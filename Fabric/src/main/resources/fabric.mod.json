@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "puffish_skills",
+	"version": "${version}",
+	"name": "Pufferfish's Skills",
+	"description": "Adds a fully configurable skill system to the game.",
+	"authors": [
+		"Pufferfish"
+	],
+	"license": "LGPL-3.0",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"net.puffish.skillsmod.main.FabricClientMain"
+		],
+		"main": [
+			"net.puffish.skillsmod.main.FabricMain"
+		]
+	},
+	"mixins": [
+		"puffish_skills.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.14.11",
+		"fabric-api": "*",
+		"minecraft": "~1.19.3",
+		"java": ">=17"
+	}
+}

@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[44,)"
+license="LGPL-3.0"
+
+[[mods]]
+modId="puffish_skills"
+version="${version}"
+displayName="Pufferfish's Skills"
+authors="Pufferfish"
+description="Adds a fully configurable skill system to the game."
+
+[[dependencies.puffish_skills]]
+modId="forge"
+mandatory=true
+versionRange="[44,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.puffish_skills]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.3,1.20)"
+ordering="NONE"
+side="BOTH"

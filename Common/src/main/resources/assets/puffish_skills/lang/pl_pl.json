@@ -1,0 +1,9 @@
+{
+	"text.puffish_skills.skills": "Umiejętności",
+	"text.puffish_skills.points_left": "Pozostałe punkty: ",
+
+	"category.puffish_skills.skills": "Umiejętności",
+	"key.puffish_skills.open": "Otwórz drzewko umiejętności",
+
+	"chat.puffish_skills.new_point": "Masz nowy punkt umiejętności. Naciśnij %s, aby otworzyć swoje drzewko umiejętności."
+}

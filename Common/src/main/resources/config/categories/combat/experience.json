@@ -1,0 +1,57 @@
+{
+	"enabled": true,
+	"experience_per_level": [
+		10,
+		11,
+		13,
+		15,
+		17,
+		20,
+		23,
+		26,
+		30,
+		33,
+		37,
+		41,
+		45,
+		49,
+		54,
+		58,
+		63,
+		68,
+		73,
+		78,
+		83,
+		88,
+		94,
+		99,
+		105,
+		110,
+		116,
+		122,
+		128,
+		134,
+		140,
+		147,
+		153,
+		159,
+		166,
+		173,
+		179,
+		186,
+		193,
+		200
+	],
+	"sources": [
+		{
+			"type": "puffish_skills:kill_entity",
+			"data": {
+				"anti_farming": {
+					"enabled": true,
+					"limit_per_chunk": 15,
+					"reset_after_seconds": 300
+				}
+			}
+		}
+	]
+}

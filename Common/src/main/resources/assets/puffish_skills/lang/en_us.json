@@ -1,0 +1,9 @@
+{
+	"text.puffish_skills.skills": "Skills",
+	"text.puffish_skills.points_left": "Points left: ",
+
+	"category.puffish_skills.skills": "Skills",
+	"key.puffish_skills.open": "Open Skill Tree",
+
+	"chat.puffish_skills.new_point": "You have a new skill point. Press %s to open your skill tree."
+}
