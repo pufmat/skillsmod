@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class PathUtils {
 	public static void createFileIfMissing(Path path) {
@@ -30,7 +32,11 @@ public class PathUtils {
 	public static void copyFileFromJar(Path source, Path target) {
 		try {
 			FileUtils.copyInputStreamToFile(Objects.requireNonNull(
-					SkillsMod.getInstance().getClass().getResourceAsStream("/" + source.toString())
+					SkillsMod.getInstance().getClass().getResourceAsStream(
+							StreamSupport.stream(source.spliterator(), false)
+									.map(Path::toString)
+									.collect(Collectors.joining("/", "/", ""))
+					)
 			), target.toFile());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
