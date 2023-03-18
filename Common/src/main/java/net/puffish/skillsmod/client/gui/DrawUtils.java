@@ -39,17 +39,12 @@ public class DrawUtils {
 			int targetY,
 			ItemStack itemStack
 	) {
-		var matrices2 = RenderSystem.getModelViewStack();
-		matrices2.push();
-		matrices2.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
-		RenderSystem.applyModelViewMatrix();
 		MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(
+				matrices,
 				itemStack,
 				targetX,
 				targetY
 		);
-		matrices2.pop();
-		RenderSystem.applyModelViewMatrix();
 	}
 
 	public static void drawSingleTexture(
