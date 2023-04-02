@@ -18,11 +18,10 @@ public class JsonArrayWrapper extends JsonWrapper {
 		var exceptions = new ArrayList<F>();
 		var list = new ArrayList<S>();
 
-		var tmp = json.asList();
-		for (int i = 0; i < tmp.size(); i++) {
+		for (int i = 0; i < json.size(); i++) {
 			reader.apply(
 					i,
-					new JsonElementWrapper(tmp.get(i), path.thenArray(i))
+					new JsonElementWrapper(json.get(i), path.thenArray(i))
 			).peek(
 					list::add,
 					exceptions::add

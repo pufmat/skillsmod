@@ -4,7 +4,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Bounds2i;
-import org.joml.Vector2i;
+import net.puffish.skillsmod.utils.Vec2i;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class ClientSkillCategoryData {
 	public Bounds2i getBounds() {
 		Bounds2i bounds = Bounds2i.zero();
 		for (var skill : skills.values()) {
-			bounds.extend(new Vector2i(skill.getX(), skill.getY()));
+			bounds.extend(new Vec2i(skill.getX(), skill.getY()));
 		}
 		return bounds;
 	}

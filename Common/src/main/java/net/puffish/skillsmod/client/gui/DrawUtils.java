@@ -13,7 +13,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import org.joml.Vector2f;
+import net.minecraft.util.math.Vec2f;
 
 public class DrawUtils {
 
@@ -157,19 +157,19 @@ public class DrawUtils {
 		float g = ((float) (color >> 8 & 0xff)) / 255f;
 		float b = ((float) (color & 0xff)) / 255f;
 		var matrix = matrices.peek().getPositionMatrix();
-		var tmp = new Vector2f(endX, endY)
-				.sub(startX, startY)
-				.normalize()
-				.perpendicular()
-				.mul(thickness / 2f);
+		var tmp = new Vec2f(endX, endY)
+				.add(new Vec2f(-startX, -startY))
+				.normalize();
 
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+		tmp = new Vec2f(tmp.y, -tmp.x).multiply(thickness / 2f);
+
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
 		bufferBuilder.vertex(matrix, startX + tmp.x, startY + tmp.y, 0).color(r, g, b, a).next();
 		bufferBuilder.vertex(matrix, startX - tmp.x, startY - tmp.y, 0).color(r, g, b, a).next();
 		bufferBuilder.vertex(matrix, endX - tmp.x, endY - tmp.y, 0).color(r, g, b, a).next();
 		bufferBuilder.vertex(matrix, endX + tmp.x, endY + tmp.y, 0).color(r, g, b, a).next();
-		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+		BufferRenderer.drawWithShader(bufferBuilder.end());
 	}
 }

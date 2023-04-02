@@ -11,13 +11,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.StatePredicate;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.error.ManyErrors;
 import net.puffish.skillsmod.utils.error.SingleError;
@@ -36,7 +35,7 @@ public class JsonParseUtils {
 
 	public static Result<StatusEffect, Error> parseEffect(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.STATUS_EFFECT.getOrEmpty(id).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.STATUS_EFFECT.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid effect at " + element.getPath().toString()));
 		}
@@ -44,7 +43,7 @@ public class JsonParseUtils {
 
 	public static Result<Block, Error> parseBlock(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getOrEmpty(id).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.BLOCK.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid block at " + element.getPath().toString()));
 		}
@@ -60,7 +59,7 @@ public class JsonParseUtils {
 
 	public static Result<RegistryEntryList.Named<Block>, Error> parseBlockTag(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.BLOCK, id)).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.BLOCK.getEntryList(TagKey.of(Registry.BLOCK_KEY, id)).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid block tag at " + element.getPath().toString()));
 		}
@@ -68,7 +67,7 @@ public class JsonParseUtils {
 
 	public static Result<EntityType<?>, Error> parseEntityType(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid entity at " + element.getPath().toString()));
 		}
@@ -77,7 +76,7 @@ public class JsonParseUtils {
 
 	public static Result<RegistryEntryList.Named<EntityType<?>>, Error> parseEntityTypeTag(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ENTITY_TYPE, id)).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.ENTITY_TYPE.getEntryList(TagKey.of(Registry.ENTITY_TYPE_KEY, id)).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid entity tag at " + element.getPath().toString()));
 		}
@@ -147,7 +146,7 @@ public class JsonParseUtils {
 
 	public static Result<EntityAttribute, Error> parseAttribute(JsonElementWrapper element) {
 		try {
-			return parseIdentifier(element).mapSuccess(id -> Registries.ATTRIBUTE.getOrEmpty(id).orElseThrow());
+			return parseIdentifier(element).mapSuccess(id -> Registry.ATTRIBUTE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid attribute at " + element.getPath().toString()));
 		}

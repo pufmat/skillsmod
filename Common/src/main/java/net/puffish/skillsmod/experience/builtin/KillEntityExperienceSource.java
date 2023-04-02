@@ -1,10 +1,11 @@
 package net.puffish.skillsmod.experience.builtin;
 
 import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.experience.ExperienceSource;
@@ -343,7 +344,9 @@ public class KillEntityExperienceSource implements ExperienceSource {
 
 			@Override
 			public boolean test(EntityType<?> entityType) {
-				return entries.contains(Registries.ENTITY_TYPE.getEntry(entityType));
+				return Registry.ENTITY_TYPE.getKey(entityType)
+						.map(key -> entries.contains(Registry.ENTITY_TYPE.entryOf(key)))
+						.orElse(false);
 			}
 		}
 	}

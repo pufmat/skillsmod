@@ -2,8 +2,8 @@ package net.puffish.skillsmod.attributes;
 
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.server.event.ServerRegistrar;
 
@@ -82,13 +82,13 @@ public class PlayerAttributes {
 	}
 
 	public static void register(ServerRegistrar registrar) {
-		registrar.register(Registries.ATTRIBUTE, STAMINA_ID, STAMINA);
-		registrar.register(Registries.ATTRIBUTE, MELEE_DAMAGE_ID, MELEE_DAMAGE);
-		registrar.register(Registries.ATTRIBUTE, RANGED_DAMAGE_ID, RANGED_DAMAGE);
-		registrar.register(Registries.ATTRIBUTE, FORTUNE_ID, FORTUNE);
-		registrar.register(Registries.ATTRIBUTE, HEALING_ID, HEALING);
-		registrar.register(Registries.ATTRIBUTE, JUMP_ID, JUMP);
-		registrar.register(Registries.ATTRIBUTE, RESISTANCE_ID, RESISTANCE);
-		registrar.register(Registries.ATTRIBUTE, MINING_SPEED_ID, MINING_SPEED);
+		registrar.register(Registry.ATTRIBUTE, STAMINA_ID, STAMINA);
+		registrar.register(Registry.ATTRIBUTE, MELEE_DAMAGE_ID, MELEE_DAMAGE);
+		registrar.register(Registry.ATTRIBUTE, RANGED_DAMAGE_ID, RANGED_DAMAGE);
+		registrar.register(Registry.ATTRIBUTE, FORTUNE_ID, FORTUNE);
+		registrar.register(Registry.ATTRIBUTE, HEALING_ID, HEALING);
+		registrar.register(Registry.ATTRIBUTE, JUMP_ID, JUMP);
+		registrar.register(Registry.ATTRIBUTE, RESISTANCE_ID, RESISTANCE);
+		registrar.register(Registry.ATTRIBUTE, MINING_SPEED_ID, MINING_SPEED);
 	}
 }

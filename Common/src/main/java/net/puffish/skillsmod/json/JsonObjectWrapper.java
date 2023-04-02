@@ -65,8 +65,7 @@ public class JsonObjectWrapper extends JsonWrapper {
 	}
 
 	public Stream<Map.Entry<String, JsonElementWrapper>> stream() {
-		return json.asMap()
-				.entrySet()
+		return json.entrySet()
 				.stream()
 				.map(entry -> Map.entry(
 						entry.getKey(),
@@ -78,11 +77,11 @@ public class JsonObjectWrapper extends JsonWrapper {
 		var exceptions = new ArrayList<F>();
 		var map = new HashMap<String, S>();
 
-		json.asMap().forEach((key, value) -> reader.apply(
-				key,
-				new JsonElementWrapper(value, path.thenObject(key))
+		json.entrySet().forEach(entry -> reader.apply(
+				entry.getKey(),
+				new JsonElementWrapper(entry.getValue(), path.thenObject(entry.getKey()))
 		).peek(
-				t -> map.put(key, t),
+				t -> map.put(entry.getKey(), t),
 				exceptions::add
 		));
 

@@ -11,10 +11,10 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
-import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -26,7 +26,7 @@ import net.puffish.skillsmod.client.data.ClientIconData;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Bounds2i;
-import org.joml.Vector2i;
+import net.puffish.skillsmod.utils.Vec2i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -76,6 +76,8 @@ public class SkillsScreen extends Screen {
 	private int contentPaddingRight;
 	private int contentPaddingBottom;
 
+	private List<? extends OrderedText> tooltip;
+
 	public SkillsScreen(List<ClientSkillCategoryData> categories) {
 		super(ScreenTexts.EMPTY);
 		this.categories = categories;
@@ -117,8 +119,8 @@ public class SkillsScreen extends Screen {
 
 		this.bounds = getActiveCategory().getBounds();
 		this.bounds.grow(CONTENT_GROW);
-		this.bounds.extend(new Vector2i(contentPaddingLeft - this.x, contentPaddingTop - this.y));
-		this.bounds.extend(new Vector2i(this.width - this.x - contentPaddingRight, this.height - this.y - contentPaddingBottom));
+		this.bounds.extend(new Vec2i(contentPaddingLeft - this.x, contentPaddingTop - this.y));
+		this.bounds.extend(new Vec2i(this.width - this.x - contentPaddingRight, this.height - this.y - contentPaddingBottom));
 
 		var contentWidth = this.width - contentPaddingLeft - contentPaddingRight;
 		var contentHeight = this.height - contentPaddingTop - contentPaddingBottom;
@@ -126,8 +128,8 @@ public class SkillsScreen extends Screen {
 		var halfWidth = MathHelper.ceilDiv(this.bounds.height() * contentWidth, contentHeight * 2);
 		var halfHeight = MathHelper.ceilDiv(this.bounds.width() * contentHeight, contentWidth * 2);
 
-		this.bounds.extend(new Vector2i(-halfWidth, -halfHeight));
-		this.bounds.extend(new Vector2i(halfWidth, halfHeight));
+		this.bounds.extend(new Vec2i(-halfWidth, -halfHeight));
+		this.bounds.extend(new Vec2i(halfWidth, halfHeight));
 
 		this.minScale = Math.max(
 				((float) contentWidth) / ((float) this.bounds.width()),
@@ -137,29 +139,29 @@ public class SkillsScreen extends Screen {
 		this.scale = 1f;
 	}
 
-	private Vector2i getMousePos(double mouseX, double mouseY) {
-		return new Vector2i(
+	private Vec2i getMousePos(double mouseX, double mouseY) {
+		return new Vec2i(
 				(int) mouseX,
 				(int) mouseY
 		);
 	}
 
-	private Vector2i getTransformedMousePos(double mouseX, double mouseY) {
-		return new Vector2i(
+	private Vec2i getTransformedMousePos(double mouseX, double mouseY) {
+		return new Vec2i(
 				(int) Math.round((mouseX - x) / scale),
 				(int) Math.round((mouseY - y) / scale)
 		);
 	}
 
-	private boolean isInsideTab(Vector2i mouse, int i) {
+	private boolean isInsideTab(Vec2i mouse, int i) {
 		return mouse.x >= FRAME_PADDING + i * 32 && mouse.y >= FRAME_PADDING && mouse.x < FRAME_PADDING + i * 32 + 28 && mouse.y < FRAME_PADDING + 32;
 	}
 
-	private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillData skill) {
+	private boolean isInsideSkill(Vec2i transformedMouse, ClientSkillData skill) {
 		return transformedMouse.x >= skill.getX() - 13 && transformedMouse.y >= skill.getY() - 13 && transformedMouse.x < skill.getX() + 13 && transformedMouse.y < skill.getY() + 13;
 	}
 
-	private boolean isInsideContent(Vector2i mouse) {
+	private boolean isInsideContent(Vec2i mouse) {
 		return mouse.x >= contentPaddingLeft && mouse.y >= contentPaddingTop && mouse.x < width - contentPaddingRight && mouse.y < height - contentPaddingBottom;
 	}
 
@@ -206,10 +208,16 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		tooltip = null;
+
 		this.renderBackground(matrices);
 		this.drawContent(matrices, mouseX, mouseY);
 		this.drawWindow(matrices);
 		this.drawTabs(matrices, mouseX, mouseY);
+
+		if (tooltip != null) {
+			renderOrderedTooltip(matrices, tooltip, mouseX, mouseY);
+		}
 	}
 
 	@Override
@@ -252,10 +260,10 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void limitPosition() {
-		y = Math.min(y, Math.round(contentPaddingTop - bounds.min().y() * scale));
-		x = Math.min(x, Math.round(contentPaddingLeft - bounds.min().x() * scale));
-		x = Math.max(x, Math.round(width - contentPaddingRight - bounds.max().x() * scale));
-		y = Math.max(y, Math.round(height - contentPaddingBottom - bounds.max().y() * scale));
+		y = Math.min(y, Math.round(contentPaddingTop - bounds.min().y * scale));
+		x = Math.min(x, Math.round(contentPaddingLeft - bounds.min().x * scale));
+		x = Math.max(x, Math.round(width - contentPaddingRight - bounds.max().x * scale));
+		y = Math.max(y, Math.round(height - contentPaddingBottom - bounds.max().y * scale));
 	}
 
 	private void drawIcon(MatrixStack matrices, int x, int y, ClientIconData icon) {
@@ -272,7 +280,7 @@ public class SkillsScreen extends Screen {
 			);
 		} else if (icon instanceof ClientIconData.EffectIconData effectIcon) {
 			var sprite = client.getStatusEffectSpriteManager().getSprite(effectIcon.getEffect());
-			RenderSystem.setShaderTexture(0, sprite.getAtlasId());
+			RenderSystem.setShaderTexture(0, sprite.getAtlas().getId());
 			DrawUtils.drawSingleSprite(
 					matrices,
 					x - 9,
@@ -335,13 +343,13 @@ public class SkillsScreen extends Screen {
 		matrices.translate(x, y, 128f);
 		matrices.scale(scale, scale, 1f);
 
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.setShaderTexture(0, getActiveCategory().getBackground());
 		DrawUtils.drawRepeatedTexture(
 				matrices,
-				bounds.min().x(),
-				bounds.min().y(),
+				bounds.min().x,
+				bounds.min().y,
 				bounds.width(),
 				bounds.height(),
 				0,
@@ -371,7 +379,7 @@ public class SkillsScreen extends Screen {
 			} else {
 				RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			}
-			RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
 
 			this.drawTexture(matrices, skill.getX() - 13, skill.getY() - 13, definition.getFrame().getTextureV(), 128 + status.getSpriteIndex() * 26, 26, 26);
@@ -380,10 +388,10 @@ public class SkillsScreen extends Screen {
 			drawIcon(matrices, skill.getX(), skill.getY(), definition.getIcon());
 
 			if (isInsideSkill(transformedMouse, skill) && isInsideContent(mouse)) {
-				setTooltip(Stream.concat(
-						Tooltip.wrapLines(client, definition.getTitle()).stream(),
-						Tooltip.wrapLines(client, definition.getDescription()).stream()
-				).toList());
+				tooltip = Stream.concat(
+						textRenderer.wrapLines(definition.getTitle(), 170).stream(),
+						textRenderer.wrapLines(definition.getDescription(), 170).stream()
+				).toList();
 			}
 
 		}
@@ -415,7 +423,7 @@ public class SkillsScreen extends Screen {
 
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 		RenderSystem.disableDepthTest();
@@ -443,7 +451,7 @@ public class SkillsScreen extends Screen {
 			drawIcon(matrices, FRAME_PADDING + 32 * i + 6 + 8, FRAME_PADDING + 9 + 8, category.getIcon());
 
 			if (isInsideTab(mouse, i)) {
-				setTooltip(Tooltip.wrapLines(client, category.getTitle()));
+				tooltip = textRenderer.wrapLines(category.getTitle(), 170);
 			}
 		}
 	}
@@ -451,7 +459,7 @@ public class SkillsScreen extends Screen {
 	private void drawWindow(MatrixStack matrices) {
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 		RenderSystem.disableDepthTest();
