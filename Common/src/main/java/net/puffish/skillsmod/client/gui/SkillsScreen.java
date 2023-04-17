@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package net.puffish.skillsmod.client.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;

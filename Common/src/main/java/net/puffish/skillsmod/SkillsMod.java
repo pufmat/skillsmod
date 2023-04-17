@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -65,7 +66,6 @@ public class SkillsMod {
 	private final ServerPacketSender packetSender;
 
 	private ChangeListener<Map<String, CategoryConfig>> categories = null;
-	private ServerData serverData = null;
 
 	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender) {
 		this.modConfigDir = modConfigDir;
@@ -263,7 +263,7 @@ public class SkillsMod {
 
 	public void eraseCategory(ServerPlayerEntity player, String categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var playerData = serverData.getPlayerData(player);
+			var playerData = getPlayerData(player);
 			playerData.removeCategoryData(category);
 
 			syncCategory(player, category);
@@ -272,7 +272,7 @@ public class SkillsMod {
 
 	public void unlockCategory(ServerPlayerEntity player, String categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var playerData = serverData.getPlayerData(player);
+			var playerData = getPlayerData(player);
 			playerData.unlockCategory(category);
 
 			syncCategory(player, category);
@@ -281,7 +281,7 @@ public class SkillsMod {
 
 	public void lockCategory(ServerPlayerEntity player, String categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var playerData = serverData.getPlayerData(player);
+			var playerData = getPlayerData(player);
 			playerData.lockCategory(category);
 
 			syncCategory(player, category);
@@ -353,7 +353,7 @@ public class SkillsMod {
 
 	public void setPointsLeft(ServerPlayerEntity player, String categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> {
-			var categoryData = serverData.getPlayerData(player).getCategoryData(category);
+			var categoryData = getPlayerData(player).getCategoryData(category);
 			categoryData.setPointsLeft(count, category.getExperience());
 
 			syncPoints(player, category, categoryData);
@@ -362,13 +362,13 @@ public class SkillsMod {
 
 	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, String categoryId) {
 		return getCategory(categoryId).map(category -> {
-			var categoryData = serverData.getPlayerData(player).getCategoryData(category);
+			var categoryData = getPlayerData(player).getCategoryData(category);
 			return categoryData.getPointsLeft(category.getExperience());
 		});
 	}
 
 	public Collection<String> getUnlockedCategories(ServerPlayerEntity player) {
-		var playerData = serverData.getPlayerData(player);
+		var playerData = getPlayerData(player);
 
 		return getAllCategories()
 				.stream()
@@ -386,7 +386,7 @@ public class SkillsMod {
 
 	public Optional<Collection<String>> getUnlockedSkills(ServerPlayerEntity player, String categoryId) {
 		return getCategory(categoryId).map(category -> {
-			var categoryData = serverData.getPlayerData(player).getCategoryData(category);
+			var categoryData = getPlayerData(player).getCategoryData(category);
 			return categoryData.getUnlockedSkillIds();
 		});
 	}
@@ -425,7 +425,7 @@ public class SkillsMod {
 
 	public void refreshReward(ServerPlayerEntity player, Identifier type) {
 		for (CategoryConfig category : getAllCategories()) {
-			var categoryData = serverData.getPlayerData(player).getCategoryData(category);
+			var categoryData = getPlayerData(player).getCategoryData(category);
 			category.refreshReward(player, categoryData, type);
 		}
 	}
@@ -458,7 +458,7 @@ public class SkillsMod {
 	}
 
 	private Optional<CategoryData> getCategoryDataIfUnlocked(ServerPlayerEntity player, CategoryConfig category) {
-		return getCategoryDataIfUnlocked(serverData.getPlayerData(player), category);
+		return getCategoryDataIfUnlocked(getPlayerData(player), category);
 	}
 
 	private Optional<CategoryData> getCategoryDataIfUnlocked(PlayerData playerData, CategoryConfig category) {
@@ -497,6 +497,10 @@ public class SkillsMod {
 		}
 	}
 
+	private PlayerData getPlayerData(ServerPlayerEntity player) {
+		return ServerData.getOrCreate(Objects.requireNonNull(player.getServer())).getPlayerData(player);
+	}
+
 	private class EventListener implements ServerEventListener {
 
 		@Override
@@ -508,11 +512,6 @@ public class SkillsMod {
 			}, null);
 
 			loadConfig();
-		}
-
-		@Override
-		public void onServerStarted(MinecraftServer server) {
-			serverData = ServerData.create(server);
 		}
 
 		@Override

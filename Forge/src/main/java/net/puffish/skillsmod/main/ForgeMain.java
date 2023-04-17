@@ -11,7 +11,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -46,7 +45,6 @@ public class ForgeMain {
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		forgeEventBus.addListener(this::onPlayerLoggedIn);
 		forgeEventBus.addListener(this::onServerStarting);
-		forgeEventBus.addListener(this::onServerStarted);
 		forgeEventBus.addListener(this::onAddReloadListener);
 		forgeEventBus.addListener(this::onRegisterCommands);
 
@@ -71,13 +69,6 @@ public class ForgeMain {
 		var server = event.getServer();
 		for (var listener : serverListeners) {
 			listener.onServerStarting(server);
-		}
-	}
-
-	private void onServerStarted(ServerStartedEvent event) {
-		var server = event.getServer();
-		for (var listener : serverListeners) {
-			listener.onServerStarted(server);
 		}
 	}
 

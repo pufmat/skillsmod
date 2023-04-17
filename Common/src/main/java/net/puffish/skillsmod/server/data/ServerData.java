@@ -4,12 +4,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.PersistentState;
-import net.minecraft.world.World;
 import net.puffish.skillsmod.SkillsAPI;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ServerData extends PersistentState {
@@ -45,8 +43,8 @@ public class ServerData extends PersistentState {
 		return nbt;
 	}
 
-	public static ServerData create(MinecraftServer server) {
-		var persistentStateManager = Objects.requireNonNull(server.getWorld(World.OVERWORLD)).getPersistentStateManager();
+	public static ServerData getOrCreate(MinecraftServer server) {
+		var persistentStateManager = server.getOverworld().getPersistentStateManager();
 
 		return persistentStateManager.getOrCreate(
 				ServerData::read,

@@ -8,8 +8,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public interface ServerEventListener {
 	void onServerStarting(MinecraftServer server);
 
-	void onServerStarted(MinecraftServer server);
-
 	void onServerReload(MinecraftServer server);
 
 	void onPlayerJoin(ServerPlayerEntity player);
