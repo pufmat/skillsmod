@@ -38,7 +38,6 @@ public class FabricMain implements ModInitializer {
 		@Override
 		public void registerListener(ServerEventListener eventListener) {
 			ServerLifecycleEvents.SERVER_STARTING.register(eventListener::onServerStarting);
-			ServerLifecycleEvents.SERVER_STARTED.register(eventListener::onServerStarted);
 
 			ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(
 					(server, resourceManager, success) -> eventListener.onServerReload(server)
