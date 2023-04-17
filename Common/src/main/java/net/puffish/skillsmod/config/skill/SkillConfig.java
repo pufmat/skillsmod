@@ -79,7 +79,7 @@ public class SkillConfig {
 		}
 
 		var neighborIds = category.getConnections().getNeighbors().get(this.id);
-		if (neighborIds.isEmpty() || neighborIds.stream().anyMatch(neighborId -> categoryData.getUnlockedSkillIds().contains(neighborId))) {
+		if (neighborIds == null || neighborIds.stream().anyMatch(neighborId -> categoryData.getUnlockedSkillIds().contains(neighborId))) {
 			return SkillState.AVAILABLE;
 		}
 
