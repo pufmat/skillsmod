@@ -91,7 +91,7 @@ public class CategoryConfig {
 				int count = countUnlocked(categoryData, definitionId);
 
 				for (var reward : definition.getRewards()) {
-					reward.getInstance().update(player, count);
+					reward.getInstance().update(player, count, true);
 				}
 			});
 
@@ -105,7 +105,7 @@ public class CategoryConfig {
 
 			for (var reward : definition.getRewards()) {
 				if (reward.getType().equals(type)) {
-					reward.getInstance().update(player, count);
+					reward.getInstance().update(player, count, false);
 				}
 			}
 		}
@@ -116,7 +116,7 @@ public class CategoryConfig {
 			int count = countUnlocked(categoryData, definition.getId());
 
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, count);
+				reward.getInstance().update(player, count, false);
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public class CategoryConfig {
 	public void resetRewards(ServerPlayerEntity player) {
 		for (var definition : definitions.getAll()) {
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, 0);
+				reward.getInstance().update(player, 0, false);
 			}
 		}
 	}
