@@ -247,7 +247,7 @@ public class SkillsMod {
 				return;
 			}
 			if (category.tryUnlockSkill(player, categoryData, skillId)) {
-				packetSender.send(player, new SkillUnlockOutPacket(categoryId, skillId));
+				packetSender.send(player, SkillUnlockOutPacket.write(categoryId, skillId));
 				syncPoints(player, category, categoryData);
 			}
 		}));
@@ -402,22 +402,22 @@ public class SkillsMod {
 	}
 
 	private void showCategory(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		packetSender.send(player, new ShowCategoryOutPacket(category, categoryData));
+		packetSender.send(player, ShowCategoryOutPacket.write(category, categoryData));
 	}
 
 	private void hideCategory(ServerPlayerEntity player, CategoryConfig category) {
-		packetSender.send(player, new HideCategoryOutPacket(category.getId()));
+		packetSender.send(player, HideCategoryOutPacket.write(category.getId()));
 	}
 
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		packetSender.send(player, new PointsUpdateOutPacket(
+		packetSender.send(player, PointsUpdateOutPacket.write(
 				category.getId(),
 				categoryData.getPointsLeft(category.getExperience())
 		));
 	}
 
 	private void syncExperience(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		packetSender.send(player, new ExperienceUpdateOutPacket(
+		packetSender.send(player, ExperienceUpdateOutPacket.write(
 				category.getId(),
 				category.getExperience().getProgress(categoryData)
 		));
