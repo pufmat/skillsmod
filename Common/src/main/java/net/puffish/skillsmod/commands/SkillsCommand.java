@@ -10,6 +10,7 @@ import net.puffish.skillsmod.SkillsAPI;
 public class SkillsCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
 		return CommandManager.literal("skills")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("unlock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", StringArgumentType.string())

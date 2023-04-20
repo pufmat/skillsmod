@@ -11,6 +11,7 @@ import net.puffish.skillsmod.SkillsAPI;
 public class PointsCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
 		return CommandManager.literal("points")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("add")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", StringArgumentType.string())
