@@ -92,7 +92,7 @@ public class AttributeReward implements Reward {
 	}
 
 	@Override
-	public void update(ServerPlayerEntity player, int count) {
+	public void update(ServerPlayerEntity player, int count, boolean recent) {
 		var instance = Objects.requireNonNull(player.getAttributeInstance(attribute));
 
 		createMissingUUIDs(count);
