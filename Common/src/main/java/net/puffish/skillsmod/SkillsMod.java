@@ -16,6 +16,8 @@ import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.attributes.PlayerAttributes;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
+import net.puffish.skillsmod.rewards.builtin.CommandReward;
+import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
@@ -97,6 +99,8 @@ public class SkillsMod {
 		PlayerAttributes.register(registrar);
 
 		AttributeReward.register();
+		CommandReward.register();
+		ScoreboardReward.register();
 
 		MineBlockExperienceSource.register();
 		KillEntityExperienceSource.register();
