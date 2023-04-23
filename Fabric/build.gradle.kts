@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.0-SNAPSHOT"
+    id("fabric-loom") version "1.1-SNAPSHOT"
     id("checkstyle")
 }
 
@@ -19,7 +19,7 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
     modImplementation("net.fabricmc:fabric-loader:${project.properties["loader_version"]}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_version"]}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
 
     implementation(project(path = ":Common", configuration = "namedElements"))
 }
