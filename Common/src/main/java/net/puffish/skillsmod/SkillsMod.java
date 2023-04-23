@@ -41,11 +41,10 @@ import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
 import net.puffish.skillsmod.utils.ChangeListener;
 import net.puffish.skillsmod.utils.PathUtils;
+import net.puffish.skillsmod.utils.PrefixedLogger;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.error.ManyErrors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,7 +61,7 @@ import java.util.function.Function;
 public class SkillsMod {
 	private static SkillsMod instance;
 
-	private final Logger logger = LoggerFactory.getLogger(SkillsAPI.MOD_ID);
+	private final PrefixedLogger logger = new PrefixedLogger(SkillsAPI.MOD_ID);
 
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
