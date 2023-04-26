@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.main;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
@@ -45,8 +46,10 @@ public class ForgeClientMain {
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		for (var listener : clientListeners) {
-			listener.onPlayerJoin();
+		if (event.getEntity() instanceof ClientPlayerEntity) {
+			for (var listener : clientListeners) {
+				listener.onPlayerJoin();
+			}
 		}
 	}
 
