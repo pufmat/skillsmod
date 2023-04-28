@@ -17,6 +17,8 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
     compileOnly("net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }
 
 loom {
