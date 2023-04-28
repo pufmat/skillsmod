@@ -8,6 +8,7 @@ import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
+import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.error.ManyErrors;
@@ -53,8 +54,8 @@ public class CommandReward implements Reward {
 	}
 
 	@Override
-	public void update(ServerPlayerEntity player, int count, boolean recent) {
-		if (recent) {
+	public void update(ServerPlayerEntity player, RewardContext context) {
+		if (context.recent()) {
 			var server = Objects.requireNonNull(player.getServer());
 
 			server.getCommandManager().executeWithPrefix(

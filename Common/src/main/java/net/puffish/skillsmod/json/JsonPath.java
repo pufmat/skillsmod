@@ -15,8 +15,8 @@ public class JsonPath {
 		this.path = path;
 	}
 
-	public static JsonPath createAnonymous() {
-		return new JsonPath(List.of());
+	public static JsonPath createNamed(String name) {
+		return new JsonPath(List.of("`" + name + "`"));
 	}
 
 	public static JsonPath fromPath(Path path) {
@@ -70,9 +70,9 @@ public class JsonPath {
 	private Error expectedTo(String str) {
 		var parent = getParent();
 		if (parent.isPresent()) {
-			return SingleError.of("Expected " + getHead() + " to " + str + " at " + parent.orElseThrow());
+			return SingleError.of("Expected " + getHead() + " to " + str + " at " + parent.orElseThrow() + ".");
 		} else {
-			return SingleError.of("Expected " + getHead() + " to " + str);
+			return SingleError.of("Expected " + getHead() + " to " + str + ".");
 		}
 	}
 

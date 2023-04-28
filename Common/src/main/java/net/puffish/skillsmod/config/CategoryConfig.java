@@ -7,6 +7,7 @@ import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
+import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.skill.SkillState;
@@ -77,25 +78,33 @@ public class CategoryConfig {
 		}
 	}
 
-	public boolean tryUnlockSkill(ServerPlayerEntity player, CategoryData categoryData, String skillId) {
-		return skills.getById(skillId).map(skill -> {
-			if (skill.getStateFor(this, categoryData) != SkillState.AVAILABLE) {
-				return false;
-			}
-
-			categoryData.unlockSkill(skillId);
-
+	public boolean tryUnlockSkill(ServerPlayerEntity player, CategoryData categoryData, String skillId, boolean force) {
+		return skills.getById(skillId).flatMap(skill -> {
 			var definitionId = skill.getDefinitionId();
 
-			definitions.getById(definitionId).ifPresent(definition -> {
+			return definitions.getById(definitionId).map(definition -> {
+				if (force) {
+					categoryData.addExtraPoints(definition.getCost());
+				} else {
+					if (skill.getStateFor(this, categoryData) != SkillState.AVAILABLE) {
+						return false;
+					}
+
+					if (categoryData.getPointsLeft(experience) < definition.getCost()) {
+						return false;
+					}
+				}
+
+				categoryData.unlockSkill(skillId);
+
 				int count = countUnlocked(categoryData, definitionId);
 
 				for (var reward : definition.getRewards()) {
-					reward.getInstance().update(player, count, true);
+					reward.getInstance().update(player, new RewardContext(count, true));
 				}
-			});
 
-			return true;
+				return true;
+			});
 		}).orElse(false);
 	}
 
@@ -105,7 +114,7 @@ public class CategoryConfig {
 
 			for (var reward : definition.getRewards()) {
 				if (reward.getType().equals(type)) {
-					reward.getInstance().update(player, count, false);
+					reward.getInstance().update(player, new RewardContext(count, false));
 				}
 			}
 		}
@@ -116,7 +125,7 @@ public class CategoryConfig {
 			int count = countUnlocked(categoryData, definition.getId());
 
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, count, false);
+				reward.getInstance().update(player, new RewardContext(count, false));
 			}
 		}
 	}
@@ -124,7 +133,7 @@ public class CategoryConfig {
 	public void resetRewards(ServerPlayerEntity player) {
 		for (var definition : definitions.getAll()) {
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, 0, false);
+				reward.getInstance().update(player, new RewardContext(0, false));
 			}
 		}
 	}

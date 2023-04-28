@@ -1,5 +1,8 @@
 package net.puffish.skillsmod.utils.error;
 
+import java.util.List;
+import java.util.function.Function;
+
 public class SingleError implements Error {
 	private final String message;
 
@@ -11,7 +14,18 @@ public class SingleError implements Error {
 		return new SingleError(message);
 	}
 
-	public String getMessage() {
-		return message;
+	@Override
+	public List<String> getMessages() {
+		return List.of(message);
+	}
+
+	@Override
+	public Error map(Function<String, String> function) {
+		return SingleError.of(function.apply(message));
+	}
+
+	@Override
+	public Error flatMap(Function<String, Error> function) {
+		return function.apply(message);
 	}
 }

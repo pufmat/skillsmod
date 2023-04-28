@@ -17,6 +17,7 @@ public abstract class WorldChunkMixin implements WorldChunkAccess {
 	private final Map<KillEntityExperienceSource.AntiFarming, LongList> antiFarmingData = new HashMap<>();
 
 	@Override
+	@Unique
 	public boolean antiFarmingAddAndCheck(KillEntityExperienceSource.AntiFarming antiFarming) {
 		if (!antiFarming.enabled()) {
 			return true;
@@ -33,6 +34,7 @@ public abstract class WorldChunkMixin implements WorldChunkAccess {
 	}
 
 	@Override
+	@Unique
 	public void antiFarmingCleanupOutdated() {
 		var currentTime = System.currentTimeMillis();
 

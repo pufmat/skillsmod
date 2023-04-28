@@ -12,6 +12,7 @@ import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
+import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.error.Error;
@@ -92,7 +93,8 @@ public class AttributeReward implements Reward {
 	}
 
 	@Override
-	public void update(ServerPlayerEntity player, int count, boolean recent) {
+	public void update(ServerPlayerEntity player, RewardContext context) {
+		var count = context.count();
 		var instance = Objects.requireNonNull(player.getAttributeInstance(attribute));
 
 		createMissingUUIDs(count);

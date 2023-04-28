@@ -13,9 +13,13 @@ import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
+import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.attributes.PlayerAttributes;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
+import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
+import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
+import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
 import net.puffish.skillsmod.server.data.CategoryData;
@@ -57,8 +61,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class SkillsMod {
+	public static final int CONFIG_VERSION = 1;
+
 	private static SkillsMod instance;
 
 	private final PrefixedLogger logger = new PrefixedLogger(SkillsAPI.MOD_ID);
@@ -103,6 +110,8 @@ public class SkillsMod {
 
 		MineBlockExperienceSource.register();
 		KillEntityExperienceSource.register();
+		EatFoodExperienceSource.register();
+		CraftItemExperienceSource.register();
 	}
 
 	public static Identifier createIdentifier(String path) {
@@ -120,8 +129,8 @@ public class SkillsMod {
 
 	private void copyConfigFromJar() {
 		PathUtils.copyFileFromJar(
-				Path.of("config", "categories.json"),
-				modConfigDir.resolve("categories.json")
+				Path.of("config", "config.json"),
+				modConfigDir.resolve("config.json")
 		);
 
 		var categories = List.of(
@@ -152,19 +161,18 @@ public class SkillsMod {
 			copyConfigFromJar();
 		}
 
-		var categoriesFile = modConfigDir.resolve("categories.json");
+		var configFile = modConfigDir.resolve("config.json");
 
-		PathUtils.createFileIfMissing(categoriesFile);
+		PathUtils.createFileIfMissing(configFile);
 
-		JsonElementWrapper.parseFile(categoriesFile, modConfigDir.relativize(categoriesFile))
-				.andThen(JsonElementWrapper::getAsArray)
-				.andThen(array -> array.getAsList((i, element) -> element.getAsString()).mapFailure(ManyErrors::ofList))
-				.andThen(this::readCategories)
+		JsonElementWrapper.parseFile(configFile, JsonPath.fromPath(modConfigDir.relativize(configFile)))
+				.andThen(ModConfig::parse)
+				.andThen(modConfig -> readCategories(modConfig.getCategories()))
 				.peek(map -> {
-					logger.info("Config loaded successfully!");
+					logger.info("Configuration loaded successfully!");
 					categories.set(map);
 				}, error -> {
-					logger.error("Could not load config:" + System.lineSeparator() + error.getMessage());
+					logger.error("Configuration could not be loaded:" + System.lineSeparator() + error.getMessages().stream().collect(Collectors.joining(System.lineSeparator())));
 					categories.set(Map.of());
 				});
 	}
@@ -205,23 +213,23 @@ public class SkillsMod {
 
 		var errors = new ArrayList<Error>();
 
-		var generalElement = JsonElementWrapper.parseFile(generalFile, modConfigDir.relativize(generalFile))
+		var generalElement = JsonElementWrapper.parseFile(generalFile, JsonPath.fromPath(modConfigDir.relativize(generalFile)))
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var definitionsElement = JsonElementWrapper.parseFile(definitionsFile, modConfigDir.relativize(definitionsFile))
+		var definitionsElement = JsonElementWrapper.parseFile(definitionsFile, JsonPath.fromPath(modConfigDir.relativize(definitionsFile)))
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var skillsElement = JsonElementWrapper.parseFile(skillsFile, modConfigDir.relativize(skillsFile))
+		var skillsElement = JsonElementWrapper.parseFile(skillsFile, JsonPath.fromPath(modConfigDir.relativize(skillsFile)))
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var connectionsElement = JsonElementWrapper.parseFile(connectionsFile, modConfigDir.relativize(connectionsFile))
+		var connectionsElement = JsonElementWrapper.parseFile(connectionsFile, JsonPath.fromPath(modConfigDir.relativize(connectionsFile)))
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var experienceElement = JsonElementWrapper.parseFile(experienceFile, modConfigDir.relativize(experienceFile))
+		var experienceElement = JsonElementWrapper.parseFile(experienceFile, JsonPath.fromPath(modConfigDir.relativize(experienceFile)))
 				.ifFailure(errors::add)
 				.getSuccess();
 
@@ -241,15 +249,16 @@ public class SkillsMod {
 	}
 
 	private void onSkillClickPacket(ServerPlayerEntity player, SkillClickInPacket packet) {
-		unlockSkill(player, packet.getCategoryId(), packet.getSkillId());
+		tryUnlockSkill(player, packet.getCategoryId(), packet.getSkillId(), false);
 	}
 
 	public void unlockSkill(ServerPlayerEntity player, String categoryId, String skillId) {
+		tryUnlockSkill(player, categoryId, skillId, true);
+	}
+
+	private void tryUnlockSkill(ServerPlayerEntity player, String categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-			if (categoryData.getPointsLeft(category.getExperience()) < 1) {
-				return;
-			}
-			if (category.tryUnlockSkill(player, categoryData, skillId)) {
+			if (category.tryUnlockSkill(player, categoryData, skillId, force)) {
 				packetSender.send(player, SkillUnlockOutPacket.write(categoryId, skillId));
 				syncPoints(player, category, categoryData);
 			}

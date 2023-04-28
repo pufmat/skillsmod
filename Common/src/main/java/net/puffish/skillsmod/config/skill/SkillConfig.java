@@ -84,7 +84,10 @@ public class SkillConfig {
 		}
 
 		if (this.isRoot) {
-			if (categoryData.getUnlockedSkillIds()
+			if (
+					!category.getGeneral().isExclusiveRoot()
+					||
+					categoryData.getUnlockedSkillIds()
 					.stream()
 					.flatMap(skillId -> category.getSkills().getById(skillId).stream())
 					.noneMatch(skill -> skill.isRoot)

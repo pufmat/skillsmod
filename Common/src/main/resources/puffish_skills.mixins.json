@@ -6,8 +6,11 @@
 	"mixins": [
 		"ApplyBonusLootFunctionMixin",
 		"BlockMixin",
+		"ConsumeItemCriterionMixin",
+		"DamageSourceMixin",
 		"EntityAttributeInstanceMixin",
 		"HungerManagerMixin",
+		"ItemStackMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
 		"ServerPlayerEntityMixin",
