@@ -249,6 +249,9 @@ public class SkillsMod {
 	}
 
 	private void onSkillClickPacket(ServerPlayerEntity player, SkillClickInPacket packet) {
+		if (player.isSpectator()) {
+			return;
+		}
 		tryUnlockSkill(player, packet.getCategoryId(), packet.getSkillId(), false);
 	}
 
