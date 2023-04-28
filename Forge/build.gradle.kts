@@ -30,8 +30,12 @@ loom {
 	}
 }
 
-tasks.checkstyleMain {
-	source(project(":Common").sourceSets.main.get().java)
+tasks.test {
+	dependsOn(project(":Common").tasks.test)
+}
+
+tasks.check {
+	dependsOn(project(":Common").tasks.check)
 }
 
 tasks.jar {

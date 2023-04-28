@@ -17,10 +17,16 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
     compileOnly("net.fabricmc:sponge-mixin:${project.properties["mixin_version"]}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }
 
 loom {
     mixin {
         useLegacyMixinAp.set(false)
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
