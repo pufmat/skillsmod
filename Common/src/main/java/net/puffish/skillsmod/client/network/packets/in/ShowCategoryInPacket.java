@@ -8,6 +8,7 @@ import net.puffish.skillsmod.client.data.ClientSkillConnectionData;
 import net.puffish.skillsmod.client.data.ClientSkillData;
 import net.puffish.skillsmod.client.data.ClientSkillDefinitionData;
 import net.puffish.skillsmod.json.JsonElementWrapper;
+import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -65,7 +66,7 @@ public class ShowCategoryInPacket implements InPacket {
 	public static ClientIconData readSkillIcon(PacketByteBuf buf) {
 		var type = buf.readString();
 		return buf.readOptional(PacketByteBuf::readString)
-				.flatMap(data -> JsonElementWrapper.parseString(data).getSuccess())
+				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.createNamed("Client Skill Icon")).getSuccess())
 				.flatMap(rootElement -> switch (type) {
 					case "item" -> JsonParseUtils.parseItemStack(rootElement)
 							.getSuccess()

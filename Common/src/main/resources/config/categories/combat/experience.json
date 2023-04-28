@@ -1,51 +1,28 @@
 {
 	"enabled": true,
-	"experience_per_level": [
-		10,
-		11,
-		13,
-		15,
-		17,
-		20,
-		23,
-		26,
-		30,
-		33,
-		37,
-		41,
-		45,
-		49,
-		54,
-		58,
-		63,
-		68,
-		73,
-		78,
-		83,
-		88,
-		94,
-		99,
-		105,
-		110,
-		116,
-		122,
-		128,
-		134,
-		140,
-		147,
-		153,
-		159,
-		166,
-		173,
-		179,
-		186,
-		193,
-		200
-	],
+	"experience_per_level": {
+		"type": "expression",
+		"data": {
+			"expression": "min(level ^ 1.432 + 10, 200)"
+		}
+	},
 	"sources": [
 		{
 			"type": "puffish_skills:kill_entity",
 			"data": {
+				"parameters": {
+					"dropped_xp": {
+						"type": "entity_dropped_experience"
+					},
+					"max_health": {
+						"type": "entity_max_health"
+					}
+				},
+				"experience": [
+					{
+						"expression": "dropped_xp + max_health / 20"
+					}
+				],
 				"anti_farming": {
 					"enabled": true,
 					"limit_per_chunk": 15,

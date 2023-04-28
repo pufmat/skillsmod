@@ -13,10 +13,10 @@ import java.util.List;
 
 public class ExperienceConfig {
 	private final boolean enabled;
-	private final List<Integer> experiencePerLevel;
+	private final ExperiencePerLevelConfig experiencePerLevel;
 	private final List<ExperienceSourceConfig> experienceSources;
 
-	private ExperienceConfig(boolean enabled, List<Integer> experiencePerLevel, List<ExperienceSourceConfig> experienceSources) {
+	private ExperienceConfig(boolean enabled, ExperiencePerLevelConfig experiencePerLevel, List<ExperienceSourceConfig> experienceSources) {
 		this.enabled = enabled;
 		this.experiencePerLevel = experiencePerLevel;
 		this.experienceSources = experienceSources;
@@ -34,8 +34,8 @@ public class ExperienceConfig {
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var experiencePerLevel = rootObject.getArray("experience_per_level")
-				.andThen(array -> array.getAsList((i, element) -> element.getAsInt()).mapFailure(ManyErrors::ofList))
+		var experiencePerLevel = rootObject.get("experience_per_level")
+				.andThen(ExperiencePerLevelConfig::parse)
 				.ifFailure(errors::add)
 				.getSuccess();
 
@@ -61,7 +61,7 @@ public class ExperienceConfig {
 		int level = 0;
 
 		while (true) {
-			int requiredExperience = experiencePerLevel.get(Math.min(level, experiencePerLevel.size() - 1));
+			int requiredExperience = experiencePerLevel.getFunction().apply(level);
 
 			if (experience < requiredExperience) {
 				return ((float) experience) / ((float) requiredExperience);
@@ -77,7 +77,7 @@ public class ExperienceConfig {
 		int level = 0;
 
 		while (true) {
-			int requiredExperience = experiencePerLevel.get(Math.min(level, experiencePerLevel.size() - 1));
+			int requiredExperience = experiencePerLevel.getFunction().apply(level);
 
 			if (experience < requiredExperience) {
 				return level;
@@ -98,7 +98,7 @@ public class ExperienceConfig {
 		return enabled;
 	}
 
-	public List<Integer> getExperiencePerLevel() {
+	public ExperiencePerLevelConfig getExperiencePerLevel() {
 		return experiencePerLevel;
 	}
 

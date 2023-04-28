@@ -17,26 +17,30 @@ public class JsonElementWrapper extends JsonWrapper {
 		this.json = json;
 	}
 
-	public static Result<JsonElementWrapper, Error> parseString(String json) {
+	public static Result<JsonElementWrapper, Error> parseString(String jsonData, JsonPath jsonPath) {
 		try {
 			return Result.success(new JsonElementWrapper(
-					JsonParser.parseString(json),
-					JsonPath.createAnonymous()
+					JsonParser.parseString(jsonData),
+					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(SingleError.of("Could not read json"));
+			return Result.failure(SingleError.of("Could not read JSON"));
 		}
 	}
 
-	public static Result<JsonElementWrapper, Error> parseFile(Path filePath, Path jsonPath) {
+	public static Result<JsonElementWrapper, Error> parseFile(Path filePath, JsonPath jsonPath) {
 		String name = filePath.getFileName().toString();
 		try {
+			var content = Files.readString(filePath);
+			if (content.isEmpty()) {
+				return Result.failure(SingleError.of("File `" + name + "` is empty."));
+			}
 			return Result.success(new JsonElementWrapper(
-					JsonParser.parseString(Files.readString(filePath)),
-					JsonPath.fromPath(jsonPath)
+					JsonParser.parseString(content),
+					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(SingleError.of("Could not read file " + name));
+			return Result.failure(SingleError.of("Could not read file `" + name + "`."));
 		}
 	}
 
