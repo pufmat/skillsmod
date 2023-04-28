@@ -23,7 +23,7 @@ public class SkillsConfig {
 
 	public static Result<SkillsConfig, Error> parse(JsonObjectWrapper rootObject, SkillDefinitionsConfig definitions) {
 		return rootObject.getAsMap((key, value) -> SkillConfig.parse(key, value, definitions))
-				.mapFailure(errors -> (Error) ManyErrors.ofList(errors))
+				.mapFailure(errors -> (Error) ManyErrors.ofList(errors.values()))
 				.mapSuccess(SkillsConfig::new);
 	}
 

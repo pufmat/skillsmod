@@ -4,7 +4,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.SkillsAPI;
@@ -72,18 +74,18 @@ public abstract class LivingEntityMixin {
 	private void injectAtDrop(DamageSource source, CallbackInfo ci) {
 		if (source.getAttacker() instanceof ServerPlayerEntity player) {
 			var entity = ((LivingEntity) (Object) this);
-			if (entity.shouldDropXp()) {
-				WorldChunkAccess worldChunk = ((WorldChunkAccess) entity.getWorld().getWorldChunk(entity.getBlockPos()));
-				worldChunk.antiFarmingCleanupOutdated();
-				SkillsAPI.visitExperienceSources(player, experienceSource -> {
-					if (experienceSource instanceof KillEntityExperienceSource entityExperienceSource) {
-						if (worldChunk.antiFarmingAddAndCheck(entityExperienceSource.getAntiFarming())) {
-							return entityExperienceSource.getValue(entity.getType(), entity.getXpToDrop());
-						}
+			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+
+			WorldChunkAccess worldChunk = ((WorldChunkAccess) entity.getWorld().getWorldChunk(entity.getBlockPos()));
+			worldChunk.antiFarmingCleanupOutdated();
+			SkillsAPI.visitExperienceSources(player, experienceSource -> {
+				if (experienceSource instanceof KillEntityExperienceSource entityExperienceSource) {
+					if (worldChunk.antiFarmingAddAndCheck(entityExperienceSource.getAntiFarming())) {
+						return entityExperienceSource.getValue(player, entity, weapon);
 					}
-					return 0;
-				});
-			}
+				}
+				return 0;
+			});
 
 		}
 	}

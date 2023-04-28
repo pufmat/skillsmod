@@ -16,12 +16,14 @@ public class GeneralConfig {
 	private final IconConfig icon;
 	private final Identifier background;
 	private final boolean unlockedByDefault;
+	private final boolean exclusiveRoot;
 
-	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault) {
+	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault, boolean exclusiveRoot) {
 		this.title = title;
 		this.icon = icon;
 		this.background = background;
 		this.unlockedByDefault = unlockedByDefault;
+		this.exclusiveRoot = exclusiveRoot;
 	}
 
 	public static Result<GeneralConfig, Error> parse(JsonElementWrapper rootElement) {
@@ -47,16 +49,21 @@ public class GeneralConfig {
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var unlockedByDefault = rootObject.getBoolean("unlocked_by_default")
-				.getSuccess()
-				.orElse(false);
+		var optUnlockedByDefault = rootObject.getBoolean("unlocked_by_default")
+				.ifFailure(errors::add)
+				.getSuccess();
+
+		var optExclusiveRoot = rootObject.getBoolean("exclusive_root")
+				.ifFailure(errors::add)
+				.getSuccess();
 
 		if (errors.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
 					optIcon.orElseThrow(),
 					optBackground.orElseThrow(),
-					unlockedByDefault
+					optUnlockedByDefault.orElseThrow(),
+					optExclusiveRoot.orElseThrow()
 			));
 		} else {
 			return Result.failure(ManyErrors.ofList(errors));
@@ -69,6 +76,10 @@ public class GeneralConfig {
 
 	public boolean isUnlockedByDefault() {
 		return unlockedByDefault;
+	}
+
+	public boolean isExclusiveRoot() {
+		return exclusiveRoot;
 	}
 
 	public IconConfig getIcon() {

@@ -4,9 +4,7 @@ import com.google.gson.JsonObject;
 import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.Result;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -74,22 +72,22 @@ public class JsonObjectWrapper extends JsonWrapper {
 				));
 	}
 
-	public <S, F> Result<Map<String, S>, List<F>> getAsMap(JsonMapReader<S, F> reader) {
-		var exceptions = new ArrayList<F>();
-		var map = new HashMap<String, S>();
+	public <S, F> Result<Map<String, S>, Map<String, F>> getAsMap(JsonMapReader<S, F> reader) {
+		var successMap = new HashMap<String, S>();
+		var failureMap = new HashMap<String, F>();
 
 		json.asMap().forEach((key, value) -> reader.apply(
 				key,
 				new JsonElementWrapper(value, path.thenObject(key))
 		).peek(
-				t -> map.put(key, t),
-				exceptions::add
+				t -> successMap.put(key, t),
+				t -> failureMap.put(key, t)
 		));
 
-		if (exceptions.isEmpty()) {
-			return Result.success(map);
+		if (failureMap.isEmpty()) {
+			return Result.success(successMap);
 		} else {
-			return Result.failure(exceptions);
+			return Result.failure(failureMap);
 		}
 	}
 

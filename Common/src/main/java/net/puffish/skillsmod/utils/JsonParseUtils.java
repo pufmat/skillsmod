@@ -10,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
@@ -58,6 +59,14 @@ public class JsonParseUtils {
 		}
 	}
 
+	public static Result<NbtPredicate, Error> parseNbtPredicate(JsonElementWrapper element) {
+		try {
+			return Result.success(NbtPredicate.fromJson(element.getJson()));
+		} catch (Exception e) {
+			return Result.failure(SingleError.of("Expected valid state predicate at " + element.getPath().toString()));
+		}
+	}
+
 	public static Result<RegistryEntryList.Named<Block>, Error> parseBlockTag(JsonElementWrapper element) {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.BLOCK, id)).orElseThrow());
@@ -88,6 +97,14 @@ public class JsonParseUtils {
 			return Result.success(JsonHelper.asItem(element.getJson(), ""));
 		} catch (Exception e) {
 			return Result.failure(SingleError.of("Expected valid item at " + element.getPath().toString()));
+		}
+	}
+
+	public static Result<RegistryEntryList.Named<Item>, Error> parseItemTag(JsonElementWrapper element) {
+		try {
+			return parseIdentifier(element).mapSuccess(id -> Registries.ITEM.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ITEM, id)).orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(SingleError.of("Expected valid item tag at " + element.getPath().toString()));
 		}
 	}
 

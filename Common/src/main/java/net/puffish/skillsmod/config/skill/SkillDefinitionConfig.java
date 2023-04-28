@@ -21,14 +21,16 @@ public class SkillDefinitionConfig {
 	private final IconConfig icon;
 	private final AdvancementFrame frame;
 	private final List<SkillRewardConfig> rewards;
+	private final int cost;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, AdvancementFrame frame, List<SkillRewardConfig> rewards) {
+	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, AdvancementFrame frame, List<SkillRewardConfig> rewards, int cost) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.icon = icon;
 		this.frame = frame;
 		this.rewards = rewards;
+		this.cost = cost;
 	}
 
 	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonElementWrapper rootElement) {
@@ -71,6 +73,10 @@ public class SkillDefinitionConfig {
 				.getSuccess()
 				.orElseGet(List::of);
 
+		var cost = rootObject.getInt("cost")
+				.getSuccess() // ignore failure because this property is optional
+				.orElse(1);
+
 		if (errors.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
@@ -78,7 +84,8 @@ public class SkillDefinitionConfig {
 					optDescription,
 					optIcon.orElseThrow(),
 					frame,
-					rewards
+					rewards,
+					cost
 			));
 		} else {
 			return Result.failure(ManyErrors.ofList(errors));
@@ -113,5 +120,9 @@ public class SkillDefinitionConfig {
 
 	public List<SkillRewardConfig> getRewards() {
 		return rewards;
+	}
+
+	public int getCost() {
+		return cost;
 	}
 }

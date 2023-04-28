@@ -1,152 +1,145 @@
 {
 	"enabled": true,
-	"experience_per_level": [
-		1000
-	],
+	"experience_per_level": {
+		"type": "values",
+		"data": {
+			"values": [
+				250,
+				500,
+				1000
+			]
+		}
+	},
 	"sources": [
 		{
 			"type": "puffish_skills:mine_block",
 			"data": {
-				"modifiers": [
-					{
-						"type": "fixed",
+				"conditions": {
+					"stone_like": {
+						"type": "block_tag",
 						"data": {
-							"value": 1
-						},
-						"conditions": [
-							{
-								"type": "tag",
-								"data": {
-									"tag": "base_stone_overworld"
-								}
-							}
-						]
+							"tag": "base_stone_overworld"
+						}
+					},
+					"deepslate": {
+						"type": "block",
+						"data": {
+							"block": "deepslate"
+						}
+					},
+					"coal_ore": {
+						"type": "block",
+						"data": {
+							"block": "coal_ore"
+						}
+					},
+					"copper_ore": {
+						"type": "block",
+						"data": {
+							"block": "copper_ore"
+						}
+					},
+					"iron_ore": {
+						"type": "block",
+						"data": {
+							"block": "iron_ore"
+						}
+					},
+					"gold_ore": {
+						"type": "block",
+						"data": {
+							"block": "gold_ore"
+						}
+					},
+					"redstone_ore": {
+						"type": "block",
+						"data": {
+							"block": "redstone_ore"
+						}
+					},
+					"lapis_ore": {
+						"type": "block",
+						"data": {
+							"block": "lapis_ore"
+						}
+					},
+					"diamond_ore": {
+						"type": "block",
+						"data": {
+							"block": "diamond_ore"
+						}
+					},
+					"emerald_ore": {
+						"type": "block",
+						"data": {
+							"block": "emerald_ore"
+						}
+					},
+					"deepslate_coal_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_coal_ore"
+						}
+					},
+					"deepslate_copper_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_copper_ore"
+						}
+					},
+					"deepslate_iron_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_iron_ore"
+						}
+					},
+					"deepslate_gold_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_gold_ore"
+						}
+					},
+					"deepslate_redstone_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_redstone_ore"
+						}
+					},
+					"deepslate_lapis_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_lapis_ore"
+						}
+					},
+					"deepslate_diamond_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_diamond_ore"
+						}
+					},
+					"deepslate_emerald_ore": {
+						"type": "block",
+						"data": {
+							"block": "deepslate_emerald_ore"
+						}
+					}
+				},
+				"experience": [
+					{
+						"condition": "stone_like",
+						"expression": "1"
 					},
 					{
-						"type": "fixed",
-						"data": {
-							"value": 2
-						},
-						"conditions": [
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate"
-								}
-							}
-						]
+						"condition": "deepslate",
+						"expression": "2"
 					},
 					{
-						"type": "fixed",
-						"data": {
-							"value": 3
-						},
-						"conditions": [
-							{
-								"type": "block",
-								"data": {
-									"block": "coal_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "copper_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "iron_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "gold_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "redstone_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "lapis_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "diamond_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "emerald_ore"
-								}
-							}
-						]
+						"condition": "coal_ore | copper_ore | iron_ore | gold_ore | redstone_ore | lapis_ore | diamond_ore | emerald_ore",
+						"expression": "3"
 					},
 					{
-						"type": "fixed",
-						"data": {
-							"value": 4
-						},
-						"conditions": [
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_coal_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_copper_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_iron_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_gold_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_redstone_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_lapis_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_diamond_ore"
-								}
-							},
-							{
-								"type": "block",
-								"data": {
-									"block": "deepslate_emerald_ore"
-								}
-							}
-						]
+						"condition": "deepslate_coal_ore | deepslate_copper_ore | deepslate_iron_ore | deepslate_gold_ore | deepslate_redstone_ore | deepslate_lapis_ore | deepslate_diamond_ore | deepslate_emerald_ore",
+						"expression": "4"
 					}
 				]
 			}
