@@ -34,6 +34,7 @@ tasks.check {
 
 tasks.jar {
     from(project.rootDir.resolve("LICENSE.txt"))
+    from(project.rootDir.resolve("LICENSE-RESOURCES.txt"))
 }
 
 tasks.processResources {
