@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.config.experience;
 
+import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.expression.ArithmeticParser;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
@@ -56,16 +57,21 @@ public class ExperiencePerLevelConfig {
 	private static Result<Function<Integer, Integer>, Error> parseExpression(Result<JsonElementWrapper, Error> maybeDataElement) {
 		return maybeDataElement
 				.andThen(JsonElementWrapper::getAsObject)
-				.andThen(dataObject -> dataObject.getString("expression"))
-				.andThen(expression -> ArithmeticParser.parse(expression, Set.of("level")))
-				.mapSuccess(expression -> level -> {
-					var value = expression.eval(Map.ofEntries(Map.entry("level", (double) level)));
-					if (Double.isFinite(value)) {
-						return (int) Math.round(value);
-					} else {
-						return 0;
-					}
-				});
+				.andThen(dataObject -> dataObject.get("expression"))
+				.andThen(expressionElement -> expressionElement.getAsString()
+						.andThen(expression -> ArithmeticParser.parse(expression, Set.of("level")))
+						.mapSuccess(expression -> level -> {
+							var value = expression.eval(Map.ofEntries(Map.entry("level", (double) level)));
+							if (Double.isFinite(value)) {
+								return (int) Math.round(value);
+							} else {
+								for (var message : expressionElement.getPath().errorAt("Expression returned a value that is not finite").getMessages()) {
+									SkillsMod.getInstance().getLogger().warn(message);
+								}
+								return 0;
+							}
+						})
+				);
 	}
 
 	private static Result<Function<Integer, Integer>, Error> parseValues(Result<JsonElementWrapper, Error> maybeDataElement) {

@@ -32,17 +32,13 @@ public class CalculationManager<T> {
 				.stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().test(t)));
 
-		var parametersVariables = parameters.entrySet()
+		var expressionVariables = parameters.entrySet()
 				.stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().apply(t)));
 
 		return calculations.stream()
-				.filter(calc -> calc.test(conditionsVariables))
+				.flatMap(calc -> calc.getValue(conditionsVariables, expressionVariables).stream())
 				.findFirst()
-				.map(calc -> {
-					var value = calc.eval(parametersVariables);
-					return Double.isFinite(value) ? (int) Math.round(value) : 0;
-				})
 				.orElse(0);
 	}
 
