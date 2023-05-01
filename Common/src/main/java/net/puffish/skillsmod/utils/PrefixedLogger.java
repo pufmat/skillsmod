@@ -20,6 +20,10 @@ public class PrefixedLogger {
 		logger.info(addPrefix(str));
 	}
 
+	public void warn(String str) {
+		logger.warn(addPrefix(str));
+	}
+
 	public void error(String str) {
 		logger.error(addPrefix(str));
 	}

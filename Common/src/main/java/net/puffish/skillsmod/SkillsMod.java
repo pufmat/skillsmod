@@ -126,6 +126,9 @@ public class SkillsMod {
 		return createIdentifier(type + "." + name);
 	}
 
+	public PrefixedLogger getLogger() {
+		return logger;
+	}
 
 	private void copyConfigFromJar() {
 		PathUtils.copyFileFromJar(
