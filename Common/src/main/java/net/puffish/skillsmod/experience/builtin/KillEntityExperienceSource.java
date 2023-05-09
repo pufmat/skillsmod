@@ -14,6 +14,7 @@ import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.experience.calculation.condition.EntityCondition;
 import net.puffish.skillsmod.experience.calculation.condition.EntityTagCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemCondition;
+import net.puffish.skillsmod.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemTagCondition;
 import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
@@ -33,6 +34,7 @@ public class KillEntityExperienceSource implements ExperienceSource {
 			Map.entry("entity", ConditionFactory.map(EntityCondition::parse, Context::entityType)),
 			Map.entry("entity_tag", ConditionFactory.map(EntityTagCondition::parse, Context::entityType)),
 			Map.entry("weapon", ConditionFactory.map(ItemCondition::parse, Context::weapon)),
+			Map.entry("weapon_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::weapon)),
 			Map.entry("weapon_tag", ConditionFactory.map(ItemTagCondition::parse, Context::weapon))
 	);
 
