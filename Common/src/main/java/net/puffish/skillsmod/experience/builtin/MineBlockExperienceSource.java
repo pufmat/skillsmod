@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.experience.builtin;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -9,8 +10,12 @@ import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.BlockCondition;
+import net.puffish.skillsmod.experience.calculation.condition.BlockStateCondition;
 import net.puffish.skillsmod.experience.calculation.condition.BlockTagCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
+import net.puffish.skillsmod.experience.calculation.condition.ItemCondition;
+import net.puffish.skillsmod.experience.calculation.condition.ItemNbtCondition;
+import net.puffish.skillsmod.experience.calculation.condition.ItemTagCondition;
 import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.json.JsonElementWrapper;
@@ -25,7 +30,11 @@ public class MineBlockExperienceSource implements ExperienceSource {
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
 			Map.entry("block", ConditionFactory.map(BlockCondition::parse, Context::blockState)),
-			Map.entry("block_tag", ConditionFactory.map(BlockTagCondition::parse, Context::blockState))
+			Map.entry("block_state", ConditionFactory.map(BlockStateCondition::parse, Context::blockState)),
+			Map.entry("block_tag", ConditionFactory.map(BlockTagCondition::parse, Context::blockState)),
+			Map.entry("tool", ConditionFactory.map(ItemCondition::parse, Context::tool)),
+			Map.entry("tool_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::tool)),
+			Map.entry("tool_tag", ConditionFactory.map(ItemTagCondition::parse, Context::tool))
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
@@ -51,12 +60,12 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS).mapSuccess(MineBlockExperienceSource::new);
 	}
 
-	private record Context(ServerPlayerEntity player, BlockState blockState) {
+	private record Context(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
 
 	}
 
-	public int getValue(ServerPlayerEntity player, BlockState blockState) {
-		return manager.getValue(new Context(player, blockState));
+	public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
+		return manager.getValue(new Context(player, blockState, tool));
 	}
 
 	@Override

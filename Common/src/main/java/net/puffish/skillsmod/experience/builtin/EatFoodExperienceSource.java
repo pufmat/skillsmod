@@ -10,6 +10,7 @@ import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.experience.calculation.condition.ItemCondition;
+import net.puffish.skillsmod.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemTagCondition;
 import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
@@ -26,6 +27,7 @@ public class EatFoodExperienceSource implements ExperienceSource {
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
 			Map.entry("item", ConditionFactory.map(ItemCondition::parse, Context::item)),
+			Map.entry("item_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::item)),
 			Map.entry("item_tag", ConditionFactory.map(ItemTagCondition::parse, Context::item))
 	);
 

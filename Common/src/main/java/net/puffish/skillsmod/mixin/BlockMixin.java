@@ -23,7 +23,7 @@ public abstract class BlockMixin {
 		if (player instanceof ServerPlayerEntity serverPlayer) {
 			SkillsAPI.visitExperienceSources(serverPlayer, experienceSource -> {
 				if (experienceSource instanceof MineBlockExperienceSource mineBlockExperienceSource) {
-					return mineBlockExperienceSource.getValue(serverPlayer, state);
+					return mineBlockExperienceSource.getValue(serverPlayer, state, stack);
 				}
 				return 0;
 			});
