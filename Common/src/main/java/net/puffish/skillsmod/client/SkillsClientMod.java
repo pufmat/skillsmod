@@ -3,9 +3,11 @@ package net.puffish.skillsmod.client;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
+import net.puffish.skillsmod.client.gui.SimpleToast;
 import net.puffish.skillsmod.client.gui.SkillsScreen;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketReceiver;
@@ -13,6 +15,7 @@ import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
+import net.puffish.skillsmod.client.network.packets.in.InvalidConfigInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowCategoryInPacket;
 import net.puffish.skillsmod.client.network.packets.in.SkillUnlockInPacket;
@@ -81,6 +84,12 @@ public class SkillsClientMod {
 				instance::onExperienceUpdatePacket
 		);
 
+		packetReceiver.registerPacket(
+				Packets.INVALID_CONFIG,
+				InvalidConfigInPacket::read,
+				instance::onInvalidConfig
+		);
+
 		eventReceiver.registerListener(instance.new EventListener());
 	}
 
@@ -122,6 +131,15 @@ public class SkillsClientMod {
 			}
 			category.setPointsLeft(packet.getPoints());
 		});
+	}
+
+	private void onInvalidConfig(InvalidConfigInPacket packet) {
+		var client = MinecraftClient.getInstance();
+		client.getToastManager().add(SimpleToast.create(
+				client,
+				Text.literal("Pufferfish's Skills"),
+				Text.translatable("invalid_config.toast.description")
+		));
 	}
 
 	private Optional<ClientSkillCategoryData> getCategoryById(String categoryId) {
