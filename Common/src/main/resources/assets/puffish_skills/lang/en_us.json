@@ -5,5 +5,7 @@
 	"category.puffish_skills.skills": "Skills",
 	"key.puffish_skills.open": "Open Skill Tree",
 
-	"chat.puffish_skills.new_point": "You have a new skill point. Press %s to open your skill tree."
+	"chat.puffish_skills.new_point": "You have a new skill point. Press %s to open your skill tree.",
+
+	"invalid_config.toast.description": "Invalid configuration, check game logs."
 }

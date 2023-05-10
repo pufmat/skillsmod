@@ -40,6 +40,7 @@ import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.server.network.packets.out.ExperienceUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.HideCategoryOutPacket;
+import net.puffish.skillsmod.server.network.packets.out.InvalidConfigOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
@@ -55,6 +56,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class SkillsMod {
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
 
-	private ChangeListener<Map<String, CategoryConfig>> categories = null;
+	private ChangeListener<Optional<Map<String, CategoryConfig>>> categories = null;
 
 	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender) {
 		this.modConfigDir = modConfigDir;
@@ -173,10 +175,10 @@ public class SkillsMod {
 				.andThen(modConfig -> readCategories(modConfig.getCategories()))
 				.peek(map -> {
 					logger.info("Configuration loaded successfully!");
-					categories.set(map);
+					categories.set(Optional.of(map));
 				}, error -> {
 					logger.error("Configuration could not be loaded:" + System.lineSeparator() + error.getMessages().stream().collect(Collectors.joining(System.lineSeparator())));
-					categories.set(Map.of());
+					categories.set(Optional.empty());
 				});
 	}
 
@@ -487,11 +489,11 @@ public class SkillsMod {
 	}
 
 	private Optional<CategoryConfig> getCategory(String categoryId) {
-		return Optional.ofNullable(categories.get().get(categoryId));
+		return categories.get().flatMap(map -> Optional.ofNullable(map.get(categoryId)));
 	}
 
 	private Collection<CategoryConfig> getAllCategories() {
-		return categories.get().values();
+		return categories.get().map(Map::values).orElseGet(Collections::emptyList);
 	}
 
 	private void syncCategory(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
@@ -510,24 +512,40 @@ public class SkillsMod {
 	}
 
 	private void syncAllCategories(ServerPlayerEntity player) {
-		for (var category : getAllCategories()) {
-			syncCategory(player, category);
+		if (isConfigValid()) {
+			for (var category : getAllCategories()) {
+				syncCategory(player, category);
+			}
+		} else if (isPlayerOperator(player)) {
+			packetSender.send(player, InvalidConfigOutPacket.write());
 		}
 	}
 
+	private boolean isConfigValid() {
+		return categories.get().isPresent();
+	}
+
 	private PlayerData getPlayerData(ServerPlayerEntity player) {
-		return ServerData.getOrCreate(Objects.requireNonNull(player.getServer())).getPlayerData(player);
+		return ServerData.getOrCreate(getPlayerServer(player)).getPlayerData(player);
+	}
+
+	private MinecraftServer getPlayerServer(ServerPlayerEntity player) {
+		return Objects.requireNonNull(player.getServer());
+	}
+
+	private boolean isPlayerOperator(ServerPlayerEntity player) {
+		return getPlayerServer(player).getPlayerManager().isOperator(player.getGameProfile());
 	}
 
 	private class EventListener implements ServerEventListener {
 
 		@Override
 		public void onServerStarting(MinecraftServer server) {
-			categories = new ChangeListener<>(old -> {
-				for (CategoryConfig category : old.values()) {
+			categories = new ChangeListener<>(old -> old.ifPresent(map -> {
+				for (CategoryConfig category : map.values()) {
 					category.dispose(server);
 				}
-			}, null);
+			}), null);
 
 			loadConfig();
 		}
