@@ -5,5 +5,7 @@
 	"category.puffish_skills.skills": "Навыки",
 	"key.puffish_skills.open": "Открыть древо навыков",
 
-	"chat.puffish_skills.new_point": "Вы получили очко навыков. Нажмите %s, чтобы открыть древо."
+	"chat.puffish_skills.new_point": "Вы получили очко навыков. Нажмите %s, чтобы открыть древо.",
+
+	"invalid_config.toast.description": "Неверная конфигурация, проверьте журналы игры."
 }

@@ -10,4 +10,5 @@ public class Packets {
 	public static final Identifier POINTS_UPDATE_PACKET = SkillsMod.createIdentifier("points_update");
 	public static final Identifier EXPERIENCE_UPDATE_PACKET = SkillsMod.createIdentifier("experience_update");
 	public static final Identifier SKILL_CLICK_PACKET = SkillsMod.createIdentifier("skill_click");
+	public static final Identifier INVALID_CONFIG = SkillsMod.createIdentifier("invalid_config");
 }
