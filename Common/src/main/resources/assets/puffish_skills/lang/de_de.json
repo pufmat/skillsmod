@@ -1,0 +1,11 @@
+{
+	"text.puffish_skills.skills": "Fertigkeiten",
+	"text.puffish_skills.points_left": "Verbleibende Punkte: ",
+
+	"category.puffish_skills.skills": "Fertigkeiten",
+	"key.puffish_skills.open": "Fertigkeitsbaum öffnen",
+
+	"chat.puffish_skills.new_point": "Du hast einen neuen Fertigkeitspunkt. Drücke %s, um den Fertigkeitsbaum zu öffnen.",
+
+	"invalid_config.toast.description": "Ungültige Konfiguration, prüfe die Logdatei."
+}
