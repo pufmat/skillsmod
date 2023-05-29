@@ -16,7 +16,7 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
     mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
-    compileOnly("net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5")
+    compileOnly("net.fabricmc:sponge-mixin:${project.properties["mixin_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }
