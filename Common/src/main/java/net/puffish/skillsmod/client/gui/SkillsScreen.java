@@ -8,9 +8,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.SkillsMod;
@@ -74,7 +73,7 @@ public class SkillsScreen extends Screen {
 	private List<? extends OrderedText> tooltip;
 
 	public SkillsScreen(List<ClientSkillCategoryData> categories) {
-		super(ScreenTexts.EMPTY);
+		super(LiteralText.EMPTY);
 		this.categories = categories;
 	}
 
@@ -666,7 +665,7 @@ public class SkillsScreen extends Screen {
 
 		tmpX = this.width - FRAME_PADDING - 7;
 
-		tmpText = Text.literal(Integer.toString(getActiveCategory().getPointsLeft()));
+		tmpText = new LiteralText(Integer.toString(getActiveCategory().getPointsLeft()));
 		tmpX -= this.textRenderer.getWidth(tmpText);
 		tmpX -= 1;
 		DrawUtils.drawTextWithBorder(

@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.mixin.LivingEntityInvoker;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
@@ -118,7 +119,8 @@ public class KillEntityExperienceSource implements ExperienceSource {
 
 	private record Context(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon) {
 		public double entityDroppedXp() {
-			return entity.shouldDropXp() ? entity.getXpToDrop() : 0.0;
+			var entityAccess = (LivingEntityInvoker) entity;
+			return entityAccess.invokeShouldDropXp() ? entityAccess.invokeGetXpToDrop(player) : 0.0;
 		}
 		public double entityMaxHealth() {
 			return entity.getMaxHealth();

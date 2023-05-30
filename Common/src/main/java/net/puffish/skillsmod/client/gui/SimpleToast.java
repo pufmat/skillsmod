@@ -32,9 +32,4 @@ public class SimpleToast implements Toast {
 	public int getHeight() {
 		return toast.getHeight();
 	}
-
-	@Override
-	public int getRequiredSpaceCount() {
-		return toast.getRequiredSpaceCount();
-	}
 }

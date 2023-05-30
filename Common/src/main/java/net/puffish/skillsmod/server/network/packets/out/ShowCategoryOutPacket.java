@@ -86,7 +86,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 
 	public static void write(PacketByteBuf buf, IconConfig icon) {
 		buf.writeString(icon.getType());
-		buf.writeNullable(icon.getData(), (buf1, element) -> buf1.writeString(element.toString()));
+		buf.writeOptional(Optional.ofNullable(icon.getData()), (buf1, element) -> buf1.writeString(element.toString()));
 	}
 
 	@Override

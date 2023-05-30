@@ -3,7 +3,8 @@ package net.puffish.skillsmod.client;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
@@ -137,8 +138,8 @@ public class SkillsClientMod {
 		var client = MinecraftClient.getInstance();
 		client.getToastManager().add(SimpleToast.create(
 				client,
-				Text.literal("Pufferfish's Skills"),
-				Text.translatable("invalid_config.toast.description")
+				new LiteralText("Pufferfish's Skills"),
+				new TranslatableText("invalid_config.toast.description")
 		));
 	}
 

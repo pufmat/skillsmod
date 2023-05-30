@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.main;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -48,7 +48,7 @@ public class FabricMain implements ModInitializer {
 			);
 
 			CommandRegistrationCallback.EVENT.register(
-					(dispatcher, registryAccess, environment) -> eventListener.onCommandsRegister(dispatcher)
+					(dispatcher, dedicated) -> eventListener.onCommandsRegister(dispatcher)
 			);
 		}
 	}

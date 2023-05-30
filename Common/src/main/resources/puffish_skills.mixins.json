@@ -11,6 +11,7 @@
 		"EntityAttributeInstanceMixin",
 		"HungerManagerMixin",
 		"ItemStackMixin",
+		"LivingEntityInvoker",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
 		"PlayerInventoryMixin",

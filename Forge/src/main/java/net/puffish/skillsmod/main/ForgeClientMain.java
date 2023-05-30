@@ -53,7 +53,7 @@ public class ForgeClientMain {
 		}
 	}
 
-	private void onInputKey(InputEvent.Key event) {
+	private void onInputKey(InputEvent.KeyInputEvent event) {
 		for (var keyBinding : keyBindings) {
 			if (keyBinding.keyBinding.wasPressed()) {
 				keyBinding.handler.handle();

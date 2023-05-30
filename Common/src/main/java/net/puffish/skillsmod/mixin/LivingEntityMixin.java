@@ -90,8 +90,8 @@ public abstract class LivingEntityMixin {
 		}
 	}
 
-	@Inject(method = "modifyAppliedDamage", at = @At("TAIL"), cancellable = true)
-	private void injectAtModifyAppliedDamage(CallbackInfoReturnable<Float> cir) {
+	@Inject(method = "applyEnchantmentsToDamage", at = @At("TAIL"), cancellable = true)
+	private void injectAtApplyEnchantmentsToDamage(CallbackInfoReturnable<Float> cir) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player && cir.getReturnValueF() < Float.MAX_VALUE / 3.0f) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RESISTANCE));
 			cir.setReturnValue(Math.max(

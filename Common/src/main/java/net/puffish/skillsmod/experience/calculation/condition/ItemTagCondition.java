@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.calculation.condition;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntryList;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
@@ -46,6 +47,8 @@ public final class ItemTagCondition implements Condition<ItemStack> {
 
 	@Override
 	public boolean test(ItemStack itemStack) {
-		return entries.contains(itemStack.getRegistryEntry());
+		return Registry.ITEM.getKey(itemStack.getItem())
+				.map(key -> entries.contains(Registry.ITEM.entryOf(key)))
+				.orElse(false);
 	}
 }

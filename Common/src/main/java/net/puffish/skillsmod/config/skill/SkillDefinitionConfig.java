@@ -2,6 +2,7 @@ package net.puffish.skillsmod.config.skill;
 
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.json.JsonElementWrapper;
@@ -52,7 +53,7 @@ public class SkillDefinitionConfig {
 						.ifFailure(errors::add)
 						.getSuccess()
 				)
-				.orElseGet(Text::empty);
+				.orElse(LiteralText.EMPTY);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(IconConfig::parse)

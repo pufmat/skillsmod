@@ -58,7 +58,7 @@ public class CommandReward implements Reward {
 		if (context.recent()) {
 			var server = Objects.requireNonNull(player.getServer());
 
-			server.getCommandManager().executeWithPrefix(
+			server.getCommandManager().execute(
 					player.getCommandSource()
 							.withSilent()
 							.withLevel(server.getFunctionPermissionLevel()),

@@ -170,6 +170,7 @@ public class DrawUtils {
 		bufferBuilder.vertex(matrix, startX - tmp.x, startY - tmp.y, 0).color(r, g, b, a).next();
 		bufferBuilder.vertex(matrix, endX - tmp.x, endY - tmp.y, 0).color(r, g, b, a).next();
 		bufferBuilder.vertex(matrix, endX + tmp.x, endY + tmp.y, 0).color(r, g, b, a).next();
-		BufferRenderer.drawWithShader(bufferBuilder.end());
+		bufferBuilder.end();
+		BufferRenderer.draw(bufferBuilder);
 	}
 }

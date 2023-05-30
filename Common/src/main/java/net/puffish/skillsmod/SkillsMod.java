@@ -6,7 +6,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.puffish.skillsmod.commands.CategoryCommand;
@@ -121,7 +121,7 @@ public class SkillsMod {
 	}
 
 	public static MutableText createTranslatable(String type, String path, Object... args) {
-		return Text.translatable(Util.createTranslationKey(type, createIdentifier(path)), args);
+		return new TranslatableText(Util.createTranslationKey(type, createIdentifier(path)), args);
 	}
 
 	public static Identifier createAttribute(String type, String name) {
