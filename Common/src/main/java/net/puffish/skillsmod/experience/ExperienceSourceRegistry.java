@@ -1,6 +1,9 @@
 package net.puffish.skillsmod.experience;
 
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.json.JsonElementWrapper;
+import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.error.Error;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -8,7 +11,15 @@ import java.util.Optional;
 public class ExperienceSourceRegistry {
 	private static final HashMap<Identifier, ExperienceSourceFactory> factories = new HashMap<>();
 
-	public static void register(Identifier key, ExperienceSourceFactory factory) {
+	public static void register(Identifier key, ExperienceSourceWithDataFactory factory) {
+		register(key, (Result<JsonElementWrapper, Error> maybeData) -> maybeData.andThen(factory::create));
+	}
+
+	public static void register(Identifier key, ExperienceSourceWithoutDataFactory factory) {
+		register(key, (Result<JsonElementWrapper, Error> maybeData) -> factory.create());
+	}
+
+	private static void register(Identifier key, ExperienceSourceFactory factory) {
 		factories.compute(key, (key2, old) -> {
 			if (old == null) {
 				return factory;

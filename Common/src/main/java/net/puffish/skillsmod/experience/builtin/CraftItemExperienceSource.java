@@ -14,7 +14,6 @@ import net.puffish.skillsmod.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemTagCondition;
 import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
-import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.error.Error;
@@ -42,11 +41,9 @@ public class CraftItemExperienceSource implements ExperienceSource {
 	}
 
 	public static void register() {
-		SkillsAPI.registerExperienceSource(
+		SkillsAPI.registerExperienceSourceWithData(
 				ID,
-				maybeDataElement -> maybeDataElement
-						.andThen(JsonElementWrapper::getAsObject)
-						.andThen(CraftItemExperienceSource::create)
+				json -> json.getAsObject().andThen(CraftItemExperienceSource::create)
 		);
 	}
 	private static Result<CraftItemExperienceSource, Error> create(JsonObjectWrapper rootObject) {
