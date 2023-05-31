@@ -32,6 +32,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		write(buf, category.getDefinitions());
 		write(buf, category.getSkills(), category, categoryData);
 		write(buf, category.getConnections());
+		buf.writeInt(categoryData.getPointsLeft(category));
 		write(buf, category.getExperience(), categoryData);
 	}
 
@@ -54,7 +55,6 @@ public class ShowCategoryOutPacket extends OutPacket {
 	}
 
 	public static void write(PacketByteBuf buf, ExperienceConfig experience, CategoryData categoryData) {
-		buf.writeInt(categoryData.getPointsLeft(experience));
 		if (experience.isEnabled()) {
 			buf.writeOptional(Optional.of(experience.getProgress(categoryData)), PacketByteBuf::writeFloat);
 		} else {

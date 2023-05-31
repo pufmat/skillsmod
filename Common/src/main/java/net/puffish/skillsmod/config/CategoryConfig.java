@@ -90,7 +90,7 @@ public class CategoryConfig {
 						return false;
 					}
 
-					if (categoryData.getPointsLeft(experience) < definition.getCost()) {
+					if (categoryData.getPointsLeft(this) < definition.getCost()) {
 						return false;
 					}
 				}

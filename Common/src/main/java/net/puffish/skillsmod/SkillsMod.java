@@ -374,7 +374,7 @@ public class SkillsMod {
 	public void setPointsLeft(ServerPlayerEntity player, String categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
-			categoryData.setPointsLeft(count, category.getExperience());
+			categoryData.setPointsLeft(count, category);
 
 			syncPoints(player, category, categoryData);
 		});
@@ -383,7 +383,7 @@ public class SkillsMod {
 	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, String categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
-			return categoryData.getPointsLeft(category.getExperience());
+			return categoryData.getPointsLeft(category);
 		});
 	}
 
@@ -432,7 +432,7 @@ public class SkillsMod {
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, PointsUpdateOutPacket.write(
 				category.getId(),
-				categoryData.getPointsLeft(category.getExperience())
+				categoryData.getPointsLeft(category)
 		));
 	}
 
