@@ -13,9 +13,11 @@ public class PlayerInventoryMixin {
 
 	@Inject(method = "getBlockBreakingSpeed", at = @At("RETURN"), cancellable = true)
 	private void injectAtGetBlockBreakingSpeed(CallbackInfoReturnable<Float> cir) {
-		var player = ((PlayerInventory) (Object) this).player;
-		var attribute = (EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MINING_SPEED);
-		cir.setReturnValue((float) attribute.computeValueForInitial(cir.getReturnValueF()));
+		if (cir.getReturnValueF() > 1.0f) { // This check is required to not break vanilla enchantments behavior
+			var player = ((PlayerInventory) (Object) this).player;
+			var attribute = (EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MINING_SPEED);
+			cir.setReturnValue((float) attribute.computeValueForInitial(cir.getReturnValueF()));
+		}
 	}
 
 }
