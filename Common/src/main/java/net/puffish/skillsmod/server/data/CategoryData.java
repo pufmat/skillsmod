@@ -4,7 +4,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.experience.ExperienceConfig;
+import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -88,16 +90,23 @@ public class CategoryData {
 		return experience.getLevel(this);
 	}
 
-	public int getSpentPoints() {
-		return getUnlockedSkillIds().size();
+	public int getSpentPoints(CategoryConfig category) {
+		return unlockedSkills.stream()
+				.flatMap(skillId -> category.getSkills()
+						.getById(skillId)
+						.flatMap(skill -> category.getDefinitions().getById(skill.getDefinitionId()))
+						.stream()
+				)
+				.mapToInt(SkillDefinitionConfig::getCost)
+				.sum();
 	}
 
-	public int getPointsLeft(ExperienceConfig experience) {
-		return getExtraPoints() + getPointsForExperience(experience) - getSpentPoints();
+	public int getPointsLeft(CategoryConfig category) {
+		return getExtraPoints() + getPointsForExperience(category.getExperience()) - getSpentPoints(category);
 	}
 
-	public void setPointsLeft(int count, ExperienceConfig experience) {
-		addExtraPoints(count - getPointsLeft(experience));
+	public void setPointsLeft(int count, CategoryConfig category) {
+		addExtraPoints(count - getPointsLeft(category));
 	}
 
 	public void addExtraPoints(int count) {
