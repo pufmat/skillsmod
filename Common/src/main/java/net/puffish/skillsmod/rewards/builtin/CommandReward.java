@@ -5,7 +5,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardContext;
@@ -26,15 +25,10 @@ public class CommandReward implements Reward {
 	}
 
 	public static void register() {
-		SkillsAPI.registerReward(ID, CommandReward::create);
-	}
-
-	private static Result<CommandReward, Error> create(Result<JsonElementWrapper, Error> maybeDataElement) {
-		return maybeDataElement.andThen(CommandReward::create);
-	}
-
-	private static Result<CommandReward, Error> create(JsonElementWrapper rootElement) {
-		return rootElement.getAsObject().andThen(CommandReward::create);
+		SkillsAPI.registerRewardWithData(
+				ID,
+				json -> json.getAsObject().andThen(CommandReward::create)
+		);
 	}
 
 	private static Result<CommandReward, Error> create(JsonObjectWrapper rootObject) {
