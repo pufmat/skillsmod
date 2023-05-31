@@ -2,12 +2,13 @@ package net.puffish.skillsmod;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.experience.ExperienceSource;
-import net.puffish.skillsmod.experience.ExperienceSourceFactory;
-import net.puffish.skillsmod.rewards.RewardFactory;
+import net.puffish.skillsmod.experience.ExperienceSourceWithDataFactory;
+import net.puffish.skillsmod.experience.ExperienceSourceWithoutDataFactory;
 import net.puffish.skillsmod.experience.ExperienceSourceRegistry;
 import net.puffish.skillsmod.rewards.RewardRegistry;
+import net.puffish.skillsmod.rewards.RewardWithDataFactory;
+import net.puffish.skillsmod.rewards.RewardWithoutDataFactory;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -16,7 +17,11 @@ import java.util.function.Function;
 public class SkillsAPI {
 	public static final String MOD_ID = "puffish_skills";
 
-	public static void registerReward(Identifier key, RewardFactory factory) {
+	public static void registerRewardWithData(Identifier key, RewardWithDataFactory factory) {
+		RewardRegistry.register(key, factory);
+	}
+
+	public static void registerRewardWithoutData(Identifier key, RewardWithoutDataFactory factory) {
 		RewardRegistry.register(key, factory);
 	}
 
@@ -24,7 +29,11 @@ public class SkillsAPI {
 		SkillsMod.getInstance().refreshReward(player, key);
 	}
 
-	public static void registerExperienceSource(Identifier key, ExperienceSourceFactory factory) {
+	public static void registerExperienceSourceWithData(Identifier key, ExperienceSourceWithDataFactory factory) {
+		ExperienceSourceRegistry.register(key, factory);
+	}
+
+	public static void registerExperienceSourceWithoutData(Identifier key, ExperienceSourceWithoutDataFactory factory) {
 		ExperienceSourceRegistry.register(key, factory);
 	}
 

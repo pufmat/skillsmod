@@ -7,9 +7,8 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
-import net.puffish.skillsmod.json.JsonElementWrapper;
+import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardContext;
@@ -39,15 +38,10 @@ public class AttributeReward implements Reward {
 	}
 
 	public static void register() {
-		SkillsAPI.registerReward(ID, AttributeReward::create);
-	}
-
-	private static Result<AttributeReward, Error> create(Result<JsonElementWrapper, Error> maybeDataElement) {
-		return maybeDataElement.andThen(AttributeReward::create);
-	}
-
-	private static Result<AttributeReward, Error> create(JsonElementWrapper rootElement) {
-		return rootElement.getAsObject().andThen(AttributeReward::create);
+		SkillsAPI.registerRewardWithData(
+				ID,
+				json -> json.getAsObject().andThen(AttributeReward::create)
+		);
 	}
 
 	private static Result<AttributeReward, Error> create(JsonObjectWrapper rootObject) {
