@@ -53,11 +53,9 @@ public class KillEntityExperienceSource implements ExperienceSource {
 	}
 
 	public static void register() {
-		SkillsAPI.registerExperienceSource(
+		SkillsAPI.registerExperienceSourceWithData(
 				ID,
-				maybeDataElement -> maybeDataElement
-						.andThen(JsonElementWrapper::getAsObject)
-						.andThen(KillEntityExperienceSource::create)
+				json -> json.getAsObject().andThen(KillEntityExperienceSource::create)
 		);
 	}
 
