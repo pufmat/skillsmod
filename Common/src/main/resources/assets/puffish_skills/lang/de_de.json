@@ -7,5 +7,7 @@
 
 	"chat.puffish_skills.new_point": "Du hast einen neuen Fertigkeitspunkt. Drücke %s, um den Fertigkeitsbaum zu öffnen.",
 
-	"invalid_config.toast.description": "Ungültige Konfiguration, prüfe die Logdatei."
+	"toast.puffish_skills.invalid_config.description": "Ungültige Konfiguration, prüfe die Logdatei.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben"
 }

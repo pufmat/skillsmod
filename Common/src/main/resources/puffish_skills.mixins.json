@@ -6,6 +6,7 @@
 	"mixins": [
 		"ApplyBonusLootFunctionMixin",
 		"BlockMixin",
+		"BooleanRuleInvoker",
 		"ConsumeItemCriterionMixin",
 		"DamageSourceMixin",
 		"EntityAttributeInstanceMixin",

@@ -1,11 +1,11 @@
-package net.puffish.skillsmod.attributes;
+package net.puffish.skillsmod.server;
 
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.server.event.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 public class PlayerAttributes {
 	public static final Identifier STAMINA_ID = SkillsMod.createAttribute("player", "stamina");
