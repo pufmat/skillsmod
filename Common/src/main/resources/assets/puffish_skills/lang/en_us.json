@@ -7,5 +7,7 @@
 
 	"chat.puffish_skills.new_point": "You have a new skill point. Press %s to open your skill tree.",
 
-	"invalid_config.toast.description": "Invalid configuration, check game logs."
+	"toast.puffish_skills.invalid_config.description": "Invalid configuration, check game logs.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Announce new skill points"
 }

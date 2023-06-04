@@ -7,5 +7,7 @@
 
 	"chat.puffish_skills.new_point": "Вы получили очко навыков. Нажмите %s, чтобы открыть древо.",
 
-	"invalid_config.toast.description": "Неверная конфигурация, проверьте журналы игры."
+	"toast.puffish_skills.invalid_config.description": "Неверная конфигурация, проверьте журналы игры.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Оповещение о новых очках навыков"
 }

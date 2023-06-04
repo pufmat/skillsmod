@@ -1,4 +1,4 @@
-package net.puffish.skillsmod.server.event;
+package net.puffish.skillsmod.server.setup;
 
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;

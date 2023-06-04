@@ -10,7 +10,7 @@ import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.SkillsAPI;
-import net.puffish.skillsmod.attributes.PlayerAttributes;
+import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
