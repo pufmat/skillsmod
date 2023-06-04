@@ -127,8 +127,10 @@ public class SkillsClientMod {
 
 	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
 		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
-			if (packet.getPoints() > category.getPointsLeft()) {
-				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(SkillsMod.createTranslatable("chat", "new_point", OPEN_KEY_BINDING.getBoundKeyLocalizedText()));
+			if (packet.announceNewPoints()) {
+				if (packet.getPoints() > category.getPointsLeft()) {
+					MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(SkillsMod.createTranslatable("chat", "new_point", OPEN_KEY_BINDING.getBoundKeyLocalizedText()));
+				}
 			}
 			category.setPointsLeft(packet.getPoints());
 		});
@@ -139,7 +141,7 @@ public class SkillsClientMod {
 		client.getToastManager().add(SimpleToast.create(
 				client,
 				new LiteralText("Pufferfish's Skills"),
-				new TranslatableText("invalid_config.toast.description")
+				new TranslatableText("toast.puffish_skills.invalid_config.description")
 		));
 	}
 

@@ -7,5 +7,7 @@
 
 	"chat.puffish_skills.new_point": "Masz nowy punkt umiejętności. Naciśnij %s, aby otworzyć swoje drzewko umiejętności.",
 
-	"invalid_config.toast.description": "Nieprawidłowa konfiguracja, sprawdź dzienniki gry."
+	"toast.puffish_skills.invalid_config.description": "Nieprawidłowa konfiguracja, sprawdź dzienniki gry.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Ogłaszaj nowe punkty umiejętności"
 }

@@ -15,10 +15,11 @@ import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.experience.ExperienceSource;
-import net.puffish.skillsmod.attributes.PlayerAttributes;
+import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
 import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
 import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
+import net.puffish.skillsmod.server.SkillsGameRules;
 import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
@@ -31,7 +32,8 @@ import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
-import net.puffish.skillsmod.server.event.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerGameRules;
+import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.network.ServerPacketReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
 import net.puffish.skillsmod.server.data.ServerData;
@@ -86,7 +88,14 @@ public class SkillsMod {
 		return instance;
 	}
 
-	public static void setup(Path configDir, ServerRegistrar registrar, ServerEventReceiver eventReceiver, ServerPacketSender packetSender, ServerPacketReceiver packetReceiver) {
+	public static void setup(
+			Path configDir,
+			ServerRegistrar registrar,
+			ServerGameRules gameRules,
+			ServerEventReceiver eventReceiver,
+			ServerPacketSender packetSender,
+			ServerPacketReceiver packetReceiver
+	) {
 		Path modConfigDir = configDir.resolve(SkillsAPI.MOD_ID);
 		try {
 			Files.createDirectories(modConfigDir);
@@ -105,6 +114,8 @@ public class SkillsMod {
 		eventReceiver.registerListener(instance.new EventListener());
 
 		PlayerAttributes.register(registrar);
+
+		SkillsGameRules.register(gameRules);
 
 		AttributeReward.register();
 		CommandReward.register();
@@ -432,7 +443,8 @@ public class SkillsMod {
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, PointsUpdateOutPacket.write(
 				category.getId(),
-				categoryData.getPointsLeft(category)
+				categoryData.getPointsLeft(category),
+				player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)
 		));
 	}
 

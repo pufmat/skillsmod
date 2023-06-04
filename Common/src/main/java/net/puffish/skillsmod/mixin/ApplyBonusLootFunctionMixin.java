@@ -8,7 +8,7 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.function.ApplyBonusLootFunction;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
-import net.puffish.skillsmod.attributes.PlayerAttributes;
+import net.puffish.skillsmod.server.PlayerAttributes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

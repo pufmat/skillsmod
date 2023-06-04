@@ -6,6 +6,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Unit;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -26,7 +27,8 @@ import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
-import net.puffish.skillsmod.server.event.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerGameRules;
+import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
@@ -51,6 +53,7 @@ public class ForgeMain {
 		SkillsMod.setup(
 				FMLPaths.CONFIGDIR.get(),
 				new ServerRegistrarImpl(),
+				new ServerGameRulesImpl(),
 				new ServerEventReceiverImpl(),
 				new ServerPacketSenderImpl(),
 				new ServerPacketReceiverImpl()
@@ -99,6 +102,13 @@ public class ForgeMain {
 			var deferredRegister = DeferredRegister.create(registry.getKey(), id.getNamespace());
 			deferredRegister.register(id.getPath(), () -> entry);
 			deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
+		}
+	}
+
+	private static class ServerGameRulesImpl implements ServerGameRules {
+		@Override
+		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String namespace, String name, GameRules.Category category, GameRules.Type<T> type) {
+			return GameRules.register(namespace + ":" + name, category, type);
 		}
 	}
 

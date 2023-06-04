@@ -2,7 +2,7 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.puffish.skillsmod.attributes.PlayerAttributes;
+import net.puffish.skillsmod.server.PlayerAttributes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
