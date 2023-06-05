@@ -18,8 +18,8 @@
 			}
 		]
 	},
-	"mining_speed+1%": {
-		"title": "+1% Mining Speed",
+	"mining_speed+3%": {
+		"title": "+3% Mining Speed",
 		"icon": {
 			"type": "effect",
 			"data": {
@@ -31,7 +31,7 @@
 				"type": "puffish_skills:attribute",
 				"data": {
 					"attribute": "puffish_skills:player.mining_speed",
-					"value": 0.01,
+					"value": 0.03,
 					"operation": "multiply_base"
 				}
 			}
