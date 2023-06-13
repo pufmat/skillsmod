@@ -1,0 +1,13 @@
+{
+	"text.puffish_skills.skills": "技能",
+	"text.puffish_skills.points_left": "技能点：",
+
+	"category.puffish_skills.skills": "技能",
+	"key.puffish_skills.open": "开启技能树",
+
+	"chat.puffish_skills.new_point": "你获得了一个新的技能点，按%s开启技能树。",
+
+	"toast.puffish_skills.invalid_config.description": "无效的配置，请检查游戏日志。",
+
+	"gamerule.puffish_skills:announceNewPoints": "宣布了新的技能点"
+}
