@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class SimpleToast implements Toast {
@@ -19,8 +19,8 @@ public class SimpleToast implements Toast {
 	}
 
 	@Override
-	public Visibility draw(MatrixStack matrices, ToastManager manager, long startTime) {
-		return toast.draw(matrices, manager, startTime);
+	public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+		return toast.draw(context, manager, startTime);
 	}
 
 	@Override
