@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.rewards;
 
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.error.Error;
@@ -12,11 +13,11 @@ public class RewardRegistry {
 	private static final HashMap<Identifier, RewardFactory> factories = new HashMap<>();
 
 	public static void register(Identifier key, RewardWithDataFactory factory) {
-		register(key, (Result<JsonElementWrapper, Error> maybeData) -> maybeData.andThen(factory::create));
+		register(key, (Result<JsonElementWrapper, Error> maybeData, ConfigContext context) -> maybeData.andThen(data -> factory.create(data, context)));
 	}
 
 	public static void register(Identifier key, RewardWithoutDataFactory factory) {
-		register(key, (Result<JsonElementWrapper, Error> maybeData) -> factory.create());
+		register(key, (Result<JsonElementWrapper, Error> maybeData, ConfigContext context) -> factory.create(context));
 	}
 
 	private static void register(Identifier key, RewardFactory factory) {

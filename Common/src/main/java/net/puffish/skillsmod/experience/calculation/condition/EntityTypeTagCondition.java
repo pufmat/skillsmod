@@ -3,6 +3,7 @@ package net.puffish.skillsmod.experience.calculation.condition;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntryList;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -23,7 +24,7 @@ public final class EntityTypeTagCondition implements Condition<EntityType<?>> {
 		return ConditionFactory.withData(EntityTypeTagCondition::parse);
 	}
 
-	public static Result<EntityTypeTagCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<EntityTypeTagCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(EntityTypeTagCondition::parse);
 	}
 

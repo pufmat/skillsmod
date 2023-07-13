@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.calculation.condition;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.predicate.StatePredicate;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -22,7 +23,7 @@ public final class BlockStateCondition implements Condition<BlockState> {
 		return ConditionFactory.withData(BlockStateCondition::parse);
 	}
 
-	public static Result<BlockStateCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<BlockStateCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(BlockStateCondition::parse);
 	}
 
