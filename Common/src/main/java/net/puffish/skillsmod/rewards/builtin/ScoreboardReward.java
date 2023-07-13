@@ -26,7 +26,7 @@ public class ScoreboardReward implements Reward {
 	public static void register() {
 		SkillsAPI.registerRewardWithData(
 				ID,
-				json -> json.getAsObject().andThen(ScoreboardReward::create)
+				(json, context) -> json.getAsObject().andThen(ScoreboardReward::create)
 		);
 	}
 

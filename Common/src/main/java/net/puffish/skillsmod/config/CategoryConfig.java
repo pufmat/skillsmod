@@ -36,18 +36,27 @@ public class CategoryConfig {
 		this.experience = experience;
 	}
 
-	public static Result<CategoryConfig, Error> parse(String id, int index, JsonElementWrapper generalElement, JsonElementWrapper definitionsElement, JsonElementWrapper skillsElement, JsonElementWrapper connectionsElement, JsonElementWrapper experienceElement) {
+	public static Result<CategoryConfig, Error> parse(
+			String id,
+			int index,
+			JsonElementWrapper generalElement,
+			JsonElementWrapper definitionsElement,
+			JsonElementWrapper skillsElement,
+			JsonElementWrapper connectionsElement,
+			JsonElementWrapper experienceElement,
+			ConfigContext context
+	) {
 		var errors = new ArrayList<Error>();
 
 		var optGeneral = GeneralConfig.parse(generalElement)
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var optExperience = ExperienceConfig.parse(experienceElement)
+		var optExperience = ExperienceConfig.parse(experienceElement, context)
 				.ifFailure(errors::add)
 				.getSuccess();
 
-		var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement)
+		var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement, context)
 				.ifFailure(errors::add)
 				.getSuccess();
 

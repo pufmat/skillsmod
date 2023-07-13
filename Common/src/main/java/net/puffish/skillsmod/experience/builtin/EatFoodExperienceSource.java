@@ -6,6 +6,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
@@ -45,12 +46,12 @@ public class EatFoodExperienceSource implements ExperienceSource {
 	public static void register() {
 		SkillsAPI.registerExperienceSourceWithData(
 				ID,
-				json -> json.getAsObject().andThen(EatFoodExperienceSource::create)
+				(json, context) -> json.getAsObject().andThen(rootObject -> EatFoodExperienceSource.create(rootObject, context))
 		);
 	}
 
-	private static Result<EatFoodExperienceSource, Error> create(JsonObjectWrapper rootObject) {
-		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS).mapSuccess(EatFoodExperienceSource::new);
+	private static Result<EatFoodExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(EatFoodExperienceSource::new);
 	}
 
 	private record Context(ServerPlayerEntity player, ItemStack item) {

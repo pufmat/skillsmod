@@ -6,6 +6,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
@@ -43,11 +44,12 @@ public class CraftItemExperienceSource implements ExperienceSource {
 	public static void register() {
 		SkillsAPI.registerExperienceSourceWithData(
 				ID,
-				json -> json.getAsObject().andThen(CraftItemExperienceSource::create)
+				(json, context) -> json.getAsObject().andThen(rootObject -> CraftItemExperienceSource.create(rootObject, context))
 		);
 	}
-	private static Result<CraftItemExperienceSource, Error> create(JsonObjectWrapper rootObject) {
-		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS).mapSuccess(CraftItemExperienceSource::new);
+
+	private static Result<CraftItemExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(CraftItemExperienceSource::new);
 	}
 
 	private record Context(ServerPlayerEntity player, ItemStack item) {
