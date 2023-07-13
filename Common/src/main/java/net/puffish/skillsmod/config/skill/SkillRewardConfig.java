@@ -2,6 +2,7 @@ package net.puffish.skillsmod.config.skill;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.rewards.Reward;
@@ -23,12 +24,12 @@ public class SkillRewardConfig {
 		this.instance = instance;
 	}
 
-	public static Result<SkillRewardConfig, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<SkillRewardConfig, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
-				.andThen(SkillRewardConfig::parse);
+				.andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<SkillRewardConfig, Error> parse(JsonObjectWrapper rootObject) {
+	public static Result<SkillRewardConfig, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		var errors = new ArrayList<Error>();
 
 		var optTypeElement = rootObject.get("type")
@@ -47,16 +48,17 @@ public class SkillRewardConfig {
 			return build(
 					optType.orElseThrow(),
 					maybeDataElement,
-					rootObject.getPath().thenObject("type")
+					rootObject.getPath().thenObject("type"),
+					context
 			);
 		} else {
 			return Result.failure(ManyErrors.ofList(errors));
 		}
 	}
 
-	private static Result<SkillRewardConfig, Error> build(Identifier type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typePath) {
+	private static Result<SkillRewardConfig, Error> build(Identifier type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typePath, ConfigContext context) {
 		return RewardRegistry.getFactory(type)
-				.map(factory -> factory.create(maybeDataElement).mapSuccess(instance -> new SkillRewardConfig(type, instance)))
+				.map(factory -> factory.create(maybeDataElement, context).mapSuccess(instance -> new SkillRewardConfig(type, instance)))
 				.orElseGet(() -> Result.failure(typePath.errorAt("Expected a valid reward type")));
 	}
 

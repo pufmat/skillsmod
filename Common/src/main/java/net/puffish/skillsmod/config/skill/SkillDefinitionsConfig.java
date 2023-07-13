@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.config.skill;
 
 import net.minecraft.server.MinecraftServer;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.utils.error.Error;
@@ -18,13 +19,13 @@ public class SkillDefinitionsConfig {
 		this.definitions = definitions;
 	}
 
-	public static Result<SkillDefinitionsConfig, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<SkillDefinitionsConfig, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
-				.andThen(SkillDefinitionsConfig::parse);
+				.andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<SkillDefinitionsConfig, Error> parse(JsonObjectWrapper rootObject) {
-		return rootObject.getAsMap(SkillDefinitionConfig::parse)
+	public static Result<SkillDefinitionsConfig, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
+		return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
 				.mapFailure(errors -> (Error) ManyErrors.ofList(errors.values()))
 				.mapSuccess(SkillDefinitionsConfig::new);
 	}

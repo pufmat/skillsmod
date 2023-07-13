@@ -27,7 +27,7 @@ public class CommandReward implements Reward {
 	public static void register() {
 		SkillsAPI.registerRewardWithData(
 				ID,
-				json -> json.getAsObject().andThen(CommandReward::create)
+				(json, context) -> json.getAsObject().andThen(CommandReward::create)
 		);
 	}
 

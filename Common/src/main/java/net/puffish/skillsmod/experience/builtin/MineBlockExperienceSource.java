@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.BlockCondition;
@@ -49,12 +50,12 @@ public class MineBlockExperienceSource implements ExperienceSource {
 	public static void register() {
 		SkillsAPI.registerExperienceSourceWithData(
 				ID,
-				json -> json.getAsObject().andThen(MineBlockExperienceSource::create)
+				(json, context) -> json.getAsObject().andThen(rootObject -> MineBlockExperienceSource.create(rootObject, context))
 		);
 	}
 
-	private static Result<MineBlockExperienceSource, Error> create(JsonObjectWrapper rootObject) {
-		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS).mapSuccess(MineBlockExperienceSource::new);
+	private static Result<MineBlockExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(MineBlockExperienceSource::new);
 	}
 
 	private record Context(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {

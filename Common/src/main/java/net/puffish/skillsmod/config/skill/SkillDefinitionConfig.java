@@ -4,6 +4,7 @@ import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
@@ -34,12 +35,12 @@ public class SkillDefinitionConfig {
 		this.cost = cost;
 	}
 
-	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonElementWrapper rootElement) {
+	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
-				.andThen(rootObject -> SkillDefinitionConfig.parse(id, rootObject));
+				.andThen(rootObject -> SkillDefinitionConfig.parse(id, rootObject, context));
 	}
 
-	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonObjectWrapper rootObject) {
+	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonObjectWrapper rootObject, ConfigContext context) {
 		var errors = new ArrayList<Error>();
 
 		var optTitle = rootObject.get("title")
@@ -69,7 +70,7 @@ public class SkillDefinitionConfig {
 				.orElse(AdvancementFrame.TASK);
 
 		var rewards = rootObject.getArray("rewards")
-				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element)).mapFailure(ManyErrors::ofList))
+				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(ManyErrors::ofList))
 				.ifFailure(errors::add)
 				.getSuccess()
 				.orElseGet(List::of);

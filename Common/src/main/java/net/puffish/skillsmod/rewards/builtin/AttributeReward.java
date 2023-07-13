@@ -40,7 +40,7 @@ public class AttributeReward implements Reward {
 	public static void register() {
 		SkillsAPI.registerRewardWithData(
 				ID,
-				json -> json.getAsObject().andThen(AttributeReward::create)
+				(json, context) -> json.getAsObject().andThen(AttributeReward::create)
 		);
 	}
 

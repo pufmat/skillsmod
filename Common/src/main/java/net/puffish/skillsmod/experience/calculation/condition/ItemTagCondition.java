@@ -4,6 +4,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntryList;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -24,7 +25,7 @@ public final class ItemTagCondition implements Condition<ItemStack> {
 		return ConditionFactory.withData(ItemTagCondition::parse);
 	}
 
-	public static Result<ItemTagCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<ItemTagCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(ItemTagCondition::parse);
 	}
 

@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.experience.calculation.condition;
 
 import net.minecraft.entity.EntityType;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -21,7 +22,7 @@ public final class EntityTypeCondition implements Condition<EntityType<?>> {
 		return ConditionFactory.withData(EntityTypeCondition::parse);
 	}
 
-	public static Result<EntityTypeCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<EntityTypeCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(EntityTypeCondition::parse);
 	}
 
