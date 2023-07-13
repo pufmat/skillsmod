@@ -13,6 +13,7 @@ import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.server.PlayerAttributes;
@@ -172,7 +173,7 @@ public class SkillsMod {
 		}
 	}
 
-	private void loadConfig() {
+	private void loadConfig(ConfigContext context) {
 		if (!Files.exists(modConfigDir) || PathUtils.isDirectoryEmpty(modConfigDir)) {
 			copyConfigFromJar();
 		}
@@ -183,7 +184,7 @@ public class SkillsMod {
 
 		JsonElementWrapper.parseFile(configFile, JsonPath.fromPath(modConfigDir.relativize(configFile)))
 				.andThen(ModConfig::parse)
-				.andThen(modConfig -> readCategories(modConfig.getCategories()))
+				.andThen(modConfig -> readCategories(modConfig.getCategories(), context))
 				.peek(map -> {
 					logger.info("Configuration loaded successfully!");
 					categories.set(Optional.of(map));
@@ -193,7 +194,7 @@ public class SkillsMod {
 				});
 	}
 
-	private Result<Map<String, CategoryConfig>, Error> readCategories(List<String> ids) {
+	private Result<Map<String, CategoryConfig>, Error> readCategories(List<String> ids, ConfigContext context) {
 		var errors = new ArrayList<Error>();
 
 		var map = new HashMap<String, CategoryConfig>();
@@ -202,7 +203,7 @@ public class SkillsMod {
 
 		for (var i = 0; i < ids.size(); i++) {
 			var id = ids.get(i);
-			readCategory(id, i, categoriesDir.resolve(id))
+			readCategory(id, i, categoriesDir.resolve(id), context)
 					.ifFailure(errors::add)
 					.ifSuccess(category -> map.put(id, category));
 		}
@@ -214,7 +215,7 @@ public class SkillsMod {
 		}
 	}
 
-	private Result<CategoryConfig, Error> readCategory(String id, int index, Path categoryDir) {
+	private Result<CategoryConfig, Error> readCategory(String id, int index, Path categoryDir, ConfigContext context) {
 		Path generalFile = categoryDir.resolve("category.json");
 		Path definitionsFile = categoryDir.resolve("definitions.json");
 		Path skillsFile = categoryDir.resolve("skills.json");
@@ -257,7 +258,8 @@ public class SkillsMod {
 					definitionsElement.orElseThrow(),
 					skillsElement.orElseThrow(),
 					connectionsElement.orElseThrow(),
-					experienceElement.orElseThrow()
+					experienceElement.orElseThrow(),
+					context
 			);
 		} else {
 			return Result.failure(ManyErrors.ofList(errors));
@@ -559,7 +561,7 @@ public class SkillsMod {
 				}
 			}), null);
 
-			loadConfig();
+			loadConfig(new ConfigContext(server));
 		}
 
 		@Override
@@ -569,7 +571,9 @@ public class SkillsMod {
 					hideCategory(player, category);
 				}
 			}
-			loadConfig();
+
+			loadConfig(new ConfigContext(server));
+
 			for (var player : server.getPlayerManager().getPlayerList()) {
 				syncAllCategories(player);
 			}

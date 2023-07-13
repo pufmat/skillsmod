@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.experience.calculation;
 
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.calculation.condition.Condition;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.experience.calculation.parameter.Parameter;
@@ -45,15 +46,17 @@ public class CalculationManager<T> {
 	public static <T> Result<CalculationManager<T>, Error> create(
 			JsonElementWrapper rootElement,
 			Map<String, ConditionFactory<T>> conditionFactories,
-			Map<String, ParameterFactory<T>> parameterFactories
+			Map<String, ParameterFactory<T>> parameterFactories,
+			ConfigContext context
 	) {
-		return rootElement.getAsObject().andThen(rootObject -> create(rootObject, conditionFactories, parameterFactories));
+		return rootElement.getAsObject().andThen(rootObject -> create(rootObject, conditionFactories, parameterFactories, context));
 	}
 
 	public static <T> Result<CalculationManager<T>, Error> create(
 			JsonObjectWrapper rootObject,
 			Map<String, ConditionFactory<T>> conditionFactories,
-			Map<String, ParameterFactory<T>> parameterFactories
+			Map<String, ParameterFactory<T>> parameterFactories,
+			ConfigContext context
 	) {
 		var errors = new ArrayList<Error>();
 
@@ -63,7 +66,7 @@ public class CalculationManager<T> {
 		rootObject.getObject("conditions")
 				.getSuccess() // ignore failure because this property is optional
 				.ifPresent(array -> array.stream()
-						.forEach(entry -> Condition.parse(entry.getValue(), conditionFactories)
+						.forEach(entry -> Condition.parse(entry.getValue(), conditionFactories, context)
 								.peek(
 										condition -> conditions.put(entry.getKey(), condition),
 										errors::add
@@ -74,7 +77,7 @@ public class CalculationManager<T> {
 		rootObject.getObject("parameters")
 				.getSuccess() // ignore failure because this property is optional
 				.ifPresent(array -> array.stream()
-						.forEach(entry -> Parameter.parse(entry.getValue(), parameterFactories)
+						.forEach(entry -> Parameter.parse(entry.getValue(), parameterFactories, context)
 								.peek(
 										parameter -> parameters.put(entry.getKey(), parameter),
 										errors::add

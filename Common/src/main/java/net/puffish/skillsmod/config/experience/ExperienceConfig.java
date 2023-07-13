@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.config.experience;
 
 import net.minecraft.server.MinecraftServer;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
@@ -22,12 +23,12 @@ public class ExperienceConfig {
 		this.experienceSources = experienceSources;
 	}
 
-	public static Result<ExperienceConfig, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<ExperienceConfig, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
-				.andThen(ExperienceConfig::parse);
+				.andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<ExperienceConfig, Error> parse(JsonObjectWrapper rootObject) {
+	public static Result<ExperienceConfig, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		var errors = new ArrayList<Error>();
 
 		var enabled = rootObject.getBoolean("enabled")
@@ -40,7 +41,7 @@ public class ExperienceConfig {
 				.getSuccess();
 
 		var experienceSources = rootObject.getArray("sources")
-				.andThen(array -> array.getAsList((i, element) -> ExperienceSourceConfig.parse(element)).mapFailure(ManyErrors::ofList))
+				.andThen(array -> array.getAsList((i, element) -> ExperienceSourceConfig.parse(element, context)).mapFailure(ManyErrors::ofList))
 				.ifFailure(errors::add)
 				.getSuccess()
 				.orElseGet(List::of);

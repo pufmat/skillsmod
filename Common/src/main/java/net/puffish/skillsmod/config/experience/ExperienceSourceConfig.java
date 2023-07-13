@@ -2,6 +2,7 @@ package net.puffish.skillsmod.config.experience;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.ExperienceSourceRegistry;
 import net.puffish.skillsmod.json.JsonElementWrapper;
@@ -23,11 +24,11 @@ public class ExperienceSourceConfig {
 		this.instance = instance;
 	}
 
-	public static Result<ExperienceSourceConfig, Error> parse(JsonElementWrapper rootElement) {
-		return rootElement.getAsObject().andThen(ExperienceSourceConfig::parse);
+	public static Result<ExperienceSourceConfig, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+		return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<ExperienceSourceConfig, Error> parse(JsonObjectWrapper rootObject) {
+	public static Result<ExperienceSourceConfig, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		var errors = new ArrayList<Error>();
 
 		var optTypeElement = rootObject.get("type")
@@ -46,16 +47,17 @@ public class ExperienceSourceConfig {
 			return build(
 					optType.orElseThrow(),
 					maybeDataElement,
-					optTypeElement.orElseThrow().getPath()
+					optTypeElement.orElseThrow().getPath(),
+					context
 			);
 		} else {
 			return Result.failure(ManyErrors.ofList(errors));
 		}
 	}
 
-	private static Result<ExperienceSourceConfig, Error> build(Identifier type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typeElementPath) {
+	private static Result<ExperienceSourceConfig, Error> build(Identifier type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typeElementPath, ConfigContext context) {
 		return ExperienceSourceRegistry.getFactory(type)
-				.map(factory -> factory.create(maybeDataElement).mapSuccess(instance -> new ExperienceSourceConfig(type, instance)))
+				.map(factory -> factory.create(maybeDataElement, context).mapSuccess(instance -> new ExperienceSourceConfig(type, instance)))
 				.orElseGet(() -> Result.failure(typeElementPath.errorAt("Expected a valid source type")));
 	}
 

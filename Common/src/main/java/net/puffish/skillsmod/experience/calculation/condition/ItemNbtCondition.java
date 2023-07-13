@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.calculation.condition;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.NbtPredicate;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -22,7 +23,7 @@ public final class ItemNbtCondition implements Condition<ItemStack> {
 		return ConditionFactory.withData(ItemNbtCondition::parse);
 	}
 
-	public static Result<ItemNbtCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<ItemNbtCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(ItemNbtCondition::parse);
 	}
 

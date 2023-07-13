@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.calculation.parameter;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -22,7 +23,7 @@ public class EffectParameter implements Parameter<LivingEntity> {
 		return ParameterFactory.withData(EffectParameter::parse);
 	}
 
-	public static Result<EffectParameter, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<EffectParameter, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(EffectParameter::parse);
 	}
 

@@ -3,6 +3,7 @@ package net.puffish.skillsmod.experience.calculation.condition;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.entry.RegistryEntryList;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -23,7 +24,7 @@ public final class BlockTagCondition implements Condition<BlockState> {
 		return ConditionFactory.withData(BlockTagCondition::parse);
 	}
 
-	public static Result<BlockTagCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<BlockTagCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(BlockTagCondition::parse);
 	}
 
