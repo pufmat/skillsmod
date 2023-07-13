@@ -82,7 +82,6 @@ public class JsonParseUtils {
 		}
 	}
 
-
 	public static Result<RegistryEntryList.Named<EntityType<?>>, Error> parseEntityTypeTag(JsonElementWrapper element) {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registry.ENTITY_TYPE.getEntryList(TagKey.of(Registry.ENTITY_TYPE_KEY, id)).orElseThrow());
