@@ -4,6 +4,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NbtPredicate;
+import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
@@ -26,7 +27,7 @@ public final class ItemCondition implements Condition<ItemStack> {
 		return ConditionFactory.withData(ItemCondition::parse);
 	}
 
-	public static Result<ItemCondition, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<ItemCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(ItemCondition::parse);
 	}
 
