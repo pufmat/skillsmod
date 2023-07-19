@@ -13,12 +13,8 @@ import java.util.function.Function;
 
 public interface Parameter<T> extends Function<T, Double> {
 
-	static <T, R> Result<Parameter<R>, Error> map(Result<? extends Parameter<T>, Error> maybe, Function<R, T> function) {
-		return maybe.mapSuccess(parameter -> r -> parameter.apply(function.apply(r)));
-	}
-
-	static <T, R> Result<Parameter<R>, Error> map(Result<JsonElementWrapper, Error> maybe, ParameterFactory<T> factory, Function<R, T> function) {
-		return map(factory.apply(maybe), function);
+	default <R> Parameter<R> map(Function<R, T> function) {
+		return r -> this.apply(function.apply(r));
 	}
 
 	static <T> Result<Parameter<T>, Error> parse(JsonElementWrapper rootElement, Map<String, ParameterFactory<T>> factories) {

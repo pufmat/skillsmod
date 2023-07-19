@@ -18,8 +18,8 @@ public final class ItemNbtCondition implements Condition<ItemStack> {
 		this.nbt = nbt;
 	}
 
-	public static Result<ItemNbtCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(ItemNbtCondition::parse);
+	public static ConditionFactory<ItemStack> factory() {
+		return ConditionFactory.withData(ItemNbtCondition::parse);
 	}
 
 	public static Result<ItemNbtCondition, Error> parse(JsonElementWrapper rootElement) {

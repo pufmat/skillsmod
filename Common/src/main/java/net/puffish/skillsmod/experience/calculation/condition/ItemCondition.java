@@ -22,8 +22,8 @@ public final class ItemCondition implements Condition<ItemStack> {
 		this.nbt = nbt;
 	}
 
-	public static Result<ItemCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(ItemCondition::parse);
+	public static ConditionFactory<ItemStack> factory() {
+		return ConditionFactory.withData(ItemCondition::parse);
 	}
 
 	public static Result<ItemCondition, Error> parse(JsonElementWrapper rootElement) {
