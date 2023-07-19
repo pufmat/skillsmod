@@ -10,6 +10,7 @@ import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,6 +39,18 @@ public abstract class LivingEntityMixin {
 			}
 		}
 		return damage;
+	}
+
+	@Inject(method = "damage", at = @At("TAIL"))
+	private void injectAtDamage(DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
+		if (((LivingEntity) (Object) this) instanceof ServerPlayerEntity serverPlayer) {
+			SkillsAPI.visitExperienceSources(serverPlayer, experienceSource -> {
+				if (experienceSource instanceof TakeDamageExperienceSource takeDamageExperienceSource) {
+					return takeDamageExperienceSource.getValue(serverPlayer, damage, source);
+				}
+				return 0;
+			});
+		}
 	}
 
 	@ModifyVariable(method = "heal", at = @At("HEAD"), ordinal = 0, argsOnly = true)
