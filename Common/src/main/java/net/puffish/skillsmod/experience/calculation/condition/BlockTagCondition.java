@@ -19,8 +19,8 @@ public final class BlockTagCondition implements Condition<BlockState> {
 		this.entries = entries;
 	}
 
-	public static Result<BlockTagCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(BlockTagCondition::parse);
+	public static ConditionFactory<BlockState> factory() {
+		return ConditionFactory.withData(BlockTagCondition::parse);
 	}
 
 	public static Result<BlockTagCondition, Error> parse(JsonElementWrapper rootElement) {

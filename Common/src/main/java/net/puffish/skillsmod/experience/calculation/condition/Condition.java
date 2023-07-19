@@ -14,12 +14,8 @@ import java.util.function.Predicate;
 
 public interface Condition<T> extends Predicate<T> {
 
-	static <T, R> Result<Condition<R>, Error> map(Result<? extends Condition<T>, Error> maybe, Function<R, T> function) {
-		return maybe.mapSuccess(condition -> r -> condition.test(function.apply(r)));
-	}
-
-	static <T, R> Result<Condition<R>, Error> map(Result<JsonElementWrapper, Error> maybe, ConditionFactory<T> factory, Function<R, T> function) {
-		return map(factory.apply(maybe), function);
+	default <R> Condition<R> map(Function<R, T> function) {
+		return r -> this.test(function.apply(r));
 	}
 
 	static <T> Result<Condition<T>, Error> parse(JsonElementWrapper rootElement, Map<String, ConditionFactory<T>> factories) {

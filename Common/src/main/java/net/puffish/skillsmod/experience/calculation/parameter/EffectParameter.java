@@ -18,8 +18,8 @@ public class EffectParameter implements Parameter<LivingEntity> {
 		this.effect = effect;
 	}
 
-	public static Result<EffectParameter, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(EffectParameter::parse);
+	public static ParameterFactory<LivingEntity> factory() {
+		return ParameterFactory.withData(EffectParameter::parse);
 	}
 
 	public static Result<EffectParameter, Error> parse(JsonElementWrapper rootElement) {
