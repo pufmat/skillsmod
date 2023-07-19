@@ -25,13 +25,13 @@ public class EatFoodExperienceSource implements ExperienceSource {
 	public static final Identifier ID = SkillsMod.createIdentifier("eat_food");
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
-			Map.entry("item", ConditionFactory.map(ItemCondition::parse, Context::item)),
-			Map.entry("item_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::item)),
-			Map.entry("item_tag", ConditionFactory.map(ItemTagCondition::parse, Context::item))
+			Map.entry("item", ItemCondition.factory().map(c -> c.map(Context::item))),
+			Map.entry("item_nbt", ItemNbtCondition.factory().map(c -> c.map(Context::item))),
+			Map.entry("item_tag", ItemTagCondition.factory().map(c -> c.map(Context::item)))
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
-			Map.entry("player_effect", ParameterFactory.map(EffectParameter::parse, Context::player)),
+			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player))),
 			Map.entry("food_hunger", ParameterFactory.simple(Context::hunger)),
 			Map.entry("food_saturation", ParameterFactory.simple(Context::saturation))
 	);

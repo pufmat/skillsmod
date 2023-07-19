@@ -12,22 +12,22 @@ import net.puffish.skillsmod.utils.error.ManyErrors;
 
 import java.util.ArrayList;
 
-public final class EntityTagCondition implements Condition<EntityType<?>> {
+public final class EntityTypeTagCondition implements Condition<EntityType<?>> {
 	private final RegistryEntryList.Named<EntityType<?>> entries;
 
-	private EntityTagCondition(RegistryEntryList.Named<EntityType<?>> entries) {
+	private EntityTypeTagCondition(RegistryEntryList.Named<EntityType<?>> entries) {
 		this.entries = entries;
 	}
 
-	public static Result<EntityTagCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(EntityTagCondition::parse);
+	public static ConditionFactory<EntityType<?>> factory() {
+		return ConditionFactory.withData(EntityTypeTagCondition::parse);
 	}
 
-	public static Result<EntityTagCondition, Error> parse(JsonElementWrapper rootElement) {
-		return rootElement.getAsObject().andThen(EntityTagCondition::parse);
+	public static Result<EntityTypeTagCondition, Error> parse(JsonElementWrapper rootElement) {
+		return rootElement.getAsObject().andThen(EntityTypeTagCondition::parse);
 	}
 
-	public static Result<EntityTagCondition, Error> parse(JsonObjectWrapper rootObject) {
+	public static Result<EntityTypeTagCondition, Error> parse(JsonObjectWrapper rootObject) {
 		var errors = new ArrayList<Error>();
 
 		var optTag = rootObject.get("tag")
@@ -36,7 +36,7 @@ public final class EntityTagCondition implements Condition<EntityType<?>> {
 				.getSuccess();
 
 		if (errors.isEmpty()) {
-			return Result.success(new EntityTagCondition(
+			return Result.success(new EntityTypeTagCondition(
 					optTag.orElseThrow()
 			));
 		} else {

@@ -18,8 +18,8 @@ public final class BlockStateCondition implements Condition<BlockState> {
 		this.state = state;
 	}
 
-	public static Result<BlockStateCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(BlockStateCondition::parse);
+	public static ConditionFactory<BlockState> factory() {
+		return ConditionFactory.withData(BlockStateCondition::parse);
 	}
 
 	public static Result<BlockStateCondition, Error> parse(JsonElementWrapper rootElement) {
