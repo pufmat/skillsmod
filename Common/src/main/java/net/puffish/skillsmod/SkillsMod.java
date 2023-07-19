@@ -16,6 +16,7 @@ import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.experience.ExperienceSource;
+import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
 import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
@@ -126,6 +127,7 @@ public class SkillsMod {
 		KillEntityExperienceSource.register();
 		EatFoodExperienceSource.register();
 		CraftItemExperienceSource.register();
+		TakeDamageExperienceSource.register();
 	}
 
 	public static Identifier createIdentifier(String path) {

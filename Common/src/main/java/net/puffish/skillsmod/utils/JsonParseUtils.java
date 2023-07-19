@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntryList;
@@ -75,6 +77,22 @@ public class JsonParseUtils {
 		}
 	}
 
+	public static Result<DamageType, Error> parseDamageType(JsonElementWrapper element, DynamicRegistryManager manager) {
+		try {
+			return parseIdentifier(element).mapSuccess(id -> manager.get(RegistryKeys.DAMAGE_TYPE).getOrEmpty(id).orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(SingleError.of("Expected valid damage type at " + element.getPath().toString()));
+		}
+	}
+
+	public static Result<RegistryEntryList.Named<DamageType>, Error> parseDamageTypeTag(JsonElementWrapper element, DynamicRegistryManager manager) {
+		try {
+			return parseIdentifier(element).mapSuccess(id -> manager.get(RegistryKeys.DAMAGE_TYPE).getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.DAMAGE_TYPE, id)).orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(SingleError.of("Expected valid entity tag at " + element.getPath().toString()));
+		}
+	}
+
 	public static Result<EntityType<?>, Error> parseEntityType(JsonElementWrapper element) {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
@@ -82,7 +100,6 @@ public class JsonParseUtils {
 			return Result.failure(SingleError.of("Expected valid entity at " + element.getPath().toString()));
 		}
 	}
-
 
 	public static Result<RegistryEntryList.Named<EntityType<?>>, Error> parseEntityTypeTag(JsonElementWrapper element) {
 		try {
