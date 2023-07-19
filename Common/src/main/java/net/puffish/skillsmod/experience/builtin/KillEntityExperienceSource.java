@@ -12,8 +12,8 @@ import net.puffish.skillsmod.mixin.LivingEntityInvoker;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
-import net.puffish.skillsmod.experience.calculation.condition.EntityCondition;
-import net.puffish.skillsmod.experience.calculation.condition.EntityTagCondition;
+import net.puffish.skillsmod.experience.calculation.condition.EntityTypeCondition;
+import net.puffish.skillsmod.experience.calculation.condition.EntityTypeTagCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.experience.calculation.condition.ItemTagCondition;
@@ -32,15 +32,15 @@ public class KillEntityExperienceSource implements ExperienceSource {
 	public static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
-			Map.entry("entity", ConditionFactory.map(EntityCondition::parse, Context::entityType)),
-			Map.entry("entity_tag", ConditionFactory.map(EntityTagCondition::parse, Context::entityType)),
-			Map.entry("weapon", ConditionFactory.map(ItemCondition::parse, Context::weapon)),
-			Map.entry("weapon_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::weapon)),
-			Map.entry("weapon_tag", ConditionFactory.map(ItemTagCondition::parse, Context::weapon))
+			Map.entry("entity", EntityTypeCondition.factory().map(c -> c.map(Context::entityType))),
+			Map.entry("entity_tag", EntityTypeTagCondition.factory().map(c -> c.map(Context::entityType))),
+			Map.entry("weapon", ItemCondition.factory().map(c -> c.map(Context::weapon))),
+			Map.entry("weapon_nbt", ItemNbtCondition.factory().map(c -> c.map(Context::weapon))),
+			Map.entry("weapon_tag", ItemTagCondition.factory().map(c -> c.map(Context::weapon)))
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
-			Map.entry("player_effect", ParameterFactory.map(EffectParameter::parse, Context::player)),
+			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player))),
 			Map.entry("entity_dropped_experience", ParameterFactory.simple(Context::entityDroppedXp)),
 			Map.entry("entity_max_health", ParameterFactory.simple(Context::entityMaxHealth))
 	);
