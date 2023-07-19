@@ -10,22 +10,22 @@ import net.puffish.skillsmod.utils.error.ManyErrors;
 
 import java.util.ArrayList;
 
-public final class EntityCondition implements Condition<EntityType<?>> {
+public final class EntityTypeCondition implements Condition<EntityType<?>> {
 	private final EntityType<?> entityType;
 
-	private EntityCondition(EntityType<?> entityType) {
+	private EntityTypeCondition(EntityType<?> entityType) {
 		this.entityType = entityType;
 	}
 
-	public static Result<EntityCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(EntityCondition::parse);
+	public static ConditionFactory<EntityType<?>> factory() {
+		return ConditionFactory.withData(EntityTypeCondition::parse);
 	}
 
-	public static Result<EntityCondition, Error> parse(JsonElementWrapper rootElement) {
-		return rootElement.getAsObject().andThen(EntityCondition::parse);
+	public static Result<EntityTypeCondition, Error> parse(JsonElementWrapper rootElement) {
+		return rootElement.getAsObject().andThen(EntityTypeCondition::parse);
 	}
 
-	public static Result<EntityCondition, Error> parse(JsonObjectWrapper rootObject) {
+	public static Result<EntityTypeCondition, Error> parse(JsonObjectWrapper rootObject) {
 		var errors = new ArrayList<Error>();
 
 		var optEntity = rootObject.get("entity")
@@ -34,7 +34,7 @@ public final class EntityCondition implements Condition<EntityType<?>> {
 				.getSuccess();
 
 		if (errors.isEmpty()) {
-			return Result.success(new EntityCondition(
+			return Result.success(new EntityTypeCondition(
 					optEntity.orElseThrow()
 			));
 		} else {

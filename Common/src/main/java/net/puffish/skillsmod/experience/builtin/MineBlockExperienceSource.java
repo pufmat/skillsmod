@@ -28,16 +28,16 @@ public class MineBlockExperienceSource implements ExperienceSource {
 	public static final Identifier ID = SkillsMod.createIdentifier("mine_block");
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
-			Map.entry("block", ConditionFactory.map(BlockCondition::parse, Context::blockState)),
-			Map.entry("block_state", ConditionFactory.map(BlockStateCondition::parse, Context::blockState)),
-			Map.entry("block_tag", ConditionFactory.map(BlockTagCondition::parse, Context::blockState)),
-			Map.entry("tool", ConditionFactory.map(ItemCondition::parse, Context::tool)),
-			Map.entry("tool_nbt", ConditionFactory.map(ItemNbtCondition::parse, Context::tool)),
-			Map.entry("tool_tag", ConditionFactory.map(ItemTagCondition::parse, Context::tool))
+			Map.entry("block", BlockCondition.factory().map(c -> c.map(Context::blockState))),
+			Map.entry("block_state", BlockStateCondition.factory().map(c -> c.map(Context::blockState))),
+			Map.entry("block_tag", BlockTagCondition.factory().map(c -> c.map(Context::blockState))),
+			Map.entry("tool", ItemCondition.factory().map(c -> c.map(Context::tool))),
+			Map.entry("tool_nbt", ItemNbtCondition.factory().map(c -> c.map(Context::tool))),
+			Map.entry("tool_tag", ItemTagCondition.factory().map(c -> c.map(Context::tool)))
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
-			Map.entry("player_effect", ParameterFactory.map(EffectParameter::parse, Context::player))
+			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player)))
 	);
 
 	private final CalculationManager<Context> manager;

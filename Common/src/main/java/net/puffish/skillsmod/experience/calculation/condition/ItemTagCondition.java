@@ -19,8 +19,8 @@ public final class ItemTagCondition implements Condition<ItemStack> {
 		this.entries = entries;
 	}
 
-	public static Result<ItemTagCondition, Error> parse(Result<JsonElementWrapper, Error> maybeElement) {
-		return maybeElement.andThen(ItemTagCondition::parse);
+	public static ConditionFactory<ItemStack> factory() {
+		return ConditionFactory.withData(ItemTagCondition::parse);
 	}
 
 	public static Result<ItemTagCondition, Error> parse(JsonElementWrapper rootElement) {
