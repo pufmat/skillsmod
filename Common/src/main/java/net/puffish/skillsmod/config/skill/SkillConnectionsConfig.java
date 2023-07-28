@@ -3,8 +3,8 @@ package net.puffish.skillsmod.config.skill;
 import net.puffish.skillsmod.json.JsonArrayWrapper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,13 +21,13 @@ public class SkillConnectionsConfig {
 		this.neighbors = neighbors;
 	}
 
-	public static Result<SkillConnectionsConfig, Error> parse(JsonElementWrapper rootElement, SkillsConfig skills) {
+	public static Result<SkillConnectionsConfig, Failure> parse(JsonElementWrapper rootElement, SkillsConfig skills) {
 		return rootElement.getAsArray().andThen(rootArray -> SkillConnectionsConfig.parse(rootArray, skills));
 	}
 
-	public static Result<SkillConnectionsConfig, Error> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
+	public static Result<SkillConnectionsConfig, Failure> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
 		return rootArray.getAsList((i, element) -> SkillConnectionConfig.parse(element, skills))
-				.<Error>mapFailure(ManyErrors::ofList)
+				.<Failure>mapFailure(ManyFailures::ofList)
 				.mapSuccess(SkillConnectionsConfig::build);
 	}
 

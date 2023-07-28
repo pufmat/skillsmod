@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.expression;
 
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -50,21 +50,21 @@ class ArithmeticParserTest {
 
 	@Test
 	public void testInvalidExpressions() {
-		testInvalid(SingleError.of("Invalid expression"), "");
-		testInvalid(SingleError.of("Invalid expression"), "+");
-		testInvalid(SingleError.of("Invalid expression"), "1 *");
-		testInvalid(SingleError.of("Invalid expression"), "1 2");
-		testInvalid(SingleError.of("Invalid expression"), "(1 / 2");
-		testInvalid(SingleError.of("Invalid expression"), "1 - 2)");
-		testInvalid(SingleError.of("Invalid expression"), "abs(");
-		testInvalid(SingleError.of("Invalid expression"), "abs(5");
-		testInvalid(SingleError.of("Invalid expression"), "abs(3,");
-		testInvalid(SingleError.of("Invalid expression"), "abs(1, 2)");
-		testInvalid(SingleError.of("Invalid expression"), "abs()");
-		testInvalid(SingleError.of("Unknown variable `abs`"), "abs");
-		testInvalid(SingleError.of("Unknown variable `a`"), "a");
-		testInvalid(SingleError.of("Unknown variable `a`"), "3 * a + 2");
-		testInvalid(SingleError.of("Unknown variable `2.3.4`"), "2.3.4");
+		testInvalid(SingleFailure.of("Invalid expression"), "");
+		testInvalid(SingleFailure.of("Invalid expression"), "+");
+		testInvalid(SingleFailure.of("Invalid expression"), "1 *");
+		testInvalid(SingleFailure.of("Invalid expression"), "1 2");
+		testInvalid(SingleFailure.of("Invalid expression"), "(1 / 2");
+		testInvalid(SingleFailure.of("Invalid expression"), "1 - 2)");
+		testInvalid(SingleFailure.of("Invalid expression"), "abs(");
+		testInvalid(SingleFailure.of("Invalid expression"), "abs(5");
+		testInvalid(SingleFailure.of("Invalid expression"), "abs(3,");
+		testInvalid(SingleFailure.of("Invalid expression"), "abs(1, 2)");
+		testInvalid(SingleFailure.of("Invalid expression"), "abs()");
+		testInvalid(SingleFailure.of("Unknown variable `abs`"), "abs");
+		testInvalid(SingleFailure.of("Unknown variable `a`"), "a");
+		testInvalid(SingleFailure.of("Unknown variable `a`"), "3 * a + 2");
+		testInvalid(SingleFailure.of("Unknown variable `2.3.4`"), "2.3.4");
 	}
 
 	private void testValid(double expected, String expression) {
@@ -77,11 +77,11 @@ class ArithmeticParserTest {
 		Assertions.assertEquals(expected, success.orElseThrow().eval(parameters), expression);
 	}
 
-	private void testInvalid(Error expected, String expression) {
+	private void testInvalid(Failure expected, String expression) {
 		testInvalid(expected, expression, Map.of());
 	}
 
-	private void testInvalid(Error expected, String expression, Map<String, Double> parameters) {
+	private void testInvalid(Failure expected, String expression, Map<String, Double> parameters) {
 		var failure = ArithmeticParser.parse(expression, parameters.keySet()).getFailure();
 		Assertions.assertTrue(failure.isPresent(), "Unexpected success: " + expression);
 		Assertions.assertEquals(expected.getMessages(), failure.orElseThrow().getMessages(), expression);

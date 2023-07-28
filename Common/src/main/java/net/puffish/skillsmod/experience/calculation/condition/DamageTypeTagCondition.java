@@ -1,8 +1,6 @@
 package net.puffish.skillsmod.experience.calculation.condition;
 
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.puffish.skillsmod.config.ConfigContext;
@@ -10,8 +8,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -26,24 +24,24 @@ public final class DamageTypeTagCondition implements Condition<RegistryEntry<Dam
 		return ConditionFactory.withData(DamageTypeTagCondition::parse);
 	}
 
-	public static Result<DamageTypeTagCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<DamageTypeTagCondition, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<DamageTypeTagCondition, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
-		var errors = new ArrayList<Error>();
+	public static Result<DamageTypeTagCondition, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
+		var failures = new ArrayList<Failure>();
 
 		var optTag = rootObject.get("tag")
 				.andThen(element -> JsonParseUtils.parseDamageTypeTag(element, context.dynamicRegistryManager()))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new DamageTypeTagCondition(
 					optTag.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

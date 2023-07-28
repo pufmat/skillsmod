@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.json;
 
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -51,28 +51,28 @@ public class JsonPath {
 		return this.path.get(0);
 	}
 
-	public Error expectedToExist() {
+	public Failure expectedToExist() {
 		return expectedTo("exist");
 	}
 
-	public Error expectedToExistAndBe(String str) {
+	public Failure expectedToExistAndBe(String str) {
 		return expectedTo("exist and be " + str);
 	}
 
-	public Error expectedToBe(String str) {
+	public Failure expectedToBe(String str) {
 		return expectedTo("be " + str);
 	}
 
-	public Error errorAt(String str) {
-		return SingleError.of(str + " at " + this);
+	public Failure failureAt(String str) {
+		return SingleFailure.of(str + " at " + this);
 	}
 
-	private Error expectedTo(String str) {
+	private Failure expectedTo(String str) {
 		var parent = getParent();
 		if (parent.isPresent()) {
-			return SingleError.of("Expected " + getHead() + " to " + str + " at " + parent.orElseThrow() + ".");
+			return SingleFailure.of("Expected " + getHead() + " to " + str + " at " + parent.orElseThrow() + ".");
 		} else {
-			return SingleError.of("Expected " + getHead() + " to " + str + ".");
+			return SingleFailure.of("Expected " + getHead() + " to " + str + ".");
 		}
 	}
 

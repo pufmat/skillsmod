@@ -9,8 +9,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -27,33 +27,33 @@ public final class ItemCondition implements Condition<ItemStack> {
 		return ConditionFactory.withData(ItemCondition::parse);
 	}
 
-	public static Result<ItemCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<ItemCondition, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(ItemCondition::parse);
 	}
 
-	public static Result<ItemCondition, Error> parse(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	public static Result<ItemCondition, Failure> parse(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optItem = rootObject.get("item")
 				.andThen(JsonParseUtils::parseItem)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var nbt = rootObject.get("nbt")
 				.getSuccess()
 				.flatMap(stateElement -> JsonParseUtils.parseNbtPredicate(stateElement)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElseGet(() -> new NbtPredicate(new NbtCompound()));
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new ItemCondition(
 					optItem.orElseThrow(),
 					nbt
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

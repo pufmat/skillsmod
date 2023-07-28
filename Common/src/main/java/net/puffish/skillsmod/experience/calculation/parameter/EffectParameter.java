@@ -7,8 +7,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -23,24 +23,24 @@ public class EffectParameter implements Parameter<LivingEntity> {
 		return ParameterFactory.withData(EffectParameter::parse);
 	}
 
-	public static Result<EffectParameter, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<EffectParameter, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(EffectParameter::parse);
 	}
 
-	public static Result<EffectParameter, Error> parse(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	public static Result<EffectParameter, Failure> parse(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optEffect = rootObject.get("effect")
 				.andThen(JsonParseUtils::parseEffect)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new EffectParameter(
 					optEffect.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

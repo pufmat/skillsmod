@@ -7,13 +7,13 @@ import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
+import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.server.data.CategoryData;
-import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.skill.SkillState;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
 import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -36,7 +36,7 @@ public class CategoryConfig {
 		this.experience = experience;
 	}
 
-	public static Result<CategoryConfig, Error> parse(
+	public static Result<CategoryConfig, Failure> parse(
 			String id,
 			int index,
 			JsonElementWrapper generalElement,
@@ -46,33 +46,33 @@ public class CategoryConfig {
 			JsonElementWrapper experienceElement,
 			ConfigContext context
 	) {
-		var errors = new ArrayList<Error>();
+		var failures = new ArrayList<Failure>();
 
 		var optGeneral = GeneralConfig.parse(generalElement)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optExperience = ExperienceConfig.parse(experienceElement, context)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement, context)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optSkills = optDefinitions.flatMap(
 				definitions -> SkillsConfig.parse(skillsElement, definitions)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 		);
 
 		var optConnections = optSkills.flatMap(
 				skills -> SkillConnectionsConfig.parse(connectionsElement, skills)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 		);
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new CategoryConfig(
 					id,
 					index,
@@ -83,7 +83,7 @@ public class CategoryConfig {
 					optExperience.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
@@ -152,8 +152,8 @@ public class CategoryConfig {
 				.stream()
 				.filter(skill ->
 						skill.getDefinitionId().equals(definitionId)
-						&&
-						skill.getStateFor(this, categoryData) == SkillState.UNLOCKED)
+								&&
+								skill.getStateFor(this, categoryData) == SkillState.UNLOCKED)
 				.count();
 	}
 
