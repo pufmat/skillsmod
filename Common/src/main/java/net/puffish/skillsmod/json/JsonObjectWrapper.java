@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.json;
 
 import com.google.gson.JsonObject;
-import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.failure.Failure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class JsonObjectWrapper extends JsonWrapper {
 		this.json = json;
 	}
 
-	public Result<JsonElementWrapper, Error> get(String key) {
+	public Result<JsonElementWrapper, Failure> get(String key) {
 		var newPath = path.thenObject(key);
 		var element = json.get(key);
 		if (element == null) {
@@ -26,37 +26,43 @@ public class JsonObjectWrapper extends JsonWrapper {
 		}
 	}
 
-	public Result<JsonObjectWrapper, Error> getObject(String key) {
+	public Result<JsonObjectWrapper, Failure> getObject(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("an object"))
 				.andThen(JsonElementWrapper::getAsObject);
 	}
 
-	public Result<JsonArrayWrapper, Error> getArray(String key) {
+	public Result<JsonArrayWrapper, Failure> getArray(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("an array"))
 				.andThen(JsonElementWrapper::getAsArray);
 	}
 
-	public Result<String, Error> getString(String key) {
+	public Result<String, Failure> getString(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("a string"))
 				.andThen(JsonElementWrapper::getAsString);
 	}
 
-	public Result<Float, Error> getFloat(String key) {
+	public Result<Float, Failure> getFloat(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("a float"))
 				.andThen(JsonElementWrapper::getAsFloat);
 	}
 
-	public Result<Integer, Error> getInt(String key) {
+	public Result<Double, Failure> getDouble(String key) {
+		return get(key)
+				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("a double"))
+				.andThen(JsonElementWrapper::getAsDouble);
+	}
+
+	public Result<Integer, Failure> getInt(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("an int"))
 				.andThen(JsonElementWrapper::getAsInt);
 	}
 
-	public Result<Boolean, Error> getBoolean(String key) {
+	public Result<Boolean, Failure> getBoolean(String key) {
 		return get(key)
 				.mapFailure(e -> path.thenObject(key).expectedToExistAndBe("a boolean"))
 				.andThen(JsonElementWrapper::getAsBoolean);

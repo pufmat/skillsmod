@@ -5,12 +5,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.config.ConfigContext;
+import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -27,23 +29,27 @@ public class CommandReward implements Reward {
 	public static void register() {
 		SkillsAPI.registerRewardWithData(
 				ID,
-				(json, context) -> json.getAsObject().andThen(CommandReward::create)
+				CommandReward::create
 		);
 	}
 
-	private static Result<CommandReward, Error> create(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	private static Result<CommandReward, Failure> create(JsonElementWrapper rootElement, ConfigContext context) {
+		return rootElement.getAsObject().andThen(CommandReward::create);
+	}
+
+	private static Result<CommandReward, Failure> create(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optCommand = rootObject.getString("command")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new CommandReward(
 					optCommand.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

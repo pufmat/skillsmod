@@ -6,8 +6,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -21,12 +21,12 @@ public class ExperiencePerLevelConfig {
 		this.function = function;
 	}
 
-	public static Result<ExperiencePerLevelConfig, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<ExperiencePerLevelConfig, Failure> parse(JsonElementWrapper rootElement) {
 		return rootElement.getAsObject().andThen(ExperiencePerLevelConfig::parse);
 	}
 
-	public static Result<ExperiencePerLevelConfig, Error> parse(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	public static Result<ExperiencePerLevelConfig, Failure> parse(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var maybeDataElement = rootObject.get("data");
 
@@ -34,27 +34,27 @@ public class ExperiencePerLevelConfig {
 				.andThen(typeElement -> typeElement.getAsString()
 						.andThen(type -> parseType(type, maybeDataElement, typeElement.getPath()))
 				)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new ExperiencePerLevelConfig(
 					optFunction.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
-	private static Result<Function<Integer, Integer>, Error> parseType(String type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typeElementPath) {
+	private static Result<Function<Integer, Integer>, Failure> parseType(String type, Result<JsonElementWrapper, Failure> maybeDataElement, JsonPath typeElementPath) {
 		return switch (type) {
 			case "expression" -> parseExpression(maybeDataElement);
 			case "values" -> parseValues(maybeDataElement);
-			default -> Result.failure(typeElementPath.errorAt("Expected a valid condition type"));
+			default -> Result.failure(typeElementPath.failureAt("Expected a valid condition type"));
 		};
 	}
 
-	private static Result<Function<Integer, Integer>, Error> parseExpression(Result<JsonElementWrapper, Error> maybeDataElement) {
+	private static Result<Function<Integer, Integer>, Failure> parseExpression(Result<JsonElementWrapper, Failure> maybeDataElement) {
 		return maybeDataElement
 				.andThen(JsonElementWrapper::getAsObject)
 				.andThen(dataObject -> dataObject.get("expression"))
@@ -65,7 +65,7 @@ public class ExperiencePerLevelConfig {
 							if (Double.isFinite(value)) {
 								return (int) Math.round(value);
 							} else {
-								for (var message : expressionElement.getPath().errorAt("Expression returned a value that is not finite").getMessages()) {
+								for (var message : expressionElement.getPath().failureAt("Expression returned a value that is not finite").getMessages()) {
 									SkillsMod.getInstance().getLogger().warn(message);
 								}
 								return 0;
@@ -74,11 +74,11 @@ public class ExperiencePerLevelConfig {
 				);
 	}
 
-	private static Result<Function<Integer, Integer>, Error> parseValues(Result<JsonElementWrapper, Error> maybeDataElement) {
+	private static Result<Function<Integer, Integer>, Failure> parseValues(Result<JsonElementWrapper, Failure> maybeDataElement) {
 		return maybeDataElement
 				.andThen(JsonElementWrapper::getAsObject)
 				.andThen(dataObject -> dataObject.getArray("values"))
-				.andThen(valueArray -> valueArray.getAsList((k, element) -> element.getAsInt()).mapFailure(ManyErrors::ofList))
+				.andThen(valueArray -> valueArray.getAsList((k, element) -> element.getAsInt()).mapFailure(ManyFailures::ofList))
 				.mapSuccess(values -> level -> values.get(Math.min(level, values.size() - 1)));
 	}
 

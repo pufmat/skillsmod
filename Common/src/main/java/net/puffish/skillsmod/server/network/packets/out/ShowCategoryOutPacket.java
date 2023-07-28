@@ -2,19 +2,19 @@ package net.puffish.skillsmod.server.network.packets.out;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.IconConfig;
-import net.puffish.skillsmod.config.CategoryConfig;
+import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
-import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.network.OutPacket;
-import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.network.Packets;
+import net.puffish.skillsmod.server.data.CategoryData;
 
 import java.util.Optional;
 

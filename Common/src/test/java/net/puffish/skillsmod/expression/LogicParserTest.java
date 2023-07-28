@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.expression;
 
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -79,25 +79,25 @@ class LogicParserTest {
 
 	@Test
 	public void testInvalidExpressions() {
-		testInvalid(SingleError.of("Invalid expression"), "");
-		testInvalid(SingleError.of("Invalid expression"), "|");
-		testInvalid(SingleError.of("Invalid expression"), "a &", Map.ofEntries(
+		testInvalid(SingleFailure.of("Invalid expression"), "");
+		testInvalid(SingleFailure.of("Invalid expression"), "|");
+		testInvalid(SingleFailure.of("Invalid expression"), "a &", Map.ofEntries(
 				Map.entry("a", false)
 		));
-		testInvalid(SingleError.of("Invalid expression"), "a b", Map.ofEntries(
+		testInvalid(SingleFailure.of("Invalid expression"), "a b", Map.ofEntries(
 				Map.entry("a", false),
 				Map.entry("b", true)
 		));
-		testInvalid(SingleError.of("Invalid expression"), "(a | b", Map.ofEntries(
+		testInvalid(SingleFailure.of("Invalid expression"), "(a | b", Map.ofEntries(
 				Map.entry("a", true),
 				Map.entry("b", false)
 		));
-		testInvalid(SingleError.of("Invalid expression"), "a & b)", Map.ofEntries(
+		testInvalid(SingleFailure.of("Invalid expression"), "a & b)", Map.ofEntries(
 				Map.entry("a", true),
 				Map.entry("b", true)
 		));
-		testInvalid(SingleError.of("Unknown variable `a`"), "a");
-		testInvalid(SingleError.of("Unknown variable `b`"), "a | b", Map.ofEntries(
+		testInvalid(SingleFailure.of("Unknown variable `a`"), "a");
+		testInvalid(SingleFailure.of("Unknown variable `b`"), "a | b", Map.ofEntries(
 				Map.entry("a", false)
 		));
 	}
@@ -112,11 +112,11 @@ class LogicParserTest {
 		Assertions.assertEquals(expected, success.orElseThrow().eval(parameters), expression);
 	}
 
-	private void testInvalid(Error expected, String expression) {
+	private void testInvalid(Failure expected, String expression) {
 		testInvalid(expected, expression, Map.of());
 	}
 
-	private void testInvalid(Error expected, String expression, Map<String, Boolean> parameters) {
+	private void testInvalid(Failure expected, String expression, Map<String, Boolean> parameters) {
 		var failure = LogicParser.parse(expression, parameters.keySet()).getFailure();
 		Assertions.assertTrue(failure.isPresent(), "Unexpected success: " + expression);
 		Assertions.assertEquals(expected.getMessages(), failure.orElseThrow().getMessages(), expression);
