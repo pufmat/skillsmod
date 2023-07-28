@@ -1,21 +1,22 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class PointsUpdateInPacket implements InPacket {
-	private final String categoryId;
+	private final Identifier categoryId;
 	private final int points;
 	private final boolean announceNewPoints;
 
-	private PointsUpdateInPacket(String categoryId, int points, boolean announceNewPoints) {
+	private PointsUpdateInPacket(Identifier categoryId, int points, boolean announceNewPoints) {
 		this.categoryId = categoryId;
 		this.points = points;
 		this.announceNewPoints = announceNewPoints;
 	}
 
 	public static PointsUpdateInPacket read(PacketByteBuf buf) {
-		var categoryId = buf.readString();
+		var categoryId = buf.readIdentifier();
 		var points = buf.readInt();
 		var announceNewPoints = buf.readBoolean();
 
@@ -26,7 +27,7 @@ public class PointsUpdateInPacket implements InPacket {
 		);
 	}
 
-	public String getCategoryId() {
+	public Identifier getCategoryId() {
 		return categoryId;
 	}
 

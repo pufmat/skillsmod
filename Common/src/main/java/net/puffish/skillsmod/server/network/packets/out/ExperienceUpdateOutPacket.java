@@ -6,14 +6,14 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 
 public class ExperienceUpdateOutPacket extends OutPacket {
-	public static ExperienceUpdateOutPacket write(String categoryId, float experienceProgress) {
+	public static ExperienceUpdateOutPacket write(Identifier categoryId, float experienceProgress) {
 		var packet = new ExperienceUpdateOutPacket();
 		write(packet.buf, categoryId, experienceProgress);
 		return packet;
 	}
 
-	public static void write(PacketByteBuf buf, String categoryId, float experienceProgress) {
-		buf.writeString(categoryId);
+	public static void write(PacketByteBuf buf, Identifier categoryId, float experienceProgress) {
+		buf.writeIdentifier(categoryId);
 		buf.writeFloat(experienceProgress);
 	}
 

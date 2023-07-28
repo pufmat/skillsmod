@@ -16,7 +16,11 @@ import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.ModConfig;
+import net.puffish.skillsmod.config.PackConfig;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
+import net.puffish.skillsmod.config.reader.ConfigReader;
+import net.puffish.skillsmod.config.reader.FileConfigReader;
+import net.puffish.skillsmod.config.reader.PackConfigReader;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
@@ -24,8 +28,6 @@ import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
@@ -58,10 +60,9 @@ import net.puffish.skillsmod.utils.failure.ManyFailures;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +80,7 @@ public class SkillsMod {
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
 
-	private ChangeListener<Optional<Map<String, CategoryConfig>>> categories = null;
+	private ChangeListener<Optional<Map<Identifier, CategoryConfig>>> categories = null;
 
 	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender) {
 		this.modConfigDir = modConfigDir;
@@ -175,109 +176,86 @@ public class SkillsMod {
 		}
 	}
 
-	private void loadConfig(ConfigContext context) {
+	private void loadModConfig(ConfigContext context) {
 		if (!Files.exists(modConfigDir) || PathUtils.isDirectoryEmpty(modConfigDir)) {
 			copyConfigFromJar();
 		}
 
-		var configFile = modConfigDir.resolve("config.json");
+		var reader = new FileConfigReader(modConfigDir);
+		var cumulatedMap = new LinkedHashMap<Identifier, CategoryConfig>();
 
-		PathUtils.createFileIfMissing(configFile);
-
-		JsonElementWrapper.parseFile(configFile, JsonPath.fromPath(modConfigDir.relativize(configFile)))
+		reader.read(Path.of("config.json"))
 				.andThen(ModConfig::parse)
-				.andThen(modConfig -> readCategories(modConfig.getCategories(), context)
-						.ifSuccess(map -> {
-							if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
-								logger.warn("Configuration loaded successfully with warning(s):"
-										+ System.lineSeparator()
-										+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
-								);
-							} else {
-								logger.info("Configuration loaded successfully!");
-							}
-							categories.set(Optional.of(map));
-						})
+				.andThen(modConfig ->
+						loadConfig(reader, modConfig, context)
+								.mapSuccess(map -> {
+									cumulatedMap.putAll(map);
+									return modConfig;
+								})
 				)
-				.ifFailure(failure -> {
+				.peek(modConfig -> {
+					cumulatedMap.putAll(loadPackConfig(modConfig, context));
+
+					categories.set(Optional.of(cumulatedMap));
+				}, failure -> {
 					logger.error("Configuration could not be loaded:"
 							+ System.lineSeparator()
 							+ failure.getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
 					);
+
 					categories.set(Optional.empty());
 				});
 	}
 
-	private Result<Map<String, CategoryConfig>, Failure> readCategories(List<String> ids, ConfigContext context) {
-		var failures = new ArrayList<Failure>();
-
-		var map = new HashMap<String, CategoryConfig>();
-
-		var categoriesDir = modConfigDir.resolve("categories");
-
-		for (var i = 0; i < ids.size(); i++) {
-			var id = ids.get(i);
-			readCategory(id, i, categoriesDir.resolve(id), context)
-					.ifFailure(failures::add)
-					.ifSuccess(category -> map.put(id, category));
-		}
-
-		if (failures.isEmpty()) {
-			return Result.success(map);
-		} else {
-			return Result.failure(ManyFailures.ofList(failures));
-		}
+	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, ConfigContext context) {
+		return reader.readCategories(Identifier.DEFAULT_NAMESPACE, modConfig.getCategories(), context)
+				.ifSuccess(map -> {
+					if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
+						logger.warn("Configuration loaded successfully with warning(s):"
+								+ System.lineSeparator()
+								+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+						);
+					} else {
+						logger.info("Configuration loaded successfully!");
+					}
+				});
 	}
 
-	private Result<CategoryConfig, Failure> readCategory(String id, int index, Path categoryDir, ConfigContext context) {
-		Path generalFile = categoryDir.resolve("category.json");
-		Path definitionsFile = categoryDir.resolve("definitions.json");
-		Path skillsFile = categoryDir.resolve("skills.json");
-		Path connectionsFile = categoryDir.resolve("connections.json");
-		Path experienceFile = categoryDir.resolve("experience.json");
+	private Map<Identifier, CategoryConfig> loadPackConfig(ModConfig modConfig, ConfigContext context) {
+		var cumulatedMap = new LinkedHashMap<Identifier, CategoryConfig>();
 
-		PathUtils.createFileIfMissing(generalFile);
-		PathUtils.createFileIfMissing(definitionsFile);
-		PathUtils.createFileIfMissing(skillsFile);
-		PathUtils.createFileIfMissing(connectionsFile);
-		PathUtils.createFileIfMissing(experienceFile);
+		var resources = context.resourceManager().findResources(
+				SkillsAPI.MOD_ID,
+				id -> id.getPath().endsWith("config.json")
+		);
 
-		var failures = new ArrayList<Failure>();
+		for (var entry : resources.entrySet()) {
+			var resource = entry.getValue();
+			var id = entry.getKey();
+			var name = id.getNamespace();
+			var reader = new PackConfigReader(context.resourceManager(), name);
 
-		var generalElement = JsonElementWrapper.parseFile(generalFile, JsonPath.fromPath(modConfigDir.relativize(generalFile)))
-				.ifFailure(failures::add)
-				.getSuccess();
-
-		var definitionsElement = JsonElementWrapper.parseFile(definitionsFile, JsonPath.fromPath(modConfigDir.relativize(definitionsFile)))
-				.ifFailure(failures::add)
-				.getSuccess();
-
-		var skillsElement = JsonElementWrapper.parseFile(skillsFile, JsonPath.fromPath(modConfigDir.relativize(skillsFile)))
-				.ifFailure(failures::add)
-				.getSuccess();
-
-		var connectionsElement = JsonElementWrapper.parseFile(connectionsFile, JsonPath.fromPath(modConfigDir.relativize(connectionsFile)))
-				.ifFailure(failures::add)
-				.getSuccess();
-
-		var experienceElement = JsonElementWrapper.parseFile(experienceFile, JsonPath.fromPath(modConfigDir.relativize(experienceFile)))
-				.ifFailure(failures::add)
-				.getSuccess();
-
-		if (failures.isEmpty()) {
-			return CategoryConfig.parse(
-					id,
-					index,
-					generalElement.orElseThrow(),
-					definitionsElement.orElseThrow(),
-					skillsElement.orElseThrow(),
-					connectionsElement.orElseThrow(),
-					experienceElement.orElseThrow(),
-					context
-			);
-		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			reader.readResource(id, resource)
+					.andThen(rootElement -> PackConfig.parse(name, rootElement))
+					.andThen(packConfig -> reader.readCategories(name, packConfig.getCategories(), context))
+					.peek(map -> {
+						if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
+							logger.warn("Data pack `" + name + "` loaded successfully with warning(s):"
+									+ System.lineSeparator()
+									+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+							);
+						} else {
+							logger.info("Data pack `" + name + "` loaded successfully!");
+						}
+						cumulatedMap.putAll(map);
+					}, failure ->
+							logger.error("Data pack `" + name + "` could not be loaded:"
+									+ System.lineSeparator()
+									+ failure.getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+					));
 		}
+
+		return cumulatedMap;
 	}
 
 	private void onSkillClickPacket(ServerPlayerEntity player, SkillClickInPacket packet) {
@@ -287,11 +265,11 @@ public class SkillsMod {
 		tryUnlockSkill(player, packet.getCategoryId(), packet.getSkillId(), false);
 	}
 
-	public void unlockSkill(ServerPlayerEntity player, String categoryId, String skillId) {
+	public void unlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
 		tryUnlockSkill(player, categoryId, skillId, true);
 	}
 
-	private void tryUnlockSkill(ServerPlayerEntity player, String categoryId, String skillId, boolean force) {
+	private void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			if (category.tryUnlockSkill(player, categoryData, skillId, force)) {
 				packetSender.send(player, SkillUnlockOutPacket.write(categoryId, skillId));
@@ -300,7 +278,7 @@ public class SkillsMod {
 		}));
 	}
 
-	public void resetSkills(ServerPlayerEntity player, String categoryId) {
+	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			categoryData.resetSkills();
 			applyRewards(player, category, categoryData);
@@ -308,7 +286,7 @@ public class SkillsMod {
 		}));
 	}
 
-	public void eraseCategory(ServerPlayerEntity player, String categoryId) {
+	public void eraseCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var playerData = getPlayerData(player);
 			playerData.removeCategoryData(category);
@@ -317,7 +295,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void unlockCategory(ServerPlayerEntity player, String categoryId) {
+	public void unlockCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var playerData = getPlayerData(player);
 			playerData.unlockCategory(category);
@@ -326,7 +304,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void lockCategory(ServerPlayerEntity player, String categoryId) {
+	public void lockCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var playerData = getPlayerData(player);
 			playerData.lockCategory(category);
@@ -335,7 +313,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void addExperience(ServerPlayerEntity player, String categoryId, int amount) {
+	public void addExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			if (!category.getExperience().isEnabled()) {
 				return;
@@ -350,7 +328,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void setExperience(ServerPlayerEntity player, String categoryId, int amount) {
+	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			if (!category.getExperience().isEnabled()) {
 				return;
@@ -365,7 +343,7 @@ public class SkillsMod {
 		});
 	}
 
-	public Optional<Integer> getExperience(ServerPlayerEntity player, String categoryId) {
+	public Optional<Integer> getExperience(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).flatMap(category -> {
 			if (!category.getExperience().isEnabled()) {
 				return Optional.empty();
@@ -375,7 +353,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void addExtraPoints(ServerPlayerEntity player, String categoryId, int count) {
+	public void addExtraPoints(ServerPlayerEntity player, Identifier categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			categoryData.addExtraPoints(count);
 
@@ -383,7 +361,7 @@ public class SkillsMod {
 		}));
 	}
 
-	public void setExtraPoints(ServerPlayerEntity player, String categoryId, int count) {
+	public void setExtraPoints(ServerPlayerEntity player, Identifier categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			categoryData.setExtraPoints(count);
 
@@ -391,14 +369,14 @@ public class SkillsMod {
 		}));
 	}
 
-	public Optional<Integer> getExtraPoints(ServerPlayerEntity player, String categoryId) {
+	public Optional<Integer> getExtraPoints(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId)
 				.flatMap(category -> getCategoryDataIfUnlocked(player, category)
 						.map(CategoryData::getExtraPoints)
 				);
 	}
 
-	public void setPointsLeft(ServerPlayerEntity player, String categoryId, int count) {
+	public void setPointsLeft(ServerPlayerEntity player, Identifier categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
 			categoryData.setPointsLeft(count, category);
@@ -407,14 +385,14 @@ public class SkillsMod {
 		});
 	}
 
-	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, String categoryId) {
+	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
 			return categoryData.getPointsLeft(category);
 		});
 	}
 
-	public Collection<String> getUnlockedCategories(ServerPlayerEntity player) {
+	public Collection<Identifier> getUnlockedCategories(ServerPlayerEntity player) {
 		var playerData = getPlayerData(player);
 
 		return getAllCategories()
@@ -424,21 +402,21 @@ public class SkillsMod {
 				.toList();
 	}
 
-	public Collection<String> getCategories() {
+	public Collection<Identifier> getCategories() {
 		return getAllCategories()
 				.stream()
 				.map(CategoryConfig::getId)
 				.toList();
 	}
 
-	public Optional<Collection<String>> getUnlockedSkills(ServerPlayerEntity player, String categoryId) {
+	public Optional<Collection<String>> getUnlockedSkills(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
 			return categoryData.getUnlockedSkillIds();
 		});
 	}
 
-	public Optional<Collection<String>> getSkills(String categoryId) {
+	public Optional<Collection<String>> getSkills(Identifier categoryId) {
 		return getCategory(categoryId).map(
 				category -> category.getSkills()
 						.getAll()
@@ -516,7 +494,7 @@ public class SkillsMod {
 		return Optional.empty();
 	}
 
-	private Optional<CategoryConfig> getCategory(String categoryId) {
+	private Optional<CategoryConfig> getCategory(Identifier categoryId) {
 		return categories.get().flatMap(map -> Optional.ofNullable(map.get(categoryId)));
 	}
 
@@ -575,7 +553,7 @@ public class SkillsMod {
 				}
 			}), null);
 
-			loadConfig(new ConfigContext(server));
+			loadModConfig(new ConfigContext(server));
 		}
 
 		@Override
@@ -586,7 +564,7 @@ public class SkillsMod {
 				}
 			}
 
-			loadConfig(new ConfigContext(server));
+			loadModConfig(new ConfigContext(server));
 
 			for (var player : server.getPlayerManager().getPlayerList()) {
 				syncAllCategories(player);

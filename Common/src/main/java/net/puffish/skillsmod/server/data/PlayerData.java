@@ -1,15 +1,16 @@
 package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerData {
-	private final Map<String, CategoryData> categories;
+	private final Map<Identifier, CategoryData> categories;
 
-	private PlayerData(Map<String, CategoryData> categories) {
+	private PlayerData(Map<Identifier, CategoryData> categories) {
 		this.categories = categories;
 	}
 
@@ -18,13 +19,13 @@ public class PlayerData {
 	}
 
 	public static PlayerData read(NbtCompound nbt) {
-		var categories = new HashMap<String, CategoryData>();
+		var categories = new HashMap<Identifier, CategoryData>();
 
 		var categoriesNbt = nbt.getCompound("categories");
 		for (var id : categoriesNbt.getKeys()) {
 			var elementNbt = categoriesNbt.get(id);
 			if (elementNbt instanceof NbtCompound categoryNbt) {
-				categories.put(id, CategoryData.read(categoryNbt));
+				categories.put(new Identifier(id), CategoryData.read(categoryNbt));
 			}
 		}
 
@@ -35,7 +36,7 @@ public class PlayerData {
 		var categoriesNbt = new NbtCompound();
 		for (var entry : categories.entrySet()) {
 			categoriesNbt.put(
-					entry.getKey(),
+					entry.getKey().toString(),
 					entry.getValue().writeNbt(new NbtCompound())
 			);
 		}
