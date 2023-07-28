@@ -9,13 +9,15 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.config.ConfigContext;
+import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +42,16 @@ public class AttributeReward implements Reward {
 	public static void register() {
 		SkillsAPI.registerRewardWithData(
 				ID,
-				(json, context) -> json.getAsObject().andThen(AttributeReward::create)
+				AttributeReward::create
 		);
 	}
 
-	private static Result<AttributeReward, Error> create(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	private static Result<AttributeReward, Failure> create(JsonElementWrapper rootElement, ConfigContext context) {
+		return rootElement.getAsObject().andThen(AttributeReward::create);
+	}
+
+	private static Result<AttributeReward, Failure> create(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optAttribute = rootObject.get("attribute")
 				.andThen(attributeElement -> JsonParseUtils.parseAttribute(attributeElement)
@@ -53,30 +59,30 @@ public class AttributeReward implements Reward {
 							if (DefaultAttributeRegistry.get(EntityType.PLAYER).has(attribute)) {
 								return Result.success(attribute);
 							} else {
-								return Result.failure(attributeElement.getPath().errorAt("Expected a valid player attribute"));
+								return Result.failure(attributeElement.getPath().failureAt("Expected a valid player attribute"));
 							}
 						})
 				)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optValue = rootObject.getFloat("value")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optOperation = rootObject.get("operation")
 				.andThen(JsonParseUtils::parseAttributeOperation)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new AttributeReward(
 					optAttribute.orElseThrow(),
 					optValue.orElseThrow(),
 					optOperation.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

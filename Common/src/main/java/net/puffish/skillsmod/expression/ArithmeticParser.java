@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.expression;
 
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class ArithmeticParser {
 			FunctionOperator.createVariadic("max", "(", ",", ")", l -> v -> l.stream().mapToDouble(e -> e.eval(v)).max().orElse(-Double.MAX_VALUE))
 	);
 
-	public static Result<Expression<Double>, Error> parse(String expression, Set<String> variables) {
+	public static Result<Expression<Double>, Failure> parse(String expression, Set<String> variables) {
 		return Parser.parse(expression, ARITHMETIC_UNARY, ARITHMETIC_BINARY, ARITHMETIC_GROUP, ARITHMETIC_FUNCTION, token -> {
 			if (variables.contains(token)) {
 				return Result.success(v -> v.get(token));
@@ -40,7 +40,7 @@ public class ArithmeticParser {
 					var value = Double.parseDouble(token);
 					return Result.success(v -> value);
 				} catch (Exception e) {
-					return Result.failure(SingleError.of("Unknown variable `" + token + "`"));
+					return Result.failure(SingleFailure.of("Unknown variable `" + token + "`"));
 				}
 			}
 		});

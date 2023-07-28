@@ -7,10 +7,10 @@ import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.utils.error.Error;
 import net.puffish.skillsmod.utils.JsonParseUtils;
-import net.puffish.skillsmod.utils.error.ManyErrors;
 import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,43 +34,43 @@ public class SkillDefinitionConfig {
 		this.cost = cost;
 	}
 
-	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<SkillDefinitionConfig, Failure> parse(String id, JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
 				.andThen(rootObject -> SkillDefinitionConfig.parse(id, rootObject, context));
 	}
 
-	public static Result<SkillDefinitionConfig, Error> parse(String id, JsonObjectWrapper rootObject, ConfigContext context) {
-		var errors = new ArrayList<Error>();
+	public static Result<SkillDefinitionConfig, Failure> parse(String id, JsonObjectWrapper rootObject, ConfigContext context) {
+		var failures = new ArrayList<Failure>();
 
 		var optTitle = rootObject.get("title")
 				.andThen(JsonParseUtils::parseText)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optDescription = rootObject.get("description")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(descriptionElement -> JsonParseUtils.parseText(descriptionElement)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElseGet(Text::empty);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(IconConfig::parse)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var frame = rootObject.get("frame")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(frameElement -> JsonParseUtils.parseFrame(frameElement)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElse(AdvancementFrame.TASK);
 
 		var rewards = rootObject.getArray("rewards")
-				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(ManyErrors::ofList))
-				.ifFailure(errors::add)
+				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(ManyFailures::ofList))
+				.ifFailure(failures::add)
 				.getSuccess()
 				.orElseGet(List::of);
 
@@ -78,7 +78,7 @@ public class SkillDefinitionConfig {
 				.getSuccess() // ignore failure because this property is optional
 				.orElse(1);
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
 					optTitle.orElseThrow(),
@@ -89,7 +89,7 @@ public class SkillDefinitionConfig {
 					cost
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

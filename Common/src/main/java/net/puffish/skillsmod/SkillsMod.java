@@ -13,47 +13,47 @@ import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
+import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.config.ModConfig;
-import net.puffish.skillsmod.experience.ExperienceSource;
-import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
-import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
+import net.puffish.skillsmod.config.skill.SkillConfig;
+import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
 import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
-import net.puffish.skillsmod.server.SkillsGameRules;
-import net.puffish.skillsmod.json.JsonPath;
-import net.puffish.skillsmod.rewards.builtin.CommandReward;
-import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
-import net.puffish.skillsmod.server.data.CategoryData;
-import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
+import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
+import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.json.JsonElementWrapper;
+import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
+import net.puffish.skillsmod.rewards.builtin.CommandReward;
+import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
+import net.puffish.skillsmod.server.PlayerAttributes;
+import net.puffish.skillsmod.server.SkillsGameRules;
+import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
+import net.puffish.skillsmod.server.data.ServerData;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
-import net.puffish.skillsmod.server.setup.ServerGameRules;
-import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.network.ServerPacketReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
-import net.puffish.skillsmod.server.data.ServerData;
 import net.puffish.skillsmod.server.network.packets.in.SkillClickInPacket;
-import net.puffish.skillsmod.config.skill.SkillConfig;
-import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.server.network.packets.out.ExperienceUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.HideCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.InvalidConfigOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
+import net.puffish.skillsmod.server.setup.ServerGameRules;
+import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.utils.ChangeListener;
 import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.utils.PrefixedLogger;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -186,18 +186,30 @@ public class SkillsMod {
 
 		JsonElementWrapper.parseFile(configFile, JsonPath.fromPath(modConfigDir.relativize(configFile)))
 				.andThen(ModConfig::parse)
-				.andThen(modConfig -> readCategories(modConfig.getCategories(), context))
-				.peek(map -> {
-					logger.info("Configuration loaded successfully!");
-					categories.set(Optional.of(map));
-				}, error -> {
-					logger.error("Configuration could not be loaded:" + System.lineSeparator() + error.getMessages().stream().collect(Collectors.joining(System.lineSeparator())));
+				.andThen(modConfig -> readCategories(modConfig.getCategories(), context)
+						.ifSuccess(map -> {
+							if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
+								logger.warn("Configuration loaded successfully with warning(s):"
+										+ System.lineSeparator()
+										+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+								);
+							} else {
+								logger.info("Configuration loaded successfully!");
+							}
+							categories.set(Optional.of(map));
+						})
+				)
+				.ifFailure(failure -> {
+					logger.error("Configuration could not be loaded:"
+							+ System.lineSeparator()
+							+ failure.getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+					);
 					categories.set(Optional.empty());
 				});
 	}
 
-	private Result<Map<String, CategoryConfig>, Error> readCategories(List<String> ids, ConfigContext context) {
-		var errors = new ArrayList<Error>();
+	private Result<Map<String, CategoryConfig>, Failure> readCategories(List<String> ids, ConfigContext context) {
+		var failures = new ArrayList<Failure>();
 
 		var map = new HashMap<String, CategoryConfig>();
 
@@ -206,18 +218,18 @@ public class SkillsMod {
 		for (var i = 0; i < ids.size(); i++) {
 			var id = ids.get(i);
 			readCategory(id, i, categoriesDir.resolve(id), context)
-					.ifFailure(errors::add)
+					.ifFailure(failures::add)
 					.ifSuccess(category -> map.put(id, category));
 		}
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(map);
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
-	private Result<CategoryConfig, Error> readCategory(String id, int index, Path categoryDir, ConfigContext context) {
+	private Result<CategoryConfig, Failure> readCategory(String id, int index, Path categoryDir, ConfigContext context) {
 		Path generalFile = categoryDir.resolve("category.json");
 		Path definitionsFile = categoryDir.resolve("definitions.json");
 		Path skillsFile = categoryDir.resolve("skills.json");
@@ -230,29 +242,29 @@ public class SkillsMod {
 		PathUtils.createFileIfMissing(connectionsFile);
 		PathUtils.createFileIfMissing(experienceFile);
 
-		var errors = new ArrayList<Error>();
+		var failures = new ArrayList<Failure>();
 
 		var generalElement = JsonElementWrapper.parseFile(generalFile, JsonPath.fromPath(modConfigDir.relativize(generalFile)))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var definitionsElement = JsonElementWrapper.parseFile(definitionsFile, JsonPath.fromPath(modConfigDir.relativize(definitionsFile)))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var skillsElement = JsonElementWrapper.parseFile(skillsFile, JsonPath.fromPath(modConfigDir.relativize(skillsFile)))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var connectionsElement = JsonElementWrapper.parseFile(connectionsFile, JsonPath.fromPath(modConfigDir.relativize(connectionsFile)))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var experienceElement = JsonElementWrapper.parseFile(experienceFile, JsonPath.fromPath(modConfigDir.relativize(experienceFile)))
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return CategoryConfig.parse(
 					id,
 					index,
@@ -264,7 +276,7 @@ public class SkillsMod {
 					context
 			);
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

@@ -5,8 +5,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
@@ -21,7 +21,7 @@ import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
+import net.puffish.skillsmod.utils.failure.Failure;
 
 import java.util.Map;
 
@@ -54,7 +54,7 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private static Result<MineBlockExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+	private static Result<MineBlockExperienceSource, Failure> create(JsonObjectWrapper rootObject, ConfigContext context) {
 		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(MineBlockExperienceSource::new);
 	}
 

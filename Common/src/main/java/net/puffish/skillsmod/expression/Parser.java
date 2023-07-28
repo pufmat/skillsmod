@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.expression;
 
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +16,11 @@ public class Parser<T> {
 	private final List<BinaryOperator<T>> binaryOperators;
 	private final List<GroupOperator> groupOperators;
 	private final List<FunctionOperator<T>> functionOperators;
-	private final Function<String, Result<Expression<T>, Error>> otherHandler;
+	private final Function<String, Result<Expression<T>, Failure>> otherHandler;
 
-	private final List<Error> errors = new ArrayList<>();
+	private final List<Failure> failures = new ArrayList<>();
 
-	private Parser(Lexer lexer, List<UnaryOperator<T>> unaryOperators, List<BinaryOperator<T>> binaryOperators, List<GroupOperator> groupOperators, List<FunctionOperator<T>> functionOperators, Function<String, Result<Expression<T>, Error>> otherHandler) {
+	private Parser(Lexer lexer, List<UnaryOperator<T>> unaryOperators, List<BinaryOperator<T>> binaryOperators, List<GroupOperator> groupOperators, List<FunctionOperator<T>> functionOperators, Function<String, Result<Expression<T>, Failure>> otherHandler) {
 		this.lexer = lexer;
 		this.unaryOperators = unaryOperators;
 		this.binaryOperators = binaryOperators;
@@ -29,19 +29,19 @@ public class Parser<T> {
 		this.otherHandler = otherHandler;
 	}
 
-	public static <T> Result<Expression<T>, Error> parse(String expression, List<UnaryOperator<T>> unaryOperators, List<BinaryOperator<T>> binaryOperators, List<GroupOperator> groupOperators, List<FunctionOperator<T>> functionOperators, Function<String, Result<Expression<T>, Error>> otherHandler) {
+	public static <T> Result<Expression<T>, Failure> parse(String expression, List<UnaryOperator<T>> unaryOperators, List<BinaryOperator<T>> binaryOperators, List<GroupOperator> groupOperators, List<FunctionOperator<T>> functionOperators, Function<String, Result<Expression<T>, Failure>> otherHandler) {
 		return new Parser<>(Lexer.create(expression), unaryOperators, binaryOperators, groupOperators, functionOperators, otherHandler).parse();
 	}
 
-	private Result<Expression<T>, Error> parse() {
+	private Result<Expression<T>, Failure> parse() {
 		var expression = tryParse();
-		if (errors.isEmpty() && !lexer.isEnd()) {
-			errors.add(SingleError.of("Invalid expression"));
+		if (failures.isEmpty() && !lexer.isEnd()) {
+			failures.add(SingleFailure.of("Invalid expression"));
 		}
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(expression.orElseThrow());
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
@@ -149,7 +149,7 @@ public class Parser<T> {
 
 			return Optional.of(
 					otherHandler.apply(token)
-							.ifFailure(errors::add)
+							.ifFailure(failures::add)
 							.getSuccessOrElse(e -> v -> null)
 			);
 		}
@@ -158,7 +158,7 @@ public class Parser<T> {
 	}
 
 	private <R> Optional<R> invalid() {
-		errors.add(SingleError.of("Invalid expression"));
+		failures.add(SingleFailure.of("Invalid expression"));
 		return Optional.empty();
 	}
 }

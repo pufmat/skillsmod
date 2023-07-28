@@ -8,8 +8,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,44 +27,44 @@ public class Calculation {
 		this.expressionElementPath = expressionElementPath;
 	}
 
-	public static Result<Calculation, Error> parse(JsonElementWrapper rootElement, Set<String> conditionVariables, Set<String> expressionVariables) {
+	public static Result<Calculation, Failure> parse(JsonElementWrapper rootElement, Set<String> conditionVariables, Set<String> expressionVariables) {
 		return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, conditionVariables, expressionVariables));
 	}
 
-	public static Result<Calculation, Error> parse(JsonObjectWrapper rootObject, Set<String> conditionVariables, Set<String> expressionVariables) {
-		var errors = new ArrayList<Error>();
+	public static Result<Calculation, Failure> parse(JsonObjectWrapper rootObject, Set<String> conditionVariables, Set<String> expressionVariables) {
+		var failures = new ArrayList<Failure>();
 
 		var condition = rootObject.get("condition")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(element -> element.getAsString()
 						.andThen(string -> LogicParser.parse(string, conditionVariables)
-								.mapFailure(error -> error.flatMap(msg -> element.getPath().errorAt(msg)))
+								.mapFailure(failure -> failure.flatMap(msg -> element.getPath().failureAt(msg)))
 						)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElse(p -> true); // no condition, so always true
 
 		var optExpressionElement = rootObject.get("expression")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optExpression = optExpressionElement
 				.flatMap(element -> element.getAsString()
 						.andThen(string -> ArithmeticParser.parse(string, expressionVariables)
-								.mapFailure(error -> error.flatMap(msg -> element.getPath().errorAt(msg))))
-						.ifFailure(errors::add)
+								.mapFailure(failure -> failure.flatMap(msg -> element.getPath().failureAt(msg))))
+						.ifFailure(failures::add)
 						.getSuccess()
 				);
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new Calculation(
 					condition,
 					optExpression.orElseThrow(),
 					optExpressionElement.orElseThrow().getPath()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
@@ -82,7 +82,7 @@ public class Calculation {
 			if (Double.isFinite(value)) {
 				return Optional.of((int) Math.round(value));
 			} else {
-				for (var message : expressionElementPath.errorAt("Expression returned a value that is not finite").getMessages()) {
+				for (var message : expressionElementPath.failureAt("Expression returned a value that is not finite").getMessages()) {
 					SkillsMod.getInstance().getLogger().warn(message);
 				}
 				return Optional.of(0);

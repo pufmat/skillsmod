@@ -3,15 +3,16 @@ package net.puffish.skillsmod.config.skill;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.ConfigContext;
-import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.rewards.Reward;
+import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.json.JsonPath;
+import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardRegistry;
-import net.puffish.skillsmod.utils.error.Error;
+import net.puffish.skillsmod.rewards.builtin.DummyReward;
 import net.puffish.skillsmod.utils.JsonParseUtils;
-import net.puffish.skillsmod.utils.error.ManyErrors;
 import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -24,42 +25,52 @@ public class SkillRewardConfig {
 		this.instance = instance;
 	}
 
-	public static Result<SkillRewardConfig, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<SkillRewardConfig, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
 				.andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<SkillRewardConfig, Error> parse(JsonObjectWrapper rootObject, ConfigContext context) {
-		var errors = new ArrayList<Error>();
+	public static Result<SkillRewardConfig, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
+		var failures = new ArrayList<Failure>();
 
 		var optTypeElement = rootObject.get("type")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optType = optTypeElement.flatMap(
 				typeElement -> JsonParseUtils.parseIdentifier(typeElement)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 		);
 
 		var maybeDataElement = rootObject.get("data");
 
-		if (errors.isEmpty()) {
+		var required = rootObject.getBoolean("required")
+				.getSuccessOrElse(e -> true);
+
+		if (failures.isEmpty()) {
 			return build(
 					optType.orElseThrow(),
 					maybeDataElement,
 					rootObject.getPath().thenObject("type"),
 					context
-			);
+			).flatmapFailure(failure -> {
+				if (required) {
+					return Result.failure(failure);
+				} else {
+					context.addWarning(failure);
+					return Result.success(new SkillRewardConfig(DummyReward.ID, new DummyReward()));
+				}
+			});
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
-	private static Result<SkillRewardConfig, Error> build(Identifier type, Result<JsonElementWrapper, Error> maybeDataElement, JsonPath typePath, ConfigContext context) {
+	private static Result<SkillRewardConfig, Failure> build(Identifier type, Result<JsonElementWrapper, Failure> maybeDataElement, JsonPath typePath, ConfigContext context) {
 		return RewardRegistry.getFactory(type)
 				.map(factory -> factory.create(maybeDataElement, context).mapSuccess(instance -> new SkillRewardConfig(type, instance)))
-				.orElseGet(() -> Result.failure(typePath.errorAt("Expected a valid reward type")));
+				.orElseGet(() -> Result.failure(typePath.failureAt("Expected a valid reward type")));
 	}
 
 	public void dispose(MinecraftServer server) {
