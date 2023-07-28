@@ -4,12 +4,11 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Unit;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -47,7 +46,7 @@ public class ForgeMain {
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		forgeEventBus.addListener(this::onPlayerLoggedIn);
 		forgeEventBus.addListener(this::onServerStarting);
-		forgeEventBus.addListener(this::onAddReloadListener);
+		forgeEventBus.addListener(this::onOnDatapackSyncEvent);
 		forgeEventBus.addListener(this::onRegisterCommands);
 
 		SkillsMod.setup(
@@ -75,18 +74,17 @@ public class ForgeMain {
 		}
 	}
 
-	private void onAddReloadListener(AddReloadListenerEvent event) {
-		event.addListener((synchronizer, manager, prepareProfiler, applyProfiler, prepareExecutor, applyExecutor) ->
-				synchronizer.whenPrepared(Unit.INSTANCE).thenRunAsync(() -> {
-					var server = ServerLifecycleHooks.getCurrentServer();
-					if (server == null) {
-						return;
-					}
-					for (var listener : serverListeners) {
-						listener.onServerReload(server);
-					}
-				}, applyExecutor)
-		);
+	private void onOnDatapackSyncEvent(OnDatapackSyncEvent event) {
+		if (event.getPlayer() != null) {
+			return;
+		}
+		var server = ServerLifecycleHooks.getCurrentServer();
+		if (server == null) {
+			return;
+		}
+		for (var listener : serverListeners) {
+			listener.onServerReload(server);
+		}
 	}
 
 	private void onRegisterCommands(RegisterCommandsEvent event) {
