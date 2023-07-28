@@ -17,7 +17,7 @@ import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
+import net.puffish.skillsmod.utils.failure.Failure;
 
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class CraftItemExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private static Result<CraftItemExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+	private static Result<CraftItemExperienceSource, Failure> create(JsonObjectWrapper rootObject, ConfigContext context) {
 		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(CraftItemExperienceSource::new);
 	}
 

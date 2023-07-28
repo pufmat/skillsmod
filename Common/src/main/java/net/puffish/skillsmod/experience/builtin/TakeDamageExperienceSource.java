@@ -21,7 +21,7 @@ import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
+import net.puffish.skillsmod.utils.failure.Failure;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private static Result<TakeDamageExperienceSource, Error> create(JsonObjectWrapper rootObject, ConfigContext context) {
+	private static Result<TakeDamageExperienceSource, Failure> create(JsonObjectWrapper rootObject, ConfigContext context) {
 		return CalculationManager.create(rootObject, CONDITIONS, PARAMETERS, context).mapSuccess(TakeDamageExperienceSource::new);
 	}
 
@@ -63,9 +63,11 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 		RegistryEntry<DamageType> damageType() {
 			return damageSource.getTypeRegistryEntry();
 		}
+
 		Optional<EntityType<?>> source() {
 			return Optional.ofNullable(damageSource.getSource()).map(Entity::getType);
 		}
+
 		Optional<EntityType<?>> attacker() {
 			return Optional.ofNullable(damageSource.getAttacker()).map(Entity::getType);
 		}

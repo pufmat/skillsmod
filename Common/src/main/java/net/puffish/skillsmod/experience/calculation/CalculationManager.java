@@ -8,8 +8,8 @@ import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class CalculationManager<T> {
 				.orElse(0);
 	}
 
-	public static <T> Result<CalculationManager<T>, Error> create(
+	public static <T> Result<CalculationManager<T>, Failure> create(
 			JsonElementWrapper rootElement,
 			Map<String, ConditionFactory<T>> conditionFactories,
 			Map<String, ParameterFactory<T>> parameterFactories,
@@ -52,13 +52,13 @@ public class CalculationManager<T> {
 		return rootElement.getAsObject().andThen(rootObject -> create(rootObject, conditionFactories, parameterFactories, context));
 	}
 
-	public static <T> Result<CalculationManager<T>, Error> create(
+	public static <T> Result<CalculationManager<T>, Failure> create(
 			JsonObjectWrapper rootObject,
 			Map<String, ConditionFactory<T>> conditionFactories,
 			Map<String, ParameterFactory<T>> parameterFactories,
 			ConfigContext context
 	) {
-		var errors = new ArrayList<Error>();
+		var failures = new ArrayList<Failure>();
 
 		var conditions = new HashMap<String, Condition<T>>();
 		var parameters = new HashMap<String, Parameter<T>>();
@@ -69,7 +69,7 @@ public class CalculationManager<T> {
 						.forEach(entry -> Condition.parse(entry.getValue(), conditionFactories, context)
 								.peek(
 										condition -> conditions.put(entry.getKey(), condition),
-										errors::add
+										failures::add
 								)
 						)
 				);
@@ -80,7 +80,7 @@ public class CalculationManager<T> {
 						.forEach(entry -> Parameter.parse(entry.getValue(), parameterFactories, context)
 								.peek(
 										parameter -> parameters.put(entry.getKey(), parameter),
-										errors::add
+										failures::add
 								)
 						)
 				);
@@ -88,20 +88,20 @@ public class CalculationManager<T> {
 		var calculations = rootObject.getArray("experience")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(array -> array.getAsList((i, element) -> Calculation.parse(element, conditions.keySet(), parameters.keySet()))
-						.mapFailure(ManyErrors::ofList)
-						.ifFailure(errors::add)
+						.mapFailure(ManyFailures::ofList)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElseGet(List::of);
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new CalculationManager<>(
 					conditions,
 					parameters,
 					calculations
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

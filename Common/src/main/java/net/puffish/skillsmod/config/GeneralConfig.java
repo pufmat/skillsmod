@@ -6,8 +6,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -26,38 +26,38 @@ public class GeneralConfig {
 		this.exclusiveRoot = exclusiveRoot;
 	}
 
-	public static Result<GeneralConfig, Error> parse(JsonElementWrapper rootElement) {
+	public static Result<GeneralConfig, Failure> parse(JsonElementWrapper rootElement) {
 		return rootElement.getAsObject()
 				.andThen(GeneralConfig::parse);
 	}
 
-	public static Result<GeneralConfig, Error> parse(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	public static Result<GeneralConfig, Failure> parse(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optTitle = rootObject.get("title")
 				.andThen(JsonParseUtils::parseText)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optIcon = rootObject.get("icon")
 				.andThen(IconConfig::parse)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optBackground = rootObject.get("background")
 				.andThen(JsonParseUtils::parseIdentifier)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optUnlockedByDefault = rootObject.getBoolean("unlocked_by_default")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optExclusiveRoot = rootObject.getBoolean("exclusive_root")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
 					optIcon.orElseThrow(),
@@ -66,7 +66,7 @@ public class GeneralConfig {
 					optExclusiveRoot.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
