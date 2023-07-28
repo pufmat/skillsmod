@@ -1,14 +1,13 @@
 package net.puffish.skillsmod.main;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.puffish.skillsmod.client.SkillsClientMod;
@@ -45,11 +44,9 @@ public class ForgeClientMain {
 		);
 	}
 
-	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ClientPlayerEntity) {
-			for (var listener : clientListeners) {
-				listener.onPlayerJoin();
-			}
+	private void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
+		for (var listener : clientListeners) {
+			listener.onPlayerJoin();
 		}
 	}
 

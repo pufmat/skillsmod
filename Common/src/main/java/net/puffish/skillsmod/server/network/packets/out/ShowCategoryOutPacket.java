@@ -26,8 +26,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 	}
 
 	public static void write(PacketByteBuf buf, CategoryConfig category, CategoryData categoryData) {
-		buf.writeString(category.getId());
-		buf.writeInt(category.getIndex());
+		buf.writeIdentifier(category.getId());
 		write(buf, category.getGeneral());
 		write(buf, category.getDefinitions());
 		write(buf, category.getSkills(), category, categoryData);

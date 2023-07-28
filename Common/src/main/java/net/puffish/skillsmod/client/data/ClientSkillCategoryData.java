@@ -12,8 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClientSkillCategoryData {
-	private final String id;
-	private final int index;
+	private final Identifier id;
 
 	private final Text title;
 	private final ClientIconData icon;
@@ -27,9 +26,8 @@ public class ClientSkillCategoryData {
 	private int pointsLeft;
 	private float experienceProgress;
 
-	public ClientSkillCategoryData(String id, int index, Text title, ClientIconData icon, Identifier background, Map<String, ClientSkillDefinitionData> definitions, Map<String, ClientSkillData> skills, Collection<ClientSkillConnectionData> connections, int pointsLeft, float experienceProgress) {
+	public ClientSkillCategoryData(Identifier id, Text title, ClientIconData icon, Identifier background, Map<String, ClientSkillDefinitionData> definitions, Map<String, ClientSkillData> skills, Collection<ClientSkillConnectionData> connections, int pointsLeft, float experienceProgress) {
 		this.id = id;
-		this.index = index;
 		this.title = title;
 		this.icon = icon;
 		this.background = background;
@@ -87,12 +85,8 @@ public class ClientSkillCategoryData {
 		}
 	}
 
-	public String getId() {
+	public Identifier getId() {
 		return id;
-	}
-
-	public int getIndex() {
-		return index;
 	}
 
 	public Map<String, ClientSkillDefinitionData> getDefinitions() {

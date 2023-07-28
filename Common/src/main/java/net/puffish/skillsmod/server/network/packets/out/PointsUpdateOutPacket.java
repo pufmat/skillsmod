@@ -6,14 +6,14 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 
 public class PointsUpdateOutPacket extends OutPacket {
-	public static PointsUpdateOutPacket write(String categoryId, int points, boolean announceNewPoints) {
+	public static PointsUpdateOutPacket write(Identifier categoryId, int points, boolean announceNewPoints) {
 		var packet = new PointsUpdateOutPacket();
 		write(packet.buf, categoryId, points, announceNewPoints);
 		return packet;
 	}
 
-	public static void write(PacketByteBuf buf, String categoryId, int points, boolean announceNewPoints) {
-		buf.writeString(categoryId);
+	public static void write(PacketByteBuf buf, Identifier categoryId, int points, boolean announceNewPoints) {
+		buf.writeIdentifier(categoryId);
 		buf.writeInt(points);
 		buf.writeBoolean(announceNewPoints);
 	}

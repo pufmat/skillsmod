@@ -6,14 +6,14 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 
 public class HideCategoryOutPacket extends OutPacket {
-	public static HideCategoryOutPacket write(String categoryId) {
+	public static HideCategoryOutPacket write(Identifier categoryId) {
 		var packet = new HideCategoryOutPacket();
 		write(packet.buf, categoryId);
 		return packet;
 	}
 
-	public static void write(PacketByteBuf buf, String categoryId) {
-		buf.writeString(categoryId);
+	public static void write(PacketByteBuf buf, Identifier categoryId) {
+		buf.writeIdentifier(categoryId);
 	}
 
 	@Override

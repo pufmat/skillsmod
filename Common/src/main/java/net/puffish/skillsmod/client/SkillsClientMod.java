@@ -5,6 +5,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.event.ClientEventListener;
@@ -23,8 +24,7 @@ import net.puffish.skillsmod.client.network.packets.in.SkillUnlockInPacket;
 import net.puffish.skillsmod.network.Packets;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public class SkillsClientMod {
 
 	private static SkillsClientMod instance;
 
-	private final Map<String, ClientSkillCategoryData> categories = new HashMap<>();
+	private final Map<Identifier, ClientSkillCategoryData> categories = new LinkedHashMap<>();
 
 	private final ClientPacketSender packetSender;
 
@@ -100,7 +100,7 @@ public class SkillsClientMod {
 		}
 
 		MinecraftClient.getInstance().setScreen(new SkillsScreen(
-				categories.values().stream().sorted(Comparator.comparing(ClientSkillCategoryData::getIndex)).toList()
+				categories.values().stream().toList()
 		));
 	}
 
@@ -145,7 +145,7 @@ public class SkillsClientMod {
 		));
 	}
 
-	private Optional<ClientSkillCategoryData> getCategoryById(String categoryId) {
+	private Optional<ClientSkillCategoryData> getCategoryById(Identifier categoryId) {
 		return Optional.ofNullable(categories.get(categoryId));
 	}
 
