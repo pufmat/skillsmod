@@ -18,17 +18,15 @@ import net.puffish.skillsmod.utils.failure.ManyFailures;
 import java.util.ArrayList;
 
 public class CategoryConfig {
-	private final String id;
-	private final int index;
+	private final Identifier id;
 	private final GeneralConfig general;
 	private final SkillDefinitionsConfig definitions;
 	private final SkillsConfig skills;
 	private final SkillConnectionsConfig connections;
 	private final ExperienceConfig experience;
 
-	private CategoryConfig(String id, int index, GeneralConfig general, SkillDefinitionsConfig definitions, SkillsConfig skills, SkillConnectionsConfig connections, ExperienceConfig experience) {
+	private CategoryConfig(Identifier id, GeneralConfig general, SkillDefinitionsConfig definitions, SkillsConfig skills, SkillConnectionsConfig connections, ExperienceConfig experience) {
 		this.id = id;
-		this.index = index;
 		this.general = general;
 		this.definitions = definitions;
 		this.skills = skills;
@@ -37,8 +35,7 @@ public class CategoryConfig {
 	}
 
 	public static Result<CategoryConfig, Failure> parse(
-			String id,
-			int index,
+			Identifier id,
 			JsonElementWrapper generalElement,
 			JsonElementWrapper definitionsElement,
 			JsonElementWrapper skillsElement,
@@ -75,7 +72,6 @@ public class CategoryConfig {
 		if (failures.isEmpty()) {
 			return Result.success(new CategoryConfig(
 					id,
-					index,
 					optGeneral.orElseThrow(),
 					optDefinitions.orElseThrow(),
 					optSkills.orElseThrow(),
@@ -162,12 +158,8 @@ public class CategoryConfig {
 		experience.dispose(server);
 	}
 
-	public String getId() {
+	public Identifier getId() {
 		return id;
-	}
-
-	public int getIndex() {
-		return index;
 	}
 
 	public GeneralConfig getGeneral() {
