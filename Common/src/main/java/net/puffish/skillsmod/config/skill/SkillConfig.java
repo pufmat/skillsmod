@@ -1,13 +1,13 @@
 package net.puffish.skillsmod.config.skill;
 
 import net.puffish.skillsmod.config.CategoryConfig;
-import net.puffish.skillsmod.server.data.CategoryData;
-import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.server.data.CategoryData;
+import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Result;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -26,21 +26,21 @@ public class SkillConfig {
 		this.isRoot = isRoot;
 	}
 
-	public static Result<SkillConfig, Error> parse(String id, JsonElementWrapper rootElement, SkillDefinitionsConfig definitions) {
+	public static Result<SkillConfig, Failure> parse(String id, JsonElementWrapper rootElement, SkillDefinitionsConfig definitions) {
 		return rootElement.getAsObject().andThen(
 				rootObject -> SkillConfig.parse(id, rootObject, definitions)
 		);
 	}
 
-	public static Result<SkillConfig, Error> parse(String id, JsonObjectWrapper rootObject, SkillDefinitionsConfig definitions) {
-		var errors = new ArrayList<Error>();
+	public static Result<SkillConfig, Failure> parse(String id, JsonObjectWrapper rootObject, SkillDefinitionsConfig definitions) {
+		var failures = new ArrayList<Failure>();
 
 		var optX = rootObject.getInt("x")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optY = rootObject.getInt("y")
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var optDefinitionId = rootObject.get("definition")
@@ -49,18 +49,18 @@ public class SkillConfig {
 							if (definitions.getById(definitionId).isPresent()) {
 								return Result.success(definitionId);
 							} else {
-								return Result.failure(definitionElement.getPath().errorAt("Expected a valid definition"));
+								return Result.failure(definitionElement.getPath().failureAt("Expected a valid definition"));
 							}
 						})
 				)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var isRoot = rootObject.getBoolean("root")
 				.getSuccess() // ignore failure because this property is optional
 				.orElse(false);
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new SkillConfig(
 					id,
 					optX.orElseThrow(),
@@ -69,7 +69,7 @@ public class SkillConfig {
 					isRoot
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
@@ -86,11 +86,11 @@ public class SkillConfig {
 		if (this.isRoot) {
 			if (
 					!category.getGeneral().isExclusiveRoot()
-					||
-					categoryData.getUnlockedSkillIds()
-					.stream()
-					.flatMap(skillId -> category.getSkills().getById(skillId).stream())
-					.noneMatch(skill -> skill.isRoot)
+							||
+							categoryData.getUnlockedSkillIds()
+									.stream()
+									.flatMap(skillId -> category.getSkills().getById(skillId).stream())
+									.noneMatch(skill -> skill.isRoot)
 			) {
 				return SkillState.AVAILABLE;
 			}

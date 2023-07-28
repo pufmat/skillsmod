@@ -8,8 +8,8 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.ManyErrors;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -26,33 +26,33 @@ public final class BlockCondition implements Condition<BlockState> {
 		return ConditionFactory.withData(BlockCondition::parse);
 	}
 
-	public static Result<BlockCondition, Error> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<BlockCondition, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(BlockCondition::parse);
 	}
 
-	public static Result<BlockCondition, Error> parse(JsonObjectWrapper rootObject) {
-		var errors = new ArrayList<Error>();
+	public static Result<BlockCondition, Failure> parse(JsonObjectWrapper rootObject) {
+		var failures = new ArrayList<Failure>();
 
 		var optBlock = rootObject.get("block")
 				.andThen(JsonParseUtils::parseBlock)
-				.ifFailure(errors::add)
+				.ifFailure(failures::add)
 				.getSuccess();
 
 		var state = rootObject.get("state")
 				.getSuccess()
 				.flatMap(stateElement -> JsonParseUtils.parseStatePredicate(stateElement)
-						.ifFailure(errors::add)
+						.ifFailure(failures::add)
 						.getSuccess()
 				)
 				.orElseGet(() -> StatePredicate.Builder.create().build());
 
-		if (errors.isEmpty()) {
+		if (failures.isEmpty()) {
 			return Result.success(new BlockCondition(
 					optBlock.orElseThrow(),
 					state
 			));
 		} else {
-			return Result.failure(ManyErrors.ofList(errors));
+			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 

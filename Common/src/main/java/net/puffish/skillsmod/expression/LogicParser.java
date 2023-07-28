@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.expression;
 
 import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.error.Error;
-import net.puffish.skillsmod.utils.error.SingleError;
+import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.util.List;
 import java.util.Set;
@@ -26,12 +26,12 @@ public class LogicParser {
 
 	);
 
-	public static Result<Expression<Boolean>, Error> parse(String expression, Set<String> variables) {
+	public static Result<Expression<Boolean>, Failure> parse(String expression, Set<String> variables) {
 		return Parser.parse(expression, LOGIC_UNARY, LOGIC_BINARY, LOGIC_GROUP, LOGIC_FUNCTION, token -> {
 			if (variables.contains(token)) {
 				return Result.success(v -> v.get(token));
 			} else {
-				return Result.failure(SingleError.of("Unknown variable `" + token + "`"));
+				return Result.failure(SingleFailure.of("Unknown variable `" + token + "`"));
 			}
 		});
 	}
