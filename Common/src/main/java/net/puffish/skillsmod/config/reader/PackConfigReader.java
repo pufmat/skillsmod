@@ -23,8 +23,8 @@ public class PackConfigReader extends ConfigReader {
 	}
 
 	public Result<JsonElementWrapper, Failure> readResource(Identifier id, Resource resource) {
-		try (var inputStream = resource.getInputStream()) {
-			return JsonElementWrapper.parseString(new String(inputStream.readAllBytes()), JsonPath.createNamed(id.toString()));
+		try (var reader = resource.getReader()) {
+			return JsonElementWrapper.parseReader(reader, JsonPath.createNamed(id.toString()));
 		} catch (Exception e) {
 			return Result.failure(SingleFailure.of("Failed to read resource `" + id + "`"));
 		}

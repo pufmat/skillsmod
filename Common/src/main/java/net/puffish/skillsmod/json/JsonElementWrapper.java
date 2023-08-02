@@ -6,6 +6,7 @@ import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.SingleFailure;
 
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -21,6 +22,17 @@ public class JsonElementWrapper extends JsonWrapper {
 		try {
 			return Result.success(new JsonElementWrapper(
 					JsonParser.parseString(jsonData),
+					jsonPath
+			));
+		} catch (Exception e) {
+			return Result.failure(SingleFailure.of("Could not read JSON"));
+		}
+	}
+
+	public static Result<JsonElementWrapper, Failure> parseReader(Reader reader, JsonPath jsonPath) {
+		try {
+			return Result.success(new JsonElementWrapper(
+					JsonParser.parseReader(reader),
 					jsonPath
 			));
 		} catch (Exception e) {
