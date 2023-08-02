@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.io.Reader;
 import java.nio.file.Files;
@@ -25,7 +24,7 @@ public class JsonElementWrapper extends JsonWrapper {
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Could not read JSON"));
+			return Result.failure(jsonPath.failureAt("Could not read JSON"));
 		}
 	}
 
@@ -36,23 +35,22 @@ public class JsonElementWrapper extends JsonWrapper {
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Could not read JSON"));
+			return Result.failure(jsonPath.failureAt("Could not read JSON"));
 		}
 	}
 
 	public static Result<JsonElementWrapper, Failure> parseFile(Path filePath, JsonPath jsonPath) {
-		String name = filePath.getFileName().toString();
 		try {
 			var content = Files.readString(filePath);
 			if (content.isEmpty()) {
-				return Result.failure(SingleFailure.of("File `" + name + "` is empty."));
+				return Result.failure(jsonPath.failureAt("File is empty"));
 			}
 			return Result.success(new JsonElementWrapper(
 					JsonParser.parseString(content),
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Could not read file `" + name + "`."));
+			return Result.failure(jsonPath.failureAt("Could not read JSON"));
 		}
 	}
 

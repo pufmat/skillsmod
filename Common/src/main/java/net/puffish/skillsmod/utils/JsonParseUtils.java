@@ -22,7 +22,6 @@ import net.minecraft.util.JsonHelper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
-import net.puffish.skillsmod.utils.failure.SingleFailure;
 
 import java.util.ArrayList;
 
@@ -31,7 +30,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new Identifier(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid nbt at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid nbt"));
 		}
 	}
 
@@ -39,7 +38,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.STATUS_EFFECT.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid effect at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid effect"));
 		}
 	}
 
@@ -47,7 +46,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid block at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid block"));
 		}
 	}
 
@@ -55,7 +54,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(StatePredicate.fromJson(element.getJson()));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid state predicate at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
 		}
 	}
 
@@ -63,7 +62,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(NbtPredicate.fromJson(element.getJson()));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid state predicate at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
 		}
 	}
 
@@ -71,7 +70,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.BLOCK, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid block tag at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid block tag"));
 		}
 	}
 
@@ -79,7 +78,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid entity at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid entity"));
 		}
 	}
 
@@ -87,7 +86,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ENTITY_TYPE, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid entity tag at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid entity tag"));
 		}
 	}
 
@@ -95,7 +94,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(JsonHelper.asItem(element.getJson(), ""));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid item at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid item"));
 		}
 	}
 
@@ -103,7 +102,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ITEM.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ITEM, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid item tag at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid item tag"));
 		}
 	}
 
@@ -111,7 +110,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(StringNbtReader.parse(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid nbt at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid nbt"));
 		}
 	}
 
@@ -141,7 +140,7 @@ public class JsonParseUtils {
 				}
 			});
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid item stack at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid item stack"));
 		}
 	}
 
@@ -149,7 +148,7 @@ public class JsonParseUtils {
 		try {
 			return element.getAsString().andThen(name -> Result.success(AdvancementFrame.forName(name)));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid frame at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid frame"));
 		}
 	}
 
@@ -157,7 +156,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(Text.Serializer.fromJson(element.getJson()));
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid text at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid text"));
 		}
 	}
 
@@ -165,7 +164,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ATTRIBUTE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(SingleFailure.of("Expected valid attribute at " + element.getPath().toString()));
+			return Result.failure(element.getPath().failureAt("Expected valid attribute"));
 		}
 	}
 
@@ -174,7 +173,7 @@ public class JsonParseUtils {
 			case "addition" -> Result.success(EntityAttributeModifier.Operation.ADDITION);
 			case "multiply_base" -> Result.success(EntityAttributeModifier.Operation.MULTIPLY_BASE);
 			case "multiply_total" -> Result.success(EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
-			default -> Result.failure(SingleFailure.of("Expected valid attribute operation at " + element.getPath().toString()));
+			default -> Result.failure(element.getPath().failureAt("Expected valid attribute operation"));
 		});
 	}
 }
