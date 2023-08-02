@@ -34,7 +34,7 @@ public sealed interface Result<S, F> permits Result.Success, Result.Failure {
 
 	<S2> Result<S2, F> andThen(Function<S, Result<S2, F>> function);
 
-	<F2> Result<S, F2> flatmapFailure(Function<F, Result<S, F2>> function);
+	<F2> Result<S, F2> orElse(Function<F, Result<S, F2>> function);
 
 	final class Success<S, F> implements Result<S, F> {
 		private final S s;
@@ -99,7 +99,7 @@ public sealed interface Result<S, F> permits Result.Success, Result.Failure {
 		}
 
 		@Override
-		public <F2> Result<S, F2> flatmapFailure(Function<F, Result<S, F2>> function) {
+		public <F2> Result<S, F2> orElse(Function<F, Result<S, F2>> function) {
 			return Result.success(s);
 		}
 	}
@@ -167,7 +167,7 @@ public sealed interface Result<S, F> permits Result.Success, Result.Failure {
 		}
 
 		@Override
-		public <F2> Result<S, F2> flatmapFailure(Function<F, Result<S, F2>> function) {
+		public <F2> Result<S, F2> orElse(Function<F, Result<S, F2>> function) {
 			return function.apply(f);
 		}
 	}

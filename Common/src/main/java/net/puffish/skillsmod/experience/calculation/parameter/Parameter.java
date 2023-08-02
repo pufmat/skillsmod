@@ -45,7 +45,7 @@ public interface Parameter<T> extends Function<T, Double> {
 					rootObject.getPath().thenObject("type"),
 					factories,
 					context
-			).flatmapFailure(failure -> {
+			).orElse(failure -> {
 				if (optFallback.isPresent()) {
 					context.addWarning(failure);
 					return Result.success(new FallbackParameter<>(optFallback.orElseThrow()));
