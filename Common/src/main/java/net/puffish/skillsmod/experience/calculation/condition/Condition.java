@@ -46,7 +46,7 @@ public interface Condition<T> extends Predicate<T> {
 					rootObject.getPath().thenObject("type"),
 					factories,
 					context
-			).flatmapFailure(failure -> {
+			).orElse(failure -> {
 				if (optFallback.isPresent()) {
 					context.addWarning(failure);
 					return Result.success(new FallbackCondition<>(optFallback.orElseThrow()));

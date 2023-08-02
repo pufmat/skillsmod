@@ -54,7 +54,7 @@ public class SkillRewardConfig {
 					maybeDataElement,
 					rootObject.getPath().thenObject("type"),
 					context
-			).flatmapFailure(failure -> {
+			).orElse(failure -> {
 				if (required) {
 					return Result.failure(failure);
 				} else {
