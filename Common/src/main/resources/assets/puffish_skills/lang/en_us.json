@@ -9,5 +9,35 @@
 
 	"toast.puffish_skills.invalid_config.description": "Invalid configuration, check game logs.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Announce new skill points"
+	"gamerule.puffish_skills:announceNewPoints": "Announce new skill points",
+
+	"command.puffish_skills.no_such_category": "There is no category with ID %s",
+	"command.puffish_skills.no_such_skill": "There is no skill with ID %s",
+
+	"command.puffish_skills.category.lock.success.single": "Locked category %s for %s",
+	"command.puffish_skills.category.lock.success.multiple": "Locked category %s for %s players",
+
+	"command.puffish_skills.category.unlock.success.single": "Unlocked category %s for %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Unlocked category %s for %s players",
+
+	"command.puffish_skills.category.erase.success.single": "Erased category %s for %s",
+	"command.puffish_skills.category.erase.success.multiple": "Erased category %s for %s players",
+
+	"command.puffish_skills.experience.add.success.single": "Added %s experience to category %s for %s",
+	"command.puffish_skills.experience.add.success.multiple": "Added %s experience to category %s for %s players",
+
+	"command.puffish_skills.experience.set.success.single": "Set %s experience in category %s for %s",
+	"command.puffish_skills.experience.set.success.multiple": "Set %s experience in category %s for %s players",
+
+	"command.puffish_skills.points.add.success.single": "Added %s points to category %s for %s",
+	"command.puffish_skills.points.add.success.multiple": "Added %s points to category %s for %s players",
+
+	"command.puffish_skills.points.set.success.single": "Set %s points in category %s for %s",
+	"command.puffish_skills.points.set.success.multiple": "Set %s points in category %s for %s players",
+
+	"command.puffish_skills.skills.unlock.success.single": "Unlocked %s skill in category %s for %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Unlocked %s skill in category %s for %s players",
+
+	"command.puffish_skills.skills.reset.success.single": "Reset all skills in category %s for %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Reset all skills in category %s for %s players"
 }

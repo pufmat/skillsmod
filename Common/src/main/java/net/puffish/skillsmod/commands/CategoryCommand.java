@@ -5,7 +5,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.utils.CommandUtils;
 
 public class CategoryCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
@@ -17,10 +17,18 @@ public class CategoryCommand {
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
 											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+
+											var category = CommandUtils.getCategory(categoryId);
+
 											for (var player : players) {
-												SkillsAPI.lockCategory(player, categoryId);
+												category.lock(player);
 											}
-											return players.size();
+											return CommandUtils.sendSuccess(
+													context,
+													players,
+													"category.lock",
+													categoryId
+											);
 										})
 								)
 						)
@@ -31,10 +39,18 @@ public class CategoryCommand {
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
 											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+
+											var category = CommandUtils.getCategory(categoryId);
+
 											for (var player : players) {
-												SkillsAPI.unlockCategory(player, categoryId);
+												category.unlock(player);
 											}
-											return players.size();
+											return CommandUtils.sendSuccess(
+													context,
+													players,
+													"category.unlock",
+													categoryId
+											);
 										})
 								)
 						)
@@ -45,10 +61,18 @@ public class CategoryCommand {
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
 											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+
+											var category = CommandUtils.getCategory(categoryId);
+
 											for (var player : players) {
-												SkillsAPI.eraseCategory(player, categoryId);
+												category.erase(player);
 											}
-											return players.size();
+											return CommandUtils.sendSuccess(
+													context,
+													players,
+													"category.erase",
+													categoryId
+											);
 										})
 								)
 						)
