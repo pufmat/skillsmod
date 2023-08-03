@@ -6,7 +6,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.utils.CommandUtils;
 
 public class ExperienceCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
@@ -20,10 +20,19 @@ public class ExperienceCommand {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
+
+													var category = CommandUtils.getCategory(categoryId);
+
 													for (var player : players) {
-														SkillsAPI.addExperience(player, categoryId, amount);
+														category.addExperience(player, amount);
 													}
-													return players.size();
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"experience.add",
+															amount,
+															categoryId
+													);
 												})
 										)
 								)
@@ -37,10 +46,19 @@ public class ExperienceCommand {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
+
+													var category = CommandUtils.getCategory(categoryId);
+
 													for (var player : players) {
-														SkillsAPI.setExperience(player, categoryId, amount);
+														category.setExperience(player, amount);
 													}
-													return players.size();
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"experience.set",
+															amount,
+															categoryId
+													);
 												})
 										)
 								)

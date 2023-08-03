@@ -9,5 +9,35 @@
 
 	"toast.puffish_skills.invalid_config.description": "Nieprawidłowa konfiguracja, sprawdź dzienniki gry.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Ogłaszaj nowe punkty umiejętności"
+	"gamerule.puffish_skills:announceNewPoints": "Ogłaszaj nowe punkty umiejętności",
+
+	"command.puffish_skills.no_such_category": "Nie istnieje kategoria z ID \"%s\"",
+	"command.puffish_skills.no_such_skill": "Nie istnieje umiejętność z ID \"%s\"",
+
+	"command.puffish_skills.category.lock.success.single": "Zablokowano kategorię %s dla %s",
+	"command.puffish_skills.category.lock.success.multiple": "Zablokowano kategorię %s dla %s graczy",
+
+	"command.puffish_skills.category.unlock.success.single": "Odblokowano kategorię %s dla %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Odblokowano kategorię %s dla %s graczy",
+
+	"command.puffish_skills.category.erase.success.single": "Wymazano kategorię %s dla %s",
+	"command.puffish_skills.category.erase.success.multiple": "Wymazano kategorię %s dla %s graczy",
+
+	"command.puffish_skills.experience.add.success.single": "Dodano %s doświadczenia do kategorii %s dla %s",
+	"command.puffish_skills.experience.add.success.multiple": "Dodano %s doświadczenia do kategorii %s dla %s graczy",
+
+	"command.puffish_skills.experience.set.success.single": "Ustawiono %s doświadczenia w kategorii %s dla %s",
+	"command.puffish_skills.experience.set.success.multiple": "Ustawiono %s doświadczenia w kategorii %s dla %s graczy",
+
+	"command.puffish_skills.points.add.success.single": "Dodano %s punktów w kategorii %s dla %s",
+	"command.puffish_skills.points.add.success.multiple": "Dodano %s punktów w kategorii %s dla %s graczy",
+
+	"command.puffish_skills.points.set.success.single": "Ustawiono %s punktów w kategorii %s dla %s",
+	"command.puffish_skills.points.set.success.multiple": "Ustawiono %s punktów w kategorii %s dla %s graczy",
+
+	"command.puffish_skills.skills.unlock.success.single": "Odblokowano umiejętność %s w kategorii %s dla %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Odblokowano umiejętność %s w kategorii %s dla %s graczy",
+
+	"command.puffish_skills.skills.reset.success.single": "Zresetowano wszystkie umiejętności w kategorii %s dla %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Zresetowano wszystkie umiejętności w kategorii %s dla %s graczy"
 }
