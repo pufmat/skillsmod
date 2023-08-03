@@ -431,6 +431,16 @@ public class SkillsMod {
 		);
 	}
 
+	public boolean hasCategory(Identifier categoryId) {
+		return getCategory(categoryId).isPresent();
+	}
+
+	public boolean hasSkill(Identifier categoryId, String skillId) {
+		return getCategory(categoryId)
+				.map(category -> category.getSkills().getById(skillId).isPresent())
+				.orElse(false);
+	}
+
 	private void showCategory(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, ShowCategoryOutPacket.write(category, categoryData));
 	}
