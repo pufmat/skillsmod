@@ -6,7 +6,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.utils.CommandUtils;
 
 public class SkillsCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
@@ -20,10 +20,20 @@ public class SkillsCommand {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
 													var skillId = StringArgumentType.getString(context, "skill");
+
+													var category = CommandUtils.getCategory(categoryId);
+													var skill = CommandUtils.getSkill(category, skillId);
+
 													for (var player : players) {
-														SkillsAPI.unlockSkill(player, categoryId, skillId);
+														skill.unlock(player);
 													}
-													return players.size();
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"skills.unlock",
+															categoryId,
+															skillId
+													);
 												})
 										)
 								)
@@ -35,10 +45,18 @@ public class SkillsCommand {
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
 											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+
+											var category = CommandUtils.getCategory(categoryId);
+
 											for (var player : players) {
-												SkillsAPI.resetSkills(player, categoryId);
+												category.resetSkills(player);
 											}
-											return players.size();
+											return CommandUtils.sendSuccess(
+													context,
+													players,
+													"skills.reset",
+													categoryId
+											);
 										})
 								)
 						)

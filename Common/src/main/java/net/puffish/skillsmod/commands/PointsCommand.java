@@ -6,7 +6,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.utils.CommandUtils;
 
 public class PointsCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
@@ -20,10 +20,19 @@ public class PointsCommand {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
 													var count = IntegerArgumentType.getInteger(context, "count");
+
+													var category = CommandUtils.getCategory(categoryId);
+
 													for (var player : players) {
-														SkillsAPI.addExtraPoints(player, categoryId, count);
+														category.addExtraPoints(player, count);
 													}
-													return players.size();
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"points.add",
+															count,
+															categoryId
+													);
 												})
 										)
 								)
@@ -37,10 +46,19 @@ public class PointsCommand {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
 													var count = IntegerArgumentType.getInteger(context, "count");
+
+													var category = CommandUtils.getCategory(categoryId);
+
 													for (var player : players) {
-														SkillsAPI.setPointsLeft(player, categoryId, count);
+														category.setPointsLeft(player, count);
 													}
-													return players.size();
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"points.set",
+															count,
+															categoryId
+													);
 												})
 										)
 								)
