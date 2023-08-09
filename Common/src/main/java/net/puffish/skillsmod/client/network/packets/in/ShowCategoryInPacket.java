@@ -35,6 +35,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var title = buf.readText();
 		var icon = readSkillIcon(buf);
 		var background = buf.readIdentifier();
+		var exclusiveRoot = buf.readBoolean();
 
 		var definitions = buf.readList(ShowCategoryInPacket::readDefinition)
 				.stream()
@@ -49,7 +50,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var points = buf.readInt();
 		var experienceProgress = buf.readOptional(PacketByteBuf::readFloat).orElse(-1f);
 
-		return new ClientSkillCategoryData(id, title, icon, background, definitions, skills, connections, points, experienceProgress);
+		return new ClientSkillCategoryData(id, title, icon, background, exclusiveRoot, definitions, skills, connections, points, experienceProgress);
 	}
 
 	public static ClientSkillDefinitionData readDefinition(PacketByteBuf buf) {
