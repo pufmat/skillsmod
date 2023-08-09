@@ -32,6 +32,7 @@ import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
+import net.puffish.skillsmod.rewards.builtin.TagReward;
 import net.puffish.skillsmod.server.PlayerAttributes;
 import net.puffish.skillsmod.server.SkillsGameRules;
 import net.puffish.skillsmod.server.data.CategoryData;
@@ -123,6 +124,7 @@ public class SkillsMod {
 		AttributeReward.register();
 		CommandReward.register();
 		ScoreboardReward.register();
+		TagReward.register();
 
 		MineBlockExperienceSource.register();
 		KillEntityExperienceSource.register();
