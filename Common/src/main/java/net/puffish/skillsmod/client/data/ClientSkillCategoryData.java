@@ -17,6 +17,7 @@ public class ClientSkillCategoryData {
 	private final Text title;
 	private final ClientIconData icon;
 	private final Identifier background;
+	private final boolean exclusiveRoot;
 
 	private final Map<String, ClientSkillDefinitionData> definitions;
 	private final Map<String, ClientSkillData> skills;
@@ -26,11 +27,12 @@ public class ClientSkillCategoryData {
 	private int pointsLeft;
 	private float experienceProgress;
 
-	public ClientSkillCategoryData(Identifier id, Text title, ClientIconData icon, Identifier background, Map<String, ClientSkillDefinitionData> definitions, Map<String, ClientSkillData> skills, Collection<ClientSkillConnectionData> connections, int pointsLeft, float experienceProgress) {
+	public ClientSkillCategoryData(Identifier id, Text title, ClientIconData icon, Identifier background, boolean exclusiveRoot, Map<String, ClientSkillDefinitionData> definitions, Map<String, ClientSkillData> skills, Collection<ClientSkillConnectionData> connections, int pointsLeft, float experienceProgress) {
 		this.id = id;
 		this.title = title;
 		this.icon = icon;
 		this.background = background;
+		this.exclusiveRoot = exclusiveRoot;
 		this.definitions = definitions;
 		this.skills = skills;
 		this.connections = connections;
@@ -70,7 +72,7 @@ public class ClientSkillCategoryData {
 			return;
 		}
 		skill.setState(SkillState.UNLOCKED);
-		if (skill.isRoot()) {
+		if (skill.isRoot() && exclusiveRoot) {
 			for (var otherSkill : skills.values()) {
 				if (otherSkill.isRoot() && otherSkill.getState() == SkillState.AVAILABLE) {
 					otherSkill.setState(SkillState.LOCKED);

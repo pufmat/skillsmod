@@ -43,6 +43,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeText(general.getTitle());
 		write(buf, general.getIcon());
 		buf.writeIdentifier(general.getBackground());
+		buf.writeBoolean(general.isExclusiveRoot());
 	}
 
 	public static void write(PacketByteBuf buf, SkillDefinitionConfig definition) {
