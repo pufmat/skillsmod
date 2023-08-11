@@ -3,17 +3,10 @@ package net.puffish.skillsmod.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
 
 public class DrawUtils {
 
@@ -141,36 +134,5 @@ public class DrawUtils {
 				textureW,
 				textureH
 		);
-	}
-
-	public static void drawLine(
-			MatrixStack matrices,
-			int startX,
-			int startY,
-			int endX,
-			int endY,
-			int thickness,
-			int color
-	) {
-		float a = ((float) (color >> 24 & 0xff)) / 255f;
-		float r = ((float) (color >> 16 & 0xff)) / 255f;
-		float g = ((float) (color >> 8 & 0xff)) / 255f;
-		float b = ((float) (color & 0xff)) / 255f;
-		var matrix = matrices.peek().getPositionMatrix();
-		var tmp = new Vec2f(endX, endY)
-				.add(new Vec2f(-startX, -startY))
-				.normalize();
-
-		tmp = new Vec2f(tmp.y, -tmp.x).multiply(thickness / 2f);
-
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(matrix, startX + tmp.x, startY + tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, startX - tmp.x, startY - tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, endX - tmp.x, endY - tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, endX + tmp.x, endY + tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
 	}
 }
