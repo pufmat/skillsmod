@@ -26,7 +26,7 @@ public class SkillDefinitionsConfig {
 
 	public static Result<SkillDefinitionsConfig, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
-				.mapFailure(failures -> (Failure) ManyFailures.ofList(failures.values()))
+				.<Failure>mapFailure(ManyFailures::ofMapValues)
 				.mapSuccess(SkillDefinitionsConfig::new);
 	}
 

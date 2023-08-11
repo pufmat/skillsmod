@@ -14,6 +14,7 @@ import net.puffish.skillsmod.config.skill.SkillsConfig;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.server.data.CategoryData;
+import net.puffish.skillsmod.skill.SkillConnection;
 
 public class ShowCategoryOutPacket extends OutPacket {
 	public static ShowCategoryOutPacket write(CategoryConfig category, CategoryData categoryData) {
@@ -65,7 +66,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 	}
 
 	public static void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
-		buf.writeCollection(connections.getAll(), ShowCategoryOutPacket::write);
+		buf.writeCollection(connections.getNormal().getAll(), ShowCategoryOutPacket::write);
 	}
 
 	public static void write(PacketByteBuf buf, SkillConfig skill, CategoryConfig category, CategoryData categoryData) {
@@ -77,9 +78,10 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeEnumConstant(categoryData.getSkillState(category, skill));
 	}
 
-	public static void write(PacketByteBuf buf, SkillConnectionConfig skill) {
-		buf.writeString(skill.getSkillAId());
-		buf.writeString(skill.getSkillBId());
+	public static void write(PacketByteBuf buf, SkillConnection skill) {
+		buf.writeString(skill.skillAId());
+		buf.writeString(skill.skillBId());
+		buf.writeBoolean(skill.bidirectional());
 	}
 
 	public static void write(PacketByteBuf buf, IconConfig icon) {

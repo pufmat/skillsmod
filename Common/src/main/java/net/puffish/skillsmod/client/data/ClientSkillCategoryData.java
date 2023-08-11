@@ -9,6 +9,7 @@ import org.joml.Vector2i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class ClientSkillCategoryData {
@@ -65,20 +66,13 @@ public class ClientSkillCategoryData {
 		this.neighbors = new HashMap<>();
 
 		for (var connection : connections) {
-			neighbors.compute(connection.getSkillAId(), (key, value) -> {
-				if (value == null) {
-					value = new ArrayList<>();
-				}
-				value.add(connection.getSkillBId());
-				return value;
-			});
-			neighbors.compute(connection.getSkillBId(), (key, value) -> {
-				if (value == null) {
-					value = new ArrayList<>();
-				}
-				value.add(connection.getSkillAId());
-				return value;
-			});
+			var a = connection.getSkillAId();
+			var b = connection.getSkillBId();
+
+			neighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
+			if (connection.isBidirectional()) {
+				neighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
+			}
 		}
 	}
 

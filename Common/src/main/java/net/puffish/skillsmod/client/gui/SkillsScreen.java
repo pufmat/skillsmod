@@ -339,12 +339,18 @@ public class SkillsScreen extends Screen {
 				16
 		);
 
-		for (var connections : getActiveCategory().getConnections()) {
-			var skillA = getActiveCategory().getSkills().get(connections.getSkillAId());
-			var skillB = getActiveCategory().getSkills().get(connections.getSkillBId());
+		for (var connection : getActiveCategory().getConnections()) {
+			var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
+			var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
 			if (skillA != null && skillB != null) {
 				drawLine(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 3, 0xff000000);
+				if (!connection.isBidirectional()) {
+					drawArrow(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 8, 0xff000000);
+				}
 				drawLine(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 1, 0xffffffff);
+				if (!connection.isBidirectional()) {
+					drawArrow(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 6, 0xffffffff);
+				}
 			}
 		}
 
@@ -390,19 +396,15 @@ public class SkillsScreen extends Screen {
 
 	private void drawLine(
 			DrawContext context,
-			int startX,
-			int startY,
-			int endX,
-			int endY,
-			int thickness,
-			int color
+			float startX,
+			float startY,
+			float endX,
+			float endY,
+			float thickness,
+			int argb
 	) {
-		float a = ((float) (color >> 24 & 0xff)) / 255f;
-		float r = ((float) (color >> 16 & 0xff)) / 255f;
-		float g = ((float) (color >> 8 & 0xff)) / 255f;
-		float b = ((float) (color & 0xff)) / 255f;
 		var matrix = context.getMatrices().peek().getPositionMatrix();
-		var tmp = new Vector2f(endX, endY)
+		var side = new Vector2f(endX, endY)
 				.sub(startX, startY)
 				.normalize()
 				.perpendicular()
@@ -411,10 +413,45 @@ public class SkillsScreen extends Screen {
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(matrix, startX + tmp.x, startY + tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, startX - tmp.x, startY - tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, endX - tmp.x, endY - tmp.y, 0).color(r, g, b, a).next();
-		bufferBuilder.vertex(matrix, endX + tmp.x, endY + tmp.y, 0).color(r, g, b, a).next();
+		bufferBuilder.vertex(matrix, startX + side.x, startY + side.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, startX - side.x, startY - side.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, endX - side.x, endY - side.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, endX + side.x, endY + side.y, 0).color(argb).next();
+		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+	}
+
+	private void drawArrow(
+			DrawContext context,
+			float startX,
+			float startY,
+			float endX,
+			float endY,
+			float thickness,
+			int argb
+	) {
+		var matrix = context.getMatrices().peek().getPositionMatrix();
+		var center = new Vector2f(endX, endY)
+				.add(startX, startY)
+				.div(2f);
+		var normal = new Vector2f(endX, endY)
+				.sub(startX, startY)
+				.normalize();
+		var forward = new Vector2f(normal)
+				.mul(thickness);
+		var backward = new Vector2f(forward)
+				.div(-2f);
+		var back = new Vector2f(center)
+				.add(backward);
+		var side = new Vector2f(backward)
+				.perpendicular()
+				.mul(MathHelper.sqrt(3f));
+
+		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+		bufferBuilder.vertex(matrix, center.x + forward.x, center.y + forward.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, back.x - side.x, back.y - side.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, back.x + side.x, back.y + side.y, 0).color(argb).next();
 		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 	}
 

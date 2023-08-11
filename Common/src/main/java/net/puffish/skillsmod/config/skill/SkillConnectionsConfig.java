@@ -2,66 +2,57 @@ package net.puffish.skillsmod.config.skill;
 
 import net.puffish.skillsmod.json.JsonArrayWrapper;
 import net.puffish.skillsmod.json.JsonElementWrapper;
+import net.puffish.skillsmod.json.JsonObjectWrapper;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SkillConnectionsConfig {
-	private final List<SkillConnectionConfig> connections;
-	private final Map<String, Collection<String>> neighbors;
+	private final SkillConnectionsGroupConfig normal;
 
-	private SkillConnectionsConfig(List<SkillConnectionConfig> connections, Map<String, Collection<String>> neighbors) {
-		this.connections = connections;
-		this.neighbors = neighbors;
+	private SkillConnectionsConfig(SkillConnectionsGroupConfig normal) {
+		this.normal = normal;
 	}
 
 	public static Result<SkillConnectionsConfig, Failure> parse(JsonElementWrapper rootElement, SkillsConfig skills) {
-		return rootElement.getAsArray().andThen(rootArray -> SkillConnectionsConfig.parse(rootArray, skills));
+		return rootElement.getAsObject()
+				.andThen(rootObject -> parse(rootObject, skills))
+				.orElse(failure -> rootElement.getAsArray()
+						.andThen(rootArray -> parseLegacy(rootArray, skills))
+				);
 	}
 
-	public static Result<SkillConnectionsConfig, Failure> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
-		return rootArray.getAsList((i, element) -> SkillConnectionConfig.parse(element, skills))
-				.<Failure>mapFailure(ManyFailures::ofList)
-				.mapSuccess(SkillConnectionsConfig::build);
-	}
+	private static Result<SkillConnectionsConfig, Failure> parse(JsonObjectWrapper rootObject, SkillsConfig skills) {
+		var failures = new ArrayList<Failure>();
 
-	private static SkillConnectionsConfig build(List<SkillConnectionConfig> connections) {
-		var neighbors = new HashMap<String, Collection<String>>();
-		for (var connection : connections) {
-			if (connection.getSkillAId().equals(connection.getSkillBId())) {
-				continue;
-			}
+		var normal = rootObject.get("normal")
+				.getSuccess()
+				.flatMap(element -> SkillConnectionsGroupConfig.parse(element, skills)
+						.ifFailure(failures::add)
+						.getSuccess()
+				)
+				.orElseGet(SkillConnectionsGroupConfig::empty);
 
-			neighbors.compute(connection.getSkillAId(), (key, value) -> {
-				if (value == null) {
-					value = new ArrayList<>();
-				}
-				value.add(connection.getSkillBId());
-				return value;
-			});
-			neighbors.compute(connection.getSkillBId(), (key, value) -> {
-				if (value == null) {
-					value = new ArrayList<>();
-				}
-				value.add(connection.getSkillAId());
-				return value;
-			});
+		if (failures.isEmpty()) {
+			return Result.success(new SkillConnectionsConfig(
+					normal
+			));
+		} else {
+			return Result.failure(ManyFailures.ofList(failures));
 		}
-
-		return new SkillConnectionsConfig(connections, neighbors);
 	}
 
-	public List<SkillConnectionConfig> getAll() {
-		return connections;
+	private static Result<SkillConnectionsConfig, Failure> parseLegacy(JsonArrayWrapper rootArray, SkillsConfig skills) {
+		return SkillConnectionsGroupConfig.parseLegacy(rootArray, skills)
+				.mapSuccess(SkillConnectionsConfig::new);
 	}
 
-	public Map<String, Collection<String>> getNeighbors() {
-		return neighbors;
+	public SkillConnectionsGroupConfig getNormal() {
+		return normal;
 	}
 }

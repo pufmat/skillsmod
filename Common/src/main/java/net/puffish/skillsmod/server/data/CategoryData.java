@@ -68,8 +68,8 @@ public class CategoryData {
 			return SkillState.UNLOCKED;
 		}
 
-		var neighborIds = category.getConnections().getNeighbors().get(skill.getId());
-		if (neighborIds == null || neighborIds.stream().anyMatch(unlockedSkills::contains)) {
+		var normalIncomingNeighborsIds = category.getConnections().getNormal().getNeighbors().get(skill.getId());
+		if (normalIncomingNeighborsIds == null || normalIncomingNeighborsIds.stream().anyMatch(unlockedSkills::contains)) {
 			return SkillState.AVAILABLE;
 		}
 
