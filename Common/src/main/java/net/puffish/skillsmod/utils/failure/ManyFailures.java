@@ -2,6 +2,7 @@ package net.puffish.skillsmod.utils.failure;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ManyFailures implements Failure {
@@ -13,6 +14,10 @@ public class ManyFailures implements Failure {
 
 	public static ManyFailures ofList(Collection<Failure> failures) {
 		return new ManyFailures(failures.stream().map(Failure::getMessages).flatMap(List::stream).toList());
+	}
+
+	public static ManyFailures ofMapValues(Map<?, Failure> failures) {
+		return new ManyFailures(failures.values().stream().map(Failure::getMessages).flatMap(List::stream).toList());
 	}
 
 	@Override
