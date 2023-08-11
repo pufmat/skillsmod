@@ -6,7 +6,12 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
@@ -16,6 +21,7 @@ import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.data.ClientIconData;
@@ -365,12 +371,18 @@ public class SkillsScreen extends Screen {
 				16
 		);
 
-		for (var connections : getActiveCategory().getConnections()) {
-			var skillA = getActiveCategory().getSkills().get(connections.getSkillAId());
-			var skillB = getActiveCategory().getSkills().get(connections.getSkillBId());
+		for (var connection : getActiveCategory().getConnections()) {
+			var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
+			var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
 			if (skillA != null && skillB != null) {
-				DrawUtils.drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 3, 0xff000000);
-				DrawUtils.drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 1, 0xffffffff);
+				drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 3, 0xff000000);
+				if (!connection.isBidirectional()) {
+					drawArrow(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 8, 0xff000000);
+				}
+				drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 1, 0xffffffff);
+				if (!connection.isBidirectional()) {
+					drawArrow(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 6, 0xffffffff);
+				}
 			}
 		}
 
@@ -421,6 +433,70 @@ public class SkillsScreen extends Screen {
 		RenderSystem.depthFunc(GL11.GL_LEQUAL);
 
 		matrices.pop();
+	}
+
+	private void drawLine(
+			MatrixStack matrices,
+			int startX,
+			int startY,
+			int endX,
+			int endY,
+			int thickness,
+			int color
+	) {
+		float a = ((float) (color >> 24 & 0xff)) / 255f;
+		float r = ((float) (color >> 16 & 0xff)) / 255f;
+		float g = ((float) (color >> 8 & 0xff)) / 255f;
+		float b = ((float) (color & 0xff)) / 255f;
+		var matrix = matrices.peek().getPositionMatrix();
+		var tmp = new Vec2f(endX, endY)
+				.add(new Vec2f(-startX, -startY))
+				.normalize();
+
+		tmp = new Vec2f(tmp.y, -tmp.x).multiply(thickness / 2f);
+
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+		bufferBuilder.vertex(matrix, startX + tmp.x, startY + tmp.y, 0).color(r, g, b, a).next();
+		bufferBuilder.vertex(matrix, startX - tmp.x, startY - tmp.y, 0).color(r, g, b, a).next();
+		bufferBuilder.vertex(matrix, endX - tmp.x, endY - tmp.y, 0).color(r, g, b, a).next();
+		bufferBuilder.vertex(matrix, endX + tmp.x, endY + tmp.y, 0).color(r, g, b, a).next();
+		BufferRenderer.drawWithShader(bufferBuilder.end());
+	}
+
+	private void drawArrow(
+			MatrixStack matrices,
+			float startX,
+			float startY,
+			float endX,
+			float endY,
+			float thickness,
+			int argb
+	) {
+		var matrix = matrices.peek().getPositionMatrix();
+		var center = new Vec2f(endX, endY)
+				.add(new Vec2f(startX, startY))
+				.multiply(0.5f);
+		var normal = new Vec2f(endX, endY)
+				.add(new Vec2f(-startX, -startY))
+				.normalize();
+		var forward = new Vec2f(normal.x, normal.y)
+				.multiply(thickness);
+		var backward = new Vec2f(forward.x, forward.y)
+				.multiply(-0.5f);
+		var back = new Vec2f(center.x, center.y)
+				.add(backward);
+		var side = new Vec2f(backward.y, -backward.x)
+				.multiply(MathHelper.sqrt(3f));
+
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+		bufferBuilder.vertex(matrix, center.x + forward.x, center.y + forward.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, back.x - side.x, back.y - side.y, 0).color(argb).next();
+		bufferBuilder.vertex(matrix, back.x + side.x, back.y + side.y, 0).color(argb).next();
+		BufferRenderer.drawWithShader(bufferBuilder.end());
 	}
 
 	private void drawTabs(MatrixStack matrices, double mouseX, double mouseY) {
