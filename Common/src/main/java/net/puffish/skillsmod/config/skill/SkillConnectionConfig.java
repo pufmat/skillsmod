@@ -7,7 +7,6 @@ import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class SkillConnectionConfig {
 	private final String skillAId;
@@ -23,7 +22,7 @@ public class SkillConnectionConfig {
 				.andThen(rootArray -> SkillConnectionConfig.parse(rootArray, skills));
 	}
 
-	public static Result<SkillConnectionConfig, Failure> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
+	private static Result<SkillConnectionConfig, Failure> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
 		if (rootArray.getSize() != 2) {
 			return Result.failure(rootArray.getPath().failureAt("Expected an array of 2 elements"));
 		}
@@ -43,19 +42,14 @@ public class SkillConnectionConfig {
 				.getSuccess();
 
 		if (failures.isEmpty()) {
-			return Result.success(build(
-					optIds.orElseThrow()
+			var ids = optIds.orElseThrow();
+			return Result.success(new SkillConnectionConfig(
+					ids.get(0),
+					ids.get(1)
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
 		}
-	}
-
-	private static SkillConnectionConfig build(List<String> ids) {
-		return new SkillConnectionConfig(
-				ids.get(0),
-				ids.get(1)
-		);
 	}
 
 	public String getSkillAId() {

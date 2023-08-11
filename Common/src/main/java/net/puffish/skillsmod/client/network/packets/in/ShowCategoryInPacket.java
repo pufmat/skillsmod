@@ -124,8 +124,9 @@ public class ShowCategoryInPacket implements InPacket {
 	public static ClientSkillConnectionData readSkillConnection(PacketByteBuf buf) {
 		var skillAId = buf.readString();
 		var skillBId = buf.readString();
+		var bidirectional = buf.readBoolean();
 
-		return new ClientSkillConnectionData(skillAId, skillBId);
+		return new ClientSkillConnectionData(skillAId, skillBId, bidirectional);
 	}
 
 	public ClientSkillCategoryData getCategory() {
