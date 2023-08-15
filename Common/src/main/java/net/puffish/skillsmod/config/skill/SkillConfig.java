@@ -1,10 +1,7 @@
 package net.puffish.skillsmod.config.skill;
 
-import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.server.data.CategoryData;
-import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
@@ -71,32 +68,6 @@ public class SkillConfig {
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
 		}
-	}
-
-	public SkillState getStateFor(CategoryConfig category, CategoryData categoryData) {
-		if (categoryData.getUnlockedSkillIds().contains(this.id)) {
-			return SkillState.UNLOCKED;
-		}
-
-		var neighborIds = category.getConnections().getNeighbors().get(this.id);
-		if (neighborIds == null || neighborIds.stream().anyMatch(neighborId -> categoryData.getUnlockedSkillIds().contains(neighborId))) {
-			return SkillState.AVAILABLE;
-		}
-
-		if (this.isRoot) {
-			if (
-					!category.getGeneral().isExclusiveRoot()
-							||
-							categoryData.getUnlockedSkillIds()
-									.stream()
-									.flatMap(skillId -> category.getSkills().getById(skillId).stream())
-									.noneMatch(skill -> skill.isRoot)
-			) {
-				return SkillState.AVAILABLE;
-			}
-		}
-
-		return SkillState.LOCKED;
 	}
 
 	public String getId() {
