@@ -88,8 +88,4 @@ public class Category {
 	public int getPointsLeft(ServerPlayerEntity player) {
 		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
 	}
-
-	public void setPointsLeft(ServerPlayerEntity player, int count) {
-		SkillsMod.getInstance().setPointsLeft(player, categoryId, count);
-	}
 }

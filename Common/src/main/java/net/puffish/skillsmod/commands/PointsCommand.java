@@ -50,7 +50,7 @@ public class PointsCommand {
 													var category = CommandUtils.getCategory(categoryId);
 
 													for (var player : players) {
-														category.setPointsLeft(player, count);
+														category.setExtraPoints(player, count);
 													}
 													return CommandUtils.sendSuccess(
 															context,

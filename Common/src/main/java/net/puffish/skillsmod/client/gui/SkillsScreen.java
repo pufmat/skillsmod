@@ -686,7 +686,12 @@ public class SkillsScreen extends Screen {
 
 		var startX = tmpX;
 
-		tmpText = Text.literal(Integer.toString(getActiveCategory().getPointsLeft()));
+		var activeCategory = getActiveCategory();
+
+		tmpText = Text.literal(activeCategory.getPointsLeft()
+				+ (activeCategory.getSpentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.getSpentPointsLeft())
+		);
+
 		tmpX -= this.textRenderer.getWidth(tmpText);
 		tmpX -= 1;
 		DrawUtils.drawTextWithBorder(
@@ -709,8 +714,6 @@ public class SkillsScreen extends Screen {
 				0xff404040
 		);
 
-		var activeCategory = getActiveCategory();
-
 		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.textRenderer.fontHeight)) {
 			var lines = new ArrayList<OrderedText>();
 
@@ -723,6 +726,7 @@ public class SkillsScreen extends Screen {
 					"tooltip",
 					"spent_points",
 					activeCategory.getSpentPoints()
+							+ (activeCategory.getSpentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.getSpentPointsLimit())
 			), 170));
 
 			tooltip = lines;
