@@ -129,13 +129,16 @@ public class SkillsClientMod {
 
 	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
 		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+			var oldPointsLeft = category.getPointsLeft();
+			category.setSpentPoints(packet.getSpentPoints());
+			category.setEarnedPoints(packet.getEarnedPoints());
+			var newPointsLeft = category.getPointsLeft();
+
 			if (packet.announceNewPoints()) {
-				if (packet.getEarnedPoints() > category.getEarnedPoints()) {
+				if (newPointsLeft > oldPointsLeft) {
 					MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(SkillsMod.createTranslatable("chat", "new_point", OPEN_KEY_BINDING.getBoundKeyLocalizedText()));
 				}
 			}
-			category.setSpentPoints(packet.getSpentPoints());
-			category.setEarnedPoints(packet.getEarnedPoints());
 		});
 	}
 

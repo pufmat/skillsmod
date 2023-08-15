@@ -31,6 +31,7 @@ import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.network.Packets;
+import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
@@ -280,7 +281,7 @@ public class SkillsMod {
 
 	private void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-			if (category.tryUnlockSkill(player, categoryData, skillId, force)) {
+			if (categoryData.tryUnlockSkill(category, player, skillId, force)) {
 				packetSender.send(player, SkillUnlockOutPacket.write(categoryId, skillId));
 				syncPoints(player, category, categoryData);
 			}
@@ -385,15 +386,6 @@ public class SkillsMod {
 				);
 	}
 
-	public void setPointsLeft(ServerPlayerEntity player, Identifier categoryId, int count) {
-		getCategory(categoryId).ifPresent(category -> {
-			var categoryData = getPlayerData(player).getCategoryData(category);
-			categoryData.setPointsLeft(count, category);
-
-			syncPoints(player, category, categoryData);
-		});
-	}
-
 	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getCategoryData(category);
@@ -474,7 +466,7 @@ public class SkillsMod {
 	public void refreshReward(ServerPlayerEntity player, Identifier type) {
 		for (CategoryConfig category : getAllCategories()) {
 			var categoryData = getPlayerData(player).getCategoryData(category);
-			category.refreshReward(player, categoryData, type);
+			categoryData.refreshReward(category, player, type);
 		}
 	}
 
@@ -498,11 +490,15 @@ public class SkillsMod {
 	}
 
 	private void applyRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		category.applyRewards(player, categoryData);
+		categoryData.applyRewards(category, player);
 	}
 
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
-		category.resetRewards(player);
+		for (var definition : category.getDefinitions().getAll()) {
+			for (var reward : definition.getRewards()) {
+				reward.getInstance().update(player, new RewardContext(0, false));
+			}
+		}
 	}
 
 	private Optional<CategoryData> getCategoryDataIfUnlocked(ServerPlayerEntity player, CategoryConfig category) {

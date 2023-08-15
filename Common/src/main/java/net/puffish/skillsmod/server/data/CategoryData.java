@@ -4,8 +4,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
+import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
+import net.puffish.skillsmod.rewards.RewardContext;
+import net.puffish.skillsmod.skill.SkillState;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,6 +61,93 @@ public class CategoryData {
 		nbt.put("unlocked_skills", unlockedNbt);
 
 		return nbt;
+	}
+
+	public SkillState getSkillState(CategoryConfig category, SkillConfig skill) {
+		if (unlockedSkills.contains(skill.getId())) {
+			return SkillState.UNLOCKED;
+		}
+
+		var neighborIds = category.getConnections().getNeighbors().get(skill.getId());
+		if (neighborIds == null || neighborIds.stream().anyMatch(unlockedSkills::contains)) {
+			return SkillState.AVAILABLE;
+		}
+
+		if (skill.isRoot()) {
+			if (!category.getGeneral().isExclusiveRoot()) {
+				return SkillState.AVAILABLE;
+			}
+			if (unlockedSkills.stream()
+					.flatMap(skillId -> category.getSkills().getById(skillId).stream())
+					.noneMatch(SkillConfig::isRoot)) {
+				return SkillState.AVAILABLE;
+			}
+		}
+
+		return SkillState.LOCKED;
+	}
+
+	public boolean tryUnlockSkill(CategoryConfig category, ServerPlayerEntity player, String skillId, boolean force) {
+		return category.getSkills().getById(skillId).flatMap(skill -> {
+			var definitionId = skill.getDefinitionId();
+
+			return category.getDefinitions().getById(definitionId).map(definition -> {
+				if (force) {
+					addExtraPoints(definition.getCost());
+				} else {
+					if (getSkillState(category, skill) != SkillState.AVAILABLE) {
+						return false;
+					}
+
+					if (getPointsLeft(category) < definition.getCost()) {
+						return false;
+					}
+				}
+
+				unlockSkill(skillId);
+
+				int count = countUnlocked(category, definitionId);
+
+				for (var reward : definition.getRewards()) {
+					reward.getInstance().update(player, new RewardContext(count, true));
+				}
+
+				return true;
+			});
+		}).orElse(false);
+	}
+
+	public int countUnlocked(CategoryConfig category, String definitionId) {
+		return (int) category.getSkills()
+				.getAll()
+				.stream()
+				.filter(skill -> skill.getDefinitionId().equals(definitionId))
+				.filter(skill -> getSkillState(category, skill) == SkillState.UNLOCKED)
+				.count();
+	}
+
+
+
+	public void refreshReward(CategoryConfig category, ServerPlayerEntity player, Identifier type) {
+		for (var definition : category.getDefinitions().getAll()) {
+			int count = countUnlocked(category, definition.getId());
+
+			for (var reward : definition.getRewards()) {
+				if (reward.getType().equals(type)) {
+					reward.getInstance().update(player, new RewardContext(count, false));
+				}
+			}
+		}
+	}
+
+	public void applyRewards(CategoryConfig category, ServerPlayerEntity player) {
+		for (var definition : category.getDefinitions().getAll()) {
+			int count = countUnlocked(category, definition.getId());
+
+			for (var reward : definition.getRewards()) {
+				reward.getInstance().update(player, new RewardContext(count, false));
+			}
+		}
 	}
 
 	public void unlockSkill(String id) {
@@ -117,11 +209,11 @@ public class CategoryData {
 	}
 
 	public int getPointsLeft(CategoryConfig category) {
-		return getEarnedPoints(category) - getSpentPoints(category);
+		return Math.min(getEarnedPoints(category), getSpentPointsLimit(category)) - getSpentPoints(category);
 	}
 
-	public void setPointsLeft(int count, CategoryConfig category) {
-		addExtraPoints(count - getPointsLeft(category));
+	public int getSpentPointsLimit(CategoryConfig category) {
+		return category.getGeneral().getSpentPointsLimit();
 	}
 
 	public void addExtraPoints(int count) {
