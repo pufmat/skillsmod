@@ -36,6 +36,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var icon = readSkillIcon(buf);
 		var background = buf.readIdentifier();
 		var exclusiveRoot = buf.readBoolean();
+		var spentPointsLimit = buf.readInt();
 
 		var definitions = buf.readList(ShowCategoryInPacket::readDefinition)
 				.stream()
@@ -65,6 +66,7 @@ public class ShowCategoryInPacket implements InPacket {
 				icon,
 				background,
 				exclusiveRoot,
+				spentPointsLimit,
 				definitions,
 				skills,
 				connections,
