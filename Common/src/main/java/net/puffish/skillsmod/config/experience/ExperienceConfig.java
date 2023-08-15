@@ -31,11 +31,11 @@ public class ExperienceConfig {
 	public static Result<ExperienceConfig, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		var failures = new ArrayList<Failure>();
 
-		var enabled = rootObject.getBoolean("enabled")
+		var optEnabled = rootObject.getBoolean("enabled")
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var experiencePerLevel = rootObject.get("experience_per_level")
+		var optExperiencePerLevel = rootObject.get("experience_per_level")
 				.andThen(ExperiencePerLevelConfig::parse)
 				.ifFailure(failures::add)
 				.getSuccess();
@@ -48,8 +48,8 @@ public class ExperienceConfig {
 
 		if (failures.isEmpty()) {
 			return Result.success(new ExperienceConfig(
-					enabled.orElseThrow(),
-					experiencePerLevel.orElseThrow(),
+					optEnabled.orElseThrow(),
+					optExperiencePerLevel.orElseThrow(),
 					experienceSources
 			));
 		} else {

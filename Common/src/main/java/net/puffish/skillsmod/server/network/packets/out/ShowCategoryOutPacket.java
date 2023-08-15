@@ -5,7 +5,6 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.IconConfig;
-import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
@@ -28,6 +27,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 	public static void write(PacketByteBuf buf, CategoryConfig category, CategoryData categoryData) {
 		buf.writeIdentifier(category.getId());
 		write(buf, category.getGeneral());
+		buf.writeInt(categoryData.getSpentPointsLimit(category));
 		write(buf, category.getDefinitions());
 		write(buf, category.getSkills(), category, categoryData);
 		write(buf, category.getConnections());
@@ -76,7 +76,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeInt(skill.getY());
 		buf.writeString(skill.getDefinitionId());
 		buf.writeBoolean(skill.isRoot());
-		buf.writeEnumConstant(skill.getStateFor(category, categoryData));
+		buf.writeEnumConstant(categoryData.getSkillState(category, skill));
 	}
 
 	public static void write(PacketByteBuf buf, SkillConnectionConfig skill) {

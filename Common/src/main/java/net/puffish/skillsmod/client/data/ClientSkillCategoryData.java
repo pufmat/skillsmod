@@ -18,6 +18,7 @@ public class ClientSkillCategoryData {
 	private final ClientIconData icon;
 	private final Identifier background;
 	private final boolean exclusiveRoot;
+	private final int spentPointsLimit;
 
 	private final Map<String, ClientSkillDefinitionData> definitions;
 	private final Map<String, ClientSkillData> skills;
@@ -37,6 +38,7 @@ public class ClientSkillCategoryData {
 			ClientIconData icon,
 			Identifier background,
 			boolean exclusiveRoot,
+			int spentPointsLimit,
 			Map<String, ClientSkillDefinitionData> definitions,
 			Map<String, ClientSkillData> skills,
 			Collection<ClientSkillConnectionData> connections,
@@ -51,6 +53,7 @@ public class ClientSkillCategoryData {
 		this.icon = icon;
 		this.background = background;
 		this.exclusiveRoot = exclusiveRoot;
+		this.spentPointsLimit = spentPointsLimit;
 		this.definitions = definitions;
 		this.skills = skills;
 		this.connections = connections;
@@ -141,7 +144,7 @@ public class ClientSkillCategoryData {
 	}
 
 	public int getPointsLeft() {
-		return earnedPoints - spentPoints;
+		return Math.max(Math.min(earnedPoints, spentPointsLimit) - spentPoints, 0);
 	}
 
 	public int getSpentPoints() {
@@ -158,6 +161,14 @@ public class ClientSkillCategoryData {
 
 	public void setEarnedPoints(int earnedPoints) {
 		this.earnedPoints = earnedPoints;
+	}
+
+	public int getSpentPointsLeft() {
+		return Math.max(spentPointsLimit - spentPoints, 0);
+	}
+
+	public int getSpentPointsLimit() {
+		return spentPointsLimit;
 	}
 
 	public int getCurrentLevel() {

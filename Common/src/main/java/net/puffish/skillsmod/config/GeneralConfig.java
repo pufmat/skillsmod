@@ -17,13 +17,15 @@ public class GeneralConfig {
 	private final Identifier background;
 	private final boolean unlockedByDefault;
 	private final boolean exclusiveRoot;
+	private final int spentPointsLimit;
 
-	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault, boolean exclusiveRoot) {
+	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault, boolean exclusiveRoot, int spentPointsLimit) {
 		this.title = title;
 		this.icon = icon;
 		this.background = background;
 		this.unlockedByDefault = unlockedByDefault;
 		this.exclusiveRoot = exclusiveRoot;
+		this.spentPointsLimit = spentPointsLimit;
 	}
 
 	public static Result<GeneralConfig, Failure> parse(JsonElementWrapper rootElement) {
@@ -57,13 +59,22 @@ public class GeneralConfig {
 				.ifFailure(failures::add)
 				.getSuccess();
 
+		var spentPointsLimit = rootObject.get("spent_points_limit")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsInt()
+						.ifFailure(failures::add)
+						.getSuccess()
+				)
+				.orElse(Integer.MAX_VALUE);
+
 		if (failures.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
 					optIcon.orElseThrow(),
 					optBackground.orElseThrow(),
 					optUnlockedByDefault.orElseThrow(),
-					optExclusiveRoot.orElseThrow()
+					optExclusiveRoot.orElseThrow(),
+					spentPointsLimit
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -88,5 +99,9 @@ public class GeneralConfig {
 
 	public Identifier getBackground() {
 		return background;
+	}
+
+	public int getSpentPointsLimit() {
+		return spentPointsLimit;
 	}
 }
