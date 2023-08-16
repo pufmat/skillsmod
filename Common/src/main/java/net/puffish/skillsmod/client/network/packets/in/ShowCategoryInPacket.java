@@ -47,10 +47,33 @@ public class ShowCategoryInPacket implements InPacket {
 
 		var connections = buf.readList(ShowCategoryInPacket::readSkillConnection);
 
-		var points = buf.readInt();
-		var experienceProgress = buf.readOptional(PacketByteBuf::readFloat).orElse(-1f);
+		var spentPoints = buf.readInt();
+		var earnedPoints = buf.readInt();
 
-		return new ClientSkillCategoryData(id, title, icon, background, exclusiveRoot, definitions, skills, connections, points, experienceProgress);
+		var currentLevel = Integer.MIN_VALUE;
+		var currentExperience = Integer.MIN_VALUE;
+		var requiredExperience = Integer.MIN_VALUE;
+		if (buf.readBoolean()) {
+			currentLevel = buf.readInt();
+			currentExperience = buf.readInt();
+			requiredExperience = buf.readInt();
+		}
+
+		return new ClientSkillCategoryData(
+				id,
+				title,
+				icon,
+				background,
+				exclusiveRoot,
+				definitions,
+				skills,
+				connections,
+				spentPoints,
+				earnedPoints,
+				currentLevel,
+				currentExperience,
+				requiredExperience
+		);
 	}
 
 	public static ClientSkillDefinitionData readDefinition(PacketByteBuf buf) {

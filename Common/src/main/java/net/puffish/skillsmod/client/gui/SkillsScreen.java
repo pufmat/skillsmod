@@ -14,7 +14,11 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.SkillsMod;
@@ -29,6 +33,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -163,6 +168,14 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= contentPaddingLeft && mouse.y >= contentPaddingTop && mouse.x < width - contentPaddingRight && mouse.y < height - contentPaddingBottom;
 	}
 
+	private boolean isInsideExperience(Vector2i mouse, int x, int y) {
+		return mouse.x >= x && mouse.y >= y && mouse.x < x + 182 && mouse.y < y + 5;
+	}
+
+	private boolean isInsideArea(Vector2i mouse, int x1, int y1, int x2, int y2) {
+		return mouse.x >= x1 && mouse.y >= y1 && mouse.x < x2 && mouse.y < y2;
+	}
+
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		var mouse = getMousePos(mouseX, mouseY);
@@ -208,7 +221,7 @@ public class SkillsScreen extends Screen {
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		this.renderBackground(context);
 		this.drawContent(context, mouseX, mouseY);
-		this.drawWindow(context);
+		this.drawWindow(context, mouseX, mouseY);
 		this.drawTabs(context, mouseX, mouseY);
 	}
 
@@ -365,7 +378,7 @@ public class SkillsScreen extends Screen {
 			if (isInsideSkill(transformedMouse, skill) && isInsideContent(mouse)) {
 				setTooltip(Stream.concat(
 						Tooltip.wrapLines(client, definition.getTitle()).stream(),
-						Tooltip.wrapLines(client, definition.getDescription()).stream()
+						Tooltip.wrapLines(client, Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY))).stream()
 				).toList());
 			}
 
@@ -447,7 +460,13 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void drawWindow(DrawContext context) {
+	private void drawWindow(DrawContext context, double mouseX, double mouseY) {
+		if (client == null) {
+			return;
+		}
+
+		var mouse = getMousePos(mouseX, mouseY);
+
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
@@ -662,6 +681,8 @@ public class SkillsScreen extends Screen {
 
 		tmpX = this.width - FRAME_PADDING - 7;
 
+		var startX = tmpX;
+
 		tmpText = Text.literal(Integer.toString(getActiveCategory().getPointsLeft()));
 		tmpX -= this.textRenderer.getWidth(tmpText);
 		tmpX -= 1;
@@ -684,9 +705,28 @@ public class SkillsScreen extends Screen {
 				false
 		);
 
+		var activeCategory = getActiveCategory();
+
+		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.textRenderer.fontHeight)) {
+			var lines = new ArrayList<OrderedText>();
+
+			lines.addAll(Tooltip.wrapLines(client, SkillsMod.createTranslatable(
+					"tooltip",
+					"earned_points",
+					activeCategory.getEarnedPoints()
+			)));
+			lines.addAll(Tooltip.wrapLines(client, SkillsMod.createTranslatable(
+					"tooltip",
+					"spent_points",
+					activeCategory.getSpentPoints()
+			)));
+
+			setTooltip(lines);
+		}
+
 		var rightX = tmpX;
 
-		if (getActiveCategory().getExperienceProgress() >= 0) {
+		if (activeCategory.getCurrentLevel() >= 0) {
 			if (small) {
 				tmpX = this.width - FRAME_PADDING - 8 - 182;
 				tmpY = TABS_HEIGHT + 25;
@@ -699,6 +739,30 @@ public class SkillsScreen extends Screen {
 			int width = Math.min(182, (int) (getActiveCategory().getExperienceProgress() * 183f));
 			if (width > 0) {
 				context.drawTexture(ICONS_TEXTURE, tmpX, tmpY, 0, 69, width, 5);
+			}
+
+			if (isInsideExperience(mouse, tmpX, tmpY)) {
+				var lines = new ArrayList<OrderedText>();
+
+				lines.addAll(Tooltip.wrapLines(client, SkillsMod.createTranslatable(
+						"tooltip",
+						"current_level",
+						activeCategory.getCurrentLevel()
+				)));
+				lines.addAll(Tooltip.wrapLines(client, SkillsMod.createTranslatable(
+						"tooltip",
+						"experience_progress",
+						activeCategory.getCurrentExperience(),
+						activeCategory.getRequiredExperience(),
+						MathHelper.floor(activeCategory.getExperienceProgress() * 100f)
+				)));
+				lines.addAll(Tooltip.wrapLines(client, SkillsMod.createTranslatable(
+						"tooltip",
+						"to_next_level",
+						activeCategory.getExperienceToNextLevel()
+				)));
+
+				setTooltip(lines);
 			}
 		}
 	}
