@@ -74,7 +74,7 @@ public class PlayerAttributes {
 
 	private static EntityAttribute create(Identifier id, double fallback, double min, double max) {
 		return new ClampedEntityAttribute(
-				"attribute.name." + id.getPath(),
+				id.toTranslationKey("attribute"),
 				fallback,
 				min,
 				max
