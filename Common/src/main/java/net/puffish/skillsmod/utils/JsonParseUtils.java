@@ -13,6 +13,8 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
 import net.minecraft.tag.TagKey;
+import net.minecraft.stat.Stat;
+import net.minecraft.stat.StatType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
@@ -29,7 +31,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new Identifier(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid nbt"));
+			return Result.failure(element.getPath().failureAt("Expected valid identifier"));
 		}
 	}
 
@@ -77,7 +79,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registry.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity"));
+			return Result.failure(element.getPath().failureAt("Expected valid entity type"));
 		}
 	}
 
@@ -85,8 +87,22 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registry.ENTITY_TYPE.getEntryList(TagKey.of(Registry.ENTITY_TYPE_KEY, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity tag"));
+			return Result.failure(element.getPath().failureAt("Expected valid entity type tag"));
 		}
+	}
+
+	public static Result<Stat<?>, Failure> parseStat(JsonElementWrapper element) {
+		try {
+			return parseIdentifier(element).mapSuccess(id -> getOrCreateStat(Registry.STAT_TYPE.getOrEmpty(
+					Identifier.splitOn(id.getNamespace(), '.')
+			).orElseThrow(), Identifier.splitOn(id.getPath(), '.')));
+		} catch (Exception e) {
+			return Result.failure(element.getPath().failureAt("Expected valid statistic"));
+		}
+	}
+
+	private static <T> Stat<T> getOrCreateStat(StatType<T> statType, Identifier id) {
+		return statType.getOrCreateStat(statType.getRegistry().getOrEmpty(id).orElseThrow());
 	}
 
 	public static Result<Item, Failure> parseItem(JsonElementWrapper element) {
