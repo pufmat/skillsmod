@@ -11,6 +11,15 @@
 	"category.puffish_skills.skills": "Umiejętności",
 	"key.puffish_skills.open": "Otwórz drzewko umiejętności",
 
+	"attribute.puffish_skills.player.stamina": "Wytrwałość",
+	"attribute.puffish_skills.player.melee_damage": "Obrażenia w zwarciu",
+	"attribute.puffish_skills.player.ranged_damage": "Obrażenia dystansowe",
+	"attribute.puffish_skills.player.fortune": "Fortuna",
+	"attribute.puffish_skills.player.healing": "Leczenie",
+	"attribute.puffish_skills.player.jump": "Skok",
+	"attribute.puffish_skills.player.resistance": "Odporność",
+	"attribute.puffish_skills.player.mining_speed": "Prędkość kopania",
+
 	"chat.puffish_skills.new_point": "Masz nowy punkt umiejętności. Naciśnij %s, aby otworzyć swoje drzewko umiejętności.",
 
 	"toast.puffish_skills.invalid_config.description": "Nieprawidłowa konfiguracja, sprawdź dzienniki gry.",
