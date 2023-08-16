@@ -10,6 +10,9 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Texts;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.SkillsMod;
@@ -24,6 +27,7 @@ import net.puffish.skillsmod.utils.Vec2i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -159,6 +163,14 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= contentPaddingLeft && mouse.y >= contentPaddingTop && mouse.x < width - contentPaddingRight && mouse.y < height - contentPaddingBottom;
 	}
 
+	private boolean isInsideExperience(Vec2i mouse, int x, int y) {
+		return mouse.x >= x && mouse.y >= y && mouse.x < x + 182 && mouse.y < y + 5;
+	}
+
+	private boolean isInsideArea(Vec2i mouse, int x1, int y1, int x2, int y2) {
+		return mouse.x >= x1 && mouse.y >= y1 && mouse.x < x2 && mouse.y < y2;
+	}
+
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		var mouse = getMousePos(mouseX, mouseY);
@@ -206,7 +218,7 @@ public class SkillsScreen extends Screen {
 
 		this.renderBackground(matrices);
 		this.drawContent(matrices, mouseX, mouseY);
-		this.drawWindow(matrices);
+		this.drawWindow(matrices, mouseX, mouseY);
 		this.drawTabs(matrices, mouseX, mouseY);
 
 		if (tooltip != null) {
@@ -384,7 +396,7 @@ public class SkillsScreen extends Screen {
 			if (isInsideSkill(transformedMouse, skill) && isInsideContent(mouse)) {
 				tooltip = Stream.concat(
 						textRenderer.wrapLines(definition.getTitle(), 170).stream(),
-						textRenderer.wrapLines(definition.getDescription(), 170).stream()
+						textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170).stream()
 				).toList();
 			}
 
@@ -450,7 +462,13 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void drawWindow(MatrixStack matrices) {
+	private void drawWindow(MatrixStack matrices, double mouseX, double mouseY) {
+		if (client == null) {
+			return;
+		}
+
+		var mouse = getMousePos(mouseX, mouseY);
+
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -665,6 +683,8 @@ public class SkillsScreen extends Screen {
 
 		tmpX = this.width - FRAME_PADDING - 7;
 
+		var startX = tmpX;
+
 		tmpText = new LiteralText(Integer.toString(getActiveCategory().getPointsLeft()));
 		tmpX -= this.textRenderer.getWidth(tmpText);
 		tmpX -= 1;
@@ -688,9 +708,28 @@ public class SkillsScreen extends Screen {
 				0xff404040
 		);
 
+		var activeCategory = getActiveCategory();
+
+		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.textRenderer.fontHeight)) {
+			var lines = new ArrayList<OrderedText>();
+
+			lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+					"tooltip",
+					"earned_points",
+					activeCategory.getEarnedPoints()
+			), 170));
+			lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+					"tooltip",
+					"spent_points",
+					activeCategory.getSpentPoints()
+			), 170));
+
+			tooltip = lines;
+		}
+
 		var rightX = tmpX;
 
-		if (getActiveCategory().getExperienceProgress() >= 0) {
+		if (activeCategory.getCurrentLevel() >= 0) {
 			if (small) {
 				tmpX = this.width - FRAME_PADDING - 8 - 182;
 				tmpY = TABS_HEIGHT + 25;
@@ -704,6 +743,30 @@ public class SkillsScreen extends Screen {
 			int width = Math.min(182, (int) (getActiveCategory().getExperienceProgress() * 183f));
 			if (width > 0) {
 				this.drawTexture(matrices, tmpX, tmpY, 0, 69, width, 5);
+			}
+
+			if (isInsideExperience(mouse, tmpX, tmpY)) {
+				var lines = new ArrayList<OrderedText>();
+
+				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+						"tooltip",
+						"current_level",
+						activeCategory.getCurrentLevel()
+				), 170));
+				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+						"tooltip",
+						"experience_progress",
+						activeCategory.getCurrentExperience(),
+						activeCategory.getRequiredExperience(),
+						MathHelper.floor(activeCategory.getExperienceProgress() * 100f)
+				), 170));
+				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+						"tooltip",
+						"to_next_level",
+						activeCategory.getExperienceToNextLevel()
+				), 170));
+
+				tooltip = lines;
 			}
 		}
 	}

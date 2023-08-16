@@ -31,8 +31,16 @@ public class ShowCategoryOutPacket extends OutPacket {
 		write(buf, category.getDefinitions());
 		write(buf, category.getSkills(), category, categoryData);
 		write(buf, category.getConnections());
-		buf.writeInt(categoryData.getPointsLeft(category));
-		write(buf, category.getExperience(), categoryData);
+		buf.writeInt(categoryData.getSpentPoints(category));
+		buf.writeInt(categoryData.getEarnedPoints(category));
+		if (category.getExperience().isEnabled()) {
+			buf.writeBoolean(true);
+			buf.writeInt(categoryData.getCurrentLevel(category));
+			buf.writeInt(categoryData.getCurrentExperience(category));
+			buf.writeInt(categoryData.getRequiredExperience(category));
+		} else {
+			buf.writeBoolean(false);
+		}
 	}
 
 	public static void write(PacketByteBuf buf, SkillDefinitionsConfig definitions) {
@@ -52,14 +60,6 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeText(definition.getDescription());
 		buf.writeEnumConstant(definition.getFrame());
 		write(buf, definition.getIcon());
-	}
-
-	public static void write(PacketByteBuf buf, ExperienceConfig experience, CategoryData categoryData) {
-		if (experience.isEnabled()) {
-			buf.writeOptional(Optional.of(experience.getProgress(categoryData)), PacketByteBuf::writeFloat);
-		} else {
-			buf.writeOptional(Optional.empty(), PacketByteBuf::writeFloat);
-		}
 	}
 
 	public static void write(PacketByteBuf buf, SkillsConfig skills, CategoryConfig category, CategoryData categoryData) {

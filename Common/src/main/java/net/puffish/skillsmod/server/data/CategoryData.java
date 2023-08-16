@@ -5,7 +5,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.puffish.skillsmod.config.CategoryConfig;
-import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 
 import java.util.HashSet;
@@ -15,14 +14,14 @@ public class CategoryData {
 	private final Set<String> unlockedSkills;
 
 	private boolean unlocked;
-	private int points;
-	private int experience;
+	private int extraPoints;
+	private int earnedExperience;
 
-	private CategoryData(Set<String> unlockedSkills, boolean unlocked, int points, int experience) {
+	private CategoryData(Set<String> unlockedSkills, boolean unlocked, int extraPoints, int earnedExperience) {
 		this.unlockedSkills = unlockedSkills;
 		this.unlocked = unlocked;
-		this.points = points;
-		this.experience = experience;
+		this.extraPoints = extraPoints;
+		this.earnedExperience = earnedExperience;
 	}
 
 	public static CategoryData create(boolean unlocked) {
@@ -47,8 +46,8 @@ public class CategoryData {
 
 	public NbtCompound writeNbt(NbtCompound nbt) {
 		nbt.putBoolean("unlocked", unlocked);
-		nbt.putInt("points", points);
-		nbt.putInt("experience", experience);
+		nbt.putInt("points", extraPoints);
+		nbt.putInt("experience", earnedExperience);
 
 		NbtList unlockedNbt = new NbtList();
 		for (var skill : unlockedSkills) {
@@ -68,26 +67,38 @@ public class CategoryData {
 	}
 
 	public void addExperience(int experience) {
-		this.experience += experience;
+		this.earnedExperience += experience;
 	}
 
 	public Set<String> getUnlockedSkillIds() {
 		return unlockedSkills;
 	}
 
-	public int getExperience() {
-		return experience;
+	public int getEarnedExperience() {
+		return earnedExperience;
 	}
 
-	public void setExperience(int experience) {
-		this.experience = experience;
+	public void setEarnedExperience(int earnedExperience) {
+		this.earnedExperience = earnedExperience;
 	}
 
-	public int getPointsForExperience(ExperienceConfig experience) {
-		if (!experience.isEnabled()) {
-			return 0;
+	public int getCurrentLevel(CategoryConfig category) {
+		return category.getExperience().getCurrentLevel(earnedExperience);
+	}
+
+	public int getCurrentExperience(CategoryConfig category) {
+		return category.getExperience().getCurrentExperience(earnedExperience);
+	}
+
+	public int getRequiredExperience(CategoryConfig category) {
+		return category.getExperience().getRequiredExperience(getCurrentLevel(category));
+	}
+
+	public int getPointsForExperience(CategoryConfig category) {
+		if (category.getExperience().isEnabled()) {
+			return getCurrentLevel(category);
 		}
-		return experience.getLevel(this);
+		return 0;
 	}
 
 	public int getSpentPoints(CategoryConfig category) {
@@ -101,8 +112,12 @@ public class CategoryData {
 				.sum();
 	}
 
+	public int getEarnedPoints(CategoryConfig category) {
+		return getExtraPoints() + getPointsForExperience(category);
+	}
+
 	public int getPointsLeft(CategoryConfig category) {
-		return getExtraPoints() + getPointsForExperience(category.getExperience()) - getSpentPoints(category);
+		return getEarnedPoints(category) - getSpentPoints(category);
 	}
 
 	public void setPointsLeft(int count, CategoryConfig category) {
@@ -110,15 +125,15 @@ public class CategoryData {
 	}
 
 	public void addExtraPoints(int count) {
-		points += count;
+		extraPoints += count;
 	}
 
 	public int getExtraPoints() {
-		return points;
+		return extraPoints;
 	}
 
 	public void setExtraPoints(int points) {
-		this.points = points;
+		this.extraPoints = points;
 	}
 
 	public boolean isUnlocked() {

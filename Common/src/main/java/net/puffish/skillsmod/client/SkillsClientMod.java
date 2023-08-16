@@ -120,19 +120,22 @@ public class SkillsClientMod {
 	}
 
 	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(
-				category -> category.setExperienceProgress(packet.getExperienceProgress())
-		);
+		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+			category.setCurrentLevel(packet.getCurrentLevel());
+			category.setCurrentExperience(packet.getCurrentExperience());
+			category.setRequiredExperience(packet.getRequiredExperience());
+		});
 	}
 
 	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
 		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
 			if (packet.announceNewPoints()) {
-				if (packet.getPoints() > category.getPointsLeft()) {
+				if (packet.getEarnedPoints() > category.getEarnedPoints()) {
 					MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(SkillsMod.createTranslatable("chat", "new_point", OPEN_KEY_BINDING.getBoundKeyLocalizedText()));
 				}
 			}
-			category.setPointsLeft(packet.getPoints());
+			category.setSpentPoints(packet.getSpentPoints());
+			category.setEarnedPoints(packet.getEarnedPoints());
 		});
 	}
 
