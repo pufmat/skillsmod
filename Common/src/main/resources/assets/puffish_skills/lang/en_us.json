@@ -11,6 +11,15 @@
 	"category.puffish_skills.skills": "Skills",
 	"key.puffish_skills.open": "Open Skill Tree",
 
+	"attribute.puffish_skills.player.stamina": "Stamina",
+	"attribute.puffish_skills.player.melee_damage": "Melee Damage",
+	"attribute.puffish_skills.player.ranged_damage": "Ranged Damage",
+	"attribute.puffish_skills.player.fortune": "Fortune",
+	"attribute.puffish_skills.player.healing": "Healing",
+	"attribute.puffish_skills.player.jump": "Jump",
+	"attribute.puffish_skills.player.resistance": "Resistance",
+	"attribute.puffish_skills.player.mining_speed": "Mining Speed",
+
 	"chat.puffish_skills.new_point": "You have a new skill point. Press %s to open your skill tree.",
 
 	"toast.puffish_skills.invalid_config.description": "Invalid configuration, check game logs.",
