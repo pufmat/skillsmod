@@ -16,6 +16,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.stat.Stat;
+import net.minecraft.stat.StatType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
@@ -30,7 +32,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new Identifier(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid nbt"));
+			return Result.failure(element.getPath().failureAt("Expected valid identifier"));
 		}
 	}
 
@@ -78,7 +80,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity"));
+			return Result.failure(element.getPath().failureAt("Expected valid entity type"));
 		}
 	}
 
@@ -86,8 +88,22 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ENTITY_TYPE, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity tag"));
+			return Result.failure(element.getPath().failureAt("Expected valid entity type tag"));
 		}
+	}
+
+	public static Result<Stat<?>, Failure> parseStat(JsonElementWrapper element) {
+		try {
+			return parseIdentifier(element).mapSuccess(id -> getOrCreateStat(Registries.STAT_TYPE.getOrEmpty(
+					Identifier.splitOn(id.getNamespace(), '.')
+			).orElseThrow(), Identifier.splitOn(id.getPath(), '.')));
+		} catch (Exception e) {
+			return Result.failure(element.getPath().failureAt("Expected valid statistic"));
+		}
+	}
+
+	private static <T> Stat<T> getOrCreateStat(StatType<T> statType, Identifier id) {
+		return statType.getOrCreateStat(statType.getRegistry().getOrEmpty(id).orElseThrow());
 	}
 
 	public static Result<Item, Failure> parseItem(JsonElementWrapper element) {
