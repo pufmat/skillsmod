@@ -1,0 +1,58 @@
+{
+	"text.puffish_skills.skills": "Habilidades",
+	"text.puffish_skills.points_left": "Pontos: ",
+
+	"tooltip.puffish_skills.current_level": "Nível atual: %s",
+	"tooltip.puffish_skills.experience_progress": "Experiência: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "Para o próximo nível: %s",
+	"tooltip.puffish_skills.earned_points": "Pontos ganhos: %s",
+	"tooltip.puffish_skills.spent_points": "Pontos gastos: %s",
+
+	"category.puffish_skills.skills": "Habilidades",
+	"key.puffish_skills.open": "Abrir Árvore de talentos",
+
+	"attribute.puffish_skills.player.stamina": "Estâmina",
+	"attribute.puffish_skills.player.melee_damage": "Dano corpo a corpo",
+	"attribute.puffish_skills.player.ranged_damage": "Dano à distância",
+	"attribute.puffish_skills.player.fortune": "Fortuna",
+	"attribute.puffish_skills.player.healing": "Cura",
+	"attribute.puffish_skills.player.jump": "Pulo",
+	"attribute.puffish_skills.player.resistance": "Resistência",
+	"attribute.puffish_skills.player.mining_speed": "Velocídade de mineração",
+
+	"chat.puffish_skills.new_point": "Você tem um novo ponto de habilidade. Aperte %s para abrir a árvore de habilidade.",
+
+	"toast.puffish_skills.invalid_config.description": "Configuração inválida, verifique os logs do jogo.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Anunciar novos pontos de habilidade",
+
+	"command.puffish_skills.no_such_category": "Não há categoria com ID %s",
+	"command.puffish_skills.no_such_skill": "Não há habilidade com ID %s",
+
+	"command.puffish_skills.category.lock.success.single": "Categoria bloqueada %s para %s",
+	"command.puffish_skills.category.lock.success.multiple": "Categoria bloqueada %s para %s jogadores",
+
+	"command.puffish_skills.category.unlock.success.single": "Categoria %s desbloqueada para %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Categoria %s desbloqueada para %s jogadores",
+
+	"command.puffish_skills.category.erase.success.single": "Categoria %s apagada para %s",
+	"command.puffish_skills.category.erase.success.multiple": "Categoria %s apagada para %s jogadores",
+
+	"command.puffish_skills.experience.add.success.single": "Adicionou %s experiência à categoria %s para %s",
+	"command.puffish_skills.experience.add.success.multiple": "Adicionou %s experiência à categoria %s para %s jogadores",
+
+	"command.puffish_skills.experience.set.success.single": "Definir %s experiência na categoria %s para %s",
+	"command.puffish_skills.experience.set.success.multiple": "Definir %s experiência na categoria %s para %s jogadores",
+
+	"command.puffish_skills.points.add.success.single": "Adicionou %s pontos à categoria %s para %s",
+	"command.puffish_skills.points.add.success.multiple": "Adicionou %s pontos à categoria %s para %s jogadores",
+
+	"command.puffish_skills.points.set.success.single": "Definir %s pontos na categoria %s para %s",
+	"command.puffish_skills.points.set.success.multiple": "Definir %s pontos na categoria %s para %s jogadores",
+
+	"command.puffish_skills.skills.unlock.success.single": "Habilidade %s desbloqueada na categoria %s para %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Habilidade %s desbloqueada na categoria %s para jogadores %s",
+
+	"command.puffish_skills.skills.reset.success.single": "Redefinir todas as habilidades na categoria %s para %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Redefinir todas as habilidades na categoria %s para %s jogadores"
+}
