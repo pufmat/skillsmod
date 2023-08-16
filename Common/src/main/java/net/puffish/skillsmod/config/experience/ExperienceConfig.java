@@ -57,34 +57,36 @@ public class ExperienceConfig {
 		}
 	}
 
-	public float getProgress(CategoryData categoryData) {
-		int experience = categoryData.getExperience();
+	public int getRequiredExperience(int level) {
+		return experiencePerLevel.getFunction().apply(level);
+	}
+
+	public int getCurrentExperience(int earnedExperience) {
 		int level = 0;
 
 		while (true) {
-			int requiredExperience = experiencePerLevel.getFunction().apply(level);
+			int requiredExperience = getRequiredExperience(level);
 
-			if (experience < requiredExperience) {
-				return ((float) experience) / ((float) requiredExperience);
+			if (earnedExperience < requiredExperience) {
+				return earnedExperience;
 			}
 
-			experience -= requiredExperience;
+			earnedExperience -= requiredExperience;
 			level++;
 		}
 	}
 
-	public int getLevel(CategoryData categoryData) {
-		int experience = categoryData.getExperience();
+	public int getCurrentLevel(int earnedExperience) {
 		int level = 0;
 
 		while (true) {
-			int requiredExperience = experiencePerLevel.getFunction().apply(level);
+			int requiredExperience = getRequiredExperience(level);
 
-			if (experience < requiredExperience) {
+			if (earnedExperience < requiredExperience) {
 				return level;
 			}
 
-			experience -= requiredExperience;
+			earnedExperience -= requiredExperience;
 			level++;
 		}
 	}

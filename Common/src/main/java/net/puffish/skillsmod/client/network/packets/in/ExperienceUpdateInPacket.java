@@ -6,20 +6,28 @@ import net.puffish.skillsmod.network.InPacket;
 
 public class ExperienceUpdateInPacket implements InPacket {
 	private final Identifier categoryId;
-	private final float experienceProgress;
+	private final int currentLevel;
+	private final int currentExperience;
+	private final int requiredExperience;
 
-	private ExperienceUpdateInPacket(Identifier categoryId, float experienceProgress) {
+	private ExperienceUpdateInPacket(Identifier categoryId, int currentLevel, int currentExperience, int requiredExperience) {
 		this.categoryId = categoryId;
-		this.experienceProgress = experienceProgress;
+		this.currentLevel = currentLevel;
+		this.currentExperience = currentExperience;
+		this.requiredExperience = requiredExperience;
 	}
 
 	public static ExperienceUpdateInPacket read(PacketByteBuf buf) {
 		var categoryId = buf.readIdentifier();
-		var experienceProgress = buf.readFloat();
+		var currentLevel = buf.readInt();
+		var currentExperience = buf.readInt();
+		var requiredExperience = buf.readInt();
 
 		return new ExperienceUpdateInPacket(
 				categoryId,
-				experienceProgress
+				currentLevel,
+				currentExperience,
+				requiredExperience
 		);
 	}
 
@@ -27,7 +35,15 @@ public class ExperienceUpdateInPacket implements InPacket {
 		return categoryId;
 	}
 
-	public float getExperienceProgress() {
-		return experienceProgress;
+	public int getCurrentLevel() {
+		return currentLevel;
+	}
+
+	public int getCurrentExperience() {
+		return currentExperience;
+	}
+
+	public int getRequiredExperience() {
+		return requiredExperience;
 	}
 }
