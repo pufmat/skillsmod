@@ -2,6 +2,12 @@
 	"text.puffish_skills.skills": "Umiejętności",
 	"text.puffish_skills.points_left": "Pozostałe punkty: ",
 
+	"tooltip.puffish_skills.current_level": "Obecny poziom: %s",
+	"tooltip.puffish_skills.experience_progress": "Doświadczenie: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "Do następnego poziomu: %s",
+	"tooltip.puffish_skills.earned_points": "Zdobyte punkty: %s",
+	"tooltip.puffish_skills.spent_points": "Wydane punkty: %s",
+
 	"category.puffish_skills.skills": "Umiejętności",
 	"key.puffish_skills.open": "Otwórz drzewko umiejętności",
 

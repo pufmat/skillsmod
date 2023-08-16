@@ -2,6 +2,12 @@
 	"text.puffish_skills.skills": "Skills",
 	"text.puffish_skills.points_left": "Points left: ",
 
+	"tooltip.puffish_skills.current_level": "Current level: %s",
+	"tooltip.puffish_skills.experience_progress": "Experience: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "To next level: %s",
+	"tooltip.puffish_skills.earned_points": "Earned points: %s",
+	"tooltip.puffish_skills.spent_points": "Spent points: %s",
+
 	"category.puffish_skills.skills": "Skills",
 	"key.puffish_skills.open": "Open Skill Tree",
 

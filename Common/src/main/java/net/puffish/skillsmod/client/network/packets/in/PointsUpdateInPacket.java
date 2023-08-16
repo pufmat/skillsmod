@@ -6,23 +6,27 @@ import net.puffish.skillsmod.network.InPacket;
 
 public class PointsUpdateInPacket implements InPacket {
 	private final Identifier categoryId;
-	private final int points;
+	private final int spentPoints;
+	private final int earnedPoints;
 	private final boolean announceNewPoints;
 
-	private PointsUpdateInPacket(Identifier categoryId, int points, boolean announceNewPoints) {
+	private PointsUpdateInPacket(Identifier categoryId, int spentPoints, int earnedPoints, boolean announceNewPoints) {
 		this.categoryId = categoryId;
-		this.points = points;
+		this.spentPoints = spentPoints;
+		this.earnedPoints = earnedPoints;
 		this.announceNewPoints = announceNewPoints;
 	}
 
 	public static PointsUpdateInPacket read(PacketByteBuf buf) {
 		var categoryId = buf.readIdentifier();
-		var points = buf.readInt();
+		var spentPoints = buf.readInt();
+		var earnedPoints = buf.readInt();
 		var announceNewPoints = buf.readBoolean();
 
 		return new PointsUpdateInPacket(
 				categoryId,
-				points,
+				spentPoints,
+				earnedPoints,
 				announceNewPoints
 		);
 	}
@@ -31,8 +35,12 @@ public class PointsUpdateInPacket implements InPacket {
 		return categoryId;
 	}
 
-	public int getPoints() {
-		return points;
+	public int getSpentPoints() {
+		return spentPoints;
+	}
+
+	public int getEarnedPoints() {
+		return earnedPoints;
 	}
 
 	public boolean announceNewPoints() {

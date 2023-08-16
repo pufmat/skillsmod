@@ -339,7 +339,7 @@ public class SkillsMod {
 			}
 
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.setExperience(amount);
+				categoryData.setEarnedExperience(amount);
 
 				syncExperience(player, category, categoryData);
 				syncPoints(player, category, categoryData);
@@ -353,7 +353,7 @@ public class SkillsMod {
 				return Optional.empty();
 			}
 
-			return getCategoryDataIfUnlocked(player, category).map(CategoryData::getExperience);
+			return getCategoryDataIfUnlocked(player, category).map(CategoryData::getEarnedExperience);
 		});
 	}
 
@@ -451,7 +451,8 @@ public class SkillsMod {
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, PointsUpdateOutPacket.write(
 				category.getId(),
-				categoryData.getPointsLeft(category),
+				categoryData.getSpentPoints(category),
+				categoryData.getEarnedPoints(category),
 				player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)
 		));
 	}
@@ -459,7 +460,9 @@ public class SkillsMod {
 	private void syncExperience(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, ExperienceUpdateOutPacket.write(
 				category.getId(),
-				category.getExperience().getProgress(categoryData)
+				categoryData.getCurrentLevel(category),
+				categoryData.getCurrentExperience(category),
+				categoryData.getRequiredExperience(category)
 		));
 	}
 
@@ -562,7 +565,7 @@ public class SkillsMod {
 		@Override
 		public void onServerStarting(MinecraftServer server) {
 			categories = new ChangeListener<>(old -> old.ifPresent(map -> {
-				for (CategoryConfig category : map.values()) {
+				for (var category : map.values()) {
 					category.dispose(server);
 				}
 			}), null);
