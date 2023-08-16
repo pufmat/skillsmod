@@ -24,10 +24,28 @@ public class ClientSkillCategoryData {
 	private final Collection<ClientSkillConnectionData> connections;
 	private final Map<String, Collection<String>> neighbors;
 
-	private int pointsLeft;
-	private float experienceProgress;
+	private int spentPoints;
+	private int earnedPoints;
 
-	public ClientSkillCategoryData(Identifier id, Text title, ClientIconData icon, Identifier background, boolean exclusiveRoot, Map<String, ClientSkillDefinitionData> definitions, Map<String, ClientSkillData> skills, Collection<ClientSkillConnectionData> connections, int pointsLeft, float experienceProgress) {
+	private int currentLevel;
+	private int currentExperience;
+	private int requiredExperience;
+
+	public ClientSkillCategoryData(
+			Identifier id,
+			Text title,
+			ClientIconData icon,
+			Identifier background,
+			boolean exclusiveRoot,
+			Map<String, ClientSkillDefinitionData> definitions,
+			Map<String, ClientSkillData> skills,
+			Collection<ClientSkillConnectionData> connections,
+			int spentPoints,
+			int earnedPoints,
+			int currentLevel,
+			int currentExperience,
+			int requiredExperience
+	) {
 		this.id = id;
 		this.title = title;
 		this.icon = icon;
@@ -36,9 +54,12 @@ public class ClientSkillCategoryData {
 		this.definitions = definitions;
 		this.skills = skills;
 		this.connections = connections;
+		this.spentPoints = spentPoints;
+		this.earnedPoints = earnedPoints;
+		this.currentLevel = currentLevel;
+		this.currentExperience = currentExperience;
+		this.requiredExperience = requiredExperience;
 		this.neighbors = new HashMap<>();
-		this.pointsLeft = pointsLeft;
-		this.experienceProgress = experienceProgress;
 
 		for (var connection : connections) {
 			neighbors.compute(connection.getSkillAId(), (key, value) -> {
@@ -120,18 +141,54 @@ public class ClientSkillCategoryData {
 	}
 
 	public int getPointsLeft() {
-		return pointsLeft;
+		return earnedPoints - spentPoints;
 	}
 
-	public void setPointsLeft(int pointsLeft) {
-		this.pointsLeft = pointsLeft;
+	public int getSpentPoints() {
+		return spentPoints;
+	}
+
+	public void setSpentPoints(int spentPoints) {
+		this.spentPoints = spentPoints;
+	}
+
+	public int getEarnedPoints() {
+		return earnedPoints;
+	}
+
+	public void setEarnedPoints(int earnedPoints) {
+		this.earnedPoints = earnedPoints;
+	}
+
+	public int getCurrentLevel() {
+		return currentLevel;
+	}
+
+	public void setCurrentLevel(int currentLevel) {
+		this.currentLevel = currentLevel;
+	}
+
+	public int getCurrentExperience() {
+		return currentExperience;
+	}
+
+	public void setCurrentExperience(int currentExperience) {
+		this.currentExperience = currentExperience;
+	}
+
+	public int getRequiredExperience() {
+		return requiredExperience;
+	}
+
+	public void setRequiredExperience(int requiredExperience) {
+		this.requiredExperience = requiredExperience;
 	}
 
 	public float getExperienceProgress() {
-		return experienceProgress;
+		return ((float) currentExperience) / ((float) requiredExperience);
 	}
 
-	public void setExperienceProgress(float experienceProgress) {
-		this.experienceProgress = experienceProgress;
+	public int getExperienceToNextLevel() {
+		return requiredExperience - currentExperience;
 	}
 }
