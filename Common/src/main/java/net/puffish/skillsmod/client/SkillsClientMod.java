@@ -50,7 +50,12 @@ public class SkillsClientMod {
 		return instance;
 	}
 
-	public static void setup(ClientEventReceiver eventReceiver, KeyBindingReceiver keyBindingReceiver, ClientPacketSender packetSender, ClientPacketReceiver packetReceiver) {
+	public static void setup(
+			ClientEventReceiver eventReceiver,
+			KeyBindingReceiver keyBindingReceiver,
+			ClientPacketSender packetSender,
+			ClientPacketReceiver packetReceiver
+	) {
 		instance = new SkillsClientMod(packetSender);
 
 		keyBindingReceiver.registerKeyBinding(OPEN_KEY_BINDING, instance::onOpenKeyPress);
@@ -134,10 +139,17 @@ public class SkillsClientMod {
 			category.setEarnedPoints(packet.getEarnedPoints());
 			var newPointsLeft = category.getPointsLeft();
 
-			if (packet.announceNewPoints()) {
-				if (newPointsLeft > oldPointsLeft) {
-					MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(SkillsMod.createTranslatable("chat", "new_point", OPEN_KEY_BINDING.getBoundKeyLocalizedText()));
-				}
+			if (packet.announceNewPoints()
+					&& newPointsLeft > oldPointsLeft
+					&& category.hasAvailableSkill()
+			) {
+				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
+						SkillsMod.createTranslatable(
+								"chat",
+								"new_point",
+								OPEN_KEY_BINDING.getBoundKeyLocalizedText()
+						)
+				);
 			}
 		});
 	}
