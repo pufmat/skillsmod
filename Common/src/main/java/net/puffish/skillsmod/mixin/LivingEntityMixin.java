@@ -2,9 +2,9 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.access.DamageSourceAccess;
@@ -30,7 +30,7 @@ public abstract class LivingEntityMixin {
 		}
 
 		if (source.getAttacker() instanceof PlayerEntity player) {
-			if (source.isOf(DamageTypes.MOB_PROJECTILE)) {
+			if (source.isIn(DamageTypeTags.IS_PROJECTILE)) {
 				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RANGED_DAMAGE));
 				damage = (float) attribute.computeValueForInitial(damage);
 			} else {
@@ -93,7 +93,8 @@ public abstract class LivingEntityMixin {
 			worldChunk.antiFarmingCleanupOutdated();
 			SkillsAPI.visitExperienceSources(player, experienceSource -> {
 				if (experienceSource instanceof KillEntityExperienceSource entityExperienceSource) {
-					if (worldChunk.antiFarmingAddAndCheck(entityExperienceSource.getAntiFarming())) {
+					var antiFarming = entityExperienceSource.getAntiFarming();
+					if (antiFarming == null || worldChunk.antiFarmingAddAndCheck(antiFarming)) {
 						return entityExperienceSource.getValue(player, entity, weapon);
 					}
 				}
