@@ -1,24 +1,21 @@
 package net.puffish.skillsmod.utils;
 
-import java.util.function.Consumer;
-
 public class ChangeListener<T> {
-	private final Consumer<T> callback;
-	private T t;
+	private Runnable undo;
+	private T value;
 
-	public ChangeListener(Consumer<T> callback, T initial) {
-		this.callback = callback;
-		this.t = initial;
+	public ChangeListener(T value, Runnable undo) {
+		this.value = value;
+		this.undo = undo;
 	}
 
 	public T get() {
-		return t;
+		return value;
 	}
 
-	public void set(T t) {
-		if (this.t != null) {
-			this.callback.accept(this.t);
-		}
-		this.t = t;
+	public void set(T value, Runnable undo) {
+		this.undo.run();
+		this.value = value;
+		this.undo = undo;
 	}
 }

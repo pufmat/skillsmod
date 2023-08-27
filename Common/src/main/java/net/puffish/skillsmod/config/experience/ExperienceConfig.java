@@ -4,36 +4,35 @@ import net.minecraft.server.MinecraftServer;
 import net.puffish.skillsmod.config.ConfigContext;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ExperienceConfig {
-	private final boolean enabled;
 	private final ExperiencePerLevelConfig experiencePerLevel;
 	private final List<ExperienceSourceConfig> experienceSources;
 
-	private ExperienceConfig(boolean enabled, ExperiencePerLevelConfig experiencePerLevel, List<ExperienceSourceConfig> experienceSources) {
-		this.enabled = enabled;
+	private ExperienceConfig(ExperiencePerLevelConfig experiencePerLevel, List<ExperienceSourceConfig> experienceSources) {
 		this.experiencePerLevel = experiencePerLevel;
 		this.experienceSources = experienceSources;
 	}
 
-	public static Result<ExperienceConfig, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
+	public static Result<Optional<ExperienceConfig>, Failure> parse(JsonElementWrapper rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
 				.andThen(rootObject -> parse(rootObject, context));
 	}
 
-	public static Result<ExperienceConfig, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
+	public static Result<Optional<ExperienceConfig>, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		var failures = new ArrayList<Failure>();
 
-		var optEnabled = rootObject.getBoolean("enabled")
-				.ifFailure(failures::add)
-				.getSuccess();
+		// Deprecated
+		var enabled = rootObject.getBoolean("enabled")
+				.getSuccess()
+				.orElse(true);
 
 		var optExperiencePerLevel = rootObject.get("experience_per_level")
 				.andThen(ExperiencePerLevelConfig::parse)
@@ -47,11 +46,14 @@ public class ExperienceConfig {
 				.orElseGet(List::of);
 
 		if (failures.isEmpty()) {
-			return Result.success(new ExperienceConfig(
-					optEnabled.orElseThrow(),
-					optExperiencePerLevel.orElseThrow(),
-					experienceSources
-			));
+			if (enabled) {
+				return Result.success(Optional.of(new ExperienceConfig(
+						optExperiencePerLevel.orElseThrow(),
+						experienceSources
+				)));
+			} else {
+				return Result.success(Optional.empty());
+			}
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
 		}
@@ -95,10 +97,6 @@ public class ExperienceConfig {
 		for (var experienceSource : experienceSources) {
 			experienceSource.dispose(server);
 		}
-	}
-
-	public boolean isEnabled() {
-		return enabled;
 	}
 
 	public ExperiencePerLevelConfig getExperiencePerLevel() {

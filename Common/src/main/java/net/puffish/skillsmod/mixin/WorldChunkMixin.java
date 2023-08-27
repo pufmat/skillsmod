@@ -19,10 +19,6 @@ public abstract class WorldChunkMixin implements WorldChunkAccess {
 	@Override
 	@Unique
 	public boolean antiFarmingAddAndCheck(KillEntityExperienceSource.AntiFarming antiFarming) {
-		if (!antiFarming.enabled()) {
-			return true;
-		}
-
 		var data = antiFarmingData.computeIfAbsent(antiFarming, key -> new LongArrayList());
 
 		if (data.size() < antiFarming.limitPerChunk()) {

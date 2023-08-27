@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class ConfigReader {
 	public abstract Result<JsonElementWrapper, Failure> read(Path path);
+	public abstract boolean exists(Path path);
 
 	public Result<Map<Identifier, CategoryConfig>, Failure> readCategories(String namespace, List<String> ids, ConfigContext context) {
 		var failures = new ArrayList<Failure>();
@@ -39,34 +41,38 @@ public abstract class ConfigReader {
 	public Result<CategoryConfig, Failure> readCategory(String namespace, String id, ConfigContext context) {
 		var failures = new ArrayList<Failure>();
 
-		var generalElement = read(Path.of("categories", id, "category.json"))
+		var optGeneralElement = read(Path.of("categories", id, "category.json"))
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var definitionsElement = read(Path.of("categories", id, "definitions.json"))
+		var optDefinitionsElement = read(Path.of("categories", id, "definitions.json"))
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var skillsElement = read(Path.of("categories", id, "skills.json"))
+		var optSkillsElement = read(Path.of("categories", id, "skills.json"))
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var connectionsElement = read(Path.of("categories", id, "connections.json"))
+		var optConnectionsElement = read(Path.of("categories", id, "connections.json"))
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var experienceElement = read(Path.of("categories", id, "experience.json"))
-				.ifFailure(failures::add)
-				.getSuccess();
+		var optExperienceElement = Optional.<JsonElementWrapper>empty();
+		var experiencePath = Path.of("categories", id, "experience.json");
+		if (exists(experiencePath)) {
+			optExperienceElement = read(experiencePath)
+					.ifFailure(failures::add)
+					.getSuccess();
+		}
 
 		if (failures.isEmpty()) {
 			return CategoryConfig.parse(
 					Identifier.of(namespace, id),
-					generalElement.orElseThrow(),
-					definitionsElement.orElseThrow(),
-					skillsElement.orElseThrow(),
-					connectionsElement.orElseThrow(),
-					experienceElement.orElseThrow(),
+					optGeneralElement.orElseThrow(),
+					optDefinitionsElement.orElseThrow(),
+					optSkillsElement.orElseThrow(),
+					optConnectionsElement.orElseThrow(),
+					optExperienceElement,
 					context
 			);
 		} else {

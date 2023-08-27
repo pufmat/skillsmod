@@ -175,19 +175,25 @@ public class CategoryData {
 	}
 
 	public int getCurrentLevel(CategoryConfig category) {
-		return category.getExperience().getCurrentLevel(earnedExperience);
+		return category.getExperience()
+				.map(experience -> experience.getCurrentLevel(earnedExperience))
+				.orElse(0);
 	}
 
 	public int getCurrentExperience(CategoryConfig category) {
-		return category.getExperience().getCurrentExperience(earnedExperience);
+		return category.getExperience()
+				.map(experience -> experience.getCurrentExperience(earnedExperience))
+				.orElse(0);
 	}
 
 	public int getRequiredExperience(CategoryConfig category) {
-		return category.getExperience().getRequiredExperience(getCurrentLevel(category));
+		return category.getExperience()
+				.map(experience -> experience.getRequiredExperience(getCurrentLevel(category)))
+				.orElse(0);
 	}
 
 	public int getPointsForExperience(CategoryConfig category) {
-		if (category.getExperience().isEnabled()) {
+		if (category.getExperience().isPresent()) {
 			return getCurrentLevel(category);
 		}
 		return 0;
