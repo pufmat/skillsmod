@@ -111,6 +111,12 @@ public class ClientSkillCategoryData {
 		}
 	}
 
+	public boolean hasAvailableSkill() {
+		return skills.values()
+				.stream()
+				.anyMatch(skill -> skill.getState() == SkillState.AVAILABLE);
+	}
+
 	public Identifier getId() {
 		return id;
 	}
