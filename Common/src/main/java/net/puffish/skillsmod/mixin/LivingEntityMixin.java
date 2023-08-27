@@ -93,8 +93,11 @@ public abstract class LivingEntityMixin {
 			worldChunk.antiFarmingCleanupOutdated();
 			SkillsAPI.visitExperienceSources(player, experienceSource -> {
 				if (experienceSource instanceof KillEntityExperienceSource entityExperienceSource) {
-					var antiFarming = entityExperienceSource.getAntiFarming();
-					if (antiFarming == null || worldChunk.antiFarmingAddAndCheck(antiFarming)) {
+					if (entityExperienceSource
+							.getAntiFarming()
+							.map(worldChunk::antiFarmingAddAndCheck)
+							.orElse(true)
+					) {
 						return entityExperienceSource.getValue(player, entity, weapon);
 					}
 				}

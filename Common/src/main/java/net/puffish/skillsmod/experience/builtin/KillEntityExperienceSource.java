@@ -27,6 +27,8 @@ import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class KillEntityExperienceSource implements ExperienceSource {
 	public static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
@@ -46,11 +48,11 @@ public class KillEntityExperienceSource implements ExperienceSource {
 	);
 
 	private final CalculationManager<Context> manager;
-	private final AntiFarming antiFarming;
+	private final Optional<AntiFarming> optAntiFarming;
 
-	private KillEntityExperienceSource(CalculationManager<Context> calculated, AntiFarming antiFarming) {
+	private KillEntityExperienceSource(CalculationManager<Context> calculated, Optional<AntiFarming> optAntiFarming) {
 		this.manager = calculated;
-		this.antiFarming = antiFarming;
+		this.optAntiFarming = optAntiFarming;
 	}
 
 	public static void register() {
@@ -68,47 +70,54 @@ public class KillEntityExperienceSource implements ExperienceSource {
 				.getSuccess();
 
 		var optAntiFarming = rootObject.get("anti_farming")
-				.andThen(AntiFarming::parse)
-				.ifFailure(failures::add)
-				.getSuccess();
+				.getSuccess()
+				.flatMap(element -> AntiFarming.parse(element)
+						.ifFailure(failures::add)
+						.getSuccess()
+						.flatMap(Function.identity())
+				);
 
 		if (failures.isEmpty()) {
 			return Result.success(new KillEntityExperienceSource(
 					optCalculated.orElseThrow(),
-					optAntiFarming.orElseThrow()
+					optAntiFarming
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
 		}
 	}
 
-	public record AntiFarming(boolean enabled, int limitPerChunk, int resetAfterSeconds) {
-		public static Result<AntiFarming, Failure> parse(JsonElementWrapper rootElement) {
+	public record AntiFarming(int limitPerChunk, int resetAfterSeconds) {
+		public static Result<Optional<AntiFarming>, Failure> parse(JsonElementWrapper rootElement) {
 			return rootElement.getAsObject()
 					.andThen(AntiFarming::parse);
 		}
 
-		public static Result<AntiFarming, Failure> parse(JsonObjectWrapper rootObject) {
+		public static Result<Optional<AntiFarming>, Failure> parse(JsonObjectWrapper rootObject) {
 			var failures = new ArrayList<Failure>();
 
+			// Deprecated
 			var enabled = rootObject.getBoolean("enabled")
+					.getSuccess()
+					.orElse(true);
+
+			var optLimitPerChunk = rootObject.getInt("limit_per_chunk")
 					.ifFailure(failures::add)
 					.getSuccess();
 
-			var limitPerChunk = rootObject.getInt("limit_per_chunk")
-					.ifFailure(failures::add)
-					.getSuccess();
-
-			var resetAfterSeconds = rootObject.getInt("reset_after_seconds")
+			var optResetAfterSeconds = rootObject.getInt("reset_after_seconds")
 					.ifFailure(failures::add)
 					.getSuccess();
 
 			if (failures.isEmpty()) {
-				return Result.success(new AntiFarming(
-						enabled.orElseThrow(),
-						limitPerChunk.orElseThrow(),
-						resetAfterSeconds.orElseThrow()
-				));
+				if (enabled) {
+					return Result.success(Optional.of(new AntiFarming(
+							optLimitPerChunk.orElseThrow(),
+							optResetAfterSeconds.orElseThrow()
+					)));
+				} else {
+					return Result.success(Optional.empty());
+				}
 			} else {
 				return Result.failure(ManyFailures.ofList(failures));
 			}
@@ -133,8 +142,8 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		return manager.getValue(new Context(player, entity, weapon));
 	}
 
-	public AntiFarming getAntiFarming() {
-		return antiFarming;
+	public Optional<AntiFarming> getAntiFarming() {
+		return optAntiFarming;
 	}
 
 	@Override
