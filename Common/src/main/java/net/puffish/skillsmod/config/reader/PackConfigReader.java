@@ -47,4 +47,16 @@ public class PackConfigReader extends ConfigReader {
 			return Result.failure(SingleFailure.of("Failed to read resource `" + id + "`"));
 		}
 	}
+
+	@Override
+	public boolean exists(Path path) {
+		var id = new Identifier(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
+
+		try {
+			resourceManager.getResource(id);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }

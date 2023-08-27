@@ -84,7 +84,10 @@ public class SkillsMod {
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
 
-	private ChangeListener<Optional<Map<Identifier, CategoryConfig>>> categories = null;
+	private final ChangeListener<Optional<Map<Identifier, CategoryConfig>>> categories = new ChangeListener<>(
+			Optional.empty(),
+			() -> { }
+	);
 
 	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender) {
 		this.modConfigDir = modConfigDir;
@@ -202,14 +205,18 @@ public class SkillsMod {
 				.peek(modConfig -> {
 					cumulatedMap.putAll(loadPackConfig(modConfig, context));
 
-					categories.set(Optional.of(cumulatedMap));
+					categories.set(Optional.of(cumulatedMap), () -> {
+						for (var category : cumulatedMap.values()) {
+							category.dispose(context.server());
+						}
+					});
 				}, failure -> {
 					logger.error("Configuration could not be loaded:"
 							+ System.lineSeparator()
 							+ failure.getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
 					);
 
-					categories.set(Optional.empty());
+					categories.set(Optional.empty(), () -> { });
 				});
 	}
 
@@ -325,7 +332,7 @@ public class SkillsMod {
 
 	public void addExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
-			if (!category.getExperience().isEnabled()) {
+			if (category.getExperience().isEmpty()) {
 				return;
 			}
 
@@ -340,7 +347,7 @@ public class SkillsMod {
 
 	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
-			if (!category.getExperience().isEnabled()) {
+			if (category.getExperience().isEmpty()) {
 				return;
 			}
 
@@ -355,7 +362,7 @@ public class SkillsMod {
 
 	public Optional<Integer> getExperience(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).flatMap(category -> {
-			if (!category.getExperience().isEnabled()) {
+			if (category.getExperience().isEmpty()) {
 				return Optional.empty();
 			}
 
@@ -472,10 +479,10 @@ public class SkillsMod {
 
 	public void visitExperienceSources(ServerPlayerEntity player, Function<ExperienceSource, Integer> function) {
 		for (CategoryConfig category : getAllCategories()) {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
+			category.getExperience().ifPresent(experience -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 				int amount = 0;
 
-				for (ExperienceSourceConfig experienceSource : category.getExperience().getExperienceSources()) {
+				for (ExperienceSourceConfig experienceSource : experience.getExperienceSources()) {
 					amount += function.apply(experienceSource.getInstance());
 				}
 
@@ -485,7 +492,7 @@ public class SkillsMod {
 					syncExperience(player, category, categoryData);
 					syncPoints(player, category, categoryData);
 				}
-			});
+			}));
 		}
 	}
 
@@ -565,12 +572,6 @@ public class SkillsMod {
 
 		@Override
 		public void onServerStarting(MinecraftServer server) {
-			categories = new ChangeListener<>(old -> old.ifPresent(map -> {
-				for (var category : map.values()) {
-					category.dispose(server);
-				}
-			}), null);
-
 			loadModConfig(new ConfigContext(server));
 		}
 
