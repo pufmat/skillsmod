@@ -15,8 +15,6 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.server.data.CategoryData;
 
-import java.util.Optional;
-
 public class ShowCategoryOutPacket extends OutPacket {
 	public static ShowCategoryOutPacket write(CategoryConfig category, CategoryData categoryData) {
 		var packet = new ShowCategoryOutPacket();
@@ -33,7 +31,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		write(buf, category.getConnections());
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getEarnedPoints(category));
-		if (category.getExperience().isEnabled()) {
+		if (category.getExperience().isPresent()) {
 			buf.writeBoolean(true);
 			buf.writeInt(categoryData.getCurrentLevel(category));
 			buf.writeInt(categoryData.getCurrentExperience(category));

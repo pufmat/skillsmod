@@ -6,6 +6,7 @@ import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileConfigReader extends ConfigReader {
@@ -26,5 +27,10 @@ public class FileConfigReader extends ConfigReader {
 	@Override
 	public Result<JsonElementWrapper, Failure> read(Path path) {
 		return readFile(modConfigDir.resolve(path));
+	}
+
+	@Override
+	public boolean exists(Path path) {
+		return Files.exists(modConfigDir.resolve(path));
 	}
 }

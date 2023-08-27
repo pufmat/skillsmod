@@ -38,4 +38,11 @@ public class PackConfigReader extends ConfigReader {
 				.map(resource -> readResource(id, resource))
 				.orElseGet(() -> Result.failure(SingleFailure.of("Resource `" + id + "` does not exist")));
 	}
+
+	@Override
+	public boolean exists(Path path) {
+		var id = Identifier.of(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
+
+		return resourceManager.getResource(id).isPresent();
+	}
 }
