@@ -23,8 +23,10 @@ public class SkillDefinitionConfig {
 	private final AdvancementFrame frame;
 	private final List<SkillRewardConfig> rewards;
 	private final int cost;
+	private final int requiredPoints;
+	private final int requiredSpentPoints;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, AdvancementFrame frame, List<SkillRewardConfig> rewards, int cost) {
+	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, AdvancementFrame frame, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -32,6 +34,8 @@ public class SkillDefinitionConfig {
 		this.frame = frame;
 		this.rewards = rewards;
 		this.cost = cost;
+		this.requiredPoints = requiredPoints;
+		this.requiredSpentPoints = requiredSpentPoints;
 	}
 
 	public static Result<SkillDefinitionConfig, Failure> parse(String id, JsonElementWrapper rootElement, ConfigContext context) {
@@ -78,6 +82,14 @@ public class SkillDefinitionConfig {
 				.getSuccess() // ignore failure because this property is optional
 				.orElse(1);
 
+		var requiredPoints = rootObject.getInt("required_points")
+				.getSuccess() // ignore failure because this property is optional
+				.orElse(0);
+
+		var requiredSpentPoints = rootObject.getInt("required_spent_points")
+				.getSuccess() // ignore failure because this property is optional
+				.orElse(0);
+
 		if (failures.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
@@ -86,7 +98,9 @@ public class SkillDefinitionConfig {
 					optIcon.orElseThrow(),
 					frame,
 					rewards,
-					cost
+					cost,
+					requiredPoints,
+					requiredSpentPoints
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -125,5 +139,13 @@ public class SkillDefinitionConfig {
 
 	public int getCost() {
 		return cost;
+	}
+
+	public int getRequiredPoints() {
+		return requiredPoints;
+	}
+
+	public int getRequiredSpentPoints() {
+		return requiredSpentPoints;
 	}
 }
