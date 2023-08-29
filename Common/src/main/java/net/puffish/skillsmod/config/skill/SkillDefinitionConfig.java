@@ -4,6 +4,7 @@ import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.puffish.skillsmod.config.ConfigContext;
+import net.puffish.skillsmod.config.FrameConfig;
 import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
@@ -20,13 +21,13 @@ public class SkillDefinitionConfig {
 	private final Text title;
 	private final Text description;
 	private final IconConfig icon;
-	private final AdvancementFrame frame;
+	private final FrameConfig frame;
 	private final List<SkillRewardConfig> rewards;
 	private final int cost;
 	private final int requiredPoints;
 	private final int requiredSpentPoints;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, AdvancementFrame frame, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
+	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, FrameConfig frame, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -67,10 +68,12 @@ public class SkillDefinitionConfig {
 		var frame = rootObject.get("frame")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(frameElement -> JsonParseUtils.parseFrame(frameElement)
+						.mapSuccess(FrameConfig::fromAdvancementFrame)
+						.orElse(failure -> FrameConfig.parse(frameElement))
 						.ifFailure(failures::add)
 						.getSuccess()
 				)
-				.orElse(AdvancementFrame.TASK);
+				.orElseGet(() -> FrameConfig.fromAdvancementFrame(AdvancementFrame.TASK));
 
 		var rewards = rootObject.getArray("rewards")
 				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(ManyFailures::ofList))
@@ -125,7 +128,7 @@ public class SkillDefinitionConfig {
 		return description;
 	}
 
-	public AdvancementFrame getFrame() {
+	public FrameConfig getFrame() {
 		return frame;
 	}
 

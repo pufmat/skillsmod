@@ -12,9 +12,7 @@ import net.puffish.skillsmod.rewards.Reward;
 import net.puffish.skillsmod.rewards.RewardContext;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.ManyFailures;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
