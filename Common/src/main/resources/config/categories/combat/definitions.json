@@ -1,7 +1,12 @@
 {
 	"root_health+2": {
 		"title": "+1 Heart",
-		"frame": "challenge",
+		"frame": {
+			"type": "advancement",
+			"data": {
+				"frame": "challenge"
+			}
+		},
 		"icon": {
 			"type": "effect",
 			"data": {
@@ -21,7 +26,12 @@
 	},
 	"root_resistance+1%": {
 		"title": "+1% Resistance",
-		"frame": "challenge",
+		"frame": {
+			"type": "advancement",
+			"data": {
+				"frame": "challenge"
+			}
+		},
 		"icon": {
 			"type": "effect",
 			"data": {
@@ -41,7 +51,12 @@
 	},
 	"root_melee_damage+3%": {
 		"title": "+3% Melee Damage",
-		"frame": "challenge",
+		"frame": {
+			"type": "advancement",
+			"data": {
+				"frame": "challenge"
+			}
+		},
 		"icon": {
 			"type": "effect",
 			"data": {
@@ -61,7 +76,12 @@
 	},
 	"root_ranged_damage+3%": {
 		"title": "+3% Ranged Damage",
-		"frame": "challenge",
+		"frame": {
+			"type": "advancement",
+			"data": {
+				"frame": "challenge"
+			}
+		},
 		"icon": {
 			"type": "item",
 			"data": {

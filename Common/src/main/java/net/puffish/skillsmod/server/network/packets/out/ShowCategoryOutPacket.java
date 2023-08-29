@@ -3,6 +3,7 @@ package net.puffish.skillsmod.server.network.packets.out;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
+import net.puffish.skillsmod.config.FrameConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
@@ -56,7 +57,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeString(definition.getId());
 		buf.writeText(definition.getTitle());
 		buf.writeText(definition.getDescription());
-		buf.writeEnumConstant(definition.getFrame());
+		write(buf, definition.getFrame());
 		write(buf, definition.getIcon());
 	}
 
@@ -87,6 +88,11 @@ public class ShowCategoryOutPacket extends OutPacket {
 	public static void write(PacketByteBuf buf, IconConfig icon) {
 		buf.writeString(icon.getType());
 		buf.writeNullable(icon.getData(), (buf1, element) -> buf1.writeString(element.toString()));
+	}
+
+	public static void write(PacketByteBuf buf, FrameConfig frame) {
+		buf.writeString(frame.getType());
+		buf.writeNullable(frame.getData(), (buf1, element) -> buf1.writeString(element.toString()));
 	}
 
 	@Override
