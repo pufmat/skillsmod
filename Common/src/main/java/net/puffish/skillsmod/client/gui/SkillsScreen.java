@@ -23,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.SkillsClientMod;
+import net.puffish.skillsmod.client.data.ClientFrameData;
 import net.puffish.skillsmod.client.data.ClientIconData;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillData;
@@ -313,6 +314,74 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
+	private void drawFrame(MatrixStack matrices, ClientFrameData frame, int x, int y, SkillState state) {
+		if (client == null) {
+			return;
+		}
+
+		if (frame instanceof ClientFrameData.AdvancementFrameData advancementFrame) {
+			var status = state == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
+			switch (state) {
+				case LOCKED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
+				case EXCLUDED -> RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+			}
+
+			RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
+			drawTexture(
+					matrices,
+					x - 13,
+					y - 13,
+					advancementFrame.getFrame().getTextureV(),
+					128 + status.getSpriteIndex() * 26,
+					26,
+					26
+			);
+		} else if (frame instanceof ClientFrameData.TextureFrameData textureFrame) {
+			var texture = switch (state) {
+				case AVAILABLE -> {
+					RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+					yield textureFrame.getAvailableTexture();
+				}
+				case UNLOCKED -> {
+					RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+					yield textureFrame.getUnlockedTexture();
+				}
+				case LOCKED -> {
+					if (textureFrame.getLockedTexture() != null) {
+						RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+						yield textureFrame.getLockedTexture();
+					} else {
+						RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
+						yield textureFrame.getAvailableTexture();
+					}
+				}
+				case EXCLUDED -> {
+					if (textureFrame.getExcludedTexture() != null) {
+						RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+						yield textureFrame.getExcludedTexture();
+					} else {
+						RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+						yield textureFrame.getAvailableTexture();
+					}
+				}
+			};
+
+			RenderSystem.setShaderTexture(0, texture);
+			drawTexture(
+					matrices,
+					x - 13,
+					y - 13,
+					0,
+					0,
+					26,
+					26,
+					26,
+					26
+			);
+		}
+	}
+
 	private void drawContent(MatrixStack matrices, double mouseX, double mouseY) {
 		if (client == null) {
 			return;
@@ -432,16 +501,7 @@ public class SkillsScreen extends Screen {
 				continue;
 			}
 
-			var status = skill.getState() == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
-			switch (skill.getState()) {
-				case LOCKED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
-				case EXCLUDED -> RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
-				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-			}
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-
-			drawTexture(matrices, skill.getX() - 13, skill.getY() - 13, definition.getFrame().getTextureV(), 128 + status.getSpriteIndex() * 26, 26, 26);
+			drawFrame(matrices, definition.getFrame(), skill.getX(), skill.getY(), skill.getState());
 
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			drawIcon(matrices, skill.getX(), skill.getY(), definition.getIcon());
