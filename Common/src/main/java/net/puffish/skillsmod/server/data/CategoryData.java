@@ -99,7 +99,11 @@ public class CategoryData {
 						return false;
 					}
 
-					if (getPointsLeft(category) < definition.getCost()) {
+					if (getPointsLeft(category) < Math.max(definition.getRequiredPoints(), definition.getCost())) {
+						return false;
+					}
+
+					if (getSpentPoints(category) < definition.getRequiredSpentPoints()) {
 						return false;
 					}
 				}
