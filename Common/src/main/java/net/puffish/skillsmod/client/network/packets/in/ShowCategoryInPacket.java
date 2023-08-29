@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
-import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.network.PacketByteBuf;
+import net.puffish.skillsmod.client.data.ClientFrameData;
 import net.puffish.skillsmod.client.data.ClientIconData;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillConnectionData;
@@ -11,7 +11,6 @@ import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonPath;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.skill.SkillState;
-import net.puffish.skillsmod.utils.JsonParseUtils;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -84,7 +83,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var id = buf.readString();
 		var title = buf.readText();
 		var description = buf.readText();
-		var frame = buf.readEnumConstant(AdvancementFrame.class);
+		var frame = readFrameIcon(buf);
 		var icon = readSkillIcon(buf);
 
 		return new ClientSkillDefinitionData(id, title, description, frame, icon);
@@ -95,21 +94,22 @@ public class ShowCategoryInPacket implements InPacket {
 		return buf.readOptional(PacketByteBuf::readString)
 				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.createNamed("Client Skill Icon")).getSuccess())
 				.flatMap(rootElement -> switch (type) {
-					case "item" -> JsonParseUtils.parseItemStack(rootElement)
-							.getSuccess()
-							.map(ClientIconData.ItemIconData::new);
-					case "effect" -> rootElement.getAsObject()
-							.andThen(rootObject -> rootObject.get("effect"))
-							.andThen(JsonParseUtils::parseEffect)
-							.getSuccess()
-							.map(ClientIconData.EffectIconData::new);
-					case "texture" -> rootElement.getAsObject()
-							.andThen(rootObject -> rootObject.get("texture"))
-							.andThen(JsonParseUtils::parseIdentifier)
-							.getSuccess()
-							.map(ClientIconData.TextureIconData::new);
+					case "item" -> ClientIconData.ItemIconData.parse(rootElement).getSuccess();
+					case "effect" -> ClientIconData.EffectIconData.parse(rootElement).getSuccess();
+					case "texture" -> ClientIconData.TextureIconData.parse(rootElement).getSuccess();
 					default -> Optional.empty();
 				}).orElseGet(ClientIconData.TextureIconData::createMissing);
+	}
+
+	public static ClientFrameData readFrameIcon(PacketByteBuf buf) {
+		var type = buf.readString();
+		return buf.readOptional(PacketByteBuf::readString)
+				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.createNamed("Client Frame Icon")).getSuccess())
+				.flatMap(rootElement -> switch (type) {
+					case "advancement" -> ClientFrameData.AdvancementFrameData.parse(rootElement).getSuccess();
+					case "texture" -> ClientFrameData.TextureFrameData.parse(rootElement).getSuccess();
+					default -> Optional.empty();
+				}).orElseGet(ClientFrameData.TextureFrameData::createMissing);
 	}
 
 	public static ClientSkillData readSkill(PacketByteBuf buf) {
