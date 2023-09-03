@@ -46,7 +46,8 @@ public class ShowCategoryInPacket implements InPacket {
 				.stream()
 				.collect(Collectors.toMap(ClientSkillData::getId, skill -> skill));
 
-		var connections = buf.readList(ShowCategoryInPacket::readSkillConnection);
+		var normalConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
+		var exclusiveConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
 
 		var spentPoints = buf.readInt();
 		var earnedPoints = buf.readInt();
@@ -69,7 +70,8 @@ public class ShowCategoryInPacket implements InPacket {
 				spentPointsLimit,
 				definitions,
 				skills,
-				connections,
+				normalConnections,
+				exclusiveConnections,
 				spentPoints,
 				earnedPoints,
 				currentLevel,

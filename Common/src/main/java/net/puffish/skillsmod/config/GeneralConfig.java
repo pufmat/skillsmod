@@ -55,9 +55,9 @@ public class GeneralConfig {
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var optExclusiveRoot = rootObject.getBoolean("exclusive_root")
-				.ifFailure(failures::add)
-				.getSuccess();
+		var exclusiveRoot = rootObject.getBoolean("exclusive_root")
+				.getSuccess() // ignore failure because this property is optional
+				.orElse(false);
 
 		var spentPointsLimit = rootObject.get("spent_points_limit")
 				.getSuccess() // ignore failure because this property is optional
@@ -73,7 +73,7 @@ public class GeneralConfig {
 					optIcon.orElseThrow(),
 					optBackground.orElseThrow(),
 					optUnlockedByDefault.orElseThrow(),
-					optExclusiveRoot.orElseThrow(),
+					exclusiveRoot,
 					spentPointsLimit
 			));
 		} else {
