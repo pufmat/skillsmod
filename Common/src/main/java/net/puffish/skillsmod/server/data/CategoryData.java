@@ -68,8 +68,21 @@ public class CategoryData {
 			return SkillState.UNLOCKED;
 		}
 
-		var normalIncomingNeighborsIds = category.getConnections().getNormal().getNeighbors().get(skill.getId());
-		if (normalIncomingNeighborsIds == null || normalIncomingNeighborsIds.stream().anyMatch(unlockedSkills::contains)) {
+		if (category.getConnections()
+				.getExclusive()
+				.getNeighborsFor(skill.getId())
+				.map(neighbors -> neighbors.stream().anyMatch(unlockedSkills::contains))
+				.orElse(false)
+		) {
+			return SkillState.EXCLUDED;
+		}
+
+		if (category.getConnections()
+				.getNormal()
+				.getNeighborsFor(skill.getId())
+				.map(neighbors -> neighbors.stream().anyMatch(unlockedSkills::contains))
+				.orElse(true)
+		) {
 			return SkillState.AVAILABLE;
 		}
 
@@ -129,8 +142,6 @@ public class CategoryData {
 				.filter(skill -> getSkillState(category, skill) == SkillState.UNLOCKED)
 				.count();
 	}
-
-
 
 	public void refreshReward(CategoryConfig category, ServerPlayerEntity player, Identifier type) {
 		for (var definition : category.getDefinitions().getAll()) {

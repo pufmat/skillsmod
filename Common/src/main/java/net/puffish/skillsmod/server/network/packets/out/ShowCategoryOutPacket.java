@@ -68,6 +68,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 
 	public static void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
 		buf.writeCollection(connections.getNormal().getAll(), ShowCategoryOutPacket::write);
+		buf.writeCollection(connections.getExclusive().getAll(), ShowCategoryOutPacket::write);
 	}
 
 	public static void write(PacketByteBuf buf, SkillConfig skill, CategoryConfig category, CategoryData categoryData) {

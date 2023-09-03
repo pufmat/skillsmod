@@ -1,6 +1,5 @@
 {
 	"unlocked_by_default": true,
-	"exclusive_root": true,
 	"title": "Combat",
 	"icon": {
 		"type": "item",
