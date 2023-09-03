@@ -371,19 +371,60 @@ public class SkillsScreen extends Screen {
 				16
 		);
 
-		for (var connection : getActiveCategory().getConnections()) {
+		for (var connection : getActiveCategory().getNormalConnections()) {
 			var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
 			var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
 			if (skillA != null && skillB != null) {
-				drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 3, 0xff000000);
-				if (!connection.isBidirectional()) {
-					drawArrow(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 8, 0xff000000);
-				}
-				drawLine(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 1, 0xffffffff);
-				if (!connection.isBidirectional()) {
-					drawArrow(matrices, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 6, 0xffffffff);
-				}
+				drawConnection(
+						matrices,
+						skillA.getX(),
+						skillA.getY(),
+						skillB.getX(),
+						skillB.getY(),
+						!connection.isBidirectional(),
+						0xffffff
+				);
 			}
+		}
+
+		if (isInsideContent(mouse)) {
+			var optHoveredSkill = getActiveCategory()
+					.getSkills()
+					.values()
+					.stream()
+					.filter(skill -> isInsideSkill(transformedMouse, skill))
+					.findFirst();
+
+			optHoveredSkill.ifPresent(hoveredSkill -> {
+				var definition = getActiveCategory().getDefinitions().get(hoveredSkill.getDefinitionId());
+				if (definition == null) {
+					return;
+				}
+
+				tooltip = Stream.concat(
+						textRenderer.wrapLines(definition.getTitle(), 170).stream(),
+						textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170).stream()
+				).toList();
+
+				var connections = getActiveCategory().getExclusiveConnections().get(hoveredSkill.getId());
+				if (connections != null) {
+					for (var connection : connections) {
+						var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
+						var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
+						if (skillA != null && skillB != null) {
+							drawConnection(
+									matrices,
+									skillA.getX(),
+									skillA.getY(),
+									skillB.getX(),
+									skillB.getY(),
+									!connection.isBidirectional(),
+									0xff0000
+							);
+						}
+					}
+				}
+			});
 		}
 
 		for (var skill : getActiveCategory().getSkills().values()) {
@@ -393,26 +434,18 @@ public class SkillsScreen extends Screen {
 			}
 
 			var status = skill.getState() == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
-			if (skill.getState() == SkillState.LOCKED) {
-				RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
-			} else {
-				RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+			switch (skill.getState()) {
+				case LOCKED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
+				case EXCLUDED -> RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			}
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
 
-			this.drawTexture(matrices, skill.getX() - 13, skill.getY() - 13, definition.getFrame().getTextureV(), 128 + status.getSpriteIndex() * 26, 26, 26);
+			drawTexture(matrices, skill.getX() - 13, skill.getY() - 13, definition.getFrame().getTextureV(), 128 + status.getSpriteIndex() * 26, 26, 26);
 
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			drawIcon(matrices, skill.getX(), skill.getY(), definition.getIcon());
-
-			if (isInsideSkill(transformedMouse, skill) && isInsideContent(mouse)) {
-				tooltip = Stream.concat(
-						textRenderer.wrapLines(definition.getTitle(), 170).stream(),
-						textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170).stream()
-				).toList();
-			}
-
 		}
 
 		matrices.pop();
@@ -435,12 +468,31 @@ public class SkillsScreen extends Screen {
 		matrices.pop();
 	}
 
+	private void drawConnection(
+			MatrixStack matrices,
+			float startX,
+			float startY,
+			float endX,
+			float endY,
+			boolean unidirectional,
+			int rgb
+	) {
+		drawLine(matrices, startX, startY, endX, endY, 3, 0xff000000);
+		if (unidirectional) {
+			drawArrow(matrices, startX, startY, endX, endY, 8, 0xff000000);
+		}
+		drawLine(matrices, startX, startY, endX, endY, 1, rgb | 0xff000000);
+		if (unidirectional) {
+			drawArrow(matrices, startX, startY, endX, endY, 6, rgb | 0xff000000);
+		}
+	}
+
 	private void drawLine(
 			MatrixStack matrices,
-			int startX,
-			int startY,
-			int endX,
-			int endY,
+			float startX,
+			float startY,
+			float endX,
+			float endY,
 			int thickness,
 			int color
 	) {
@@ -820,10 +872,10 @@ public class SkillsScreen extends Screen {
 			}
 
 			RenderSystem.setShaderTexture(0, InGameHud.GUI_ICONS_TEXTURE);
-			this.drawTexture(matrices, tmpX, tmpY, 0, 64, 182, 5);
+			drawTexture(matrices, tmpX, tmpY, 0, 64, 182, 5);
 			int width = Math.min(182, (int) (getActiveCategory().getExperienceProgress() * 183f));
 			if (width > 0) {
-				this.drawTexture(matrices, tmpX, tmpY, 0, 69, width, 5);
+				drawTexture(matrices, tmpX, tmpY, 0, 69, width, 5);
 			}
 
 			if (isInsideExperience(mouse, tmpX, tmpY)) {
