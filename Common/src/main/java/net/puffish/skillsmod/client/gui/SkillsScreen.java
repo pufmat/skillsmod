@@ -339,19 +339,60 @@ public class SkillsScreen extends Screen {
 				16
 		);
 
-		for (var connection : getActiveCategory().getConnections()) {
+		for (var connection : getActiveCategory().getNormalConnections()) {
 			var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
 			var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
 			if (skillA != null && skillB != null) {
-				drawLine(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 3, 0xff000000);
-				if (!connection.isBidirectional()) {
-					drawArrow(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 8, 0xff000000);
-				}
-				drawLine(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 1, 0xffffffff);
-				if (!connection.isBidirectional()) {
-					drawArrow(context, skillA.getX(), skillA.getY(), skillB.getX(), skillB.getY(), 6, 0xffffffff);
-				}
+				drawConnection(
+						context,
+						skillA.getX(),
+						skillA.getY(),
+						skillB.getX(),
+						skillB.getY(),
+						!connection.isBidirectional(),
+						0xffffff
+				);
 			}
+		}
+
+		if (isInsideContent(mouse)) {
+			var optHoveredSkill = getActiveCategory()
+					.getSkills()
+					.values()
+					.stream()
+					.filter(skill -> isInsideSkill(transformedMouse, skill))
+					.findFirst();
+
+			optHoveredSkill.ifPresent(hoveredSkill -> {
+				var definition = getActiveCategory().getDefinitions().get(hoveredSkill.getDefinitionId());
+				if (definition == null) {
+					return;
+				}
+
+				setTooltip(Stream.concat(
+						Tooltip.wrapLines(client, definition.getTitle()).stream(),
+						Tooltip.wrapLines(client, Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY))).stream()
+				).toList());
+
+				var connections = getActiveCategory().getExclusiveConnections().get(hoveredSkill.getId());
+				if (connections != null) {
+					for (var connection : connections) {
+						var skillA = getActiveCategory().getSkills().get(connection.getSkillAId());
+						var skillB = getActiveCategory().getSkills().get(connection.getSkillBId());
+						if (skillA != null && skillB != null) {
+							drawConnection(
+									context,
+									skillA.getX(),
+									skillA.getY(),
+									skillB.getX(),
+									skillB.getY(),
+									!connection.isBidirectional(),
+									0xff0000
+							);
+						}
+					}
+				}
+			});
 		}
 
 		for (var skill : getActiveCategory().getSkills().values()) {
@@ -361,10 +402,10 @@ public class SkillsScreen extends Screen {
 			}
 
 			var status = skill.getState() == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
-			if (skill.getState() == SkillState.LOCKED) {
-				RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
-			} else {
-				RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+			switch (skill.getState()) {
+				case LOCKED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
+				case EXCLUDED -> RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			}
 			RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 
@@ -380,18 +421,29 @@ public class SkillsScreen extends Screen {
 
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			drawIcon(context, definition.getIcon(), skill.getX(), skill.getY());
-
-			if (isInsideSkill(transformedMouse, skill) && isInsideContent(mouse)) {
-				setTooltip(Stream.concat(
-						Tooltip.wrapLines(client, definition.getTitle()).stream(),
-						Tooltip.wrapLines(client, Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY))).stream()
-				).toList());
-			}
-
 		}
 
 		context.getMatrices().pop();
 		context.disableScissor();
+	}
+
+	private void drawConnection(
+			DrawContext context,
+			float startX,
+			float startY,
+			float endX,
+			float endY,
+			boolean unidirectional,
+			int rgb
+	) {
+		drawLine(context, startX, startY, endX, endY, 3, 0xff000000);
+		if (unidirectional) {
+			drawArrow(context, startX, startY, endX, endY, 8, 0xff000000);
+		}
+		drawLine(context, startX, startY, endX, endY, 1, rgb | 0xff000000);
+		if (unidirectional) {
+			drawArrow(context, startX, startY, endX, endY, 6, rgb | 0xff000000);
+		}
 	}
 
 	private void drawLine(

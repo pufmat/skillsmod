@@ -8,15 +8,14 @@ import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class SkillConnectionsConfig {
 	private final SkillConnectionsGroupConfig normal;
+	private final SkillConnectionsGroupConfig exclusive;
 
-	private SkillConnectionsConfig(SkillConnectionsGroupConfig normal) {
+	private SkillConnectionsConfig(SkillConnectionsGroupConfig normal, SkillConnectionsGroupConfig exclusive) {
 		this.normal = normal;
+		this.exclusive = exclusive;
 	}
 
 	public static Result<SkillConnectionsConfig, Failure> parse(JsonElementWrapper rootElement, SkillsConfig skills) {
@@ -38,9 +37,18 @@ public class SkillConnectionsConfig {
 				)
 				.orElseGet(SkillConnectionsGroupConfig::empty);
 
+		var exclusive = rootObject.get("exclusive")
+				.getSuccess()
+				.flatMap(element -> SkillConnectionsGroupConfig.parse(element, skills)
+						.ifFailure(failures::add)
+						.getSuccess()
+				)
+				.orElseGet(SkillConnectionsGroupConfig::empty);
+
 		if (failures.isEmpty()) {
 			return Result.success(new SkillConnectionsConfig(
-					normal
+					normal,
+					exclusive
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -49,10 +57,17 @@ public class SkillConnectionsConfig {
 
 	private static Result<SkillConnectionsConfig, Failure> parseLegacy(JsonArrayWrapper rootArray, SkillsConfig skills) {
 		return SkillConnectionsGroupConfig.parseLegacy(rootArray, skills)
-				.mapSuccess(SkillConnectionsConfig::new);
+				.mapSuccess(normal -> new SkillConnectionsConfig(
+						normal,
+						SkillConnectionsGroupConfig.empty()
+				));
 	}
 
 	public SkillConnectionsGroupConfig getNormal() {
 		return normal;
+	}
+
+	public SkillConnectionsGroupConfig getExclusive() {
+		return exclusive;
 	}
 }

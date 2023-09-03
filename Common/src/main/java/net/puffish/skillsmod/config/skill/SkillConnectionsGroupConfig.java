@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SkillConnectionsGroupConfig {
 	private final List<SkillConnection> connections;
@@ -142,7 +143,7 @@ public class SkillConnectionsGroupConfig {
 		return connections;
 	}
 
-	public Map<String, Collection<String>> getNeighbors() {
-		return neighbors;
+	public Optional<Collection<String>> getNeighborsFor(String skillId) {
+		return Optional.ofNullable(neighbors.get(skillId));
 	}
 }
