@@ -22,8 +22,10 @@ public class ClientSkillCategoryData {
 
 	private final Map<String, ClientSkillDefinitionData> definitions;
 	private final Map<String, ClientSkillData> skills;
-	private final Collection<ClientSkillConnectionData> connections;
-	private final Map<String, Collection<String>> neighbors;
+	private final Collection<ClientSkillConnectionData> normalConnections;
+	private final Map<String, Collection<String>> normalNeighbors;
+	private final Map<String, Collection<String>> exclusiveNeighbors;
+	private final Map<String, Collection<ClientSkillConnectionData>> exclusiveConnections;
 
 	private int spentPoints;
 	private int earnedPoints;
@@ -41,7 +43,8 @@ public class ClientSkillCategoryData {
 			int spentPointsLimit,
 			Map<String, ClientSkillDefinitionData> definitions,
 			Map<String, ClientSkillData> skills,
-			Collection<ClientSkillConnectionData> connections,
+			Collection<ClientSkillConnectionData> normalConnections,
+			Collection<ClientSkillConnectionData> exclusiveConnections,
 			int spentPoints,
 			int earnedPoints,
 			int currentLevel,
@@ -56,22 +59,37 @@ public class ClientSkillCategoryData {
 		this.spentPointsLimit = spentPointsLimit;
 		this.definitions = definitions;
 		this.skills = skills;
-		this.connections = connections;
+		this.normalConnections = normalConnections;
 		this.spentPoints = spentPoints;
 		this.earnedPoints = earnedPoints;
 		this.currentLevel = currentLevel;
 		this.currentExperience = currentExperience;
 		this.requiredExperience = requiredExperience;
-		this.neighbors = new HashMap<>();
+		this.normalNeighbors = new HashMap<>();
+		this.exclusiveNeighbors = new HashMap<>();
+		this.exclusiveConnections = new HashMap<>();
 
-		for (var connection : connections) {
+		for (var connection : normalConnections) {
 			var a = connection.getSkillAId();
 			var b = connection.getSkillBId();
 
-			neighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
+			normalNeighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
 			if (connection.isBidirectional()) {
-				neighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
+				normalNeighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
 			}
+		}
+
+		for (var connection : exclusiveConnections) {
+			var a = connection.getSkillAId();
+			var b = connection.getSkillBId();
+
+			exclusiveNeighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
+			if (connection.isBidirectional()) {
+				exclusiveNeighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
+			}
+
+			this.exclusiveConnections.computeIfAbsent(a, key -> new HashSet<>()).add(connection);
+			this.exclusiveConnections.computeIfAbsent(b, key -> new HashSet<>()).add(connection);
 		}
 	}
 
@@ -96,10 +114,22 @@ public class ClientSkillCategoryData {
 				}
 			}
 		}
-		for (var neighborId : neighbors.get(skillId)) {
-			var neighbor = skills.get(neighborId);
-			if (neighbor != null && neighbor.getState() == SkillState.LOCKED) {
-				neighbor.setState(SkillState.AVAILABLE);
+		var normalNeighborsIds = normalNeighbors.get(skillId);
+		if (normalNeighborsIds != null) {
+			for (var neighborId : normalNeighborsIds) {
+				var neighbor = skills.get(neighborId);
+				if (neighbor != null && neighbor.getState() == SkillState.LOCKED) {
+					neighbor.setState(SkillState.AVAILABLE);
+				}
+			}
+		}
+		var exclusiveNeighborsIds = exclusiveNeighbors.get(skillId);
+		if (exclusiveNeighborsIds != null) {
+			for (var neighborId : exclusiveNeighborsIds) {
+				var neighbor = skills.get(neighborId);
+				if (neighbor != null && neighbor.getState() != SkillState.UNLOCKED) {
+					neighbor.setState(SkillState.EXCLUDED);
+				}
 			}
 		}
 	}
@@ -122,12 +152,12 @@ public class ClientSkillCategoryData {
 		return skills;
 	}
 
-	public Collection<ClientSkillConnectionData> getConnections() {
-		return connections;
+	public Collection<ClientSkillConnectionData> getNormalConnections() {
+		return normalConnections;
 	}
 
-	public Map<String, Collection<String>> getNeighbors() {
-		return neighbors;
+	public Map<String, Collection<ClientSkillConnectionData>> getExclusiveConnections() {
+		return exclusiveConnections;
 	}
 
 	public Text getTitle() {
