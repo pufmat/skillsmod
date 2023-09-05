@@ -36,6 +36,14 @@ public class JsonParseUtils {
 		}
 	}
 
+	public static Result<String, Failure> parseIdentifierPath(JsonElementWrapper element) {
+		try {
+			return Result.success(new Identifier(Identifier.DEFAULT_NAMESPACE, JsonHelper.asString(element.getJson(), "")).getPath());
+		} catch (Exception e) {
+			return Result.failure(element.getPath().failureAt("Expected valid identifier path"));
+		}
+	}
+
 	public static Result<StatusEffect, Failure> parseEffect(JsonElementWrapper element) {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.STATUS_EFFECT.getOrEmpty(id).orElseThrow());
