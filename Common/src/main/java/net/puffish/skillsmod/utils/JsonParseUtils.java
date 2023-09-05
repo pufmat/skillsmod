@@ -28,7 +28,6 @@ import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class JsonParseUtils {
 	public static Result<Identifier, Failure> parseIdentifier(JsonElementWrapper element) {
@@ -36,6 +35,14 @@ public class JsonParseUtils {
 			return Result.success(new Identifier(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
 			return Result.failure(element.getPath().failureAt("Expected valid identifier"));
+		}
+	}
+
+	public static Result<String, Failure> parseIdentifierPath(JsonElementWrapper element) {
+		try {
+			return Result.success(new Identifier(Identifier.DEFAULT_NAMESPACE, JsonHelper.asString(element.getJson(), "")).getPath());
+		} catch (Exception e) {
+			return Result.failure(element.getPath().failureAt("Expected valid identifier path"));
 		}
 	}
 
