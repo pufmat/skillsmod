@@ -3,6 +3,7 @@ package net.puffish.skillsmod.config;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.json.JsonElementWrapper;
 import net.puffish.skillsmod.json.JsonObjectWrapper;
+import net.puffish.skillsmod.utils.JsonParseUtils;
 import net.puffish.skillsmod.utils.Result;
 import net.puffish.skillsmod.utils.failure.Failure;
 import net.puffish.skillsmod.utils.failure.ManyFailures;
@@ -42,7 +43,9 @@ public class ModConfig {
 		}
 
 		var optCategories = rootObject.getArray("categories")
-				.andThen(array -> array.getAsList((i, element) -> element.getAsString()).mapFailure(ManyFailures::ofList))
+				.andThen(array -> array.getAsList((i, element) -> JsonParseUtils.parseIdentifierPath(element))
+						.mapFailure(ManyFailures::ofList)
+				)
 				.ifFailure(failures::add)
 				.getSuccess();
 
