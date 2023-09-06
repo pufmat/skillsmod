@@ -184,7 +184,7 @@ public class SkillsMod {
 		}
 	}
 
-	private void loadModConfig(ConfigContext context) {
+	private void loadModConfig(MinecraftServer server) {
 		if (!Files.exists(modConfigDir) || PathUtils.isDirectoryEmpty(modConfigDir)) {
 			copyConfigFromJar();
 		}
@@ -195,18 +195,18 @@ public class SkillsMod {
 		reader.read(Path.of("config.json"))
 				.andThen(ModConfig::parse)
 				.andThen(modConfig ->
-						loadConfig(reader, modConfig, context)
+						loadConfig(reader, modConfig, server)
 								.mapSuccess(map -> {
 									cumulatedMap.putAll(map);
 									return modConfig;
 								})
 				)
 				.peek(modConfig -> {
-					cumulatedMap.putAll(loadPackConfig(modConfig, context));
+					cumulatedMap.putAll(loadPackConfig(modConfig, server));
 
 					categories.set(Optional.of(cumulatedMap), () -> {
 						for (var category : cumulatedMap.values()) {
-							category.dispose(context.server());
+							category.dispose(server);
 						}
 					});
 				}, failure -> {
@@ -219,7 +219,9 @@ public class SkillsMod {
 				});
 	}
 
-	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, ConfigContext context) {
+	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, MinecraftServer server) {
+		var context = new ConfigContext(server);
+
 		return reader.readCategories(Identifier.DEFAULT_NAMESPACE, modConfig.getCategories(), context)
 				.ifSuccess(map -> {
 					if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
@@ -233,7 +235,8 @@ public class SkillsMod {
 				});
 	}
 
-	private Map<Identifier, CategoryConfig> loadPackConfig(ModConfig modConfig, ConfigContext context) {
+	private Map<Identifier, CategoryConfig> loadPackConfig(ModConfig modConfig, MinecraftServer server) {
+		var context = new ConfigContext(server);
 		var cumulatedMap = new LinkedHashMap<Identifier, CategoryConfig>();
 
 		var resources = context.resourceManager().findResources(
@@ -567,7 +570,7 @@ public class SkillsMod {
 
 		@Override
 		public void onServerStarting(MinecraftServer server) {
-			loadModConfig(new ConfigContext(server));
+			loadModConfig(server);
 		}
 
 		@Override
@@ -578,7 +581,7 @@ public class SkillsMod {
 				}
 			}
 
-			loadModConfig(new ConfigContext(server));
+			loadModConfig(server);
 
 			for (var player : server.getPlayerManager().getPlayerList()) {
 				syncAllCategories(player);
