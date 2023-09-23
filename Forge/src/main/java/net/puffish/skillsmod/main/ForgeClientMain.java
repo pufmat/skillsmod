@@ -3,13 +3,13 @@ package net.puffish.skillsmod.main;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.UnknownCustomPayload;
+import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.ChannelBuilder;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
@@ -81,26 +81,26 @@ public class ForgeClientMain {
 		@Override
 		public void send(OutPacket packet) {
 			Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler())
-					.sendPacket(new CustomPayloadC2SPacket(packet.getIdentifier(), packet.getBuf()));
+					.sendPacket(new CustomPayloadC2SPacket(
+							new UnknownCustomPayload(
+									packet.getIdentifier(),
+									packet.getBuf()
+							)
+					));
 		}
 	}
 
 	private static class ClientPacketReceiverImpl implements ClientPacketReceiver {
 		@Override
 		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var channel = NetworkRegistry.newEventChannel(
-					identifier,
-					() -> "1",
-					version -> true,
-					version -> true
-			);
+			var channel = ChannelBuilder.named(identifier).eventNetworkChannel();
 			channel.addListener(networkEvent -> {
-				var context = networkEvent.getSource().get();
+				var context = networkEvent.getSource();
 				if (context.getPacketHandled()) {
 					return;
 				}
-				if (networkEvent instanceof NetworkEvent.ServerCustomPayloadEvent serverNetworkEvent) {
-					var packet = reader.apply(serverNetworkEvent.getPayload());
+				if (context.isClientSide()) {
+					var packet = reader.apply(networkEvent.getPayload());
 					context.enqueueWork(() -> handler.handle(packet));
 					context.setPacketHandled(true);
 				}

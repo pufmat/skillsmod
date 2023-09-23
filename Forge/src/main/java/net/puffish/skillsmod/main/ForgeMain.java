@@ -1,7 +1,8 @@
 package net.puffish.skillsmod.main;
 
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.packet.UnknownCustomPayload;
+import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -16,10 +17,8 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.SkillsAPI;
 import net.puffish.skillsmod.network.InPacket;
@@ -78,10 +77,7 @@ public class ForgeMain {
 		if (event.getPlayer() != null) {
 			return;
 		}
-		var server = ServerLifecycleHooks.getCurrentServer();
-		if (server == null) {
-			return;
-		}
+		var server = event.getPlayerList().getServer();
 		for (var listener : serverListeners) {
 			listener.onServerReload(server);
 		}
@@ -120,26 +116,26 @@ public class ForgeMain {
 	private static class ServerPacketSenderImpl implements ServerPacketSender {
 		@Override
 		public void send(ServerPlayerEntity player, OutPacket packet) {
-			player.networkHandler.sendPacket(new CustomPayloadS2CPacket(packet.getIdentifier(), packet.getBuf()));
+			player.networkHandler.sendPacket(new CustomPayloadS2CPacket(
+					new UnknownCustomPayload(
+							packet.getIdentifier(),
+							packet.getBuf()
+					)
+			));
 		}
 	}
 
 	private static class ServerPacketReceiverImpl implements ServerPacketReceiver {
 		@Override
 		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			var channel = NetworkRegistry.newEventChannel(
-					identifier,
-					() -> "1",
-					version -> true,
-					version -> true
-			);
+			var channel = ChannelBuilder.named(identifier).eventNetworkChannel();
 			channel.addListener(networkEvent -> {
-				var context = networkEvent.getSource().get();
+				var context = networkEvent.getSource();
 				if (context.getPacketHandled()) {
 					return;
 				}
-				if (networkEvent instanceof NetworkEvent.ClientCustomPayloadEvent serverNetworkEvent) {
-					var packet = reader.apply(serverNetworkEvent.getPayload());
+				if (context.isServerSide()) {
+					var packet = reader.apply(networkEvent.getPayload());
 					context.enqueueWork(() -> handler.handle(context.getSender(), packet));
 					context.setPacketHandled(true);
 				}

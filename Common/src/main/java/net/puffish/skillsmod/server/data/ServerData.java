@@ -1,8 +1,10 @@
 package net.puffish.skillsmod.server.data;
 
+import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.ChunkUpdateState;
 import net.minecraft.world.PersistentState;
 import net.puffish.skillsmod.SkillsAPI;
 
@@ -43,12 +45,19 @@ public class ServerData extends PersistentState {
 		return nbt;
 	}
 
+	public static PersistentState.Type<ServerData> getPersistentStateType() {
+		return new PersistentState.Type<>(
+				ServerData::new,
+				ServerData::read,
+				null
+		);
+	}
+
 	public static ServerData getOrCreate(MinecraftServer server) {
 		var persistentStateManager = server.getOverworld().getPersistentStateManager();
 
 		return persistentStateManager.getOrCreate(
-				ServerData::read,
-				ServerData::new,
+				getPersistentStateType(),
 				SkillsAPI.MOD_ID
 		);
 	}

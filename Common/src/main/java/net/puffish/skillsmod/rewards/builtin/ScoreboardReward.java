@@ -55,7 +55,7 @@ public class ScoreboardReward implements Reward {
 	@Override
 	public void update(ServerPlayerEntity player, RewardContext context) {
 		var scoreboard = player.getScoreboard();
-		var objective = scoreboard.getObjective(objectiveName);
+		var objective = scoreboard.getNullableObjective(objectiveName);
 		if (objective != null) {
 			scoreboard.getPlayerScore(player.getEntityName(), objective).setScore(context.count());
 		}

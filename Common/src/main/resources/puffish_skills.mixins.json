@@ -13,6 +13,7 @@
 		"HungerManagerMixin",
 		"ItemStackMixin",
 		"LivingEntityMixin",
+		"PersistentStateManagerMixin",
 		"PlayerEntityMixin",
 		"PlayerInventoryMixin",
 		"ServerPlayerEntityMixin",

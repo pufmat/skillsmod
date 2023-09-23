@@ -44,7 +44,7 @@ public final class BlockCondition implements Condition<BlockState> {
 						.ifFailure(failures::add)
 						.getSuccess()
 				)
-				.orElseGet(() -> StatePredicate.Builder.create().build());
+				.orElseGet(() -> StatePredicate.Builder.create().build().orElseThrow());
 
 		if (failures.isEmpty()) {
 			return Result.success(new BlockCondition(

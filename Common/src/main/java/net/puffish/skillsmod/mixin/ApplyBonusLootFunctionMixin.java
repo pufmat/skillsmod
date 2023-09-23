@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.function.ApplyBonusLootFunction;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.server.PlayerAttributes;
 import org.spongepowered.asm.mixin.Final;
@@ -20,11 +21,11 @@ public abstract class ApplyBonusLootFunctionMixin {
 
 	@Shadow
 	@Final
-	private Enchantment enchantment;
+	private RegistryEntry<Enchantment> enchantment;
 
 	@ModifyVariable(method = "process", at = @At("STORE"), ordinal = 0)
 	private int modifyVariableAtProcess(int i, ItemStack itemStack, LootContext context) {
-		if (enchantment == Enchantments.FORTUNE && context.get(LootContextParameters.THIS_ENTITY) instanceof PlayerEntity player) {
+		if (enchantment.value() == Enchantments.FORTUNE && context.get(LootContextParameters.THIS_ENTITY) instanceof PlayerEntity player) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.FORTUNE));
 			double fortune = attribute.computeValueForInitial(i);
 			i = (int) fortune;

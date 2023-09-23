@@ -1,5 +1,7 @@
 package net.puffish.skillsmod.utils;
 
+import com.google.gson.JsonSyntaxException;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
@@ -10,6 +12,8 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
@@ -64,7 +68,7 @@ public class JsonParseUtils {
 
 	public static Result<StatePredicate, Failure> parseStatePredicate(JsonElementWrapper element) {
 		try {
-			return Result.success(StatePredicate.fromJson(element.getJson()));
+			return Result.success(StatePredicate.fromJson(element.getJson()).orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
 		}
@@ -72,7 +76,7 @@ public class JsonParseUtils {
 
 	public static Result<NbtPredicate, Failure> parseNbtPredicate(JsonElementWrapper element) {
 		try {
-			return Result.success(NbtPredicate.fromJson(element.getJson()));
+			return Result.success(new NbtPredicate(StringNbtReader.parse(JsonHelper.asString(element.getJson(), "nbt"))));
 		} catch (Exception e) {
 			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
 		}
@@ -134,7 +138,7 @@ public class JsonParseUtils {
 
 	public static Result<Item, Failure> parseItem(JsonElementWrapper element) {
 		try {
-			return Result.success(JsonHelper.asItem(element.getJson(), ""));
+			return Result.success(JsonHelper.asItem(element.getJson(), "").value());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().failureAt("Expected valid item"));
 		}

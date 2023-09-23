@@ -39,10 +39,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class SkillsScreen extends Screen {
-	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
 	private static final Identifier WINDOW_TEXTURE = new Identifier("textures/gui/advancements/window.png");
-	private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-	private static final Identifier ICONS_TEXTURE = new Identifier("textures/gui/icons.png");
+	private static final Identifier EXPERIENCE_BAR_BACKGROUND_TEXTURE = new Identifier("hud/experience_bar_background");
+	private static final Identifier EXPERIENCE_BAR_PROGRESS_TEXTURE = new Identifier("hud/experience_bar_progress");
+	private static final Identifier TAB_ABOVE_LEFT_SELECTED_TEXTURE = new Identifier("advancements/tab_above_left_selected");
+	private static final Identifier TAB_ABOVE_MIDDLE_SELECTED_TEXTURE = new Identifier("advancements/tab_above_middle_selected");
+	private static final Identifier TAB_ABOVE_LEFT_TEXTURE = new Identifier("advancements/tab_above_left");
+	private static final Identifier TAB_ABOVE_MIDDLE_TEXTURE = new Identifier("advancements/tab_above_middle");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -220,7 +223,7 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 		this.drawContent(context, mouseX, mouseY);
 		this.drawWindow(context, mouseX, mouseY);
 		this.drawTabs(context, mouseX, mouseY);
@@ -243,8 +246,8 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		float factor = (float) Math.pow(2, amount * 0.25);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		float factor = (float) Math.pow(2, verticalAmount * 0.25);
 
 		scale *= factor;
 
@@ -262,7 +265,7 @@ public class SkillsScreen extends Screen {
 
 		limitPosition();
 
-		return super.mouseScrolled(mouseX, mouseY, amount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	private void limitPosition() {
@@ -321,12 +324,10 @@ public class SkillsScreen extends Screen {
 				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			}
 
-			context.drawTexture(
-					WIDGETS_TEXTURE,
+			context.drawGuiTexture(
+					status.getFrameTexture(advancementFrame.getFrame()),
 					x - 13,
 					y - 13,
-					advancementFrame.getFrame().getTextureV(),
-					128 + status.getSpriteIndex() * 26,
 					26,
 					26
 			);
@@ -571,12 +572,16 @@ public class SkillsScreen extends Screen {
 		RenderSystem.disableDepthTest();
 
 		for (var i = 0; i < categories.size(); i++) {
-			context.drawTexture(
-					TABS_TEXTURE,
+			context.drawGuiTexture(
+					activeCategory == i
+						? i == 0
+							? TAB_ABOVE_LEFT_SELECTED_TEXTURE
+							: TAB_ABOVE_MIDDLE_SELECTED_TEXTURE
+						: i == 0
+							? TAB_ABOVE_LEFT_TEXTURE
+							: TAB_ABOVE_MIDDLE_TEXTURE,
 					FRAME_PADDING + 32 * i,
 					FRAME_PADDING,
-					i > 0 ? 28 : 0,
-					activeCategory == i ? 32 : 0,
 					28,
 					32
 			);
@@ -879,11 +884,12 @@ public class SkillsScreen extends Screen {
 				tmpY = TABS_HEIGHT + 15;
 			}
 
-			context.drawTexture(ICONS_TEXTURE, tmpX, tmpY, 0, 64, 182, 5);
+			context.drawGuiTexture(EXPERIENCE_BAR_BACKGROUND_TEXTURE, tmpX, tmpY, 182, 5);
 			int width = Math.min(182, (int) (getActiveCategory().getExperienceProgress() * 183f));
 			if (width > 0) {
-				context.drawTexture(ICONS_TEXTURE, tmpX, tmpY, 0, 69, width, 5);
+				context.drawGuiTexture(EXPERIENCE_BAR_PROGRESS_TEXTURE, 182, 5, 0, 0, tmpX, tmpY, width, 5);
 			}
+
 
 			if (isInsideExperience(mouse, tmpX, tmpY)) {
 				var lines = new ArrayList<OrderedText>();
