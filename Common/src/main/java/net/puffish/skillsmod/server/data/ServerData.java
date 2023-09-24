@@ -1,12 +1,10 @@
 package net.puffish.skillsmod.server.data;
 
-import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.ChunkUpdateState;
 import net.minecraft.world.PersistentState;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 
 import java.util.HashMap;
 import java.util.Map;

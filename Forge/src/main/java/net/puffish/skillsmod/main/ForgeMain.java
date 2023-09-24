@@ -20,7 +20,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.registries.DeferredRegister;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
