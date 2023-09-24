@@ -2,14 +2,15 @@ package net.puffish.skillsmod.config;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.config.experience.ExperienceConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Optional;

@@ -1,10 +1,12 @@
 package net.puffish.skillsmod.rewards;
 
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.config.ConfigContext;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.api.rewards.RewardWithDataFactory;
+import net.puffish.skillsmod.api.rewards.RewardWithoutDataFactory;
+import net.puffish.skillsmod.api.config.ConfigContext;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
 
 import java.util.HashMap;
 import java.util.Optional;
