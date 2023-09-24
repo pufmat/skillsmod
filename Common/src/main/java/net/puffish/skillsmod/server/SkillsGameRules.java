@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.server;
 
 import net.minecraft.world.GameRules;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.mixin.BooleanRuleInvoker;
 import net.puffish.skillsmod.server.setup.ServerGameRules;
 

@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.expression;
 
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.SingleFailure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

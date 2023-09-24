@@ -1,15 +1,15 @@
 package net.puffish.skillsmod.experience.calculation;
 
-import net.puffish.skillsmod.config.ConfigContext;
-import net.puffish.skillsmod.experience.calculation.condition.Condition;
-import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
-import net.puffish.skillsmod.experience.calculation.parameter.Parameter;
-import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.config.ConfigContext;
+import net.puffish.skillsmod.api.experience.calculation.condition.Condition;
+import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
+import net.puffish.skillsmod.api.experience.calculation.parameter.Parameter;
+import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.json.JsonObjectWrapper;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.HashMap;

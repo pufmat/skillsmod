@@ -7,8 +7,8 @@ import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillConnectionData;
 import net.puffish.skillsmod.client.data.ClientSkillData;
 import net.puffish.skillsmod.client.data.ClientSkillDefinitionData;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.json.JsonPath;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.skill.SkillState;
 

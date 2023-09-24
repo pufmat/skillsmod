@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.expression;
 
 import net.minecraft.util.math.MathHelper;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.SingleFailure;
 
 import java.util.List;
 import java.util.Set;

@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
-import net.puffish.skillsmod.rewards.RewardContext;
+import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.skill.SkillState;
 
 import java.util.HashSet;
