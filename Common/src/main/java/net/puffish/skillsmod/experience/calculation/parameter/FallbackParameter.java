@@ -1,5 +1,7 @@
 package net.puffish.skillsmod.experience.calculation.parameter;
 
+import net.puffish.skillsmod.api.experience.calculation.parameter.Parameter;
+
 public class FallbackParameter<T> implements Parameter<T> {
 	private final double fallback;
 

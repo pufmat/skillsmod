@@ -4,12 +4,12 @@ import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.expression.ArithmeticParser;
 import net.puffish.skillsmod.expression.Expression;
 import net.puffish.skillsmod.expression.LogicParser;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.json.JsonPath;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.json.JsonObjectWrapper;
+import net.puffish.skillsmod.api.json.JsonPath;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.Map;

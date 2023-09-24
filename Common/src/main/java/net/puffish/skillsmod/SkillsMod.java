@@ -10,12 +10,13 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
-import net.puffish.skillsmod.config.ConfigContext;
+import net.puffish.skillsmod.server.ServerConfigContext;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.config.PackConfig;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
@@ -23,7 +24,7 @@ import net.puffish.skillsmod.config.reader.ConfigReader;
 import net.puffish.skillsmod.config.reader.FileConfigReader;
 import net.puffish.skillsmod.config.reader.PackConfigReader;
 import net.puffish.skillsmod.config.skill.SkillConfig;
-import net.puffish.skillsmod.experience.ExperienceSource;
+import net.puffish.skillsmod.api.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.builtin.CraftItemExperienceSource;
 import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
 import net.puffish.skillsmod.experience.builtin.IncreaseStatExperienceSource;
@@ -31,7 +32,7 @@ import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.network.Packets;
-import net.puffish.skillsmod.rewards.RewardContext;
+import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
@@ -57,9 +58,9 @@ import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.utils.ChangeListener;
 import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.utils.PrefixedLogger;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
-import net.puffish.skillsmod.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -221,7 +222,7 @@ public class SkillsMod {
 	}
 
 	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, MinecraftServer server) {
-		var context = new ConfigContext(server);
+		var context = new ServerConfigContext(server);
 
 		return reader.readCategories(Identifier.DEFAULT_NAMESPACE, modConfig.getCategories(), context)
 				.ifSuccess(map -> {
@@ -237,10 +238,10 @@ public class SkillsMod {
 	}
 
 	private Map<Identifier, CategoryConfig> loadPackConfig(ModConfig modConfig, MinecraftServer server) {
-		var context = new ConfigContext(server);
+		var context = new ServerConfigContext(server);
 		var cumulatedMap = new LinkedHashMap<Identifier, CategoryConfig>();
 
-		var resources = context.resourceManager().findResources(
+		var resources = context.getResourceManager().findResources(
 				SkillsAPI.MOD_ID,
 				id -> id.endsWith("config.json")
 		);
@@ -248,12 +249,12 @@ public class SkillsMod {
 		for (var id : resources) {
 			Resource resource;
 			try {
-				resource = context.resourceManager().getResource(id);
+				resource = context.getResourceManager().getResource(id);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 			var name = id.getNamespace();
-			var reader = new PackConfigReader(context.resourceManager(), name);
+			var reader = new PackConfigReader(context.getResourceManager(), name);
 
 			reader.readResource(id, resource)
 					.andThen(rootElement -> PackConfig.parse(name, rootElement))

@@ -4,10 +4,10 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.json.JsonElementWrapper;
-import net.puffish.skillsmod.utils.JsonParseUtils;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.utils.JsonParseUtils;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
 
 public sealed interface ClientIconData permits ClientIconData.EffectIconData, ClientIconData.ItemIconData, ClientIconData.TextureIconData {
 

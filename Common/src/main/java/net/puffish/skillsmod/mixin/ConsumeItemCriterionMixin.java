@@ -3,7 +3,7 @@ package net.puffish.skillsmod.mixin;
 import net.minecraft.advancement.criterion.ConsumeItemCriterion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.builtin.EatFoodExperienceSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
