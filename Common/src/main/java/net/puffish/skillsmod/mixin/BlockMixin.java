@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

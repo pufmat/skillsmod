@@ -6,7 +6,7 @@ import net.minecraft.entity.damage.ProjectileDamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;

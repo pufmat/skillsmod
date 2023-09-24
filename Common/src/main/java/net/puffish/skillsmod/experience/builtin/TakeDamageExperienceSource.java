@@ -6,20 +6,21 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.config.ConfigContext;
-import net.puffish.skillsmod.experience.ExperienceSource;
+import net.puffish.skillsmod.api.config.ConfigContext;
+import net.puffish.skillsmod.api.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
-import net.puffish.skillsmod.experience.calculation.condition.ConditionFactory;
-import net.puffish.skillsmod.experience.calculation.condition.DamageTypeCondition;
-import net.puffish.skillsmod.experience.calculation.condition.EntityTypeCondition;
-import net.puffish.skillsmod.experience.calculation.condition.EntityTypeTagCondition;
-import net.puffish.skillsmod.experience.calculation.parameter.EffectParameter;
-import net.puffish.skillsmod.experience.calculation.parameter.ParameterFactory;
-import net.puffish.skillsmod.json.JsonObjectWrapper;
-import net.puffish.skillsmod.utils.Result;
-import net.puffish.skillsmod.utils.failure.Failure;
+import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
+import net.puffish.skillsmod.api.experience.calculation.condition.DamageTypeCondition;
+import net.puffish.skillsmod.api.experience.calculation.condition.DamageTypeTagCondition;
+import net.puffish.skillsmod.api.experience.calculation.condition.EntityTypeCondition;
+import net.puffish.skillsmod.api.experience.calculation.condition.EntityTypeTagCondition;
+import net.puffish.skillsmod.api.experience.calculation.parameter.EffectParameter;
+import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
+import net.puffish.skillsmod.api.json.JsonObjectWrapper;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.failure.Failure;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 
 	private static final Map<String, ConditionFactory<Context>> CONDITIONS = Map.ofEntries(
 			Map.entry("damage_type", DamageTypeCondition.factory().map(c -> c.map(Context::damageType))),
+			Map.entry("damage_type_tag", DamageTypeTagCondition.factory().map(c -> c.map(Context::damageType))),
 			Map.entry("attacker", EntityTypeCondition.factory().map(c -> ctx -> ctx.attacker().map(c::test).orElse(false))),
 			Map.entry("attacker_tag", EntityTypeTagCondition.factory().map(c -> ctx -> ctx.attacker().map(c::test).orElse(false))),
 			Map.entry("source", EntityTypeCondition.factory().map(c -> ctx -> ctx.source().map(c::test).orElse(false))),

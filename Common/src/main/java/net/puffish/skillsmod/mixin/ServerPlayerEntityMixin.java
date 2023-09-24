@@ -2,7 +2,7 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stat;
-import net.puffish.skillsmod.SkillsAPI;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.builtin.IncreaseStatExperienceSource;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import org.spongepowered.asm.mixin.Mixin;
