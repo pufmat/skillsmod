@@ -2,6 +2,7 @@ package net.puffish.skillsmod.api;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.skill.SkillState;
 
 public class Skill {
 	private final Category category;
@@ -18,6 +19,10 @@ public class Skill {
 
 	public String getId() {
 		return skillId;
+	}
+
+	public boolean isUnlocked(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getSkillState(player, category.getId(), skillId).orElseThrow() == SkillState.UNLOCKED;
 	}
 
 	public void unlock(ServerPlayerEntity player) {
