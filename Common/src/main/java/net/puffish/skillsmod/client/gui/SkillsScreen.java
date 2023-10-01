@@ -82,7 +82,7 @@ public class SkillsScreen extends Screen {
 	private int contentPaddingRight;
 	private int contentPaddingBottom;
 
-	private List<? extends OrderedText> tooltip;
+	private List<OrderedText> tooltip;
 
 	public SkillsScreen(List<ClientSkillCategoryData> categories) {
 		super(ScreenTexts.EMPTY);
@@ -470,10 +470,13 @@ public class SkillsScreen extends Screen {
 					return;
 				}
 
-				tooltip = Stream.concat(
-						textRenderer.wrapLines(definition.getTitle(), 170).stream(),
-						textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170).stream()
-				).toList();
+				var lines = new ArrayList<OrderedText>();
+				lines.add(definition.getTitle().asOrderedText());
+				lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170));
+				if (client.options.advancedItemTooltips) {
+					lines.add(Text.literal(hoveredSkill.getId()).formatted(Formatting.DARK_GRAY).asOrderedText());
+				}
+				tooltip = lines;
 
 				var connections = getActiveCategory().getExclusiveConnections().get(hoveredSkill.getId());
 				if (connections != null) {
@@ -905,17 +908,17 @@ public class SkillsScreen extends Screen {
 		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.textRenderer.fontHeight)) {
 			var lines = new ArrayList<OrderedText>();
 
-			lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+			lines.add(SkillsMod.createTranslatable(
 					"tooltip",
 					"earned_points",
 					activeCategory.getEarnedPoints()
-			), 170));
-			lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+			).asOrderedText());
+			lines.add(SkillsMod.createTranslatable(
 					"tooltip",
 					"spent_points",
 					activeCategory.getSpentPoints()
 							+ (activeCategory.getSpentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.getSpentPointsLimit())
-			), 170));
+			).asOrderedText());
 
 			tooltip = lines;
 		}
@@ -941,23 +944,23 @@ public class SkillsScreen extends Screen {
 			if (isInsideExperience(mouse, tmpX, tmpY)) {
 				var lines = new ArrayList<OrderedText>();
 
-				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"current_level",
 						activeCategory.getCurrentLevel()
-				), 170));
-				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+				).asOrderedText());
+				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"experience_progress",
 						activeCategory.getCurrentExperience(),
 						activeCategory.getRequiredExperience(),
 						MathHelper.floor(activeCategory.getExperienceProgress() * 100f)
-				), 170));
-				lines.addAll(textRenderer.wrapLines(SkillsMod.createTranslatable(
+				).asOrderedText());
+				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"to_next_level",
 						activeCategory.getExperienceToNextLevel()
-				), 170));
+				).asOrderedText());
 
 				tooltip = lines;
 			}
