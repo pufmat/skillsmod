@@ -88,4 +88,16 @@ public class Category {
 	public int getPointsLeft(ServerPlayerEntity player) {
 		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
 	}
+
+	public int getCurrentLevel(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getCurrentLevel(player, categoryId).orElseThrow();
+	}
+
+	public int getCurrentExperience(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getCurrentExperience(player, categoryId).orElseThrow();
+	}
+
+	public int getRequiredExperience(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getRequiredExperience(player, categoryId).orElseThrow();
+	}
 }
