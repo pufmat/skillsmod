@@ -19,6 +19,8 @@
 	"attribute.puffish_skills.player.jump": "Skok",
 	"attribute.puffish_skills.player.resistance": "Odporność",
 	"attribute.puffish_skills.player.mining_speed": "Prędkość kopania",
+	"attribute.puffish_skills.player.sprinting_speed": "Prędkość biegania",
+	"attribute.puffish_skills.player.knockback": "Odrzut",
 
 	"chat.puffish_skills.new_point": "Masz nowy punkt umiejętności. Naciśnij %s, aby otworzyć swoje drzewko umiejętności.",
 
