@@ -72,6 +72,22 @@ public class PlayerAttributes {
 			Double.MAX_VALUE
 	).setTracked(true);
 
+	public static final Identifier SPRINTING_SPEED_ID = SkillsMod.createAttribute("player", "sprinting_speed");
+	public static final EntityAttribute SPRINTING_SPEED = create(
+			SPRINTING_SPEED_ID,
+			0.0,
+			0.0,
+			Double.MAX_VALUE
+	).setTracked(true);
+
+	public static final Identifier KNOCKBACK_ID = SkillsMod.createAttribute("player", "knockback");
+	public static final EntityAttribute KNOCKBACK = create(
+			KNOCKBACK_ID,
+			0.0,
+			0.0,
+			Double.MAX_VALUE
+	).setTracked(true);
+
 	private static EntityAttribute create(Identifier id, double fallback, double min, double max) {
 		return new ClampedEntityAttribute(
 				id.toTranslationKey("attribute"),
@@ -90,5 +106,7 @@ public class PlayerAttributes {
 		registrar.register(Registries.ATTRIBUTE, JUMP_ID, JUMP);
 		registrar.register(Registries.ATTRIBUTE, RESISTANCE_ID, RESISTANCE);
 		registrar.register(Registries.ATTRIBUTE, MINING_SPEED_ID, MINING_SPEED);
+		registrar.register(Registries.ATTRIBUTE, SPRINTING_SPEED_ID, SPRINTING_SPEED);
+		registrar.register(Registries.ATTRIBUTE, KNOCKBACK_ID, KNOCKBACK);
 	}
 }
