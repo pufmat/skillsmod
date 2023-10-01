@@ -12,14 +12,15 @@ import net.puffish.skillsmod.api.utils.failure.Failure;
 import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public final class BlockCondition implements Condition<BlockState> {
 	private final Block block;
-	private final StatePredicate state;
+	private final Optional<StatePredicate> optState;
 
-	public BlockCondition(Block block, StatePredicate state) {
+	public BlockCondition(Block block, Optional<StatePredicate> optState) {
 		this.block = block;
-		this.state = state;
+		this.optState = optState;
 	}
 
 	public static ConditionFactory<BlockState> factory() {
@@ -38,18 +39,17 @@ public final class BlockCondition implements Condition<BlockState> {
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var state = rootObject.get("state")
+		var optState = rootObject.get("state")
 				.getSuccess()
 				.flatMap(stateElement -> JsonParseUtils.parseStatePredicate(stateElement)
 						.ifFailure(failures::add)
 						.getSuccess()
-				)
-				.orElseGet(() -> StatePredicate.Builder.create().build().orElseThrow());
+				);
 
 		if (failures.isEmpty()) {
 			return Result.success(new BlockCondition(
 					optBlock.orElseThrow(),
-					state
+					optState
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -58,6 +58,6 @@ public final class BlockCondition implements Condition<BlockState> {
 
 	@Override
 	public boolean test(BlockState blockState) {
-		return blockState.isOf(block) && state.test(blockState);
+		return blockState.isOf(block) && optState.map(state -> state.test(blockState)).orElse(true);
 	}
 }

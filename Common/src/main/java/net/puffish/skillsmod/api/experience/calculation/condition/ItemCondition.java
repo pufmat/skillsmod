@@ -2,7 +2,6 @@ package net.puffish.skillsmod.api.experience.calculation.condition;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NbtPredicate;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
@@ -13,14 +12,15 @@ import net.puffish.skillsmod.api.utils.failure.Failure;
 import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public final class ItemCondition implements Condition<ItemStack> {
 	private final Item item;
-	private final NbtPredicate nbt;
+	private final Optional<NbtPredicate> optNbt;
 
-	public ItemCondition(Item item, NbtPredicate nbt) {
+	public ItemCondition(Item item, Optional<NbtPredicate> optNbt) {
 		this.item = item;
-		this.nbt = nbt;
+		this.optNbt = optNbt;
 	}
 
 	public static ConditionFactory<ItemStack> factory() {
@@ -39,18 +39,17 @@ public final class ItemCondition implements Condition<ItemStack> {
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var nbt = rootObject.get("nbt")
+		var optNbt = rootObject.get("nbt")
 				.getSuccess()
 				.flatMap(stateElement -> JsonParseUtils.parseNbtPredicate(stateElement)
 						.ifFailure(failures::add)
 						.getSuccess()
-				)
-				.orElseGet(() -> new NbtPredicate(new NbtCompound()));
+				);
 
 		if (failures.isEmpty()) {
 			return Result.success(new ItemCondition(
 					optItem.orElseThrow(),
-					nbt
+					optNbt
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -59,6 +58,6 @@ public final class ItemCondition implements Condition<ItemStack> {
 
 	@Override
 	public boolean test(ItemStack itemStack) {
-		return itemStack.isOf(item) && nbt.test(itemStack);
+		return itemStack.isOf(item) && optNbt.map(nbt -> nbt.test(itemStack)).orElse(true);
 	}
 }
