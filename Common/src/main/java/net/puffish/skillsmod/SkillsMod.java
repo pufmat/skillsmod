@@ -54,6 +54,7 @@ import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
 import net.puffish.skillsmod.server.setup.ServerGameRules;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
+import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.ChangeListener;
 import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.utils.PrefixedLogger;
@@ -397,6 +398,34 @@ public class SkillsMod {
 			var categoryData = getPlayerData(player).getCategoryData(category);
 			return categoryData.getPointsLeft(category);
 		});
+	}
+
+	public Optional<Integer> getCurrentLevel(ServerPlayerEntity player, Identifier categoryId) {
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getCategoryData(category);
+			return categoryData.getCurrentLevel(category);
+		});
+	}
+
+	public Optional<Integer> getCurrentExperience(ServerPlayerEntity player, Identifier categoryId) {
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getCategoryData(category);
+			return categoryData.getCurrentExperience(category);
+		});
+	}
+
+	public Optional<Integer> getRequiredExperience(ServerPlayerEntity player, Identifier categoryId) {
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getCategoryData(category);
+			return categoryData.getRequiredExperience(category);
+		});
+	}
+
+	public Optional<SkillState> getSkillState(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+		return getCategory(categoryId).flatMap(category -> category.getSkills().getById(skillId).map(skill -> {
+			var categoryData = getPlayerData(player).getCategoryData(category);
+			return categoryData.getSkillState(category, skill);
+		}));
 	}
 
 	public Collection<Identifier> getUnlockedCategories(ServerPlayerEntity player) {
