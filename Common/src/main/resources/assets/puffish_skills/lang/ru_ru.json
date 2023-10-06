@@ -20,11 +20,11 @@
 	"attribute.puffish_skills.player.resistance": "Сопротевление",
 	"attribute.puffish_skills.player.mining_speed": "Скорость копания",
 
-	"chat.puffish_skills.new_point": "Вы разблокировали новое очко навыка. Нажмите %s чтобы открыть древо Навыков.",
+	"chat.puffish_skills.new_point": "Вы получили очко навыков. Нажмите %s, чтобы открыть древо навыков.",
 
-	"toast.puffish_skills.invalid_config.description": "Неверная конфигурация, проверьте игровые логи.",
+	"toast.puffish_skills.invalid_config.description": "Неверная конфигурация, проверьте журналы игры.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Аннонсировать новые очки навыков",
+	"gamerule.puffish_skills:announceNewPoints": "Оповещение о новых очках навыков",
 
 	"command.puffish_skills.no_such_category": "Нет категории с идентификатором %s",
 	"command.puffish_skills.no_such_skill": "Нет категории с идентификатором %s",
