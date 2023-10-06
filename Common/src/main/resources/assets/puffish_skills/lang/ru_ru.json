@@ -9,7 +9,7 @@
 	"tooltip.puffish_skills.spent_points": "Потраченные очки: %s",
 
 	"category.puffish_skills.skills": "Навыки",
-	"key.puffish_skills.open": "Открыть древо улучшений",
+	"key.puffish_skills.open": "Открыть древо навыков",
 
 	"attribute.puffish_skills.player.stamina": "Выносливость",
 	"attribute.puffish_skills.player.melee_damage": "Ближний урон",
