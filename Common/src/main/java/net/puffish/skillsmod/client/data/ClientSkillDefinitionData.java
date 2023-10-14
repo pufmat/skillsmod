@@ -3,18 +3,20 @@ package net.puffish.skillsmod.client.data;
 import net.minecraft.text.Text;
 
 public class ClientSkillDefinitionData {
-	protected final String id;
-	protected final Text title;
-	protected final Text description;
-	protected final ClientFrameData frame;
-	protected final ClientIconData icon;
+	private final String id;
+	private final Text title;
+	private final Text description;
+	private final ClientFrameData frame;
+	private final ClientIconData icon;
+	private final float size;
 
-	public ClientSkillDefinitionData(String id, Text title, Text description, ClientFrameData frame, ClientIconData icon) {
+	public ClientSkillDefinitionData(String id, Text title, Text description, ClientFrameData frame, ClientIconData icon, float size) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.frame = frame;
 		this.icon = icon;
+		this.size = size;
 	}
 
 	public String getId() {
@@ -35,5 +37,9 @@ public class ClientSkillDefinitionData {
 
 	public ClientIconData getIcon() {
 		return icon;
+	}
+
+	public float getSize() {
+		return size;
 	}
 }
