@@ -23,17 +23,19 @@ public class SkillDefinitionConfig {
 	private final Text description;
 	private final IconConfig icon;
 	private final FrameConfig frame;
+	private final float size;
 	private final List<SkillRewardConfig> rewards;
 	private final int cost;
 	private final int requiredPoints;
 	private final int requiredSpentPoints;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, FrameConfig frame, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
+	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.icon = icon;
 		this.frame = frame;
+		this.size = size;
 		this.rewards = rewards;
 		this.cost = cost;
 		this.requiredPoints = requiredPoints;
@@ -76,6 +78,10 @@ public class SkillDefinitionConfig {
 				)
 				.orElseGet(() -> FrameConfig.fromAdvancementFrame(AdvancementFrame.TASK));
 
+		var size = rootObject.getFloat("size")
+				.getSuccess() // ignore failure because this property is optional
+				.orElse(1f);
+
 		var rewards = rootObject.getArray("rewards")
 				.andThen(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(ManyFailures::ofList))
 				.ifFailure(failures::add)
@@ -101,6 +107,7 @@ public class SkillDefinitionConfig {
 					optDescription,
 					optIcon.orElseThrow(),
 					frame,
+					size,
 					rewards,
 					cost,
 					requiredPoints,
@@ -131,6 +138,10 @@ public class SkillDefinitionConfig {
 
 	public FrameConfig getFrame() {
 		return frame;
+	}
+
+	public float getSize() {
+		return size;
 	}
 
 	public IconConfig getIcon() {

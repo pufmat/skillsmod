@@ -61,6 +61,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeText(definition.getDescription());
 		write(buf, definition.getFrame());
 		write(buf, definition.getIcon());
+		buf.writeFloat(definition.getSize());
 	}
 
 	public static void write(PacketByteBuf buf, SkillsConfig skills, CategoryConfig category, CategoryData categoryData) {
