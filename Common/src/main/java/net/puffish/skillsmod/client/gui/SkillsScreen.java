@@ -28,6 +28,7 @@ import net.puffish.skillsmod.client.data.ClientFrameData;
 import net.puffish.skillsmod.client.data.ClientIconData;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillData;
+import net.puffish.skillsmod.client.data.ClientSkillDefinitionData;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Bounds2i;
@@ -162,8 +163,9 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= FRAME_PADDING + i * 32 && mouse.y >= FRAME_PADDING && mouse.x < FRAME_PADDING + i * 32 + 28 && mouse.y < FRAME_PADDING + 32;
 	}
 
-	private boolean isInsideSkill(Vec2i transformedMouse, ClientSkillData skill) {
-		return transformedMouse.x >= skill.getX() - 13 && transformedMouse.y >= skill.getY() - 13 && transformedMouse.x < skill.getX() + 13 && transformedMouse.y < skill.getY() + 13;
+	private boolean isInsideSkill(Vec2i transformedMouse, ClientSkillData skill, ClientSkillDefinitionData definition) {
+		var halfSize = Math.round(13f * definition.getSize());
+		return transformedMouse.x >= skill.getX() - halfSize && transformedMouse.y >= skill.getY() - halfSize && transformedMouse.x < skill.getX() + halfSize && transformedMouse.y < skill.getY() + halfSize;
 	}
 
 	private boolean isInsideContent(Vec2i mouse) {
@@ -185,7 +187,12 @@ public class SkillsScreen extends Screen {
 
 		if (isInsideContent(mouse)) {
 			for (var skill : getActiveCategory().getSkills().values()) {
-				if (isInsideSkill(transformedMouse, skill)) {
+				var definition = getActiveCategory().getDefinitions().get(skill.getDefinitionId());
+				if (definition == null) {
+					continue;
+				}
+
+				if (isInsideSkill(transformedMouse, skill, definition)) {
 					SkillsClientMod.getInstance()
 							.getPacketSender()
 							.send(SkillClickOutPacket.write(getActiveCategory().getId(), skill.getId()));
@@ -264,8 +271,8 @@ public class SkillsScreen extends Screen {
 			factor = maxScale / scale;
 		}
 
-		x -= Math.round((factor - 1f) * (mouseX - x));
-		y -= Math.round((factor - 1f) * (mouseY - y));
+		x -= (int) Math.round((factor - 1f) * (mouseX - x));
+		y -= (int) Math.round((factor - 1f) * (mouseY - y));
 
 		limitPosition();
 
@@ -279,45 +286,56 @@ public class SkillsScreen extends Screen {
 		y = Math.max(y, Math.round(height - contentPaddingBottom - bounds.max().y * scale));
 	}
 
-	private void drawIcon(MatrixStack matrices, int x, int y, ClientIconData icon) {
+	private void drawIcon(MatrixStack matrices, ClientIconData icon, float sizeScale, int x, int y) {
 		if (client == null) {
 			return;
 		}
 
 		if (icon instanceof ClientIconData.ItemIconData itemIcon) {
+			matrices.push();
+			matrices.translate(x * (1f - sizeScale), y * (1f - sizeScale), 0);
+			matrices.scale(sizeScale, sizeScale, 1);
 			DrawUtils.drawItem(
 					matrices,
 					x - 8,
 					y - 8,
 					itemIcon.getItem()
 			);
+			matrices.pop();
 		} else if (icon instanceof ClientIconData.EffectIconData effectIcon) {
 			var sprite = client.getStatusEffectSpriteManager().getSprite(effectIcon.getEffect());
+			int halfSize = Math.round(9f * sizeScale);
+			var size = halfSize * 2;
 			RenderSystem.setShaderTexture(0, sprite.getAtlas().getId());
 			DrawUtils.drawSingleSprite(
 					matrices,
-					x - 9,
-					y - 9,
-					18,
-					18,
+					x - halfSize,
+					y - halfSize,
+					size,
+					size,
 					sprite
 			);
 		} else if (icon instanceof ClientIconData.TextureIconData textureIcon) {
+			int halfSize = Math.round(8f * sizeScale);
+			var size = halfSize * 2;
 			RenderSystem.setShaderTexture(0, textureIcon.getTexture());
 			DrawUtils.drawSingleTexture(
 					matrices,
-					x - 8,
-					y - 8,
-					16,
-					16
+					x - halfSize,
+					y - halfSize,
+					size,
+					size
 			);
 		}
 	}
 
-	private void drawFrame(MatrixStack matrices, ClientFrameData frame, int x, int y, SkillState state) {
+	private void drawFrame(MatrixStack matrices, ClientFrameData frame, float sizeScale, int x, int y, SkillState state) {
 		if (client == null) {
 			return;
 		}
+
+		var halfSize = Math.round(13f * sizeScale);
+		var size = halfSize * 2;
 
 		if (frame instanceof ClientFrameData.AdvancementFrameData advancementFrame) {
 			var status = state == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
@@ -330,12 +348,16 @@ public class SkillsScreen extends Screen {
 			RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
 			drawTexture(
 					matrices,
-					x - 13,
-					y - 13,
+					x - halfSize,
+					y - halfSize,
+					size,
+					size,
 					advancementFrame.getFrame().getTextureV(),
 					128 + status.getSpriteIndex() * 26,
 					26,
-					26
+					26,
+					TEXTURE_WIDTH,
+					TEXTURE_HEIGHT
 			);
 		} else if (frame instanceof ClientFrameData.TextureFrameData textureFrame) {
 			var texture = switch (state) {
@@ -370,14 +392,14 @@ public class SkillsScreen extends Screen {
 			RenderSystem.setShaderTexture(0, texture);
 			drawTexture(
 					matrices,
-					x - 13,
-					y - 13,
+					x - halfSize,
+					y - halfSize,
 					0,
 					0,
-					26,
-					26,
-					26,
-					26
+					size,
+					size,
+					size,
+					size
 			);
 		}
 	}
@@ -460,7 +482,14 @@ public class SkillsScreen extends Screen {
 					.getSkills()
 					.values()
 					.stream()
-					.filter(skill -> isInsideSkill(transformedMouse, skill))
+					.filter(skill -> {
+						var definition = getActiveCategory().getDefinitions().get(skill.getDefinitionId());
+						if (definition == null) {
+							return false;
+						}
+
+						return isInsideSkill(transformedMouse, skill, definition);
+					})
 					.findFirst();
 
 			optHoveredSkill.ifPresent(hoveredSkill -> {
@@ -504,10 +533,10 @@ public class SkillsScreen extends Screen {
 				continue;
 			}
 
-			drawFrame(matrices, definition.getFrame(), skill.getX(), skill.getY(), skill.getState());
+			drawFrame(matrices, definition.getFrame(), definition.getSize(), skill.getX(), skill.getY(), skill.getState());
 
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-			drawIcon(matrices, skill.getX(), skill.getY(), definition.getIcon());
+			drawIcon(matrices, definition.getIcon(), definition.getSize(), skill.getX(), skill.getY());
 		}
 
 		matrices.pop();
@@ -645,7 +674,13 @@ public class SkillsScreen extends Screen {
 		for (var i = 0; i < categories.size(); i++) {
 			var category = categories.get(i);
 
-			drawIcon(matrices, FRAME_PADDING + 32 * i + 6 + 8, FRAME_PADDING + 9 + 8, category.getIcon());
+			drawIcon(
+					matrices,
+					category.getIcon(),
+					1f,
+					FRAME_PADDING + 32 * i + 6 + 8,
+					FRAME_PADDING + 9 + 8
+			);
 
 			if (isInsideTab(mouse, i)) {
 				tooltip = textRenderer.wrapLines(category.getTitle(), 170);
