@@ -27,6 +27,7 @@ import net.puffish.skillsmod.client.data.ClientFrameData;
 import net.puffish.skillsmod.client.data.ClientIconData;
 import net.puffish.skillsmod.client.data.ClientSkillCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillData;
+import net.puffish.skillsmod.client.data.ClientSkillDefinitionData;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.Bounds2i;
@@ -160,8 +161,9 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= FRAME_PADDING + i * 32 && mouse.y >= FRAME_PADDING && mouse.x < FRAME_PADDING + i * 32 + 28 && mouse.y < FRAME_PADDING + 32;
 	}
 
-	private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillData skill) {
-		return transformedMouse.x >= skill.getX() - 13 && transformedMouse.y >= skill.getY() - 13 && transformedMouse.x < skill.getX() + 13 && transformedMouse.y < skill.getY() + 13;
+	private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillData skill, ClientSkillDefinitionData definition) {
+		var halfSize = Math.round(13f * definition.getSize());
+		return transformedMouse.x >= skill.getX() - halfSize && transformedMouse.y >= skill.getY() - halfSize && transformedMouse.x < skill.getX() + halfSize && transformedMouse.y < skill.getY() + halfSize;
 	}
 
 	private boolean isInsideContent(Vector2i mouse) {
@@ -183,7 +185,12 @@ public class SkillsScreen extends Screen {
 
 		if (isInsideContent(mouse)) {
 			for (var skill : getActiveCategory().getSkills().values()) {
-				if (isInsideSkill(transformedMouse, skill)) {
+				var definition = getActiveCategory().getDefinitions().get(skill.getDefinitionId());
+				if (definition == null) {
+					continue;
+				}
+
+				if (isInsideSkill(transformedMouse, skill, definition)) {
 					SkillsClientMod.getInstance()
 							.getPacketSender()
 							.send(SkillClickOutPacket.write(getActiveCategory().getId(), skill.getId()));
@@ -256,8 +263,8 @@ public class SkillsScreen extends Screen {
 			factor = maxScale / scale;
 		}
 
-		x -= Math.round((factor - 1f) * (mouseX - x));
-		y -= Math.round((factor - 1f) * (mouseY - y));
+		x -= (int) Math.round((factor - 1f) * (mouseX - x));
+		y -= (int) Math.round((factor - 1f) * (mouseY - y));
 
 		limitPosition();
 
@@ -271,46 +278,58 @@ public class SkillsScreen extends Screen {
 		y = Math.max(y, (int) Math.ceil(height - contentPaddingBottom - bounds.max().y() * scale));
 	}
 
-	private void drawIcon(DrawContext context, ClientIconData icon, int x, int y) {
+	private void drawIcon(DrawContext context, ClientIconData icon, float sizeScale, int x, int y) {
 		if (client == null) {
 			return;
 		}
 
 		if (icon instanceof ClientIconData.ItemIconData itemIcon) {
+			var matrices = context.getMatrices();
+			matrices.push();
+			matrices.translate(x * (1f - sizeScale), y * (1f - sizeScale), 0);
+			matrices.scale(sizeScale, sizeScale, 1);
 			context.drawItem(
 					itemIcon.getItem(),
 					x - 8,
 					y - 8
 			);
+			matrices.pop();
 		} else if (icon instanceof ClientIconData.EffectIconData effectIcon) {
 			var sprite = client.getStatusEffectSpriteManager().getSprite(effectIcon.getEffect());
+			int halfSize = Math.round(9f * sizeScale);
+			var size = halfSize * 2;
 			context.drawSprite(
-					x - 9,
-					y - 9,
+					x - halfSize,
+					y - halfSize,
 					0,
-					18,
-					18,
+					size,
+					size,
 					sprite
 			);
 		} else if (icon instanceof ClientIconData.TextureIconData textureIcon) {
+			int halfSize = Math.round(8f * sizeScale);
+			var size = halfSize * 2;
 			context.drawTexture(
 					textureIcon.getTexture(),
-					x - 8,
-					y - 8,
+					x - halfSize,
+					y - halfSize,
 					0,
 					0,
-					16,
-					16,
-					16,
-					16
+					size,
+					size,
+					size,
+					size
 			);
 		}
 	}
 
-	private void drawFrame(DrawContext context, ClientFrameData frame, int x, int y, SkillState state) {
+	private void drawFrame(DrawContext context, ClientFrameData frame, float sizeScale, int x, int y, SkillState state) {
 		if (client == null) {
 			return;
 		}
+
+		var halfSize = Math.round(13f * sizeScale);
+		var size = halfSize * 2;
 
 		if (frame instanceof ClientFrameData.AdvancementFrameData advancementFrame) {
 			var status = state == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
@@ -322,12 +341,16 @@ public class SkillsScreen extends Screen {
 
 			context.drawTexture(
 					WIDGETS_TEXTURE,
-					x - 13,
-					y - 13,
+					x - halfSize,
+					y - halfSize,
+					size,
+					size,
 					advancementFrame.getFrame().getTextureV(),
 					128 + status.getSpriteIndex() * 26,
 					26,
-					26
+					26,
+					TEXTURE_WIDTH,
+					TEXTURE_HEIGHT
 			);
 		} else if (frame instanceof ClientFrameData.TextureFrameData textureFrame) {
 			var texture = switch (state) {
@@ -361,14 +384,14 @@ public class SkillsScreen extends Screen {
 
 			context.drawTexture(
 					texture,
-					x - 13,
-					y - 13,
+					x - halfSize,
+					y - halfSize,
 					0,
 					0,
-					26,
-					26,
-					26,
-					26
+					size,
+					size,
+					size,
+					size
 			);
 		}
 	}
@@ -426,7 +449,14 @@ public class SkillsScreen extends Screen {
 					.getSkills()
 					.values()
 					.stream()
-					.filter(skill -> isInsideSkill(transformedMouse, skill))
+					.filter(skill -> {
+						var definition = getActiveCategory().getDefinitions().get(skill.getDefinitionId());
+						if (definition == null) {
+							return false;
+						}
+
+						return isInsideSkill(transformedMouse, skill, definition);
+					})
 					.findFirst();
 
 			optHoveredSkill.ifPresent(hoveredSkill -> {
@@ -470,10 +500,10 @@ public class SkillsScreen extends Screen {
 				continue;
 			}
 
-			drawFrame(context, definition.getFrame(), skill.getX(), skill.getY(), skill.getState());
+			drawFrame(context, definition.getFrame(), definition.getSize(), skill.getX(), skill.getY(), skill.getState());
 
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-			drawIcon(context, definition.getIcon(), skill.getX(), skill.getY());
+			drawIcon(context, definition.getIcon(), definition.getSize(), skill.getX(), skill.getY());
 		}
 
 		context.getMatrices().pop();
@@ -592,6 +622,7 @@ public class SkillsScreen extends Screen {
 			drawIcon(
 					context,
 					category.getIcon(),
+					1f,
 					FRAME_PADDING + 32 * i + 6 + 8,
 					FRAME_PADDING + 9 + 8
 			);
