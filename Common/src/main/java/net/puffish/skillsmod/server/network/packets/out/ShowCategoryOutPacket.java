@@ -59,6 +59,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeString(definition.getId());
 		buf.writeText(definition.getTitle());
 		buf.writeText(definition.getDescription());
+		buf.writeText(definition.getExtraDescription());
 		write(buf, definition.getFrame());
 		write(buf, definition.getIcon());
 		buf.writeFloat(definition.getSize());

@@ -53,6 +53,8 @@ public class SkillsScreen extends Screen {
 	private static final int CONTENT_GROW = 32;
 	private static final int TABS_HEIGHT = 28;
 
+	private static final int LINE_WIDTH = 170;
+
 	private static final int HALF_FRAME_WIDTH = FRAME_WIDTH / 2;
 	private static final int HALF_FRAME_HEIGHT = FRAME_HEIGHT / 2;
 
@@ -499,7 +501,10 @@ public class SkillsScreen extends Screen {
 
 				var lines = new ArrayList<OrderedText>();
 				lines.add(definition.getTitle().asOrderedText());
-				lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), 170));
+				lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), LINE_WIDTH));
+				if (Screen.hasShiftDown()) {
+					lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(definition.getExtraDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY)), LINE_WIDTH));
+				}
 				if (client.options.advancedItemTooltips) {
 					lines.add(new LiteralText(hoveredSkill.getId()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}
@@ -684,7 +689,7 @@ public class SkillsScreen extends Screen {
 			);
 
 			if (isInsideTab(mouse, i)) {
-				tooltip = textRenderer.wrapLines(category.getTitle(), 170);
+				tooltip = textRenderer.wrapLines(category.getTitle(), LINE_WIDTH);
 			}
 		}
 	}

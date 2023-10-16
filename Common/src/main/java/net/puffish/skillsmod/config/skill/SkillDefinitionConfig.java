@@ -21,6 +21,7 @@ public class SkillDefinitionConfig {
 	private final String id;
 	private final Text title;
 	private final Text description;
+	private final Text extraDescription;
 	private final IconConfig icon;
 	private final FrameConfig frame;
 	private final float size;
@@ -29,10 +30,11 @@ public class SkillDefinitionConfig {
 	private final int requiredPoints;
 	private final int requiredSpentPoints;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
+	private SkillDefinitionConfig(String id, Text title, Text description, Text extraDescription, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredPoints, int requiredSpentPoints) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
+		this.extraDescription = extraDescription;
 		this.icon = icon;
 		this.frame = frame;
 		this.size = size;
@@ -55,7 +57,15 @@ public class SkillDefinitionConfig {
 				.ifFailure(failures::add)
 				.getSuccess();
 
-		var optDescription = rootObject.get("description")
+		var description = rootObject.get("description")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(descriptionElement -> JsonParseUtils.parseText(descriptionElement)
+						.ifFailure(failures::add)
+						.getSuccess()
+				)
+				.orElse(LiteralText.EMPTY);
+
+		var extraDescription = rootObject.get("extra_description")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(descriptionElement -> JsonParseUtils.parseText(descriptionElement)
 						.ifFailure(failures::add)
@@ -104,7 +114,8 @@ public class SkillDefinitionConfig {
 			return Result.success(new SkillDefinitionConfig(
 					id,
 					optTitle.orElseThrow(),
-					optDescription,
+					description,
+					extraDescription,
 					optIcon.orElseThrow(),
 					frame,
 					size,
@@ -134,6 +145,10 @@ public class SkillDefinitionConfig {
 
 	public Text getDescription() {
 		return description;
+	}
+
+	public Text getExtraDescription() {
+		return extraDescription;
 	}
 
 	public FrameConfig getFrame() {
