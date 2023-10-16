@@ -83,11 +83,12 @@ public class ShowCategoryInPacket implements InPacket {
 		var id = buf.readString();
 		var title = buf.readText();
 		var description = buf.readText();
+		var extraDescription = buf.readText();
 		var frame = readFrameIcon(buf);
 		var icon = readSkillIcon(buf);
 		var size = buf.readFloat();
 
-		return new ClientSkillDefinitionData(id, title, description, frame, icon, size);
+		return new ClientSkillDefinitionData(id, title, description, extraDescription, frame, icon, size);
 	}
 
 	public static ClientIconData readSkillIcon(PacketByteBuf buf) {
