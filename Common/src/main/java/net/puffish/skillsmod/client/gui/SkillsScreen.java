@@ -468,6 +468,9 @@ public class SkillsScreen extends Screen {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(definition.getTitle().asOrderedText());
 				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(definition.getDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY))));
+				if (Screen.hasShiftDown()) {
+					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(definition.getExtraDescription().copy(), Style.EMPTY.withFormatting(Formatting.GRAY))));
+				}
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(hoveredSkill.getId()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}
