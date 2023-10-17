@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.builtin;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -10,6 +11,8 @@ import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.experience.ExperienceSource;
+import net.puffish.skillsmod.api.experience.calculation.condition.DamageTypeCondition;
+import net.puffish.skillsmod.api.experience.calculation.condition.DamageTypeTagCondition;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.api.experience.calculation.condition.EntityTypeCondition;
@@ -38,7 +41,9 @@ public class KillEntityExperienceSource implements ExperienceSource {
 			Map.entry("entity_tag", EntityTypeTagCondition.factory().map(c -> c.map(Context::entityType))),
 			Map.entry("weapon", ItemCondition.factory().map(c -> c.map(Context::weapon))),
 			Map.entry("weapon_nbt", ItemNbtCondition.factory().map(c -> c.map(Context::weapon))),
-			Map.entry("weapon_tag", ItemTagCondition.factory().map(c -> c.map(Context::weapon)))
+			Map.entry("weapon_tag", ItemTagCondition.factory().map(c -> c.map(Context::weapon))),
+			Map.entry("damage_type", DamageTypeCondition.factory().map(c -> c.map(Context::damageType))),
+			Map.entry("damage_type_tag", DamageTypeTagCondition.factory().map(c -> c.map(Context::damageType)))
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
@@ -124,7 +129,7 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Context(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon) {
+	private record Context(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource) {
 		public double entityDroppedXp() {
 			return entity.shouldDropXp() ? entity.getXpToDrop() : 0.0;
 		}
@@ -136,10 +141,14 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		public EntityType<?> entityType() {
 			return entity.getType();
 		}
+
+		String damageType() {
+			return damageSource.getName();
+		}
 	}
 
-	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon) {
-		return manager.getValue(new Context(player, entity, weapon));
+	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource) {
+		return manager.getValue(new Context(player, entity, weapon, damageSource));
 	}
 
 	public Optional<AntiFarming> getAntiFarming() {
