@@ -98,7 +98,7 @@ public abstract class LivingEntityMixin {
 							.map(worldChunk::antiFarmingAddAndCheck)
 							.orElse(true)
 					) {
-						return entityExperienceSource.getValue(player, entity, weapon);
+						return entityExperienceSource.getValue(player, entity, weapon, source);
 					}
 				}
 				return 0;
