@@ -341,8 +341,7 @@ public class SkillsScreen extends Screen {
 		if (frame instanceof ClientFrameData.AdvancementFrameData advancementFrame) {
 			var status = state == SkillState.UNLOCKED ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
 			switch (state) {
-				case LOCKED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
-				case EXCLUDED -> RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+				case LOCKED, EXCLUDED -> RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
 				default -> RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 			}
 
@@ -384,7 +383,7 @@ public class SkillsScreen extends Screen {
 						RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 						yield textureFrame.getExcludedTexture();
 					} else {
-						RenderSystem.setShaderColor(0.85f, 0.1f, 0.1f, 1f);
+						RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1f);
 						yield textureFrame.getAvailableTexture();
 					}
 				}
