@@ -26,7 +26,7 @@ public abstract class ApplyBonusLootFunctionMixin {
 	private int modifyVariableAtProcess(int i, ItemStack itemStack, LootContext context) {
 		if (enchantment == Enchantments.FORTUNE && context.get(LootContextParameters.THIS_ENTITY) instanceof PlayerEntity player) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.FORTUNE));
-			double fortune = attribute.computeValueForInitial(i);
+			double fortune = attribute.computeIncreasedValueForInitial(i);
 			i = (int) fortune;
 			if (context.getRandom().nextFloat() < fortune - i) {
 				i++;
