@@ -25,8 +25,8 @@ public abstract class EntityAttributeInstanceMixin implements EntityAttributeIns
 
 	@Override
 	@Unique
-	public double computeValueForInitial(double initial) {
-		double value1 = this.getBaseValue() + initial;
+	public double computeIncreasedValueForInitial(double initial) {
+		double value1 = initial + this.getBaseValue();
 		for (EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADDITION)) {
 			value1 += modifier.getValue();
 		}
@@ -36,6 +36,23 @@ public abstract class EntityAttributeInstanceMixin implements EntityAttributeIns
 		}
 		for (EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_TOTAL)) {
 			value2 *= 1.0 + modifier.getValue();
+		}
+		return this.type.clamp(value2);
+	}
+
+	@Override
+	@Unique
+	public double computeDecreasedValueForInitial(double initial) {
+		double value1 = initial - this.getBaseValue();
+		for (EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.ADDITION)) {
+			value1 -= modifier.getValue();
+		}
+		double value2 = value1;
+		for (EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_BASE)) {
+			value2 -= value1 * modifier.getValue();
+		}
+		for (EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_TOTAL)) {
+			value2 *= 1.0 - modifier.getValue();
 		}
 		return this.type.clamp(value2);
 	}

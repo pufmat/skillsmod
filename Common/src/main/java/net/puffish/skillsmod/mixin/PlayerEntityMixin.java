@@ -39,7 +39,7 @@ public abstract class PlayerEntityMixin {
 		var player = (PlayerEntity) (Object) this;
 
 		var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.KNOCKBACK));
-		var knockback = attribute.computeValueForInitial(VANILLA_KNOCKBACK) - VANILLA_KNOCKBACK;
+		var knockback = attribute.computeIncreasedValueForInitial(VANILLA_KNOCKBACK) - VANILLA_KNOCKBACK;
 
 		var yaw = player.getYaw() * MathHelper.RADIANS_PER_DEGREE;
 		var sin = MathHelper.sin(yaw);
@@ -58,7 +58,7 @@ public abstract class PlayerEntityMixin {
 
 		if (player.isSprinting()) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.SPRINTING_SPEED));
-			cir.setReturnValue((float) attribute.computeValueForInitial(cir.getReturnValueF()));
+			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}
 

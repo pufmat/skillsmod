@@ -32,10 +32,10 @@ public abstract class LivingEntityMixin {
 		if (source.getAttacker() instanceof PlayerEntity player) {
 			if (source instanceof ProjectileDamageSource) {
 				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RANGED_DAMAGE));
-				damage = (float) attribute.computeValueForInitial(damage);
+				damage = (float) attribute.computeIncreasedValueForInitial(damage);
 			} else {
 				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MELEE_DAMAGE));
-				damage = (float) attribute.computeValueForInitial(damage);
+				damage = (float) attribute.computeIncreasedValueForInitial(damage);
 			}
 		}
 		return damage;
@@ -61,7 +61,7 @@ public abstract class LivingEntityMixin {
 
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.HEALING));
-			amount = (float) attribute.computeValueForInitial(amount);
+			amount = (float) attribute.computeIncreasedValueForInitial(amount);
 		}
 		return amount;
 	}
@@ -70,7 +70,7 @@ public abstract class LivingEntityMixin {
 	private void injectAtGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.JUMP));
-			cir.setReturnValue((float) attribute.computeValueForInitial(cir.getReturnValueF()));
+			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}
 
@@ -78,7 +78,7 @@ public abstract class LivingEntityMixin {
 	private float modifyVariableAtComputeFallDamage(float reduction) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.JUMP));
-			reduction += (attribute.computeValueForInitial(1.0f) - 1.0f) * 10.0f;
+			reduction += (attribute.computeIncreasedValueForInitial(1.0f) - 1.0f) * 10.0f;
 		}
 		return reduction;
 	}
@@ -113,7 +113,7 @@ public abstract class LivingEntityMixin {
 			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RESISTANCE));
 			cir.setReturnValue(Math.max(
 					0.0f,
-					2.0f * cir.getReturnValueF() - ((float) attribute.computeValueForInitial(cir.getReturnValueF()))
+					(float) attribute.computeDecreasedValueForInitial(cir.getReturnValueF())
 			));
 		}
 	}
