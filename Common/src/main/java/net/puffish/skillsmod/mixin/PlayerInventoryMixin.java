@@ -16,7 +16,7 @@ public class PlayerInventoryMixin {
 		if (cir.getReturnValueF() > 1.0f) { // This check is required to not break vanilla enchantments behavior
 			var player = ((PlayerInventory) (Object) this).player;
 			var attribute = (EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MINING_SPEED);
-			cir.setReturnValue((float) attribute.computeValueForInitial(cir.getReturnValueF()));
+			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}
 

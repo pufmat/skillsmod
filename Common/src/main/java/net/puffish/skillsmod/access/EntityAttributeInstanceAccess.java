@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.access;
 
 public interface EntityAttributeInstanceAccess {
-	double computeValueForInitial(double initial);
+	double computeIncreasedValueForInitial(double initial);
+	double computeDecreasedValueForInitial(double initial);
 }
