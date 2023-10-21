@@ -128,7 +128,10 @@ public class ForgeMain {
 	private static class ServerPacketReceiverImpl implements ServerPacketReceiver {
 		@Override
 		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			var channel = ChannelBuilder.named(identifier).eventNetworkChannel();
+			var channel = ChannelBuilder.named(identifier)
+					.serverAcceptedVersions((status, version) -> true)
+					.clientAcceptedVersions((status, version) -> true)
+					.eventNetworkChannel();
 			channel.addListener(networkEvent -> {
 				var context = networkEvent.getSource();
 				if (context.getPacketHandled()) {

@@ -93,7 +93,10 @@ public class ForgeClientMain {
 	private static class ClientPacketReceiverImpl implements ClientPacketReceiver {
 		@Override
 		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var channel = ChannelBuilder.named(identifier).eventNetworkChannel();
+			var channel = ChannelBuilder.named(identifier)
+					.serverAcceptedVersions((status, version) -> true)
+					.clientAcceptedVersions((status, version) -> true)
+					.eventNetworkChannel();
 			channel.addListener(networkEvent -> {
 				var context = networkEvent.getSource();
 				if (context.getPacketHandled()) {
