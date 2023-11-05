@@ -71,7 +71,6 @@ public class GeneralConfig {
 
 		var optPlaySound = rootObject.get("play_sound")
 				.andThen(JsonParseUtils::parseIdentifier)
-				//.ifFailure(failures::add)
 				.getSuccess()
 				.orElse(Identifier.of("", ""));
 

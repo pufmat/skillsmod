@@ -3,11 +3,7 @@ package net.puffish.skillsmod.client;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-<<<<<<< HEAD
-=======
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
->>>>>>> 3f9ad5c (Added play_sound as an optional configuration)
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
@@ -155,14 +151,11 @@ public class SkillsClientMod {
 								OPEN_KEY_BINDING.getBoundKeyLocalizedText()
 						)
 				);
-<<<<<<< HEAD
-=======
 
 				if (!playSound.equals(Identifier.of("", ""))) {
 					var soundEvent = SoundEvent.of(playSound);
 					MinecraftClient.getInstance().player.playSound(soundEvent, 1.0f, 1.0f);
 				}
->>>>>>> 3f9ad5c (Added play_sound as an optional configuration)
 			}
 		});
 	}
