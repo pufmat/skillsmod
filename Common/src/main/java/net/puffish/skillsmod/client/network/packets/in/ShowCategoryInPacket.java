@@ -34,6 +34,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var title = buf.readText();
 		var icon = readSkillIcon(buf);
 		var background = buf.readIdentifier();
+		var playSound = buf.readIdentifier();
 		var exclusiveRoot = buf.readBoolean();
 		var spentPointsLimit = buf.readInt();
 
@@ -60,11 +61,13 @@ public class ShowCategoryInPacket implements InPacket {
 			requiredExperience = buf.readInt();
 		}
 
+
 		return new ClientSkillCategoryData(
 				id,
 				title,
 				icon,
 				background,
+				playSound,
 				exclusiveRoot,
 				spentPointsLimit,
 				definitions,

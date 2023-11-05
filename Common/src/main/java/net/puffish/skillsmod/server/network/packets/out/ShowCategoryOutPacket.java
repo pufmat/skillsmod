@@ -50,6 +50,7 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeText(general.getTitle());
 		write(buf, general.getIcon());
 		buf.writeIdentifier(general.getBackground());
+		buf.writeIdentifier(general.getPlaySound());
 		buf.writeBoolean(general.isExclusiveRoot());
 	}
 

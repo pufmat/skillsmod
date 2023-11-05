@@ -18,14 +18,16 @@ public class GeneralConfig {
 	private final boolean unlockedByDefault;
 	private final boolean exclusiveRoot;
 	private final int spentPointsLimit;
+	private final Identifier playSound;
 
-	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault, boolean exclusiveRoot, int spentPointsLimit) {
+	private GeneralConfig(Text title, IconConfig icon, Identifier background, boolean unlockedByDefault, boolean exclusiveRoot, int spentPointsLimit, Identifier playSound) {
 		this.title = title;
 		this.icon = icon;
 		this.background = background;
 		this.unlockedByDefault = unlockedByDefault;
 		this.exclusiveRoot = exclusiveRoot;
 		this.spentPointsLimit = spentPointsLimit;
+		this.playSound = playSound;
 	}
 
 	public static Result<GeneralConfig, Failure> parse(JsonElementWrapper rootElement) {
@@ -67,6 +69,12 @@ public class GeneralConfig {
 				)
 				.orElse(Integer.MAX_VALUE);
 
+		var optPlaySound = rootObject.get("play_sound")
+				.andThen(JsonParseUtils::parseIdentifier)
+				//.ifFailure(failures::add)
+				.getSuccess()
+				.orElse(Identifier.of("", ""));
+
 		if (failures.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
@@ -74,7 +82,8 @@ public class GeneralConfig {
 					optBackground.orElseThrow(),
 					optUnlockedByDefault.orElseThrow(),
 					exclusiveRoot,
-					spentPointsLimit
+					spentPointsLimit,
+					optPlaySound
 			));
 		} else {
 			return Result.failure(ManyFailures.ofList(failures));
@@ -103,5 +112,9 @@ public class GeneralConfig {
 
 	public int getSpentPointsLimit() {
 		return spentPointsLimit;
+	}
+
+	public Identifier getPlaySound() {
+		return playSound;
 	}
 }

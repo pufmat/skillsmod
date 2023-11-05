@@ -34,11 +34,14 @@ public class ClientSkillCategoryData {
 	private int currentExperience;
 	private int requiredExperience;
 
+	private final Identifier playSound;
+
 	public ClientSkillCategoryData(
 			Identifier id,
 			Text title,
 			ClientIconData icon,
 			Identifier background,
+			Identifier playSound,
 			boolean exclusiveRoot,
 			int spentPointsLimit,
 			Map<String, ClientSkillDefinitionData> definitions,
@@ -68,6 +71,7 @@ public class ClientSkillCategoryData {
 		this.normalNeighbors = new HashMap<>();
 		this.exclusiveNeighbors = new HashMap<>();
 		this.exclusiveConnections = new HashMap<>();
+		this.playSound = playSound;
 
 		for (var connection : normalConnections) {
 			var a = connection.getSkillAId();
@@ -230,5 +234,9 @@ public class ClientSkillCategoryData {
 
 	public int getExperienceToNextLevel() {
 		return requiredExperience - currentExperience;
+	}
+
+	public Identifier getPlaySound() {
+		return playSound;
 	}
 }
