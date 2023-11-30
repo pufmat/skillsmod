@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.expression;
 
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Failure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -79,25 +78,25 @@ class LogicParserTest {
 
 	@Test
 	public void testInvalidExpressions() {
-		testInvalid(SingleFailure.of("Invalid expression"), "");
-		testInvalid(SingleFailure.of("Invalid expression"), "|");
-		testInvalid(SingleFailure.of("Invalid expression"), "a &", Map.ofEntries(
+		testInvalid(Failure.message("Invalid expression"), "");
+		testInvalid(Failure.message("Invalid expression"), "|");
+		testInvalid(Failure.message("Invalid expression"), "a &", Map.ofEntries(
 				Map.entry("a", false)
 		));
-		testInvalid(SingleFailure.of("Invalid expression"), "a b", Map.ofEntries(
+		testInvalid(Failure.message("Invalid expression"), "a b", Map.ofEntries(
 				Map.entry("a", false),
 				Map.entry("b", true)
 		));
-		testInvalid(SingleFailure.of("Invalid expression"), "(a | b", Map.ofEntries(
+		testInvalid(Failure.message("Invalid expression"), "(a | b", Map.ofEntries(
 				Map.entry("a", true),
 				Map.entry("b", false)
 		));
-		testInvalid(SingleFailure.of("Invalid expression"), "a & b)", Map.ofEntries(
+		testInvalid(Failure.message("Invalid expression"), "a & b)", Map.ofEntries(
 				Map.entry("a", true),
 				Map.entry("b", true)
 		));
-		testInvalid(SingleFailure.of("Unknown variable `a`"), "a");
-		testInvalid(SingleFailure.of("Unknown variable `b`"), "a | b", Map.ofEntries(
+		testInvalid(Failure.message("Unknown variable `a`"), "a");
+		testInvalid(Failure.message("Unknown variable `b`"), "a | b", Map.ofEntries(
 				Map.entry("a", false)
 		));
 	}

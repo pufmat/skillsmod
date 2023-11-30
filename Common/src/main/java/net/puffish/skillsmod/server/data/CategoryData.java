@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
-import net.puffish.skillsmod.api.rewards.RewardContext;
+import net.puffish.skillsmod.impl.rewards.RewardContextImpl;
 import net.puffish.skillsmod.skill.SkillState;
 
 import java.util.HashSet;
@@ -126,7 +126,7 @@ public class CategoryData {
 				int count = countUnlocked(category, definitionId);
 
 				for (var reward : definition.getRewards()) {
-					reward.getInstance().update(player, new RewardContext(count, true));
+					reward.getInstance().update(player, new RewardContextImpl(count, true));
 				}
 
 				return true;
@@ -149,7 +149,7 @@ public class CategoryData {
 
 			for (var reward : definition.getRewards()) {
 				if (reward.getType().equals(type)) {
-					reward.getInstance().update(player, new RewardContext(count, false));
+					reward.getInstance().update(player, new RewardContextImpl(count, false));
 				}
 			}
 		}
@@ -160,7 +160,7 @@ public class CategoryData {
 			int count = countUnlocked(category, definition.getId());
 
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, new RewardContext(count, false));
+				reward.getInstance().update(player, new RewardContextImpl(count, false));
 			}
 		}
 	}

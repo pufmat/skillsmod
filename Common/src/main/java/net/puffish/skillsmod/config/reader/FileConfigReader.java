@@ -4,7 +4,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

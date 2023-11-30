@@ -10,8 +10,7 @@ import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -51,14 +50,14 @@ public class ExperienceSourceConfig {
 					context
 			);
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
 	private static Result<ExperienceSourceConfig, Failure> build(Identifier type, Result<JsonElementWrapper, Failure> maybeDataElement, JsonPath typeElementPath, ConfigContext context) {
 		return ExperienceSourceRegistry.getFactory(type)
 				.map(factory -> factory.create(maybeDataElement, context).mapSuccess(instance -> new ExperienceSourceConfig(type, instance)))
-				.orElseGet(() -> Result.failure(typeElementPath.failureAt("Expected a valid source type")));
+				.orElseGet(() -> Result.failure(typeElementPath.createFailure("Expected a valid source type")));
 	}
 
 	public void dispose(MinecraftServer server) {

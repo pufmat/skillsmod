@@ -4,8 +4,7 @@ import com.google.gson.JsonElement;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -40,7 +39,7 @@ public class IconConfig {
 					data.orElseThrow().getJson()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

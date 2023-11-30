@@ -6,7 +6,7 @@ import net.puffish.skillsmod.api.experience.ExperienceSourceWithoutDataFactory;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.HashMap;
 import java.util.Optional;

@@ -1,8 +1,7 @@
 package net.puffish.skillsmod.expression;
 
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +30,7 @@ public class LogicParser {
 			if (variables.contains(token)) {
 				return Result.success(v -> v.get(token));
 			} else {
-				return Result.failure(SingleFailure.of("Unknown variable `" + token + "`"));
+				return Result.failure(Failure.message("Unknown variable `" + token + "`"));
 			}
 		});
 	}

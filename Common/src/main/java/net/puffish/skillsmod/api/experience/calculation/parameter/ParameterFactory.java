@@ -3,7 +3,7 @@ package net.puffish.skillsmod.api.experience.calculation.parameter;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

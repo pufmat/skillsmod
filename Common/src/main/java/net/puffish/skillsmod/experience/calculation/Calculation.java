@@ -8,8 +8,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -38,7 +37,12 @@ public class Calculation {
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(element -> element.getAsString()
 						.andThen(string -> LogicParser.parse(string, conditionVariables)
-								.mapFailure(failure -> failure.flatMap(msg -> element.getPath().failureAt(msg)))
+								.mapFailure(failure -> Failure.fromMany(
+										failure.getMessages()
+												.stream()
+												.map(msg -> element.getPath().createFailure(msg))
+												.toList()
+								))
 						)
 						.ifFailure(failures::add)
 						.getSuccess()
@@ -52,7 +56,13 @@ public class Calculation {
 		var optExpression = optExpressionElement
 				.flatMap(element -> element.getAsString()
 						.andThen(string -> ArithmeticParser.parse(string, expressionVariables)
-								.mapFailure(failure -> failure.flatMap(msg -> element.getPath().failureAt(msg))))
+								.mapFailure(failure -> Failure.fromMany(
+										failure.getMessages()
+												.stream()
+												.map(msg -> element.getPath().createFailure(msg))
+												.toList()
+								))
+						)
 						.ifFailure(failures::add)
 						.getSuccess()
 				);
@@ -64,7 +74,7 @@ public class Calculation {
 					optExpressionElement.orElseThrow().getPath()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -82,7 +92,7 @@ public class Calculation {
 			if (Double.isFinite(value)) {
 				return Optional.of((int) Math.round(value));
 			} else {
-				for (var message : expressionElementPath.failureAt("Expression returned a value that is not finite").getMessages()) {
+				for (var message : expressionElementPath.createFailure("Expression returned a value that is not finite").getMessages()) {
 					SkillsMod.getInstance().getLogger().warn(message);
 				}
 				return Optional.of(0);

@@ -2,102 +2,45 @@ package net.puffish.skillsmod.api;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public class Category {
-	private final Identifier categoryId;
+public interface Category {
+	Identifier getId();
 
-	public Category(Identifier categoryId) {
-		this.categoryId = categoryId;
-	}
+	Optional<Skill> getSkill(String skillId);
 
-	public Identifier getId() {
-		return categoryId;
-	}
+	List<Skill> getSkills();
 
-	public Optional<Skill> getSkill(String skillId) {
-		if (SkillsMod.getInstance().hasSkill(categoryId, skillId)) {
-			return Optional.of(new Skill(this, skillId));
-		} else {
-			return Optional.empty();
-		}
-	}
+	Collection<Skill> getUnlockedSkills(ServerPlayerEntity player);
 
-	private List<Skill> getSkills() {
-		return SkillsMod.getInstance()
-				.getSkills(categoryId)
-				.orElseThrow()
-				.stream()
-				.map(skillId -> new Skill(this, skillId))
-				.toList();
-	}
+	void unlock(ServerPlayerEntity player);
 
-	public Collection<Skill> getUnlockedSkills(ServerPlayerEntity player) {
-		return SkillsMod.getInstance()
-				.getUnlockedSkills(player, categoryId)
-				.orElseThrow()
-				.stream()
-				.map(skillId -> new Skill(this, skillId))
-				.toList();
-	}
+	void lock(ServerPlayerEntity player);
 
-	public void unlock(ServerPlayerEntity player) {
-		SkillsMod.getInstance().unlockCategory(player, categoryId);
-	}
+	void erase(ServerPlayerEntity player);
 
-	public void lock(ServerPlayerEntity player) {
-		SkillsMod.getInstance().lockCategory(player, categoryId);
-	}
+	void resetSkills(ServerPlayerEntity player);
 
-	public void erase(ServerPlayerEntity player) {
-		SkillsMod.getInstance().eraseCategory(player, categoryId);
-	}
+	int getExperience(ServerPlayerEntity player);
 
-	public void resetSkills(ServerPlayerEntity player) {
-		SkillsMod.getInstance().resetSkills(player, categoryId);
-	}
+	void setExperience(ServerPlayerEntity player, int amount);
 
-	public int getExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getExperience(player, categoryId).orElseThrow();
-	}
+	void addExperience(ServerPlayerEntity player, int amount);
 
-	public void setExperience(ServerPlayerEntity player, int amount) {
-		SkillsMod.getInstance().setExperience(player, categoryId, amount);
-	}
+	int getExtraPoints(ServerPlayerEntity player);
 
-	public void addExperience(ServerPlayerEntity player, int amount) {
-		SkillsMod.getInstance().addExperience(player, categoryId, amount);
-	}
+	void setExtraPoints(ServerPlayerEntity player, int count);
 
-	public int getExtraPoints(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getExtraPoints(player, categoryId).orElseThrow();
-	}
+	void addExtraPoints(ServerPlayerEntity player, int count);
 
-	public void setExtraPoints(ServerPlayerEntity player, int count) {
-		SkillsMod.getInstance().setExtraPoints(player, categoryId, count);
-	}
+	int getPointsLeft(ServerPlayerEntity player);
 
-	public void addExtraPoints(ServerPlayerEntity player, int count) {
-		SkillsMod.getInstance().addExtraPoints(player, categoryId, count);
-	}
+	int getCurrentLevel(ServerPlayerEntity player);
 
-	public int getPointsLeft(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
-	}
+	int getCurrentExperience(ServerPlayerEntity player);
 
-	public int getCurrentLevel(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getCurrentLevel(player, categoryId).orElseThrow();
-	}
-
-	public int getCurrentExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getCurrentExperience(player, categoryId).orElseThrow();
-	}
-
-	public int getRequiredExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getRequiredExperience(player, categoryId).orElseThrow();
-	}
+	int getRequiredExperience(ServerPlayerEntity player);
 }

@@ -5,8 +5,7 @@ import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public abstract class ConfigReader {
 		if (failures.isEmpty()) {
 			return Result.success(map);
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -76,7 +75,7 @@ public abstract class ConfigReader {
 					context
 			);
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 }

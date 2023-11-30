@@ -15,7 +15,8 @@ import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
-import net.puffish.skillsmod.server.ServerConfigContext;
+import net.puffish.skillsmod.impl.rewards.RewardContextImpl;
+import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.config.PackConfig;
 import net.puffish.skillsmod.config.experience.ExperienceSourceConfig;
@@ -31,7 +32,6 @@ import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.network.Packets;
-import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
@@ -59,8 +59,7 @@ import net.puffish.skillsmod.utils.ChangeListener;
 import net.puffish.skillsmod.utils.PathUtils;
 import net.puffish.skillsmod.utils.PrefixedLogger;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -222,14 +221,14 @@ public class SkillsMod {
 	}
 
 	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, MinecraftServer server) {
-		var context = new ServerConfigContext(server);
+		var context = new ConfigContextImpl(server);
 
 		return reader.readCategories(Identifier.DEFAULT_NAMESPACE, modConfig.getCategories(), context)
 				.ifSuccess(map -> {
 					if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
 						logger.warn("Configuration loaded successfully with warning(s):"
 								+ System.lineSeparator()
-								+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+								+ context.warnings().stream().collect(Collectors.joining(System.lineSeparator()))
 						);
 					} else {
 						logger.info("Configuration loaded successfully!");
@@ -238,7 +237,7 @@ public class SkillsMod {
 	}
 
 	private Map<Identifier, CategoryConfig> loadPackConfig(ModConfig modConfig, MinecraftServer server) {
-		var context = new ServerConfigContext(server);
+		var context = new ConfigContextImpl(server);
 		var cumulatedMap = new LinkedHashMap<Identifier, CategoryConfig>();
 
 		var resources = context.getResourceManager().findResources(
@@ -259,7 +258,7 @@ public class SkillsMod {
 						if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
 							logger.warn("Data pack `" + name + "` loaded successfully with warning(s):"
 									+ System.lineSeparator()
-									+ ManyFailures.ofList(context.warnings()).getMessages().stream().collect(Collectors.joining(System.lineSeparator()))
+									+ context.warnings().stream().collect(Collectors.joining(System.lineSeparator()))
 							);
 						} else {
 							logger.info("Data pack `" + name + "` loaded successfully!");
@@ -531,7 +530,7 @@ public class SkillsMod {
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
 		for (var definition : category.getDefinitions().getAll()) {
 			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(player, new RewardContext(0, false));
+				reward.getInstance().update(player, new RewardContextImpl(0, false));
 			}
 		}
 	}

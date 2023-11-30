@@ -3,8 +3,7 @@ package net.puffish.skillsmod.config.skill;
 import net.puffish.skillsmod.api.json.JsonArrayWrapper;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -24,7 +23,7 @@ public class SkillConnectionConfig {
 
 	private static Result<SkillConnectionConfig, Failure> parse(JsonArrayWrapper rootArray, SkillsConfig skills) {
 		if (rootArray.getSize() != 2) {
-			return Result.failure(rootArray.getPath().failureAt("Expected an array of 2 elements"));
+			return Result.failure(rootArray.getPath().createFailure("Expected an array of 2 elements"));
 		}
 
 		var failures = new ArrayList<Failure>();
@@ -32,7 +31,7 @@ public class SkillConnectionConfig {
 		var optIds = rootArray.getAsList((i, element) -> element.getAsString().andThen(id -> {
 					if (skills.getById(id).isEmpty()) {
 						return Result.failure(
-								element.getPath().failureAt("Expected a valid skill")
+								element.getPath().createFailure("Expected a valid skill")
 						);
 					} else {
 						return Result.success(id);
@@ -48,7 +47,7 @@ public class SkillConnectionConfig {
 					ids.get(1)
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

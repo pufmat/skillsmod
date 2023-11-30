@@ -1,9 +1,7 @@
 package net.puffish.skillsmod.expression;
 
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
-import net.puffish.skillsmod.api.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +34,12 @@ public class Parser<T> {
 	private Result<Expression<T>, Failure> parse() {
 		var expression = tryParse();
 		if (failures.isEmpty() && !lexer.isEnd()) {
-			failures.add(SingleFailure.of("Invalid expression"));
+			failures.add(Failure.message("Invalid expression"));
 		}
 		if (failures.isEmpty()) {
 			return Result.success(expression.orElseThrow());
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -158,7 +156,7 @@ public class Parser<T> {
 	}
 
 	private <R> Optional<R> invalid() {
-		failures.add(SingleFailure.of("Invalid expression"));
+		failures.add(Failure.message("Invalid expression"));
 		return Optional.empty();
 	}
 }

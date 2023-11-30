@@ -3,7 +3,6 @@ package net.puffish.skillsmod.api.config;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.MinecraftServer;
-import net.puffish.skillsmod.api.utils.failure.Failure;
 
 public interface ConfigContext {
 
@@ -11,5 +10,5 @@ public interface ConfigContext {
 	DynamicRegistryManager getDynamicRegistryManager();
 	ResourceManager getResourceManager();
 
-	void addWarning(Failure failure);
+	void addWarning(String message);
 }

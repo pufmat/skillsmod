@@ -21,7 +21,7 @@ import net.puffish.skillsmod.api.experience.calculation.parameter.EffectParamete
 import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.Map;
 

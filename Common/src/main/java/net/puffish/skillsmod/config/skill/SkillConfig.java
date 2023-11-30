@@ -3,8 +3,7 @@ package net.puffish.skillsmod.config.skill;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -46,7 +45,7 @@ public class SkillConfig {
 							if (definitions.getById(definitionId).isPresent()) {
 								return Result.success(definitionId);
 							} else {
-								return Result.failure(definitionElement.getPath().failureAt("Expected a valid definition"));
+								return Result.failure(definitionElement.getPath().createFailure("Expected a valid definition"));
 							}
 						})
 				)
@@ -66,7 +65,7 @@ public class SkillConfig {
 					isRoot
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

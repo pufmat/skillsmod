@@ -3,114 +3,64 @@ package net.puffish.skillsmod.api.json;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
+import net.puffish.skillsmod.impl.json.JsonElementWrapperImpl;
 
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JsonElementWrapper extends JsonWrapper {
-	private final JsonElement json;
-
-	public JsonElementWrapper(JsonElement json, JsonPath path) {
-		super(path);
-		this.json = json;
-	}
-
-	public static Result<JsonElementWrapper, Failure> parseString(String jsonData, JsonPath jsonPath) {
+public interface JsonElementWrapper extends JsonWrapper {
+	static Result<JsonElementWrapper, Failure> parseString(String jsonData, JsonPath jsonPath) {
 		try {
-			return Result.success(new JsonElementWrapper(
+			return Result.success(new JsonElementWrapperImpl(
 					JsonParser.parseString(jsonData),
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(jsonPath.failureAt("Could not read JSON"));
+			return Result.failure(jsonPath.createFailure("Could not read JSON"));
 		}
 	}
 
-	public static Result<JsonElementWrapper, Failure> parseReader(Reader reader, JsonPath jsonPath) {
+	static Result<JsonElementWrapper, Failure> parseReader(Reader reader, JsonPath jsonPath) {
 		try {
-			return Result.success(new JsonElementWrapper(
+			return Result.success(new JsonElementWrapperImpl(
 					JsonParser.parseReader(reader),
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(jsonPath.failureAt("Could not read JSON"));
+			return Result.failure(jsonPath.createFailure("Could not read JSON"));
 		}
 	}
 
-	public static Result<JsonElementWrapper, Failure> parseFile(Path filePath, JsonPath jsonPath) {
+	static Result<JsonElementWrapper, Failure> parseFile(Path filePath, JsonPath jsonPath) {
 		try {
 			var content = Files.readString(filePath);
 			if (content.isEmpty()) {
-				return Result.failure(jsonPath.failureAt("File is empty"));
+				return Result.failure(jsonPath.createFailure("File is empty"));
 			}
-			return Result.success(new JsonElementWrapper(
+			return Result.success(new JsonElementWrapperImpl(
 					JsonParser.parseString(content),
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(jsonPath.failureAt("Could not read JSON"));
+			return Result.failure(jsonPath.createFailure("Could not read JSON"));
 		}
 	}
 
-	public Result<JsonObjectWrapper, Failure> getAsObject() {
-		try {
-			return Result.success(new JsonObjectWrapper(json.getAsJsonObject(), path));
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("an object"));
-		}
-	}
+	Result<JsonObjectWrapper, Failure> getAsObject();
 
-	public Result<JsonArrayWrapper, Failure> getAsArray() {
-		try {
-			return Result.success(new JsonArrayWrapper(json.getAsJsonArray(), path));
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("an array"));
-		}
-	}
+	Result<JsonArrayWrapper, Failure> getAsArray();
 
-	public Result<String, Failure> getAsString() {
-		try {
-			return Result.success(json.getAsString());
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("a string"));
-		}
-	}
+	Result<String, Failure> getAsString();
 
-	public Result<Float, Failure> getAsFloat() {
-		try {
-			return Result.success(json.getAsFloat());
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("a float"));
-		}
-	}
+	Result<Float, Failure> getAsFloat();
 
-	public Result<Double, Failure> getAsDouble() {
-		try {
-			return Result.success(json.getAsDouble());
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("a double"));
-		}
-	}
+	Result<Double, Failure> getAsDouble();
 
-	public Result<Integer, Failure> getAsInt() {
-		try {
-			return Result.success(json.getAsInt());
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("an int"));
-		}
-	}
+	Result<Integer, Failure> getAsInt();
 
-	public Result<Boolean, Failure> getAsBoolean() {
-		try {
-			return Result.success(json.getAsBoolean());
-		} catch (Exception e) {
-			return Result.failure(path.expectedToBe("a boolean"));
-		}
-	}
+	Result<Boolean, Failure> getAsBoolean();
 
-	public JsonElement getJson() {
-		return json;
-	}
+	JsonElement getJson();
 }

@@ -6,8 +6,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class ExperiencePerLevelConfig {
 					optFunction.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -50,7 +49,7 @@ public class ExperiencePerLevelConfig {
 		return switch (type) {
 			case "expression" -> parseExpression(maybeDataElement);
 			case "values" -> parseValues(maybeDataElement);
-			default -> Result.failure(typeElementPath.failureAt("Expected a valid condition type"));
+			default -> Result.failure(typeElementPath.createFailure("Expected a valid condition type"));
 		};
 	}
 
@@ -65,7 +64,7 @@ public class ExperiencePerLevelConfig {
 							if (Double.isFinite(value)) {
 								return (int) Math.round(value);
 							} else {
-								for (var message : expressionElement.getPath().failureAt("Expression returned a value that is not finite").getMessages()) {
+								for (var message : expressionElement.getPath().createFailure("Expression returned a value that is not finite").getMessages()) {
 									SkillsMod.getInstance().getLogger().warn(message);
 								}
 								return 0;
@@ -78,7 +77,7 @@ public class ExperiencePerLevelConfig {
 		return maybeDataElement
 				.andThen(JsonElementWrapper::getAsObject)
 				.andThen(dataObject -> dataObject.getArray("values"))
-				.andThen(valueArray -> valueArray.getAsList((k, element) -> element.getAsInt()).mapFailure(ManyFailures::ofList))
+				.andThen(valueArray -> valueArray.getAsList((k, element) -> element.getAsInt()).mapFailure(Failure::fromMany))
 				.mapSuccess(values -> level -> values.get(Math.min(level, values.size() - 1)));
 	}
 
