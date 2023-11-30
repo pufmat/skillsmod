@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.api.Experience;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
@@ -24,6 +25,12 @@ public class CommandUtils {
 	public static Skill getSkill(Category category, String skillId) throws CommandSyntaxException {
 		return category.getSkill(skillId).orElseThrow(() -> new SimpleCommandExceptionType(
 				SkillsMod.createTranslatable("command", "no_such_skill", skillId)
+		).create());
+	}
+
+	public static Experience getExperience(Category category) throws CommandSyntaxException {
+		return category.getExperience().orElseThrow(() -> new SimpleCommandExceptionType(
+				SkillsMod.createTranslatable("command", "no_experience")
 		).create());
 	}
 

@@ -22,9 +22,10 @@ public class ExperienceCommand {
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
 													var category = CommandUtils.getCategory(categoryId);
+													var experience = CommandUtils.getExperience(category);
 
 													for (var player : players) {
-														category.addExperience(player, amount);
+														experience.addTotal(player, amount);
 													}
 													return CommandUtils.sendSuccess(
 															context,
@@ -48,9 +49,10 @@ public class ExperienceCommand {
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
 													var category = CommandUtils.getCategory(categoryId);
+													var experience = CommandUtils.getExperience(category);
 
 													for (var player : players) {
-														category.setExperience(player, amount);
+														experience.setTotal(player, amount);
 													}
 													return CommandUtils.sendSuccess(
 															context,

@@ -30,6 +30,7 @@
 
 	"command.puffish_skills.no_such_category": "There is no category with ID %s",
 	"command.puffish_skills.no_such_skill": "There is no skill with ID %s",
+	"command.puffish_skills.no_experience": "Experience is not enabled for this category",
 
 	"command.puffish_skills.category.lock.success.single": "Locked category %s for %s",
 	"command.puffish_skills.category.lock.success.multiple": "Locked category %s for %s players",
