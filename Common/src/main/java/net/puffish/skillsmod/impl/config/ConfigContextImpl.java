@@ -1,16 +1,15 @@
-package net.puffish.skillsmod.server;
+package net.puffish.skillsmod.impl.config;
 
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.puffish.skillsmod.api.config.ConfigContext;
-import net.puffish.skillsmod.api.utils.failure.Failure;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record ServerConfigContext(MinecraftServer server, List<Failure> warnings) implements ConfigContext {
-	public ServerConfigContext(MinecraftServer server) {
+public record ConfigContextImpl(MinecraftServer server, List<String> warnings) implements ConfigContext {
+	public ConfigContextImpl(MinecraftServer server) {
 		this(server, new ArrayList<>());
 	}
 
@@ -30,7 +29,7 @@ public record ServerConfigContext(MinecraftServer server, List<Failure> warnings
 	}
 
 	@Override
-	public void addWarning(Failure failure) {
+	public void addWarning(String failure) {
 		warnings.add(failure);
 	}
 }

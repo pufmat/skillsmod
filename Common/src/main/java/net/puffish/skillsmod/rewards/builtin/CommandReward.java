@@ -11,7 +11,7 @@ import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.rewards.Reward;
 import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class CommandReward implements Reward {
 
 	@Override
 	public void update(ServerPlayerEntity player, RewardContext context) {
-		if (context.recent()) {
+		if (context.isRecent()) {
 			executeCommand(player, command);
 		}
 
@@ -90,11 +90,11 @@ public class CommandReward implements Reward {
 				count = 0;
 			}
 
-			while (context.count() > count) {
+			while (context.getCount() > count) {
 				executeCommand(player, unlockCommand);
 				count++;
 			}
-			while (context.count() < count) {
+			while (context.getCount() < count) {
 				executeCommand(player, lockCommand);
 				count--;
 			}

@@ -11,8 +11,7 @@ import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.rewards.Reward;
 import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -48,7 +47,7 @@ public class ScoreboardReward implements Reward {
 					optScoreboard.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -57,7 +56,7 @@ public class ScoreboardReward implements Reward {
 		var scoreboard = player.getScoreboard();
 		var objective = scoreboard.getNullableObjective(objectiveName);
 		if (objective != null) {
-			scoreboard.getPlayerScore(player.getEntityName(), objective).setScore(context.count());
+			scoreboard.getPlayerScore(player.getEntityName(), objective).setScore(context.getCount());
 		}
 	}
 

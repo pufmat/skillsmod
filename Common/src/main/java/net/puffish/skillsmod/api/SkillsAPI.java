@@ -7,6 +7,7 @@ import net.puffish.skillsmod.api.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.ExperienceSourceRegistry;
 import net.puffish.skillsmod.api.experience.ExperienceSourceWithDataFactory;
 import net.puffish.skillsmod.api.experience.ExperienceSourceWithoutDataFactory;
+import net.puffish.skillsmod.impl.CategoryImpl;
 import net.puffish.skillsmod.rewards.RewardRegistry;
 import net.puffish.skillsmod.api.rewards.RewardWithDataFactory;
 import net.puffish.skillsmod.api.rewards.RewardWithoutDataFactory;
@@ -44,21 +45,25 @@ public class SkillsAPI {
 
 	public static Optional<Category> getCategory(Identifier categoryId) {
 		if (SkillsMod.getInstance().hasCategory(categoryId)) {
-			return Optional.of(new Category(categoryId));
+			return Optional.of(new CategoryImpl(categoryId));
 		} else {
 			return Optional.empty();
 		}
 	}
 
 	public static List<Category> getCategories() {
-		return SkillsMod.getInstance().getCategories().stream().map(Category::new).toList();
+		return SkillsMod.getInstance()
+				.getCategories()
+				.stream()
+				.map(id -> (Category) new CategoryImpl(id))
+				.toList();
 	}
 
 	public static List<Category> getUnlockedCategories(ServerPlayerEntity player) {
 		return SkillsMod.getInstance()
 				.getUnlockedCategories(player)
 				.stream()
-				.map(Category::new)
+				.map(id -> (Category) new CategoryImpl(id))
 				.toList();
 	}
 }

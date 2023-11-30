@@ -6,8 +6,7 @@ import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.skill.SkillConnection;
 import net.puffish.skillsmod.skill.SkillPair;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +41,7 @@ public class SkillConnectionsGroupConfig {
 				.getArray("bidirectional")
 				.getSuccess()
 				.flatMap(array -> array.getAsList((i, element) -> SkillConnectionConfig.parse(element, skills))
-						.<Failure>mapFailure(ManyFailures::ofList)
+						.mapFailure(Failure::fromMany)
 						.ifFailure(failures::add)
 						.getSuccess()
 				)
@@ -52,7 +51,7 @@ public class SkillConnectionsGroupConfig {
 				.getArray("unidirectional")
 				.getSuccess()
 				.flatMap(array -> array.getAsList((i, element) -> SkillConnectionConfig.parse(element, skills))
-						.<Failure>mapFailure(ManyFailures::ofList)
+						.mapFailure(Failure::fromMany)
 						.ifFailure(failures::add)
 						.getSuccess()
 				)
@@ -64,13 +63,13 @@ public class SkillConnectionsGroupConfig {
 					unidirectional
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
 	public static Result<SkillConnectionsGroupConfig, Failure> parseLegacy(JsonArrayWrapper rootArray, SkillsConfig skills) {
 		return rootArray.getAsList((i, element) -> SkillConnectionConfig.parse(element, skills))
-				.<Failure>mapFailure(ManyFailures::ofList)
+				.mapFailure(Failure::fromMany)
 				.mapSuccess(bidirectional -> SkillConnectionsGroupConfig.build(bidirectional, List.of()));
 	}
 

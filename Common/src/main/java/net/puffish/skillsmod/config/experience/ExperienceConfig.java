@@ -5,8 +5,7 @@ import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ public class ExperienceConfig {
 				.getSuccess();
 
 		var experienceSources = rootObject.getArray("sources")
-				.andThen(array -> array.getAsList((i, element) -> ExperienceSourceConfig.parse(element, context)).mapFailure(ManyFailures::ofList))
+				.andThen(array -> array.getAsList((i, element) -> ExperienceSourceConfig.parse(element, context)).mapFailure(Failure::fromMany))
 				.ifFailure(failures::add)
 				.getSuccess()
 				.orElseGet(List::of);
@@ -55,7 +54,7 @@ public class ExperienceConfig {
 				return Result.success(Optional.empty());
 			}
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

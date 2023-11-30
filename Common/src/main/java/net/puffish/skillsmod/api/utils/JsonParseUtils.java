@@ -24,8 +24,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 
@@ -34,7 +32,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new Identifier(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid identifier"));
+			return Result.failure(element.getPath().createFailure("Expected valid identifier"));
 		}
 	}
 
@@ -42,7 +40,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new Identifier(Identifier.DEFAULT_NAMESPACE, JsonHelper.asString(element.getJson(), "")).getPath());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid identifier path"));
+			return Result.failure(element.getPath().createFailure("Expected valid identifier path"));
 		}
 	}
 
@@ -50,7 +48,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.STATUS_EFFECT.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid effect"));
+			return Result.failure(element.getPath().createFailure("Expected valid effect"));
 		}
 	}
 
@@ -58,7 +56,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid block"));
+			return Result.failure(element.getPath().createFailure("Expected valid block"));
 		}
 	}
 
@@ -66,7 +64,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(StatePredicate.fromJson(element.getJson()).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
+			return Result.failure(element.getPath().createFailure("Expected valid state predicate"));
 		}
 	}
 
@@ -74,7 +72,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(new NbtPredicate(StringNbtReader.parse(JsonHelper.asString(element.getJson(), "nbt"))));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid state predicate"));
+			return Result.failure(element.getPath().createFailure("Expected valid state predicate"));
 		}
 	}
 
@@ -82,7 +80,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.BLOCK.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.BLOCK, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid block tag"));
+			return Result.failure(element.getPath().createFailure("Expected valid block tag"));
 		}
 	}
 
@@ -90,7 +88,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> manager.get(RegistryKeys.DAMAGE_TYPE).getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid damage type"));
+			return Result.failure(element.getPath().createFailure("Expected valid damage type"));
 		}
 	}
 
@@ -98,7 +96,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> manager.get(RegistryKeys.DAMAGE_TYPE).getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.DAMAGE_TYPE, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid damage type tag"));
+			return Result.failure(element.getPath().createFailure("Expected valid damage type tag"));
 		}
 	}
 
@@ -106,7 +104,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity type"));
+			return Result.failure(element.getPath().createFailure("Expected valid entity type"));
 		}
 	}
 
@@ -114,7 +112,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ENTITY_TYPE.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ENTITY_TYPE, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid entity type tag"));
+			return Result.failure(element.getPath().createFailure("Expected valid entity type tag"));
 		}
 	}
 
@@ -124,7 +122,7 @@ public class JsonParseUtils {
 					Identifier.splitOn(id.getNamespace(), '.')
 			).orElseThrow(), Identifier.splitOn(id.getPath(), '.')));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid statistic"));
+			return Result.failure(element.getPath().createFailure("Expected valid statistic"));
 		}
 	}
 
@@ -136,7 +134,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(JsonHelper.asItem(element.getJson(), "").value());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid item"));
+			return Result.failure(element.getPath().createFailure("Expected valid item"));
 		}
 	}
 
@@ -144,7 +142,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ITEM.getTagCreatingWrapper().getOptional(TagKey.of(RegistryKeys.ITEM, id)).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid item tag"));
+			return Result.failure(element.getPath().createFailure("Expected valid item tag"));
 		}
 	}
 
@@ -152,7 +150,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(StringNbtReader.parse(JsonHelper.asString(element.getJson(), "")));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid nbt"));
+			return Result.failure(element.getPath().createFailure("Expected valid nbt"));
 		}
 	}
 
@@ -178,11 +176,11 @@ public class JsonParseUtils {
 					nbt.ifPresent(itemStack::setNbt);
 					return Result.success(itemStack);
 				} else {
-					return Result.failure(ManyFailures.ofList(failures));
+					return Result.failure(Failure.fromMany(failures));
 				}
 			});
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid item stack"));
+			return Result.failure(element.getPath().createFailure("Expected valid item stack"));
 		}
 	}
 
@@ -190,7 +188,7 @@ public class JsonParseUtils {
 		try {
 			return element.getAsString().andThen(name -> Result.success(AdvancementFrame.forName(name)));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid frame"));
+			return Result.failure(element.getPath().createFailure("Expected valid frame"));
 		}
 	}
 
@@ -198,7 +196,7 @@ public class JsonParseUtils {
 		try {
 			return Result.success(Text.Serializer.fromJson(element.getJson()));
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid text"));
+			return Result.failure(element.getPath().createFailure("Expected valid text"));
 		}
 	}
 
@@ -206,7 +204,7 @@ public class JsonParseUtils {
 		try {
 			return parseIdentifier(element).mapSuccess(id -> Registries.ATTRIBUTE.getOrEmpty(id).orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().failureAt("Expected valid attribute"));
+			return Result.failure(element.getPath().createFailure("Expected valid attribute"));
 		}
 	}
 
@@ -215,7 +213,7 @@ public class JsonParseUtils {
 			case "addition" -> Result.success(EntityAttributeModifier.Operation.ADDITION);
 			case "multiply_base" -> Result.success(EntityAttributeModifier.Operation.MULTIPLY_BASE);
 			case "multiply_total" -> Result.success(EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
-			default -> Result.failure(element.getPath().failureAt("Expected valid attribute operation"));
+			default -> Result.failure(element.getPath().createFailure("Expected valid attribute operation"));
 		});
 	}
 }

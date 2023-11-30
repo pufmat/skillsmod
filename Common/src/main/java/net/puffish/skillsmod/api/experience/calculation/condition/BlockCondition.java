@@ -8,8 +8,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -18,7 +17,7 @@ public final class BlockCondition implements Condition<BlockState> {
 	private final Block block;
 	private final Optional<StatePredicate> optState;
 
-	public BlockCondition(Block block, Optional<StatePredicate> optState) {
+	private BlockCondition(Block block, Optional<StatePredicate> optState) {
 		this.block = block;
 		this.optState = optState;
 	}
@@ -52,7 +51,7 @@ public final class BlockCondition implements Condition<BlockState> {
 					optState
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

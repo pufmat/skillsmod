@@ -1,15 +1,14 @@
 package net.puffish.skillsmod.experience.calculation;
 
 import net.puffish.skillsmod.api.config.ConfigContext;
+import net.puffish.skillsmod.api.json.JsonElementWrapper;
+import net.puffish.skillsmod.api.json.JsonObjectWrapper;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.api.utils.Failure;
 import net.puffish.skillsmod.api.experience.calculation.condition.Condition;
 import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.api.experience.calculation.parameter.Parameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
-import net.puffish.skillsmod.api.json.JsonElementWrapper;
-import net.puffish.skillsmod.api.json.JsonObjectWrapper;
-import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +87,7 @@ public class CalculationManager<T> {
 		var calculations = rootObject.getArray("experience")
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(array -> array.getAsList((i, element) -> Calculation.parse(element, conditions.keySet(), parameters.keySet()))
-						.mapFailure(ManyFailures::ofList)
+						.mapFailure(Failure::fromMany)
 						.ifFailure(failures::add)
 						.getSuccess()
 				)
@@ -101,7 +100,7 @@ public class CalculationManager<T> {
 					calculations
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

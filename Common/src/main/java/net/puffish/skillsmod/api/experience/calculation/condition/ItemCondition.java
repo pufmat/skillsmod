@@ -8,8 +8,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -18,7 +17,7 @@ public final class ItemCondition implements Condition<ItemStack> {
 	private final Item item;
 	private final Optional<NbtPredicate> optNbt;
 
-	public ItemCondition(Item item, Optional<NbtPredicate> optNbt) {
+	private ItemCondition(Item item, Optional<NbtPredicate> optNbt) {
 		this.item = item;
 		this.optNbt = optNbt;
 	}
@@ -52,7 +51,7 @@ public final class ItemCondition implements Condition<ItemStack> {
 					optNbt
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

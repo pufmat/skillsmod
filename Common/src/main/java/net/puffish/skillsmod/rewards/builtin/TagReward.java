@@ -11,8 +11,7 @@ import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.rewards.Reward;
 import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -48,13 +47,13 @@ public class TagReward implements Reward {
 					optTag.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
 	@Override
 	public void update(ServerPlayerEntity player, RewardContext context) {
-		if (context.count() > 0) {
+		if (context.getCount() > 0) {
 			player.addCommandTag(tag);
 		} else {
 			player.removeScoreboardTag(tag);

@@ -7,15 +7,14 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
 public final class ItemNbtCondition implements Condition<ItemStack> {
 	private final NbtPredicate nbt;
 
-	public ItemNbtCondition(NbtPredicate nbt) {
+	private ItemNbtCondition(NbtPredicate nbt) {
 		this.nbt = nbt;
 	}
 
@@ -40,7 +39,7 @@ public final class ItemNbtCondition implements Condition<ItemStack> {
 					optNbt.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 

@@ -11,8 +11,7 @@ import net.puffish.skillsmod.rewards.RewardRegistry;
 import net.puffish.skillsmod.rewards.builtin.DummyReward;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 
@@ -58,19 +57,19 @@ public class SkillRewardConfig {
 				if (required) {
 					return Result.failure(failure);
 				} else {
-					context.addWarning(failure);
+					failure.getMessages().forEach(context::addWarning);
 					return Result.success(new SkillRewardConfig(DummyReward.ID, new DummyReward()));
 				}
 			});
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
 	private static Result<SkillRewardConfig, Failure> build(Identifier type, Result<JsonElementWrapper, Failure> maybeDataElement, JsonPath typePath, ConfigContext context) {
 		return RewardRegistry.getFactory(type)
 				.map(factory -> factory.create(maybeDataElement, context).mapSuccess(instance -> new SkillRewardConfig(type, instance)))
-				.orElseGet(() -> Result.failure(typePath.failureAt("Expected a valid reward type")));
+				.orElseGet(() -> Result.failure(typePath.createFailure("Expected a valid reward type")));
 	}
 
 	public void dispose(MinecraftServer server) {

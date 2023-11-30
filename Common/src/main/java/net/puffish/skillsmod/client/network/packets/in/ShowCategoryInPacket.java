@@ -94,7 +94,7 @@ public class ShowCategoryInPacket implements InPacket {
 	public static ClientIconData readSkillIcon(PacketByteBuf buf) {
 		var type = buf.readString();
 		return buf.readOptional(PacketByteBuf::readString)
-				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.createNamed("Client Skill Icon")).getSuccess())
+				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.named("Client Skill Icon")).getSuccess())
 				.flatMap(rootElement -> switch (type) {
 					case "item" -> ClientIconData.ItemIconData.parse(rootElement).getSuccess();
 					case "effect" -> ClientIconData.EffectIconData.parse(rootElement).getSuccess();
@@ -106,7 +106,7 @@ public class ShowCategoryInPacket implements InPacket {
 	public static ClientFrameData readFrameIcon(PacketByteBuf buf) {
 		var type = buf.readString();
 		return buf.readOptional(PacketByteBuf::readString)
-				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.createNamed("Client Frame Icon")).getSuccess())
+				.flatMap(data -> JsonElementWrapper.parseString(data, JsonPath.named("Client Frame Icon")).getSuccess())
 				.flatMap(rootElement -> switch (type) {
 					case "advancement" -> ClientFrameData.AdvancementFrameData.parse(rootElement).getSuccess();
 					case "texture" -> ClientFrameData.TextureFrameData.parse(rootElement).getSuccess();

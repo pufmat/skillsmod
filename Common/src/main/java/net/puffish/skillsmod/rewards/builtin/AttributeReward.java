@@ -16,8 +16,7 @@ import net.puffish.skillsmod.api.rewards.Reward;
 import net.puffish.skillsmod.api.rewards.RewardContext;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +58,7 @@ public class AttributeReward implements Reward {
 							if (DefaultAttributeRegistry.get(EntityType.PLAYER).has(attribute)) {
 								return Result.success(attribute);
 							} else {
-								return Result.failure(attributeElement.getPath().failureAt("Expected a valid player attribute"));
+								return Result.failure(attributeElement.getPath().createFailure("Expected a valid player attribute"));
 							}
 						})
 				)
@@ -82,7 +81,7 @@ public class AttributeReward implements Reward {
 					optOperation.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
@@ -94,7 +93,7 @@ public class AttributeReward implements Reward {
 
 	@Override
 	public void update(ServerPlayerEntity player, RewardContext context) {
-		var count = context.count();
+		var count = context.getCount();
 		var instance = Objects.requireNonNull(player.getAttributeInstance(attribute));
 
 		createMissingUUIDs(count);

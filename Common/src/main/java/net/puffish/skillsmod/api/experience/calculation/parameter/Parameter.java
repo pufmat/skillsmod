@@ -5,8 +5,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 import net.puffish.skillsmod.experience.calculation.parameter.FallbackParameter;
 
 import java.util.ArrayList;
@@ -48,21 +47,21 @@ public interface Parameter<T> extends Function<T, Double> {
 					context
 			).orElse(failure -> {
 				if (optFallback.isPresent()) {
-					context.addWarning(failure);
+					failure.getMessages().forEach(context::addWarning);
 					return Result.success(new FallbackParameter<>(optFallback.orElseThrow()));
 				} else {
 					return Result.failure(failure);
 				}
 			});
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
 	private static <T> Result<Parameter<T>, Failure> build(String type, Result<JsonElementWrapper, Failure> maybeDataElement, JsonPath typePath, Map<String, ParameterFactory<T>> factories, ConfigContext context) {
 		var factory = factories.get(type);
 		if (factory == null) {
-			return Result.failure(typePath.failureAt("Expected a valid parameter type"));
+			return Result.failure(typePath.createFailure("Expected a valid parameter type"));
 		} else {
 			return factory.apply(maybeDataElement, context).mapSuccess(c -> (Parameter<T>) c);
 		}

@@ -5,8 +5,7 @@ import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class SkillDefinitionsConfig {
 
 	public static Result<SkillDefinitionsConfig, Failure> parse(JsonObjectWrapper rootObject, ConfigContext context) {
 		return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
-				.<Failure>mapFailure(ManyFailures::ofMapValues)
+				.mapFailure(failureMap -> Failure.fromMany(failureMap.values()))
 				.mapSuccess(SkillDefinitionsConfig::new);
 	}
 

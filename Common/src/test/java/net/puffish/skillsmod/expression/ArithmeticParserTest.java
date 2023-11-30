@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.expression;
 
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Failure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -50,21 +49,21 @@ class ArithmeticParserTest {
 
 	@Test
 	public void testInvalidExpressions() {
-		testInvalid(SingleFailure.of("Invalid expression"), "");
-		testInvalid(SingleFailure.of("Invalid expression"), "+");
-		testInvalid(SingleFailure.of("Invalid expression"), "1 *");
-		testInvalid(SingleFailure.of("Invalid expression"), "1 2");
-		testInvalid(SingleFailure.of("Invalid expression"), "(1 / 2");
-		testInvalid(SingleFailure.of("Invalid expression"), "1 - 2)");
-		testInvalid(SingleFailure.of("Invalid expression"), "abs(");
-		testInvalid(SingleFailure.of("Invalid expression"), "abs(5");
-		testInvalid(SingleFailure.of("Invalid expression"), "abs(3,");
-		testInvalid(SingleFailure.of("Invalid expression"), "abs(1, 2)");
-		testInvalid(SingleFailure.of("Invalid expression"), "abs()");
-		testInvalid(SingleFailure.of("Unknown variable `abs`"), "abs");
-		testInvalid(SingleFailure.of("Unknown variable `a`"), "a");
-		testInvalid(SingleFailure.of("Unknown variable `a`"), "3 * a + 2");
-		testInvalid(SingleFailure.of("Unknown variable `2.3.4`"), "2.3.4");
+		testInvalid(Failure.message("Invalid expression"), "");
+		testInvalid(Failure.message("Invalid expression"), "+");
+		testInvalid(Failure.message("Invalid expression"), "1 *");
+		testInvalid(Failure.message("Invalid expression"), "1 2");
+		testInvalid(Failure.message("Invalid expression"), "(1 / 2");
+		testInvalid(Failure.message("Invalid expression"), "1 - 2)");
+		testInvalid(Failure.message("Invalid expression"), "abs(");
+		testInvalid(Failure.message("Invalid expression"), "abs(5");
+		testInvalid(Failure.message("Invalid expression"), "abs(3,");
+		testInvalid(Failure.message("Invalid expression"), "abs(1, 2)");
+		testInvalid(Failure.message("Invalid expression"), "abs()");
+		testInvalid(Failure.message("Unknown variable `abs`"), "abs");
+		testInvalid(Failure.message("Unknown variable `a`"), "a");
+		testInvalid(Failure.message("Unknown variable `a`"), "3 * a + 2");
+		testInvalid(Failure.message("Unknown variable `2.3.4`"), "2.3.4");
 	}
 
 	private void testValid(double expected, String expression) {

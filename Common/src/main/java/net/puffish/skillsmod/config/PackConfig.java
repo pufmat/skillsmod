@@ -5,9 +5,7 @@ import net.puffish.skillsmod.api.json.JsonElementWrapper;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
 import net.puffish.skillsmod.api.utils.JsonParseUtils;
 import net.puffish.skillsmod.api.utils.Result;
-import net.puffish.skillsmod.api.utils.failure.Failure;
-import net.puffish.skillsmod.api.utils.failure.ManyFailures;
-import net.puffish.skillsmod.api.utils.failure.SingleFailure;
+import net.puffish.skillsmod.api.utils.Failure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +29,15 @@ public class PackConfig {
 				.getSuccessOrElse(e -> Integer.MIN_VALUE);
 
 		if (version < SkillsMod.CONFIG_VERSION) {
-			return Result.failure(SingleFailure.of("Data pack `" + name + "` is outdated. Check out the mod's wiki to learn how to update the data pack."));
+			return Result.failure(Failure.message("Data pack `" + name + "` is outdated. Check out the mod's wiki to learn how to update the data pack."));
 		}
 		if (version > SkillsMod.CONFIG_VERSION) {
-			return Result.failure(SingleFailure.of("Data pack `" + name + "` is for a newer version of the mod. Please update the mod."));
+			return Result.failure(Failure.message("Data pack `" + name + "` is for a newer version of the mod. Please update the mod."));
 		}
 
 		var optCategories = rootObject.getArray("categories")
 				.andThen(array -> array.getAsList((i, element) -> JsonParseUtils.parseIdentifierPath(element))
-						.mapFailure(ManyFailures::ofList)
+						.mapFailure(Failure::fromMany)
 				)
 				.ifFailure(failures::add)
 				.getSuccess();
@@ -49,7 +47,7 @@ public class PackConfig {
 					optCategories.orElseThrow()
 			));
 		} else {
-			return Result.failure(ManyFailures.ofList(failures));
+			return Result.failure(Failure.fromMany(failures));
 		}
 	}
 
