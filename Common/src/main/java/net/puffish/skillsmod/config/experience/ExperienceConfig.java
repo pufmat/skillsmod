@@ -62,6 +62,14 @@ public class ExperienceConfig {
 		return experiencePerLevel.getFunction().apply(level);
 	}
 
+	public int getRequiredTotalExperience(int level) {
+		int total = 0;
+		for (var i = 0; i < level; i++) {
+			total += getRequiredExperience(level);
+		}
+		return total;
+	}
+
 	public int getCurrentExperience(int earnedExperience) {
 		int level = 0;
 

@@ -30,6 +30,7 @@
 
 	"command.puffish_skills.no_such_category": "Nie istnieje kategoria z ID \"%s\"",
 	"command.puffish_skills.no_such_skill": "Nie istnieje umiejętność z ID \"%s\"",
+	"command.puffish_skills.no_experience": "Doświadczenie nie jest włączone dla tej kategorii",
 
 	"command.puffish_skills.category.lock.success.single": "Zablokowano kategorię %s dla %s",
 	"command.puffish_skills.category.lock.success.multiple": "Zablokowano kategorię %s dla %s graczy",

@@ -201,9 +201,15 @@ public class CategoryData {
 				.orElse(0);
 	}
 
-	public int getRequiredExperience(CategoryConfig category) {
+	public int getRequiredExperience(CategoryConfig category, int level) {
 		return category.getExperience()
-				.map(experience -> experience.getRequiredExperience(getCurrentLevel(category)))
+				.map(experience -> experience.getExperiencePerLevel().getFunction().apply(level))
+				.orElse(0);
+	}
+
+	public int getRequiredTotalExperience(CategoryConfig category, int level) {
+		return category.getExperience()
+				.map(experience -> experience.getRequiredTotalExperience(level))
 				.orElse(0);
 	}
 

@@ -33,10 +33,11 @@ public class ShowCategoryOutPacket extends OutPacket {
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getEarnedPoints(category));
 		if (category.getExperience().isPresent()) {
+			var level = categoryData.getCurrentLevel(category);
 			buf.writeBoolean(true);
-			buf.writeInt(categoryData.getCurrentLevel(category));
+			buf.writeInt(level);
 			buf.writeInt(categoryData.getCurrentExperience(category));
-			buf.writeInt(categoryData.getRequiredExperience(category));
+			buf.writeInt(categoryData.getRequiredExperience(category, level));
 		} else {
 			buf.writeBoolean(false);
 		}

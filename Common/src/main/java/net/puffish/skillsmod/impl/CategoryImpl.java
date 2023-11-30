@@ -4,6 +4,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
+import net.puffish.skillsmod.api.Experience;
 import net.puffish.skillsmod.api.Skill;
 
 import java.util.Collection;
@@ -20,6 +21,15 @@ public class CategoryImpl implements Category {
 	@Override
 	public Identifier getId() {
 		return categoryId;
+	}
+
+	@Override
+	public Optional<Experience> getExperience() {
+		if (SkillsMod.getInstance().hasExperience(categoryId).orElseThrow()) {
+			return Optional.of(new ExperienceImpl(categoryId));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	@Override
@@ -72,21 +82,6 @@ public class CategoryImpl implements Category {
 	}
 
 	@Override
-	public int getExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getExperience(player, categoryId).orElseThrow();
-	}
-
-	@Override
-	public void setExperience(ServerPlayerEntity player, int amount) {
-		SkillsMod.getInstance().setExperience(player, categoryId, amount);
-	}
-
-	@Override
-	public void addExperience(ServerPlayerEntity player, int amount) {
-		SkillsMod.getInstance().addExperience(player, categoryId, amount);
-	}
-
-	@Override
 	public int getExtraPoints(ServerPlayerEntity player) {
 		return SkillsMod.getInstance().getExtraPoints(player, categoryId).orElseThrow();
 	}
@@ -104,20 +99,5 @@ public class CategoryImpl implements Category {
 	@Override
 	public int getPointsLeft(ServerPlayerEntity player) {
 		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
-	}
-
-	@Override
-	public int getCurrentLevel(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getCurrentLevel(player, categoryId).orElseThrow();
-	}
-
-	@Override
-	public int getCurrentExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getCurrentExperience(player, categoryId).orElseThrow();
-	}
-
-	@Override
-	public int getRequiredExperience(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getRequiredExperience(player, categoryId).orElseThrow();
 	}
 }
