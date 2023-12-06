@@ -6,7 +6,7 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
-import net.puffish.skillsmod.server.PlayerAttributes;
+import net.puffish.skillsmod.server.setup.SkillsAttributes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,27 +18,26 @@ public abstract class PlayerEntityMixin {
 
 	private static final double VANILLA_KNOCKBACK = 0.4;
 
-	@Inject(method = "createPlayerAttributes", at = @At("RETURN"), cancellable = true)
+	@Inject(method = "createPlayerAttributes", at = @At("RETURN"))
 	private static void injectAtCreatePlayerAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
-		cir.setReturnValue(cir.getReturnValue()
-				.add(PlayerAttributes.STAMINA)
-				.add(PlayerAttributes.FORTUNE)
-				.add(PlayerAttributes.RANGED_DAMAGE)
-				.add(PlayerAttributes.MELEE_DAMAGE)
-				.add(PlayerAttributes.HEALING)
-				.add(PlayerAttributes.JUMP)
-				.add(PlayerAttributes.RESISTANCE)
-				.add(PlayerAttributes.MINING_SPEED)
-				.add(PlayerAttributes.SPRINTING_SPEED)
-				.add(PlayerAttributes.KNOCKBACK)
-		);
+		cir.getReturnValue()
+				.add(SkillsAttributes.STAMINA)
+				.add(SkillsAttributes.FORTUNE)
+				.add(SkillsAttributes.RANGED_DAMAGE)
+				.add(SkillsAttributes.MELEE_DAMAGE)
+				.add(SkillsAttributes.HEALING)
+				.add(SkillsAttributes.JUMP)
+				.add(SkillsAttributes.RESISTANCE)
+				.add(SkillsAttributes.MINING_SPEED)
+				.add(SkillsAttributes.SPRINTING_SPEED)
+				.add(SkillsAttributes.KNOCKBACK);
 	}
 
 	@Inject(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;onTargetDamaged(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/Entity;)V"))
 	private void injectAtAttack(Entity target, CallbackInfo ci) {
 		var player = (PlayerEntity) (Object) this;
 
-		var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.KNOCKBACK));
+		var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.KNOCKBACK));
 		var knockback = attribute.computeIncreasedValueForInitial(VANILLA_KNOCKBACK) - VANILLA_KNOCKBACK;
 
 		var yaw = player.getYaw() * MathHelper.RADIANS_PER_DEGREE;
@@ -57,7 +56,7 @@ public abstract class PlayerEntityMixin {
 		var player = (PlayerEntity) (Object) this;
 
 		if (player.isSprinting()) {
-			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.SPRINTING_SPEED));
+			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.SPRINTING_SPEED));
 			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}

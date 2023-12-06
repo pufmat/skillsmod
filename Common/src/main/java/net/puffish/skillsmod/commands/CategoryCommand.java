@@ -2,9 +2,9 @@ package net.puffish.skillsmod.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.utils.CommandUtils;
 
 public class CategoryCommand {
@@ -13,12 +13,10 @@ public class CategoryCommand {
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("lock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
-											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
-
-											var category = CommandUtils.getCategory(categoryId);
+											var category = CategoryArgumentType.getCategory(context, "category");
 
 											for (var player : players) {
 												category.lock(player);
@@ -27,7 +25,7 @@ public class CategoryCommand {
 													context,
 													players,
 													"category.lock",
-													categoryId
+													category.getId()
 											);
 										})
 								)
@@ -35,12 +33,10 @@ public class CategoryCommand {
 				)
 				.then(CommandManager.literal("unlock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
-											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
-
-											var category = CommandUtils.getCategory(categoryId);
+											var category = CategoryArgumentType.getCategory(context, "category");
 
 											for (var player : players) {
 												category.unlock(player);
@@ -49,7 +45,7 @@ public class CategoryCommand {
 													context,
 													players,
 													"category.unlock",
-													categoryId
+													category.getId()
 											);
 										})
 								)
@@ -57,12 +53,10 @@ public class CategoryCommand {
 				)
 				.then(CommandManager.literal("erase")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
-											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
-
-											var category = CommandUtils.getCategory(categoryId);
+											var category = CategoryArgumentType.getCategory(context, "category");
 
 											for (var player : players) {
 												category.erase(player);
@@ -71,7 +65,7 @@ public class CategoryCommand {
 													context,
 													players,
 													"category.erase",
-													categoryId
+													category.getId()
 											);
 										})
 								)

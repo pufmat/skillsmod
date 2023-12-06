@@ -3,9 +3,9 @@ package net.puffish.skillsmod.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.utils.CommandUtils;
 
 public class PointsCommand {
@@ -14,14 +14,12 @@ public class PointsCommand {
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("add")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.then(CommandManager.argument("count", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+													var category = CategoryArgumentType.getCategory(context, "category");
 													var count = IntegerArgumentType.getInteger(context, "count");
-
-													var category = CommandUtils.getCategory(categoryId);
 
 													for (var player : players) {
 														category.addExtraPoints(player, count);
@@ -31,7 +29,7 @@ public class PointsCommand {
 															players,
 															"points.add",
 															count,
-															categoryId
+															category.getId()
 													);
 												})
 										)
@@ -40,14 +38,12 @@ public class PointsCommand {
 				)
 				.then(CommandManager.literal("set")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.then(CommandManager.argument("count", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+													var category = CategoryArgumentType.getCategory(context, "category");
 													var count = IntegerArgumentType.getInteger(context, "count");
-
-													var category = CommandUtils.getCategory(categoryId);
 
 													for (var player : players) {
 														category.setExtraPoints(player, count);
@@ -57,7 +53,7 @@ public class PointsCommand {
 															players,
 															"points.set",
 															count,
-															categoryId
+															category.getId()
 													);
 												})
 										)

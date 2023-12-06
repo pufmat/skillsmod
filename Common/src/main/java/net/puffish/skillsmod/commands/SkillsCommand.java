@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
+import net.puffish.skillsmod.commands.arguments.SkillArgumentType;
 import net.puffish.skillsmod.utils.CommandUtils;
 
 public class SkillsCommand {
@@ -14,15 +14,12 @@ public class SkillsCommand {
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("unlock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
-										.then(CommandManager.argument("skill", StringArgumentType.string())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
+										.then(CommandManager.argument("skill", SkillArgumentType.skill())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
-													var skillId = StringArgumentType.getString(context, "skill");
-
-													var category = CommandUtils.getCategory(categoryId);
-													var skill = CommandUtils.getSkill(category, skillId);
+													var category = CategoryArgumentType.getCategory(context, "category");
+													var skill = SkillArgumentType.getSkill(context, "skill", category);
 
 													for (var player : players) {
 														skill.unlock(player);
@@ -31,8 +28,8 @@ public class SkillsCommand {
 															context,
 															players,
 															"skills.unlock",
-															categoryId,
-															skillId
+															category.getId(),
+															skill.getId()
 													);
 												})
 										)
@@ -41,12 +38,10 @@ public class SkillsCommand {
 				)
 				.then(CommandManager.literal("reset")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
 										.executes(context -> {
 											var players = EntityArgumentType.getPlayers(context, "players");
-											var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
-
-											var category = CommandUtils.getCategory(categoryId);
+											var category = CategoryArgumentType.getCategory(context, "category");
 
 											for (var player : players) {
 												category.resetSkills(player);
@@ -55,7 +50,7 @@ public class SkillsCommand {
 													context,
 													players,
 													"skills.reset",
-													categoryId
+													category.getId()
 											);
 										})
 								)
