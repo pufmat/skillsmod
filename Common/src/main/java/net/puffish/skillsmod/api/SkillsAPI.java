@@ -53,7 +53,7 @@ public class SkillsAPI {
 
 	public static List<Category> getCategories() {
 		return SkillsMod.getInstance()
-				.getCategories()
+				.getCategories(false)
 				.stream()
 				.map(id -> (Category) new CategoryImpl(id))
 				.toList();

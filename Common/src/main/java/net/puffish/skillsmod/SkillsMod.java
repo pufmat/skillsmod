@@ -36,8 +36,9 @@ import net.puffish.skillsmod.rewards.builtin.AttributeReward;
 import net.puffish.skillsmod.rewards.builtin.CommandReward;
 import net.puffish.skillsmod.rewards.builtin.ScoreboardReward;
 import net.puffish.skillsmod.rewards.builtin.TagReward;
-import net.puffish.skillsmod.server.PlayerAttributes;
-import net.puffish.skillsmod.server.SkillsGameRules;
+import net.puffish.skillsmod.server.setup.SkillsArgumentTypes;
+import net.puffish.skillsmod.server.setup.SkillsAttributes;
+import net.puffish.skillsmod.server.setup.SkillsGameRules;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.ServerData;
@@ -52,7 +53,6 @@ import net.puffish.skillsmod.server.network.packets.out.InvalidConfigOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
-import net.puffish.skillsmod.server.setup.ServerGameRules;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.ChangeListener;
@@ -101,7 +101,6 @@ public class SkillsMod {
 	public static void setup(
 			Path configDir,
 			ServerRegistrar registrar,
-			ServerGameRules gameRules,
 			ServerEventReceiver eventReceiver,
 			ServerPacketSender packetSender,
 			ServerPacketReceiver packetReceiver
@@ -123,9 +122,9 @@ public class SkillsMod {
 
 		eventReceiver.registerListener(instance.new EventListener());
 
-		PlayerAttributes.register(registrar);
-
-		SkillsGameRules.register(gameRules);
+		SkillsAttributes.register(registrar);
+		SkillsGameRules.register(registrar);
+		SkillsArgumentTypes.register(registrar);
 
 		AttributeReward.register();
 		CommandReward.register();
@@ -448,9 +447,10 @@ public class SkillsMod {
 				.toList();
 	}
 
-	public Collection<Identifier> getCategories() {
+	public Collection<Identifier> getCategories(boolean onlyWithExperience) {
 		return getAllCategories()
 				.stream()
+				.filter(category -> !onlyWithExperience || category.getExperience().isPresent())
 				.map(CategoryConfig::getId)
 				.toList();
 	}

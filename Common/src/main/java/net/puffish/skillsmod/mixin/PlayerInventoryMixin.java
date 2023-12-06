@@ -2,7 +2,7 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
-import net.puffish.skillsmod.server.PlayerAttributes;
+import net.puffish.skillsmod.server.setup.SkillsAttributes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,7 +15,7 @@ public class PlayerInventoryMixin {
 	private void injectAtGetBlockBreakingSpeed(CallbackInfoReturnable<Float> cir) {
 		if (cir.getReturnValueF() > 1.0f) { // This check is required to not break vanilla enchantments behavior
 			var player = ((PlayerInventory) (Object) this).player;
-			var attribute = (EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MINING_SPEED);
+			var attribute = (EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.MINING_SPEED);
 			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}

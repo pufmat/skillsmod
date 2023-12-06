@@ -1,5 +1,8 @@
 package net.puffish.skillsmod.main;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.command.argument.ArgumentTypes;
+import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.registry.Registry;
@@ -22,11 +25,11 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.mixin.GameRulesAccessor;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
-import net.puffish.skillsmod.server.setup.ServerGameRules;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketReceiver;
@@ -52,7 +55,6 @@ public class ForgeMain {
 		SkillsMod.setup(
 				FMLPaths.CONFIGDIR.get(),
 				new ServerRegistrarImpl(),
-				new ServerGameRulesImpl(),
 				new ServerEventReceiverImpl(),
 				new ServerPacketSenderImpl(),
 				new ServerPacketReceiverImpl()
@@ -101,12 +103,15 @@ public class ForgeMain {
 			deferredRegister.register(id.getPath(), () -> entry);
 			deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
 		}
-	}
 
-	private static class ServerGameRulesImpl implements ServerGameRules {
 		@Override
-		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String namespace, String name, GameRules.Category category, GameRules.Type<T> type) {
-			return GameRules.register(namespace + ":" + name, category, type);
+		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
+			GameRulesAccessor.getRuleTypes().put(key, type);
+		}
+
+		@Override
+		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+			ArgumentTypes.registerByClass(clazz, serializer);
 		}
 	}
 

@@ -3,9 +3,9 @@ package net.puffish.skillsmod.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.utils.CommandUtils;
 
 public class ExperienceCommand {
@@ -14,15 +14,14 @@ public class ExperienceCommand {
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(CommandManager.literal("add")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.categoryOnlyWithExperience())
 										.then(CommandManager.argument("amount", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+													var category = CategoryArgumentType.getCategory(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
-													var category = CommandUtils.getCategory(categoryId);
-													var experience = CommandUtils.getExperience(category);
+													var experience = category.getExperience().orElseThrow();
 
 													for (var player : players) {
 														experience.addTotal(player, amount);
@@ -32,7 +31,7 @@ public class ExperienceCommand {
 															players,
 															"experience.add",
 															amount,
-															categoryId
+															category.getId()
 													);
 												})
 										)
@@ -41,15 +40,14 @@ public class ExperienceCommand {
 				)
 				.then(CommandManager.literal("set")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", IdentifierArgumentType.identifier())
+								.then(CommandManager.argument("category", CategoryArgumentType.categoryOnlyWithExperience())
 										.then(CommandManager.argument("amount", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var categoryId = IdentifierArgumentType.getIdentifier(context, "category");
+													var category = CategoryArgumentType.getCategory(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
-													var category = CommandUtils.getCategory(categoryId);
-													var experience = CommandUtils.getExperience(category);
+													var experience = category.getExperience().orElseThrow();
 
 													for (var player : players) {
 														experience.setTotal(player, amount);
@@ -59,7 +57,7 @@ public class ExperienceCommand {
 															players,
 															"experience.set",
 															amount,
-															categoryId
+															category.getId()
 													);
 												})
 										)

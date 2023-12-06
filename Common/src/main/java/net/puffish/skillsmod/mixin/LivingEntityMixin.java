@@ -12,7 +12,7 @@ import net.puffish.skillsmod.access.EntityAttributeInstanceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
-import net.puffish.skillsmod.server.PlayerAttributes;
+import net.puffish.skillsmod.server.setup.SkillsAttributes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,10 +31,10 @@ public abstract class LivingEntityMixin {
 
 		if (source.getAttacker() instanceof PlayerEntity player) {
 			if (source.isIn(DamageTypeTags.IS_PROJECTILE)) {
-				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RANGED_DAMAGE));
+				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.RANGED_DAMAGE));
 				damage = (float) attribute.computeIncreasedValueForInitial(damage);
 			} else {
-				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.MELEE_DAMAGE));
+				var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.MELEE_DAMAGE));
 				damage = (float) attribute.computeIncreasedValueForInitial(damage);
 			}
 		}
@@ -60,7 +60,7 @@ public abstract class LivingEntityMixin {
 		}
 
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
-			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.HEALING));
+			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.HEALING));
 			amount = (float) attribute.computeIncreasedValueForInitial(amount);
 		}
 		return amount;
@@ -69,7 +69,7 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "getJumpVelocity", at = @At("RETURN"), cancellable = true)
 	private void injectAtGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
-			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.JUMP));
+			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.JUMP));
 			cir.setReturnValue((float) attribute.computeIncreasedValueForInitial(cir.getReturnValueF()));
 		}
 	}
@@ -77,7 +77,7 @@ public abstract class LivingEntityMixin {
 	@ModifyVariable(method = "computeFallDamage", at = @At("STORE"), ordinal = 2)
 	private float modifyVariableAtComputeFallDamage(float reduction) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player) {
-			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.JUMP));
+			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.JUMP));
 			reduction += (attribute.computeIncreasedValueForInitial(1.0f) - 1.0f) * 10.0f;
 		}
 		return reduction;
@@ -110,7 +110,7 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "modifyAppliedDamage", at = @At("TAIL"), cancellable = true)
 	private void injectAtModifyAppliedDamage(CallbackInfoReturnable<Float> cir) {
 		if (((LivingEntity) (Object) this) instanceof PlayerEntity player && cir.getReturnValueF() < Float.MAX_VALUE / 3.0f) {
-			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(PlayerAttributes.RESISTANCE));
+			var attribute = ((EntityAttributeInstanceAccess) player.getAttributeInstance(SkillsAttributes.RESISTANCE));
 			cir.setReturnValue(Math.max(
 					0.0f,
 					(float) attribute.computeDecreasedValueForInitial(cir.getReturnValueF())
