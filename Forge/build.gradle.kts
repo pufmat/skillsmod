@@ -1,5 +1,5 @@
 plugins {
-	id("dev.architectury.loom") version "1.0-SNAPSHOT"
+	id("dev.architectury.loom")
 	id("checkstyle")
 }
 
@@ -24,10 +24,8 @@ dependencies {
 }
 
 loom {
-	forge {
-		mixinConfig("puffish_skills.mixins.json")
-		mixin.defaultRefmapName.set("puffish_skills-refmap.json")
-	}
+	mixin.defaultRefmapName.set("puffish_skills-refmap.json")
+	forge.mixinConfig("puffish_skills.mixins.json")
 }
 
 tasks.test {
