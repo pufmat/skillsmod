@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.1-SNAPSHOT"
+    id("dev.architectury.loom")
     id("checkstyle")
 }
 
@@ -22,6 +22,10 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
 
     implementation(project(path = ":Common", configuration = "namedElements"))
+}
+
+loom {
+    mixin.defaultRefmapName.set("puffish_skills-refmap.json")
 }
 
 tasks.test {

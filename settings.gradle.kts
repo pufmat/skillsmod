@@ -8,6 +8,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("dev.architectury.loom") version "1.3.358" apply false
+}
+
 rootProject.name = "Pufferfish's Skills"
 
 include("Common", "Fabric", "Forge")
