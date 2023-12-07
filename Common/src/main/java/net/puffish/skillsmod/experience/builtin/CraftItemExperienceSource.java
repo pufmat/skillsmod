@@ -4,20 +4,21 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.experience.ExperienceSource;
-import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemCondition;
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemTagCondition;
+import net.puffish.skillsmod.api.experience.calculation.parameter.AttributeParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
-import net.puffish.skillsmod.api.utils.Result;
 import net.puffish.skillsmod.api.utils.Failure;
+import net.puffish.skillsmod.api.utils.Result;
+import net.puffish.skillsmod.experience.calculation.CalculationManager;
 
 import java.util.Map;
 
@@ -32,7 +33,8 @@ public class CraftItemExperienceSource implements ExperienceSource {
 	);
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
-			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player)))
+			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player))),
+			Map.entry("player_attribute", AttributeParameter.factory().map(p -> p.map(Context::player)))
 	);
 
 	private final CalculationManager<Context> manager;
