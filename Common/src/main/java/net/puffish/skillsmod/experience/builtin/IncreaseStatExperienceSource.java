@@ -11,6 +11,7 @@ import net.puffish.skillsmod.api.experience.ExperienceSource;
 import net.puffish.skillsmod.experience.calculation.CalculationManager;
 import net.puffish.skillsmod.api.experience.calculation.condition.ConditionFactory;
 import net.puffish.skillsmod.api.experience.calculation.condition.StatCondition;
+import net.puffish.skillsmod.api.experience.calculation.parameter.AttributeParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.api.json.JsonObjectWrapper;
@@ -28,6 +29,7 @@ public class IncreaseStatExperienceSource implements ExperienceSource {
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
 			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player))),
+			Map.entry("player_attribute", AttributeParameter.factory().map(p -> p.map(Context::player))),
 			Map.entry("amount", ParameterFactory.simple(ctx -> (double) ctx.amount()))
 	);
 

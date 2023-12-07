@@ -22,6 +22,7 @@ import net.puffish.skillsmod.api.experience.calculation.condition.EntityTypeTagC
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemCondition;
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemNbtCondition;
 import net.puffish.skillsmod.api.experience.calculation.condition.ItemTagCondition;
+import net.puffish.skillsmod.api.experience.calculation.parameter.AttributeParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.EffectParameter;
 import net.puffish.skillsmod.api.experience.calculation.parameter.ParameterFactory;
 import net.puffish.skillsmod.api.json.JsonElementWrapper;
@@ -49,6 +50,7 @@ public class KillEntityExperienceSource implements ExperienceSource {
 
 	private static final Map<String, ParameterFactory<Context>> PARAMETERS = Map.ofEntries(
 			Map.entry("player_effect", EffectParameter.factory().map(p -> p.map(Context::player))),
+			Map.entry("player_attribute", AttributeParameter.factory().map(p -> p.map(Context::player))),
 			Map.entry("entity_dropped_experience", ParameterFactory.simple(Context::entityDroppedXp)),
 			Map.entry("entity_max_health", ParameterFactory.simple(Context::entityMaxHealth))
 	);
