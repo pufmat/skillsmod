@@ -10,6 +10,8 @@ group = "${project.properties["maven_group"]}"
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+
+    withSourcesJar()
 }
 
 dependencies {
@@ -23,4 +25,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest {
+        attributes["Fabric-Loom-Remap"] = "true"
+    }
 }
