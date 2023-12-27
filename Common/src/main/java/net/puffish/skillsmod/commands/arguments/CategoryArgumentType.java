@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,6 +16,7 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.utils.CommandUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -46,7 +46,7 @@ public class CategoryArgumentType implements ArgumentType<Category> {
 
 	@Override
 	public Category parse(StringReader reader) throws CommandSyntaxException {
-		var categoryId = Identifier.fromCommandInput(reader);
+		var categoryId = SkillsMod.convertIdentifier(Identifier.fromCommandInput(reader));
 		return SkillsAPI.getCategory(categoryId)
 				.filter(category -> !onlyWithExperience || category.getExperience().isPresent())
 				.orElseThrow(() -> NO_SUCH_CATEGORY.create(categoryId));
@@ -54,7 +54,7 @@ public class CategoryArgumentType implements ArgumentType<Category> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		CommandSource.suggestIdentifiers(SkillsMod.getInstance().getCategories(onlyWithExperience), builder);
+		CommandUtils.suggestIdentifiers(SkillsMod.getInstance().getCategories(onlyWithExperience), builder);
 		return builder.buildFuture();
 	}
 
