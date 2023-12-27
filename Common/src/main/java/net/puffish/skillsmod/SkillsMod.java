@@ -143,6 +143,13 @@ public class SkillsMod {
 		return new Identifier(SkillsAPI.MOD_ID, path);
 	}
 
+	public static Identifier convertIdentifier(Identifier id) {
+		if (id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+			return createIdentifier(id.getPath());
+		}
+		return id;
+	}
+
 	public static MutableText createTranslatable(String type, String path, Object... args) {
 		return Text.translatable(Util.createTranslationKey(type, createIdentifier(path)), args);
 	}
@@ -222,7 +229,7 @@ public class SkillsMod {
 	private Result<Map<Identifier, CategoryConfig>, Failure> loadConfig(ConfigReader reader, ModConfig modConfig, MinecraftServer server) {
 		var context = new ConfigContextImpl(server);
 
-		return reader.readCategories(Identifier.DEFAULT_NAMESPACE, modConfig.getCategories(), context)
+		return reader.readCategories(SkillsAPI.MOD_ID, modConfig.getCategories(), context)
 				.ifSuccess(map -> {
 					if (modConfig.getShowWarnings() && !context.warnings().isEmpty()) {
 						logger.warn("Configuration loaded successfully with warning(s):"

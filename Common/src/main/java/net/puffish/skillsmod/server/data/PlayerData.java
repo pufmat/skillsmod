@@ -2,6 +2,7 @@ package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.config.CategoryConfig;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class PlayerData {
 		for (var id : categoriesNbt.getKeys()) {
 			var elementNbt = categoriesNbt.get(id);
 			if (elementNbt instanceof NbtCompound categoryNbt) {
-				categories.put(new Identifier(id), CategoryData.read(categoryNbt));
+				categories.put(SkillsMod.convertIdentifier(new Identifier(id)), CategoryData.read(categoryNbt));
 			}
 		}
 
