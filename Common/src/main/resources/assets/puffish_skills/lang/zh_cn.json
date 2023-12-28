@@ -1,17 +1,17 @@
 {
-    "text.puffish_skills.skills": "技能",
-    "text.puffish_skills.points_left": "剩余技能点：",
+	"text.puffish_skills.skills": "技能",
+	"text.puffish_skills.points_left": "剩余技能点：",
 
-    "tooltip.puffish_skills.current_level": "当前等级：%s",
+	"tooltip.puffish_skills.current_level": "当前等级：%s",
 	"tooltip.puffish_skills.experience_progress": "经验：%s/%s (%s%%)",
 	"tooltip.puffish_skills.to_next_level": "距下一级：%s",
 	"tooltip.puffish_skills.earned_points": "获得点数：%s",
 	"tooltip.puffish_skills.spent_points": "消耗点数：%s",
 
-    "category.puffish_skills.skills": "技能",
-    "key.puffish_skills.open": "打开技能树",
+	"category.puffish_skills.skills": "技能",
+	"key.puffish_skills.open": "打开技能树",
 
-    "attribute.puffish_skills.player.stamina": "体力",
+	"attribute.puffish_skills.player.stamina": "体力",
 	"attribute.puffish_skills.player.melee_damage": "近战伤害",
 	"attribute.puffish_skills.player.ranged_damage": "远程伤害",
 	"attribute.puffish_skills.player.fortune": "时运",
@@ -22,39 +22,39 @@
 	"attribute.puffish_skills.player.sprinting_speed": "冲刺速度",
 	"attribute.puffish_skills.player.knockback": "击退",
 
-    "chat.puffish_skills.new_point": "你获得了一个新的技能点，按%s开启技能树。",
+	"chat.puffish_skills.new_point": "你获得了一个新的技能点，按%s开启技能树。",
 
-    "toast.puffish_skills.invalid_config.description": "无效的配置，请检查游戏日志。",
+	"toast.puffish_skills.invalid_config.description": "无效的配置，请检查游戏日志。",
 
-    "gamerule.puffish_skills:announceNewPoints": "提示获得新的技能点",
+	"gamerule.puffish_skills:announceNewPoints": "提示获得新的技能点",
 
-    "command.puffish_skills.no_such_category": "无类别ID为%s",
-    "command.puffish_skills.no_such_skill": "无技能ID为%s",
+	"command.puffish_skills.no_such_category": "无类别ID为%s",
+	"command.puffish_skills.no_such_skill": "无技能ID为%s",
 
-    "command.puffish_skills.category.lock.success.single": "为%1$s锁定类别%2$s",
-    "command.puffish_skills.category.lock.success.multiple": "为玩家%1$s锁定类别%2$s",
+	"command.puffish_skills.category.lock.success.single": "为%1$s锁定类别%2$s",
+	"command.puffish_skills.category.lock.success.multiple": "为玩家%1$s锁定类别%2$s",
 
-    "command.puffish_skills.category.unlock.success.single": "为%2$s解锁类别%1$s",
-    "command.puffish_skills.category.unlock.success.multiple": "为玩家%2$s解锁类别%1$s",
+	"command.puffish_skills.category.unlock.success.single": "为%2$s解锁类别%1$s",
+	"command.puffish_skills.category.unlock.success.multiple": "为玩家%2$s解锁类别%1$s",
 
-    "command.puffish_skills.category.erase.success.single": "为%1$s清空类别%2$s",
-    "command.puffish_skills.category.erase.success.multiple": "为玩家%1$s清空类别%2$s",
+	"command.puffish_skills.category.erase.success.single": "为%1$s清空类别%2$s",
+	"command.puffish_skills.category.erase.success.multiple": "为玩家%1$s清空类别%2$s",
 
-    "command.puffish_skills.experience.add.success.single": "为%3$s增加%1$s点经验至类别%2$s",
-    "command.puffish_skills.experience.add.success.multiple": "为玩家%3$s增加%1$s点经验至类别%2$s",
+	"command.puffish_skills.experience.add.success.single": "为%3$s增加%1$s点经验至类别%2$s",
+	"command.puffish_skills.experience.add.success.multiple": "为玩家%3$s增加%1$s点经验至类别%2$s",
 
-    "command.puffish_skills.experience.set.success.single": "为%3$s设定为%1$s点经验至类别%2$s",
-    "command.puffish_skills.experience.set.success.multiple": "将玩家%3$s类别%2$s的经验设定为%1$s点",
+	"command.puffish_skills.experience.set.success.single": "为%3$s设定为%1$s点经验至类别%2$s",
+	"command.puffish_skills.experience.set.success.multiple": "将玩家%3$s类别%2$s的经验设定为%1$s点",
 
-    "command.puffish_skills.points.add.success.single": "为%3$s增加%1$s点技能点至类别%2$s",
-    "command.puffish_skills.points.add.success.multiple": "为玩家%3$s增加%1$s点技能点至类别%2$s",
+	"command.puffish_skills.points.add.success.single": "为%3$s增加%1$s点技能点至类别%2$s",
+	"command.puffish_skills.points.add.success.multiple": "为玩家%3$s增加%1$s点技能点至类别%2$s",
 
-    "command.puffish_skills.points.set.success.single": "为%3$s设定为%1$s点技能点至类别%2$s",
-    "command.puffish_skills.points.set.success.multiple": "为%3$s玩家设定为%1$s点技能点至类别%2$s",
+	"command.puffish_skills.points.set.success.single": "为%3$s设定为%1$s点技能点至类别%2$s",
+	"command.puffish_skills.points.set.success.multiple": "为%3$s玩家设定为%1$s点技能点至类别%2$s",
 
-    "command.puffish_skills.skills.unlock.success.single": "为%3$s解锁类别%2$s中的技能%1$s",
-    "command.puffish_skills.skills.unlock.success.multiple": "为玩家%3$s解锁类别%2$s中的技能%1$s",
+	"command.puffish_skills.skills.unlock.success.single": "为%3$s解锁类别%2$s中的技能%1$s",
+	"command.puffish_skills.skills.unlock.success.multiple": "为玩家%3$s解锁类别%2$s中的技能%1$s",
 
-    "command.puffish_skills.skills.reset.success.single": "为%1$s重置类别%2$s的所有技能",
-    "command.puffish_skills.skills.reset.success.multiple": "为玩家%1$s重置类别%2$s的所有技能"
+	"command.puffish_skills.skills.reset.success.single": "为%1$s重置类别%2$s的所有技能",
+	"command.puffish_skills.skills.reset.success.multiple": "为玩家%1$s重置类别%2$s的所有技能"
 }
