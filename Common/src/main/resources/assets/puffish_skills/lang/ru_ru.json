@@ -1,13 +1,60 @@
 {
 	"text.puffish_skills.skills": "Навыки",
-	"text.puffish_skills.points_left": "Осталось очков: ",
+	"text.puffish_skills.points_left": "Очков осталось: ",
+
+	"tooltip.puffish_skills.current_level": "Текущий уровень: %s",
+	"tooltip.puffish_skills.experience_progress": "Опыт: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "До след. уровня: %s",
+	"tooltip.puffish_skills.earned_points": "Заработанные очки: %s",
+	"tooltip.puffish_skills.spent_points": "Потраченные очки: %s",
 
 	"category.puffish_skills.skills": "Навыки",
-	"key.puffish_skills.open": "Открыть древо навыков",
+	"key.puffish_skills.open": "Открыть дерево улучшений",
 
-	"chat.puffish_skills.new_point": "Вы получили очко навыков. Нажмите %s, чтобы открыть древо.",
+	"attribute.puffish_skills.player.stamina": "Выносливость",
+	"attribute.puffish_skills.player.melee_damage": "Урон в ближнем бою",
+	"attribute.puffish_skills.player.ranged_damage": "Урон в дальнем бою",
+	"attribute.puffish_skills.player.fortune": "Удача",
+	"attribute.puffish_skills.player.healing": "Регенерация",
+	"attribute.puffish_skills.player.jump": "Прыжок",
+	"attribute.puffish_skills.player.resistance": "Сопротивление",
+	"attribute.puffish_skills.player.mining_speed": "Скорость копания",
+	"attribute.puffish_skills.player.sprinting_speed": "Скорость бега",
+	"attribute.puffish_skills.player.knockback": "Отдача",
 
-	"toast.puffish_skills.invalid_config.description": "Неверная конфигурация, проверьте журналы игры.",
+	"chat.puffish_skills.new_point": "Вы получили новое очко навыка. Нажмите %s чтобы открыть Дерево навыков.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Оповещение о новых очках навыков"
+	"toast.puffish_skills.invalid_config.description": "Недопустимая конфигурация, проверьте логи игры.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Объявлять о новых очках навыков",
+
+	"command.puffish_skills.no_such_category": "Нет категории с идентификатором %s",
+	"command.puffish_skills.no_such_skill": "Нет навыка с идентификатором %s",
+
+	"command.puffish_skills.category.lock.success.single": "Заблокирована категория %s для %s",
+	"command.puffish_skills.category.lock.success.multiple": "Заблокирована категория %s для %s игроков",
+
+	"command.puffish_skills.category.unlock.success.single": "Разблокирована категория %s для %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Разблокирована категория %s для %s игроков",
+
+	"command.puffish_skills.category.erase.success.single": "Удалена категория %s для %s",
+	"command.puffish_skills.category.erase.success.multiple": "Удалена категория %s для %s игроков",
+
+	"command.puffish_skills.experience.add.success.single": "Добавлено %s опыта к категории %s для %s",
+	"command.puffish_skills.experience.add.success.multiple": "Добавлено %s опыта к категории %s для %s игроков",
+
+	"command.puffish_skills.experience.set.success.single": "Установлено %s опыта в категории %s для %s",
+	"command.puffish_skills.experience.set.success.multiple": "Установлено %s опыта в категории %s для %s игроков",
+
+	"command.puffish_skills.points.add.success.single": "Добавлено %s очков к категории %s для %s",
+	"command.puffish_skills.points.add.success.multiple": "Добавлено %s очков к категории %s для %s игроков",
+
+	"command.puffish_skills.points.set.success.single": "Установлено %s очков в категории %s для %s",
+	"command.puffish_skills.points.set.success.multiple": "Установлено %s очков в категории %s для %s игроков",
+
+	"command.puffish_skills.skills.unlock.success.single": "Разблокирован %s навык в категории %s для %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Разблокирован %s навык в категории %s для %s игроков",
+
+	"command.puffish_skills.skills.reset.success.single": "Сброшены все навыки в категории %s для %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Сброшены все навыки в категории %s для %s игроков"
 }
