@@ -21,6 +21,6 @@ public class PointsUpdateOutPacket extends OutPacket {
 
 	@Override
 	public Identifier getIdentifier() {
-		return Packets.POINTS_UPDATE_PACKET;
+		return Packets.POINTS_UPDATE;
 	}
 }

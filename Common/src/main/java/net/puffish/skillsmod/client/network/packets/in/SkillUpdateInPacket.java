@@ -4,21 +4,25 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
-public class SkillUnlockInPacket implements InPacket {
+public class SkillUpdateInPacket implements InPacket {
 	private final Identifier categoryId;
 	private final String skillId;
+	private final boolean unlocked;
 
-	private SkillUnlockInPacket(Identifier categoryId, String skillId) {
+	private SkillUpdateInPacket(Identifier categoryId, String skillId, boolean unlocked) {
 		this.categoryId = categoryId;
 		this.skillId = skillId;
+		this.unlocked = unlocked;
 	}
 
-	public static SkillUnlockInPacket read(PacketByteBuf buf) {
+	public static SkillUpdateInPacket read(PacketByteBuf buf) {
 		var categoryId = buf.readIdentifier();
 		var skillId = buf.readString();
-		return new SkillUnlockInPacket(
+		var unlocked = buf.readBoolean();
+		return new SkillUpdateInPacket(
 				categoryId,
-				skillId
+				skillId,
+				unlocked
 		);
 	}
 
@@ -28,5 +32,9 @@ public class SkillUnlockInPacket implements InPacket {
 
 	public String getSkillId() {
 		return skillId;
+	}
+
+	public boolean isUnlocked() {
+		return unlocked;
 	}
 }

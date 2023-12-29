@@ -56,6 +56,9 @@
 	"command.puffish_skills.skills.unlock.success.single": "Unlocked %s skill in category %s for %s",
 	"command.puffish_skills.skills.unlock.success.multiple": "Unlocked %s skill in category %s for %s players",
 
+	"command.puffish_skills.skills.lock.success.single": "Locked %s skill in category %s for %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Locked %s skill in category %s for %s players",
+
 	"command.puffish_skills.skills.reset.success.single": "Reset all skills in category %s for %s",
 	"command.puffish_skills.skills.reset.success.multiple": "Reset all skills in category %s for %s players"
 }

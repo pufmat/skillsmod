@@ -52,7 +52,7 @@ import net.puffish.skillsmod.server.network.packets.out.HideCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.InvalidConfigOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
-import net.puffish.skillsmod.server.network.packets.out.SkillUnlockOutPacket;
+import net.puffish.skillsmod.server.network.packets.out.SkillUpdateOutPacket;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.skill.SkillState;
 import net.puffish.skillsmod.utils.ChangeListener;
@@ -115,7 +115,7 @@ public class SkillsMod {
 		instance = new SkillsMod(modConfigDir, packetSender);
 
 		packetReceiver.registerPacket(
-				Packets.SKILL_CLICK_PACKET,
+				Packets.SKILL_CLICK,
 				SkillClickInPacket::read,
 				instance::onSkillClickPacket
 		);
@@ -294,9 +294,17 @@ public class SkillsMod {
 	private void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			if (categoryData.tryUnlockSkill(category, player, skillId, force)) {
-				packetSender.send(player, SkillUnlockOutPacket.write(categoryId, skillId));
+				packetSender.send(player, SkillUpdateOutPacket.write(categoryId, skillId, true));
 				syncPoints(player, category, categoryData);
 			}
+		}));
+	}
+
+	public void lockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
+			categoryData.lockSkill(skillId);
+			packetSender.send(player, SkillUpdateOutPacket.write(categoryId, skillId, false));
+			syncPoints(player, category, categoryData);
 		}));
 	}
 

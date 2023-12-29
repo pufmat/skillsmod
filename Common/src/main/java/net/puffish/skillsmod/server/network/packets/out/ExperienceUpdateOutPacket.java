@@ -21,6 +21,6 @@ public class ExperienceUpdateOutPacket extends OutPacket {
 
 	@Override
 	public Identifier getIdentifier() {
-		return Packets.EXPERIENCE_UPDATE_PACKET;
+		return Packets.EXPERIENCE_UPDATE;
 	}
 }

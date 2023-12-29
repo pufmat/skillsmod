@@ -19,7 +19,7 @@ import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
 import net.puffish.skillsmod.client.network.packets.in.InvalidConfigInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowCategoryInPacket;
-import net.puffish.skillsmod.client.network.packets.in.SkillUnlockInPacket;
+import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 import net.puffish.skillsmod.network.Packets;
 import org.lwjgl.glfw.GLFW;
 
@@ -72,19 +72,19 @@ public class SkillsClientMod {
 		);
 
 		packetReceiver.registerPacket(
-				Packets.SKILL_UNLOCK_PACKET,
-				SkillUnlockInPacket::read,
-				instance::onSkillUnlockPacket
+				Packets.SKILL_UPDATE,
+				SkillUpdateInPacket::read,
+				instance::onSkillUpdatePacket
 		);
 
 		packetReceiver.registerPacket(
-				Packets.POINTS_UPDATE_PACKET,
+				Packets.POINTS_UPDATE,
 				PointsUpdateInPacket::read,
 				instance::onPointsUpdatePacket
 		);
 
 		packetReceiver.registerPacket(
-				Packets.EXPERIENCE_UPDATE_PACKET,
+				Packets.EXPERIENCE_UPDATE,
 				ExperienceUpdateInPacket::read,
 				instance::onExperienceUpdatePacket
 		);
@@ -117,10 +117,14 @@ public class SkillsClientMod {
 		categories.remove(packet.getCategoryId());
 	}
 
-	private void onSkillUnlockPacket(SkillUnlockInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(
-				category -> category.unlock(packet.getSkillId())
-		);
+	private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
+		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+			if (packet.isUnlocked()) {
+				category.unlock(packet.getSkillId());
+			} else {
+				category.lock(packet.getSkillId());
+			}
+		});
 	}
 
 	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {

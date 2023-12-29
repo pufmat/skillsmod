@@ -10,4 +10,6 @@ public interface Skill {
 	boolean isUnlocked(ServerPlayerEntity player);
 
 	void unlock(ServerPlayerEntity player);
+
+	void lock(ServerPlayerEntity player);
 }

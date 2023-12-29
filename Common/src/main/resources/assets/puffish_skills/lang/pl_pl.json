@@ -56,6 +56,9 @@
 	"command.puffish_skills.skills.unlock.success.single": "Odblokowano umiejętność %s w kategorii %s dla %s",
 	"command.puffish_skills.skills.unlock.success.multiple": "Odblokowano umiejętność %s w kategorii %s dla %s graczy",
 
+	"command.puffish_skills.skills.lock.success.single": "Zablokowano umiejętność %s w kategorii %s dla %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Zablokowano umiejętność %s w kategorii %s dla %s graczy",
+
 	"command.puffish_skills.skills.reset.success.single": "Zresetowano wszystkie umiejętności w kategorii %s dla %s",
 	"command.puffish_skills.skills.reset.success.multiple": "Zresetowano wszystkie umiejętności w kategorii %s dla %s graczy"
 }

@@ -19,6 +19,6 @@ public class SkillClickOutPacket extends OutPacket {
 
 	@Override
 	public Identifier getIdentifier() {
-		return Packets.SKILL_CLICK_PACKET;
+		return Packets.SKILL_CLICK;
 	}
 }
