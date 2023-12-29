@@ -7,19 +7,13 @@ import net.puffish.skillsmod.api.utils.Failure;
 import net.puffish.skillsmod.impl.json.JsonElementWrapperImpl;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public interface JsonElementWrapper extends JsonWrapper {
 	static Result<JsonElementWrapper, Failure> parseString(String jsonData, JsonPath jsonPath) {
-		try {
-			return Result.success(new JsonElementWrapperImpl(
-					JsonParser.parseString(jsonData),
-					jsonPath
-			));
-		} catch (Exception e) {
-			return Result.failure(jsonPath.createFailure("Could not read JSON"));
-		}
+		return parseReader(new StringReader(jsonData), jsonPath);
 	}
 
 	static Result<JsonElementWrapper, Failure> parseReader(Reader reader, JsonPath jsonPath) {
@@ -29,7 +23,7 @@ public interface JsonElementWrapper extends JsonWrapper {
 					jsonPath
 			));
 		} catch (Exception e) {
-			return Result.failure(jsonPath.createFailure("Could not read JSON"));
+			return Result.failure(jsonPath.createFailure("Could not parse JSON due to malformed syntax"));
 		}
 	}
 
@@ -39,12 +33,9 @@ public interface JsonElementWrapper extends JsonWrapper {
 			if (content.isEmpty()) {
 				return Result.failure(jsonPath.createFailure("File is empty"));
 			}
-			return Result.success(new JsonElementWrapperImpl(
-					JsonParser.parseString(content),
-					jsonPath
-			));
+			return parseString(content, jsonPath);
 		} catch (Exception e) {
-			return Result.failure(jsonPath.createFailure("Could not read JSON"));
+			return Result.failure(jsonPath.createFailure("Could not read file"));
 		}
 	}
 
