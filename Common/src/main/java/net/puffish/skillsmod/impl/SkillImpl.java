@@ -34,4 +34,9 @@ public class SkillImpl implements Skill {
 	public void unlock(ServerPlayerEntity player) {
 		SkillsMod.getInstance().unlockSkill(player, category.getId(), skillId);
 	}
+
+	@Override
+	public void lock(ServerPlayerEntity player) {
+		SkillsMod.getInstance().lockSkill(player, category.getId(), skillId);
+	}
 }

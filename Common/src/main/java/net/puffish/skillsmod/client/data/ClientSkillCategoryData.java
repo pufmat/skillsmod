@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public class ClientSkillCategoryData {
 	private final Identifier id;
@@ -22,10 +23,12 @@ public class ClientSkillCategoryData {
 
 	private final Map<String, ClientSkillDefinitionData> definitions;
 	private final Map<String, ClientSkillData> skills;
-	private final Collection<ClientSkillConnectionData> normalConnections;
 	private final Map<String, Collection<String>> normalNeighbors;
+	private final Collection<ClientSkillConnectionData> normalConnections;
 	private final Map<String, Collection<String>> exclusiveNeighbors;
 	private final Map<String, Collection<ClientSkillConnectionData>> exclusiveConnections;
+	private final Map<String, Collection<String>> normalNeighborsReversed;
+	private final Map<String, Collection<String>> exclusiveNeighborsReversed;
 
 	private int spentPoints;
 	private int earnedPoints;
@@ -68,14 +71,18 @@ public class ClientSkillCategoryData {
 		this.normalNeighbors = new HashMap<>();
 		this.exclusiveNeighbors = new HashMap<>();
 		this.exclusiveConnections = new HashMap<>();
+		this.normalNeighborsReversed = new HashMap<>();
+		this.exclusiveNeighborsReversed = new HashMap<>();
 
 		for (var connection : normalConnections) {
 			var a = connection.getSkillAId();
 			var b = connection.getSkillBId();
 
 			normalNeighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
+			normalNeighborsReversed.computeIfAbsent(b, key -> new HashSet<>()).add(a);
 			if (connection.isBidirectional()) {
 				normalNeighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
+				normalNeighborsReversed.computeIfAbsent(a, key -> new HashSet<>()).add(b);
 			}
 		}
 
@@ -84,8 +91,10 @@ public class ClientSkillCategoryData {
 			var b = connection.getSkillBId();
 
 			exclusiveNeighbors.computeIfAbsent(a, key -> new HashSet<>()).add(b);
+			exclusiveNeighborsReversed.computeIfAbsent(b, key -> new HashSet<>()).add(a);
 			if (connection.isBidirectional()) {
 				exclusiveNeighbors.computeIfAbsent(b, key -> new HashSet<>()).add(a);
+				exclusiveNeighborsReversed.computeIfAbsent(a, key -> new HashSet<>()).add(b);
 			}
 
 			this.exclusiveConnections.computeIfAbsent(a, key -> new HashSet<>()).add(connection);
@@ -108,30 +117,111 @@ public class ClientSkillCategoryData {
 		}
 		skill.setState(SkillState.UNLOCKED);
 		if (skill.isRoot() && exclusiveRoot) {
-			for (var otherSkill : skills.values()) {
-				if (otherSkill.isRoot() && otherSkill.getState() == SkillState.AVAILABLE) {
-					otherSkill.setState(SkillState.LOCKED);
+			skills.values().stream()
+					.filter(ClientSkillData::isRoot)
+					.filter(other -> other.getState() == SkillState.AVAILABLE)
+					.forEach(other -> other.setState(SkillState.LOCKED));
+		}
+		var normalNeighborsIds = normalNeighbors.get(skillId);
+		if (normalNeighborsIds != null) {
+			normalNeighborsIds.stream()
+					.map(skills::get)
+					.filter(Objects::nonNull)
+					.filter(neighbor -> neighbor.getState() == SkillState.LOCKED)
+					.forEach(neighbor -> neighbor.setState(SkillState.AVAILABLE));
+		}
+		var exclusiveNeighborsIds = exclusiveNeighbors.get(skillId);
+		if (exclusiveNeighborsIds != null) {
+			exclusiveNeighborsIds.stream()
+					.map(skills::get)
+					.filter(Objects::nonNull)
+					.filter(neighbor -> neighbor.getState() != SkillState.UNLOCKED)
+					.forEach(neighbor -> neighbor.setState(SkillState.EXCLUDED));
+		}
+	}
+
+	public void lock(String skillId) {
+		var skill = skills.get(skillId);
+		if (skill == null) {
+			return;
+		}
+		if (isExcluded(skill)) {
+			skill.setState(SkillState.EXCLUDED);
+		} else if (isAvailable(skill)) {
+			skill.setState(SkillState.AVAILABLE);
+		} else {
+			skill.setState(SkillState.LOCKED);
+		}
+		if (skill.isRoot()) {
+			if (exclusiveRoot) {
+				if (skills.values()
+						.stream()
+						.filter(ClientSkillData::isRoot)
+						.allMatch(other -> other.getState() != SkillState.UNLOCKED)) {
+					skills.values()
+							.stream()
+							.filter(ClientSkillData::isRoot)
+							.filter(other -> other.getState() == SkillState.LOCKED)
+							.forEach(other -> other.setState(SkillState.AVAILABLE));
 				}
 			}
 		}
 		var normalNeighborsIds = normalNeighbors.get(skillId);
 		if (normalNeighborsIds != null) {
-			for (var neighborId : normalNeighborsIds) {
-				var neighbor = skills.get(neighborId);
-				if (neighbor != null && neighbor.getState() == SkillState.LOCKED) {
-					neighbor.setState(SkillState.AVAILABLE);
-				}
-			}
+			normalNeighborsIds.stream()
+					.map(skills::get)
+					.filter(Objects::nonNull)
+					.filter(neighbor -> neighbor.getState() == SkillState.AVAILABLE)
+					.forEach(neighbor -> {
+						if (!isAvailable(neighbor)) {
+							neighbor.setState(SkillState.LOCKED);
+						}
+					});
 		}
 		var exclusiveNeighborsIds = exclusiveNeighbors.get(skillId);
 		if (exclusiveNeighborsIds != null) {
-			for (var neighborId : exclusiveNeighborsIds) {
-				var neighbor = skills.get(neighborId);
-				if (neighbor != null && neighbor.getState() != SkillState.UNLOCKED) {
-					neighbor.setState(SkillState.EXCLUDED);
-				}
-			}
+			exclusiveNeighborsIds.stream()
+					.map(skills::get)
+					.filter(Objects::nonNull)
+					.filter(neighbor -> neighbor.getState() == SkillState.EXCLUDED)
+					.forEach(neighbor -> {
+						if (!isExcluded(neighbor)) {
+							if (isAvailable(neighbor)) {
+								neighbor.setState(SkillState.AVAILABLE);
+							} else {
+								neighbor.setState(SkillState.LOCKED);
+							}
+						}
+					});
 		}
+	}
+
+	private boolean isExcluded(ClientSkillData skill) {
+		var exclusiveNeighborsReversedIds = exclusiveNeighborsReversed.get(skill.getId());
+		if (exclusiveNeighborsReversedIds == null) {
+			return false;
+		}
+		return exclusiveNeighborsReversedIds.stream()
+				.map(skills::get)
+				.filter(Objects::nonNull)
+				.anyMatch(neighbor -> neighbor.getState() == SkillState.UNLOCKED);
+	}
+
+	private boolean isAvailable(ClientSkillData skill) {
+		if (skill.isRoot()) {
+			return !exclusiveRoot || skills.values()
+					.stream()
+					.filter(ClientSkillData::isRoot)
+					.allMatch(other -> other.getState() != SkillState.UNLOCKED);
+		}
+		var normalNeighborsReversedIds = normalNeighborsReversed.get(skill.getId());
+		if (normalNeighborsReversedIds == null) {
+			return false;
+		}
+		return normalNeighborsReversedIds.stream()
+				.map(skills::get)
+				.filter(Objects::nonNull)
+				.anyMatch(neighbor -> neighbor.getState() == SkillState.UNLOCKED);
 	}
 
 	public boolean hasAvailableSkill() {

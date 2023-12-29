@@ -36,6 +36,30 @@ public class SkillsCommand {
 								)
 						)
 				)
+				.then(CommandManager.literal("lock")
+						.then(CommandManager.argument("players", EntityArgumentType.players())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
+										.then(CommandManager.argument("skill", SkillArgumentType.skill())
+												.executes(context -> {
+													var players = EntityArgumentType.getPlayers(context, "players");
+													var category = CategoryArgumentType.getCategory(context, "category");
+													var skill = SkillArgumentType.getSkill(context, "skill", category);
+
+													for (var player : players) {
+														skill.lock(player);
+													}
+													return CommandUtils.sendSuccess(
+															context,
+															players,
+															"skills.lock",
+															category.getId(),
+															skill.getId()
+													);
+												})
+										)
+								)
+						)
+				)
 				.then(CommandManager.literal("reset")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", CategoryArgumentType.category())

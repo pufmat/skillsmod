@@ -169,6 +169,10 @@ public class CategoryData {
 		unlockedSkills.add(id);
 	}
 
+	public void lockSkill(String id) {
+		unlockedSkills.remove(id);
+	}
+
 	public void resetSkills() {
 		unlockedSkills.clear();
 	}
