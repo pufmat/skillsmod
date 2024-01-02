@@ -99,10 +99,6 @@ public class SkillsClientMod {
 	}
 
 	private void onOpenKeyPress() {
-		if (categories.isEmpty()) {
-			return;
-		}
-
 		MinecraftClient.getInstance().setScreen(new SkillsScreen(
 				categories.values().stream().toList()
 		));

@@ -294,6 +294,10 @@ public class ClientSkillCategoryData {
 		return currentLevel;
 	}
 
+	public boolean hasExperience() {
+		return currentLevel >= 0;
+	}
+
 	public void setCurrentLevel(int currentLevel) {
 		this.currentLevel = currentLevel;
 	}
