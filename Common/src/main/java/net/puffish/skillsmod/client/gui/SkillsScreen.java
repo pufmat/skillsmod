@@ -35,6 +35,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SkillsScreen extends Screen {
 	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
@@ -59,7 +60,7 @@ public class SkillsScreen extends Screen {
 
 	private final List<ClientSkillCategoryData> categories;
 
-	private ClientSkillCategoryData activeCategory;
+	private Optional<ClientSkillCategoryData> optActiveCategory;
 
 	private float minScale = 1f;
 	private float maxScale = 1f;
@@ -70,7 +71,7 @@ public class SkillsScreen extends Screen {
 
 	private boolean dragging;
 
-	private Bounds2i bounds;
+	private Bounds2i bounds = Bounds2i.zero();
 
 	private double dragStartX;
 	private double dragStartY;
@@ -85,7 +86,9 @@ public class SkillsScreen extends Screen {
 	public SkillsScreen(List<ClientSkillCategoryData> categories) {
 		super(ScreenTexts.EMPTY);
 		this.categories = categories;
-		this.activeCategory = categories.get(0);
+		this.optActiveCategory = categories.isEmpty()
+				? Optional.empty()
+				: Optional.of(categories.get(0));
 	}
 
 	@Override
@@ -96,7 +99,9 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void resize() {
-		this.small = this.width < 450;
+		this.small = optActiveCategory
+				.map(activeCategory -> activeCategory.hasExperience() && this.width < 450)
+				.orElse(false);
 
 		if (this.small) {
 			contentPaddingTop = 62;
@@ -113,7 +118,9 @@ public class SkillsScreen extends Screen {
 		this.x = this.width / 2;
 		this.y = this.height / 2;
 
-		this.bounds = activeCategory.getBounds();
+		this.bounds = optActiveCategory
+				.map(ClientSkillCategoryData::getBounds)
+				.orElseGet(Bounds2i::zero);
 		this.bounds.grow(CONTENT_GROW);
 		this.bounds.extend(new Vector2i(contentPaddingLeft - this.x, contentPaddingTop - this.y));
 		this.bounds.extend(new Vector2i(this.width - this.x - contentPaddingRight, this.height - this.y - contentPaddingBottom));
@@ -172,6 +179,14 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		optActiveCategory.ifPresent(activeCategory ->
+				mouseClickedWithCategory(mouseX, mouseY, button, activeCategory)
+		);
+
+		return super.mouseClicked(mouseX, mouseY, button);
+	}
+
+	private void mouseClickedWithCategory(double mouseX, double mouseY, int button, ClientSkillCategoryData activeCategory) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY);
 
@@ -200,12 +215,10 @@ public class SkillsScreen extends Screen {
 
 		for (var i = 0; i < categories.size(); i++) {
 			if (isInsideTab(mouse, i)) {
-				activeCategory = categories.get(i);
+				optActiveCategory = Optional.of(categories.get(i));
 				resize();
 			}
 		}
-
-		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override
@@ -383,17 +396,10 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void drawContent(DrawContext context, double mouseX, double mouseY) {
-		if (client == null) {
-			return;
-		}
-
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.disableBlend();
 		RenderSystem.enableDepthTest();
-
-		var mouse = getMousePos(mouseX, mouseY);
-		var transformedMouse = getTransformedMousePos(mouseX, mouseY);
 
 		context.enableScissor(
 				contentPaddingLeft - 4,
@@ -401,6 +407,22 @@ public class SkillsScreen extends Screen {
 				this.width - contentPaddingRight + 4,
 				this.height - contentPaddingBottom + 4
 		);
+
+		optActiveCategory.ifPresentOrElse(
+				activeCategory -> drawContentWithCategory(context, mouseX, mouseY, activeCategory),
+				() -> drawContentWithoutCategory(context)
+		);
+
+		context.disableScissor();
+	}
+
+	private void drawContentWithCategory(DrawContext context, double mouseX, double mouseY, ClientSkillCategoryData activeCategory) {
+		if (client == null) {
+			return;
+		}
+
+		var mouse = getMousePos(mouseX, mouseY);
+		var transformedMouse = getTransformedMousePos(mouseX, mouseY);
 
 		var matrices = context.getMatrices();
 		matrices.push();
@@ -525,7 +547,27 @@ public class SkillsScreen extends Screen {
 		itemRenderer.draw();
 
 		matrices.pop();
-		context.disableScissor();
+	}
+
+	private void drawContentWithoutCategory(DrawContext context) {
+		context.fill(0, 0, width, height, 0xff000000);
+
+		var tmpX = contentPaddingLeft + (width - contentPaddingLeft - contentPaddingRight) / 2;
+
+		context.drawCenteredTextWithShadow(
+				this.textRenderer,
+				Text.translatable("advancements.sad_label"),
+				tmpX,
+				height - contentPaddingBottom - this.textRenderer.fontHeight,
+				0xffffffff
+		);
+		context.drawCenteredTextWithShadow(
+				this.textRenderer,
+				Text.translatable("advancements.empty"),
+				tmpX,
+				contentPaddingTop + (height - contentPaddingTop - contentPaddingBottom - this.textRenderer.fontHeight) / 2,
+				0xffffffff
+		);
 	}
 
 	private void drawTabs(DrawContext context, double mouseX, double mouseY) {
@@ -546,7 +588,7 @@ public class SkillsScreen extends Screen {
 					FRAME_PADDING + 32 * i,
 					FRAME_PADDING,
 					i > 0 ? 28 : 0,
-					activeCategory == categories.get(i) ? 32 : 0,
+					optActiveCategory.orElseThrow() == categories.get(i) ? 32 : 0,
 					28,
 					32
 			);
@@ -588,8 +630,6 @@ public class SkillsScreen extends Screen {
 		if (client == null) {
 			return;
 		}
-
-		var mouse = getMousePos(mouseX, mouseY);
 
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		RenderSystem.colorMask(true, true, true, true);
@@ -801,6 +841,14 @@ public class SkillsScreen extends Screen {
 				false
 		);
 
+		optActiveCategory.ifPresent(activeCategory ->
+				drawWindowWithCategory(context, mouseX, mouseY, tmpText, tmpX, tmpY, activeCategory)
+		);
+	}
+
+	private void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, Text tmpText, int tmpX, int tmpY, ClientSkillCategoryData activeCategory) {
+		var mouse = getMousePos(mouseX, mouseY);
+
 		var leftX = tmpX + this.textRenderer.getWidth(tmpText);
 
 		tmpX = this.width - FRAME_PADDING - 7;
@@ -850,7 +898,7 @@ public class SkillsScreen extends Screen {
 
 		var rightX = tmpX;
 
-		if (activeCategory.getCurrentLevel() >= 0) {
+		if (activeCategory.hasExperience()) {
 			if (small) {
 				tmpX = this.width - FRAME_PADDING - 8 - 182;
 				tmpY = TABS_HEIGHT + 25;
