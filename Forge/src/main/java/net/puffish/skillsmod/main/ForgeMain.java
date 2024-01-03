@@ -6,6 +6,7 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
@@ -30,10 +31,10 @@ import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
-import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,6 +112,9 @@ public class ForgeMain {
 
 		@Override
 		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+			var deferredRegister = DeferredRegister.create(RegistryKeys.COMMAND_ARGUMENT_TYPE, id.getNamespace());
+			deferredRegister.register(id.getPath(), () -> serializer);
+			deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
 			ArgumentTypes.registerByClass(clazz, serializer);
 		}
 	}

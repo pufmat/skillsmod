@@ -18,7 +18,7 @@ public class ExperienceCommand {
 										.then(CommandManager.argument("amount", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var category = CategoryArgumentType.getCategory(context, "category");
+													var category = CategoryArgumentType.getCategoryOnlyWithExperience(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
 													var experience = category.getExperience().orElseThrow();
@@ -44,7 +44,7 @@ public class ExperienceCommand {
 										.then(CommandManager.argument("amount", IntegerArgumentType.integer())
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
-													var category = CategoryArgumentType.getCategory(context, "category");
+													var category = CategoryArgumentType.getCategoryOnlyWithExperience(context, "category");
 													var amount = IntegerArgumentType.getInteger(context, "amount");
 
 													var experience = category.getExperience().orElseThrow();

@@ -15,11 +15,11 @@ public class SkillsCommand {
 				.then(CommandManager.literal("unlock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("skill", SkillArgumentType.skill())
+										.then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var category = CategoryArgumentType.getCategory(context, "category");
-													var skill = SkillArgumentType.getSkill(context, "skill", category);
+													var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
 													for (var player : players) {
 														skill.unlock(player);
@@ -39,11 +39,11 @@ public class SkillsCommand {
 				.then(CommandManager.literal("lock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("skill", SkillArgumentType.skill())
+										.then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
 												.executes(context -> {
 													var players = EntityArgumentType.getPlayers(context, "players");
 													var category = CategoryArgumentType.getCategory(context, "category");
-													var skill = SkillArgumentType.getSkill(context, "skill", category);
+													var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
 													for (var player : players) {
 														skill.lock(player);
