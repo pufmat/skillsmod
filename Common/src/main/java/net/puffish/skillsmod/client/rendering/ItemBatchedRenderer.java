@@ -7,135 +7,132 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.puffish.skillsmod.access.ImmediateAccess;
+import net.puffish.skillsmod.access.MinecraftClientAccess;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ItemBatchedRenderer {
-	private final Map<ComparableItemStack, BatchedVertexConsumers> batch = new HashMap<>();
+
+	private final Map<ComparableItemStack, List<ItemEmit>> batch = new HashMap<>();
+
+	private record ItemEmit(
+			Matrix4f matrix,
+			int x, int y
+	) { }
 
 	public void emitItem(DrawContext context, ItemStack item, int x, int y) {
-		batch.computeIfAbsent(
+		var emits = batch.computeIfAbsent(
 				new ComparableItemStack(item),
-				comparable -> emitItemBatched(comparable.itemStack)
-		).emit(context.getMatrices().peek().getPositionMatrix(), x, y);
+				key -> new ArrayList<>()
+		);
+
+		emits.add(new ItemEmit(
+				context.getMatrices().peek().getPositionMatrix(),
+				x, y
+		));
 	}
 
 	public void draw() {
-		for (var emit : batch.values()) {
-			emit.draw();
-		}
-		batch.clear();
-	}
+		for (var entry : batch.entrySet()) {
+			var itemStack = entry.getKey().itemStack;
 
-	private BatchedVertexConsumers emitItemBatched(ItemStack item) {
-		var client = MinecraftClient.getInstance();
+			var client = MinecraftClient.getInstance();
 
-		var bakedModel = client.getItemRenderer().getModel(
-				item,
-				client.world,
-				client.player,
-				0
-		);
-
-		var matrices = new MatrixStack();
-		matrices.translate(0, 0, 150);
-		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
-		matrices.scale(16f, 16f, 16f);
-
-		var vertexConsumerProvider = new BatchedVertexConsumerProvider();
-
-		client.getItemRenderer().renderItem(
-				item,
-				ModelTransformationMode.GUI,
-				false,
-				matrices,
-				vertexConsumerProvider,
-				0xF000F0,
-				OverlayTexture.DEFAULT_UV,
-				bakedModel
-		);
-
-		return vertexConsumerProvider.end(bakedModel.isSideLit());
-	}
-
-	private static class BatchedVertexConsumerProvider implements VertexConsumerProvider {
-		private final List<RenderLayer> renderLayers = new ArrayList<>();
-		private final List<BufferBuilder> bufferBuilders = new ArrayList<>();
-
-		@Override
-		public VertexConsumer getBuffer(RenderLayer layer) {
-			var builder = new BufferBuilder(256);
-			builder.begin(layer.getDrawMode(), layer.getVertexFormat());
-			renderLayers.add(layer);
-			bufferBuilders.add(builder);
-			return builder;
-		}
-
-		public BatchedVertexConsumers end(boolean guiDepthLighting) {
-			return new BatchedVertexConsumers(
-					renderLayers,
-					bufferBuilders.stream().map(BufferBuilder::end).toList(),
-					guiDepthLighting
+			var bakedModel = client.getItemRenderer().getModel(
+					itemStack,
+					client.world,
+					client.player,
+					0
 			);
-		}
-	}
 
-	private static class BatchedVertexConsumers {
-		private final List<RenderLayer> renderLayers;
-		private final List<BufferBuilder.BuiltBuffer> builtBuffers;
-		private final boolean guiDepthLighting;
-		private final List<Emit> emits = new ArrayList<>();
+			var matrices = new MatrixStack();
+			matrices.translate(0, 0, 150);
+			matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
+			matrices.scale(16f, 16f, 16f);
 
-		private BatchedVertexConsumers(List<RenderLayer> renderLayers, List<BufferBuilder.BuiltBuffer> bufferBuilders, boolean guiDepthLighting) {
-			this.renderLayers = renderLayers;
-			this.builtBuffers = bufferBuilders;
-			this.guiDepthLighting = guiDepthLighting;
-		}
-
-		public void emit(Matrix4f matrix, int x, int y) {
-			emits.add(new Emit(matrix, x, y));
-		}
-
-		public void draw() {
-			if (guiDepthLighting) {
+			if (bakedModel.isSideLit()) {
 				DiffuseLighting.enableGuiDepthLighting();
 			} else {
 				DiffuseLighting.disableGuiDepthLighting();
 			}
 
-			for (var i = 0; i < builtBuffers.size(); i++) {
-				var builtBuffer = builtBuffers.get(i);
-				var renderLayer = renderLayers.get(i);
+			var clientAccess = (MinecraftClientAccess) client;
+			var immediateAccess = (ImmediateAccess) clientAccess.getBufferBuilders().getEntityVertexConsumers();
+			var vertexConsumerProvider = new BatchedImmediate(
+					immediateAccess.getFallbackBuffer(),
+					immediateAccess.getLayerBuffers(),
+					entry.getValue()
+			);
 
-				renderLayer.startDrawing();
-				var vertexBuffer = builtBuffer.getParameters().format().getBuffer();
-				vertexBuffer.bind();
-				vertexBuffer.upload(builtBuffer);
-				for (var emit : emits) {
-					vertexBuffer.draw(
-							new Matrix4f(RenderSystem.getModelViewMatrix())
-									.mul(emit.matrix())
-									.translate(emit.x(), emit.y(), 0),
-							RenderSystem.getProjectionMatrix(),
-							RenderSystem.getShader()
-					);
-				}
-				renderLayer.endDrawing();
-			}
+			client.getItemRenderer().renderItem(
+					itemStack,
+					ModelTransformationMode.GUI,
+					false,
+					matrices,
+					vertexConsumerProvider,
+					0xF000F0,
+					OverlayTexture.DEFAULT_UV,
+					bakedModel
+			);
 
-			emits.clear();
+			vertexConsumerProvider.draw();
+		}
+		batch.clear();
+	}
+
+	private static class BatchedImmediate extends VertexConsumerProvider.Immediate {
+		private final List<ItemEmit> emits;
+
+		public BatchedImmediate(BufferBuilder fallbackBuffer, Map<RenderLayer, BufferBuilder> layerBuffers, List<ItemEmit> emits) {
+			super(fallbackBuffer, layerBuffers);
+			this.emits = emits;
 		}
 
-		private record Emit(Matrix4f matrix, int x, int y) {
+		public void draw(RenderLayer renderLayer) {
+			var bufferBuilder = layerBuffers.getOrDefault(renderLayer, fallbackBuffer);
+			var sameLayer = Objects.equals(currentLayer, renderLayer.asOptional());
+
+			if (!sameLayer && bufferBuilder == this.fallbackBuffer) {
+				return;
+			}
+			if (!activeConsumers.remove(bufferBuilder)) {
+				return;
+			}
+
+			bufferBuilder.setSorter(RenderSystem.getVertexSorting());
+			var builtBuffer = bufferBuilder.end();
+
+			renderLayer.startDrawing();
+			var vertexBuffer = builtBuffer.getParameters().format().getBuffer();
+			vertexBuffer.bind();
+			vertexBuffer.upload(builtBuffer);
+
+			for (var emit : emits) {
+				vertexBuffer.draw(
+						new Matrix4f(RenderSystem.getModelViewMatrix())
+								.mul(emit.matrix())
+								.translate(emit.x(), emit.y(), 0),
+						RenderSystem.getProjectionMatrix(),
+						RenderSystem.getShader()
+				);
+			}
+
+			renderLayer.endDrawing();
+
+			if (sameLayer) {
+				currentLayer = Optional.empty();
+			}
 		}
 	}
 
