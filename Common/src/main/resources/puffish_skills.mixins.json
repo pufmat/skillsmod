@@ -20,6 +20,10 @@
 		"ServerPlayerEntityMixin",
 		"WorldChunkMixin"
 	],
+	"client": [
+		"ImmediateMixin",
+		"MinecraftClientMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},
