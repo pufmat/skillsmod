@@ -14,14 +14,19 @@ import net.puffish.skillsmod.experience.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.builtin.TakeDamageExperienceSource;
 import net.puffish.skillsmod.server.setup.SkillsAttributes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+	@Unique
+	private int entityDroppedXp = 0;
 
 	@ModifyVariable(method = "damage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
 	private float modifyVariableAtDamage(float damage, DamageSource source) {
@@ -83,7 +88,7 @@ public abstract class LivingEntityMixin {
 		return reduction;
 	}
 
-	@Inject(method = "drop", at = @At("HEAD"))
+	@Inject(method = "drop", at = @At("TAIL"))
 	private void injectAtDrop(DamageSource source, CallbackInfo ci) {
 		if (source.getAttacker() instanceof ServerPlayerEntity player) {
 			var entity = ((LivingEntity) (Object) this);
@@ -98,13 +103,19 @@ public abstract class LivingEntityMixin {
 							.map(worldChunk::antiFarmingAddAndCheck)
 							.orElse(true)
 					) {
-						return entityExperienceSource.getValue(player, entity, weapon, source);
+						return entityExperienceSource.getValue(player, entity, weapon, source, entityDroppedXp);
 					}
 				}
 				return 0;
 			});
-
 		}
+
+	}
+
+	@ModifyArg(method = "dropXp", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ExperienceOrbEntity;spawn(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/Vec3d;I)V"), index = 2)
+	private int injectAtDropXp(int droppedXp) {
+		entityDroppedXp = droppedXp;
+		return droppedXp;
 	}
 
 	@Inject(method = "modifyAppliedDamage", at = @At("TAIL"), cancellable = true)
