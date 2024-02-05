@@ -10,7 +10,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,9 +154,9 @@ public class ConnectionBatchedRenderer {
 			float x2, float y2,
 			float x3, float y3
 	) {
-		var v1 = matrix.transform(new Vector4f(x1, y1, 0f, 1f));
-		var v2 = matrix.transform(new Vector4f(x2, y2, 0f, 1f));
-		var v3 = matrix.transform(new Vector4f(x3, y3, 0f, 1f));
+		var v1 = matrix.transformPosition(new Vector3f(x1, y1, 0f));
+		var v2 = matrix.transformPosition(new Vector3f(x2, y2, 0f));
+		var v3 = matrix.transformPosition(new Vector3f(x3, y3, 0f));
 
 		emits.add(new TriangleEmit(
 				v1.x, v1.y, v1.z,
