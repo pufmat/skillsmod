@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.client.rendering;
 
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -7,6 +8,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class ItemBatchedRenderer {
 
@@ -44,6 +47,11 @@ public class ItemBatchedRenderer {
 	}
 
 	public void draw() {
+		var matrices = new MatrixStack();
+		matrices.translate(0, 0, 150);
+		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
+		matrices.scale(16f, 16f, 16f);
+
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
 
@@ -55,11 +63,6 @@ public class ItemBatchedRenderer {
 					client.player,
 					0
 			);
-
-			var matrices = new MatrixStack();
-			matrices.translate(0, 0, 150);
-			matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
-			matrices.scale(16f, 16f, 16f);
 
 			if (bakedModel.isSideLit()) {
 				DiffuseLighting.enableGuiDepthLighting();
@@ -91,29 +94,66 @@ public class ItemBatchedRenderer {
 		batch.clear();
 	}
 
-	private static class BatchedImmediate extends VertexConsumerProvider.Immediate {
+	private static class BatchedImmediate implements VertexConsumerProvider {
 		private final List<ItemEmit> emits;
+		private final BufferBuilder fallbackBuffer;
+		private final Map<RenderLayer, BufferBuilder> layerBuffers;
+		private Optional<RenderLayer> optCurrentLayer = Optional.empty();
+		private final Set<BufferBuilder> activeConsumers = Sets.newHashSet();
 
-		public BatchedImmediate(BufferBuilder fallbackBuffer, Map<RenderLayer, BufferBuilder> layerBuffers, List<ItemEmit> emits) {
-			super(fallbackBuffer, layerBuffers);
+		private BatchedImmediate(BufferBuilder fallbackBuffer, Map<RenderLayer, BufferBuilder> layerBuffers, List<ItemEmit> emits) {
+			this.fallbackBuffer = fallbackBuffer;
+			this.layerBuffers = layerBuffers;
 			this.emits = emits;
 		}
 
-		public void draw(RenderLayer renderLayer) {
-			var bufferBuilder = layerBuffers.getOrDefault(renderLayer, fallbackBuffer);
-			var sameLayer = Objects.equals(currentLayer, renderLayer.asOptional());
+		@Override
+		public VertexConsumer getBuffer(RenderLayer layer) {
+			var optLayer = layer.asOptional();
+			var bufferBuilder = this.getBufferInternal(layer);
+			if (!Objects.equals(this.optCurrentLayer, optLayer) || !layer.areVerticesNotShared()) {
+				this.optCurrentLayer.ifPresent(currentLayer -> {
+					if (!this.layerBuffers.containsKey(currentLayer)) {
+						this.draw(currentLayer);
+					}
+				});
+				if (this.activeConsumers.add(bufferBuilder)) {
+					bufferBuilder.begin(layer.getDrawMode(), layer.getVertexFormat());
+				}
+				this.optCurrentLayer = optLayer;
+			}
+			return bufferBuilder;
+		}
 
-			if (!sameLayer && bufferBuilder == this.fallbackBuffer) {
+		private BufferBuilder getBufferInternal(RenderLayer layer) {
+			return this.layerBuffers.getOrDefault(layer, this.fallbackBuffer);
+		}
+
+		public void draw() {
+			this.optCurrentLayer.ifPresent(layer -> {
+				if (this.getBuffer(layer) == this.fallbackBuffer) {
+					this.draw(layer);
+				}
+			});
+			for (var layer : this.layerBuffers.keySet()) {
+				this.draw(layer);
+			}
+		}
+
+		private void draw(RenderLayer layer) {
+			var bufferBuilder = this.getBufferInternal(layer);
+			var same = Objects.equals(this.optCurrentLayer, layer.asOptional());
+			if (!same && bufferBuilder == this.fallbackBuffer) {
 				return;
 			}
-			if (!activeConsumers.remove(bufferBuilder)) {
+			if (!this.activeConsumers.remove(bufferBuilder)) {
 				return;
 			}
 
 			bufferBuilder.setSorter(RenderSystem.getVertexSorting());
 			var builtBuffer = bufferBuilder.end();
 
-			renderLayer.startDrawing();
+			layer.startDrawing();
 			var vertexBuffer = builtBuffer.getParameters().format().getBuffer();
 			vertexBuffer.bind();
 			vertexBuffer.upload(builtBuffer);
@@ -127,11 +167,10 @@ public class ItemBatchedRenderer {
 						RenderSystem.getShader()
 				);
 			}
+			layer.endDrawing();
 
-			renderLayer.endDrawing();
-
-			if (sameLayer) {
-				currentLayer = Optional.empty();
+			if (same) {
+				this.optCurrentLayer = Optional.empty();
 			}
 		}
 	}

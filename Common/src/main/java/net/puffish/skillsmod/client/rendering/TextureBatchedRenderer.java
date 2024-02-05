@@ -10,7 +10,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
-import org.joml.Vector4f;
+import org.joml.Vector3f;
 import org.joml.Vector4fc;
 
 import java.util.ArrayList;
@@ -349,10 +349,10 @@ public class TextureBatchedRenderer {
 
 		var matrix = context.getMatrices().peek().getPositionMatrix();
 
-		var v1 = matrix.transform(new Vector4f(minX, minY, 0f, 1f));
-		var v2 = matrix.transform(new Vector4f(minX, maxY, 0f, 1f));
-		var v3 = matrix.transform(new Vector4f(maxX, maxY, 0f, 1f));
-		var v4 = matrix.transform(new Vector4f(maxX, minY, 0f, 1f));
+		var v1 = matrix.transformPosition(new Vector3f(minX, minY, 0f));
+		var v2 = matrix.transformPosition(new Vector3f(minX, maxY, 0f));
+		var v3 = matrix.transformPosition(new Vector3f(maxX, maxY, 0f));
+		var v4 = matrix.transformPosition(new Vector3f(maxX, minY, 0f));
 
 		emits.add(new TextureEmit(
 				v1.x, v1.y, v1.z,
