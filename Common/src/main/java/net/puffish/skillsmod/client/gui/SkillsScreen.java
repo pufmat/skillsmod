@@ -34,8 +34,10 @@ import org.joml.Vector4fc;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class SkillsScreen extends Screen {
 	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
@@ -58,9 +60,11 @@ public class SkillsScreen extends Screen {
 	private static final Vector4fc COLOR_WHITE = new Vector4f(1f, 1f, 1f, 1f);
 	private static final Vector4fc COLOR_GRAY = new Vector4f(0.25f, 0.25f, 0.25f, 1f);
 
-	private final List<ClientSkillCategoryData> categories;
+	private final Map<Identifier, ClientSkillCategoryData> categories;
 
-	private Optional<ClientSkillCategoryData> optActiveCategory;
+	private Optional<ClientSkillCategoryData> optActiveCategory = Optional.empty();
+
+	private int activeCategoryIndex = 0;
 
 	private float minScale = 1f;
 	private float maxScale = 1f;
@@ -69,33 +73,26 @@ public class SkillsScreen extends Screen {
 	private int x = 0;
 	private int y = 0;
 
-	private boolean dragging;
+	private double dragStartX = 0;
+	private double dragStartY = 0;
+	private boolean dragging = false;
 
 	private Bounds2i bounds = Bounds2i.zero();
+	private boolean small = false;
 
-	private double dragStartX;
-	private double dragStartY;
+	private int contentPaddingTop = 0;
+	private int contentPaddingLeft = 0;
+	private int contentPaddingRight = 0;
+	private int contentPaddingBottom = 0;
 
-	private boolean small;
-
-	private int contentPaddingTop;
-	private int contentPaddingLeft;
-	private int contentPaddingRight;
-	private int contentPaddingBottom;
-
-	public SkillsScreen(List<ClientSkillCategoryData> categories) {
+	public SkillsScreen(Map<Identifier, ClientSkillCategoryData> categories) {
 		super(ScreenTexts.EMPTY);
 		this.categories = categories;
-		this.optActiveCategory = categories.isEmpty()
-				? Optional.empty()
-				: Optional.of(categories.get(0));
 	}
 
 	@Override
 	protected void init() {
 		super.init();
-
-		resize();
 	}
 
 	private void resize() {
@@ -177,6 +174,23 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= x1 && mouse.y >= y1 && mouse.x < x2 && mouse.y < y2;
 	}
 
+	private void syncCategory() {
+		var opt = categories.values().stream().skip(activeCategoryIndex).findFirst();
+		if (!Objects.equals(opt, optActiveCategory)) {
+			optActiveCategory = opt;
+			resize();
+		}
+	}
+
+	private void forEachCategory(BiConsumer<Integer, ClientSkillCategoryData> consumer) {
+		var it = categories.values().iterator();
+		var i = 0;
+		while (it.hasNext()) {
+			consumer.accept(i, it.next());
+			i++;
+		}
+	}
+
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		optActiveCategory.ifPresent(activeCategory ->
@@ -213,12 +227,12 @@ public class SkillsScreen extends Screen {
 			dragging = false;
 		}
 
-		for (var i = 0; i < categories.size(); i++) {
+		forEachCategory((i, category) -> {
 			if (isInsideTab(mouse, i)) {
-				optActiveCategory = Optional.of(categories.get(i));
-				resize();
+				activeCategoryIndex = i;
+				syncCategory();
 			}
-		}
+		});
 	}
 
 	@Override
@@ -232,6 +246,8 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.syncCategory();
+
 		this.renderBackground(context);
 		this.drawContent(context, mouseX, mouseY);
 		this.drawWindow(context, mouseX, mouseY);
@@ -582,26 +598,22 @@ public class SkillsScreen extends Screen {
 		RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 		RenderSystem.disableDepthTest();
 
-		for (var i = 0; i < categories.size(); i++) {
-			context.drawTexture(
-					TABS_TEXTURE,
-					FRAME_PADDING + 32 * i,
-					FRAME_PADDING,
-					i > 0 ? 28 : 0,
-					optActiveCategory.orElseThrow() == categories.get(i) ? 32 : 0,
-					28,
-					32
-			);
-		}
+		forEachCategory((i, category) -> context.drawTexture(
+				TABS_TEXTURE,
+				FRAME_PADDING + 32 * i,
+				FRAME_PADDING,
+				i > 0 ? 28 : 0,
+				optActiveCategory.orElse(null) == category ? 32 : 0,
+				28,
+				32
+		));
 
 		var mouse = getMousePos(mouseX, mouseY);
 
 		var textureRenderer = new TextureBatchedRenderer();
 		var itemBatch = new ItemBatchedRenderer();
 
-		for (var i = 0; i < categories.size(); i++) {
-			var category = categories.get(i);
-
+		forEachCategory((i, category) -> {
 			drawIcon(
 					context,
 					textureRenderer,
@@ -620,7 +632,7 @@ public class SkillsScreen extends Screen {
 				}
 				setTooltip(lines);
 			}
-		}
+		});
 
 		textureRenderer.draw();
 		itemBatch.draw();
