@@ -3,13 +3,11 @@ package net.puffish.skillsmod.main;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.UnknownCustomPayload;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.network.ChannelBuilder;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
@@ -24,24 +22,25 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class ForgeClientMain {
+public class NeoForgeClientMain {
 	private final List<ClientEventListener> clientListeners = new ArrayList<>();
 	private final List<KeyBindingWithHandler> keyBindings = new ArrayList<>();
 
-	public ForgeClientMain() {
-		var forgeEventBus = MinecraftForge.EVENT_BUS;
-		forgeEventBus.addListener(this::onPlayerLoggedIn);
-		forgeEventBus.addListener(this::onInputKey);
-
+	public NeoForgeClientMain(Map<Identifier, NeoForgeMain.PacketBuilder> packetBuilders) {
 		SkillsClientMod.setup(
-				new ClientRegistrarImpl(),
+				new ClientRegistrarImpl(packetBuilders),
 				new ClientEventReceiverImpl(),
 				new KeyBindingReceiverImpl(),
 				new ClientPacketSenderImpl()
 		);
+
+		var neoForgeEventBus = NeoForge.EVENT_BUS;
+		neoForgeEventBus.addListener(this::onPlayerLoggedIn);
+		neoForgeEventBus.addListener(this::onInputKey);
 	}
 
 	private void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
@@ -58,31 +57,30 @@ public class ForgeClientMain {
 		}
 	}
 
-	private record KeyBindingWithHandler(KeyBinding keyBinding, KeyBindingHandler handler) {
-	}
+	private record KeyBindingWithHandler(KeyBinding keyBinding, KeyBindingHandler handler) { }
 
 	private static class ClientRegistrarImpl implements ClientRegistrar {
-		@Override
-		public <T extends InPacket> void registerInPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var channel = ChannelBuilder.named(identifier)
-					.serverAcceptedVersions((status, version) -> true)
-					.clientAcceptedVersions((status, version) -> true)
-					.eventNetworkChannel();
-			channel.addListener(networkEvent -> {
-				var context = networkEvent.getSource();
-				if (context.getPacketHandled()) {
-					return;
-				}
-				if (context.isClientSide()) {
-					var packet = reader.apply(networkEvent.getPayload());
-					context.enqueueWork(() -> handler.handle(packet));
-					context.setPacketHandled(true);
-				}
-			});
+
+		private final Map<Identifier, NeoForgeMain.PacketBuilder> packetBuilders;
+
+		private ClientRegistrarImpl(Map<Identifier, NeoForgeMain.PacketBuilder> packetBuilders) {
+			this.packetBuilders = packetBuilders;
 		}
 
 		@Override
-		public void registerOutPacket(Identifier id) { }
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
+			packetBuilders.computeIfAbsent(id, key -> new NeoForgeMain.PacketBuilder())
+					.setClientHandler((payload, context) -> {
+						var packet = reader.apply(payload.data());
+						context.workHandler().execute(() -> handler.handle(packet));
+					});
+		}
+
+		@Override
+		public void registerOutPacket(Identifier id) {
+			packetBuilders.computeIfAbsent(id, key -> new NeoForgeMain.PacketBuilder())
+					.fallbackServerHandler();
+		}
 	}
 
 	private class ClientEventReceiverImpl implements ClientEventReceiver {
@@ -105,9 +103,9 @@ public class ForgeClientMain {
 		@Override
 		public void send(OutPacket packet) {
 			Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler())
-					.sendPacket(new CustomPayloadC2SPacket(
-							new UnknownCustomPayload(packet.getIdentifier(), packet.getBuf())
-					));
+					.sendPacket(new CustomPayloadC2SPacket(new NeoForgeMain.SharedCustomPayload(
+							packet.getIdentifier(), packet.getBuf()
+					)));
 		}
 	}
 }

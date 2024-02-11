@@ -56,7 +56,7 @@ public class ScoreboardReward implements Reward {
 		var scoreboard = player.getScoreboard();
 		var objective = scoreboard.getNullableObjective(objectiveName);
 		if (objective != null) {
-			scoreboard.getPlayerScore(player.getEntityName(), objective).setScore(context.getCount());
+			scoreboard.getOrCreateScore(player, objective).setScore(context.getCount());
 		}
 	}
 

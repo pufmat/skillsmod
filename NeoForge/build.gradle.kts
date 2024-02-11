@@ -3,8 +3,12 @@ plugins {
 	id("checkstyle")
 }
 
+repositories {
+	maven(url = "https://maven.neoforged.net/releases/")
+}
+
 base.archivesName.set("${project.properties["archives_base_name"]}")
-version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-forge"
+version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-neoforge"
 group = "${project.properties["maven_group"]}"
 
 evaluationDependsOn(":Common")
@@ -18,14 +22,13 @@ dependencies {
 	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
 	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
-	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
+	neoForge("net.neoforged:neoforge:${project.properties["neoforge_version"]}")
 
 	implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {
-	mixin.defaultRefmapName.set("puffish_skills-refmap.json")
-	forge.mixinConfig("puffish_skills.mixins.json")
+	mixin.useLegacyMixinAp = false
 }
 
 tasks.test {

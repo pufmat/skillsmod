@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.api.utils;
 
+import com.mojang.serialization.JsonOps;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
@@ -62,7 +63,7 @@ public class JsonParseUtils {
 
 	public static Result<StatePredicate, Failure> parseStatePredicate(JsonElementWrapper element) {
 		try {
-			return Result.success(StatePredicate.fromJson(element.getJson()).orElseThrow());
+			return Result.success(StatePredicate.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createFailure("Expected valid state predicate"));
 		}
@@ -186,7 +187,7 @@ public class JsonParseUtils {
 
 	public static Result<AdvancementFrame, Failure> parseFrame(JsonElementWrapper element) {
 		try {
-			return element.getAsString().andThen(name -> Result.success(AdvancementFrame.forName(name)));
+			return Result.success(AdvancementFrame.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createFailure("Expected valid frame"));
 		}
@@ -194,7 +195,7 @@ public class JsonParseUtils {
 
 	public static Result<Text, Failure> parseText(JsonElementWrapper element) {
 		try {
-			return Result.success(Text.Serializer.fromJson(element.getJson()));
+			return Result.success(Text.Serialization.fromJsonTree(element.getJson()));
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createFailure("Expected valid text"));
 		}

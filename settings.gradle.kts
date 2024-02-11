@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         maven(url = "https://maven.fabricmc.net/")
-        maven(url = "https://maven.minecraftforge.net/")
+        maven(url = "https://maven.neoforged.net/releases/")
         maven(url = "https://maven.architectury.dev/")
         mavenCentral()
         gradlePluginPortal()
@@ -14,4 +14,4 @@ plugins {
 
 rootProject.name = "Pufferfish's Skills"
 
-include("Common", "Fabric", "Forge")
+include("Common", "Fabric", "NeoForge")

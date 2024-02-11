@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
-	@Inject(method = "onCraft", at = @At("HEAD"))
-	private void injectAtOnCraft(World world, PlayerEntity player, int amount, CallbackInfo ci) {
+	@Inject(method = "onCraftByPlayer", at = @At("HEAD"))
+	private void injectAtOnCraftByPlayer(World world, PlayerEntity player, int amount, CallbackInfo ci) {
 		if (player instanceof ServerPlayerEntity serverPlayer) {
 			SkillsAPI.visitExperienceSources(serverPlayer, experienceSource -> {
 				if (experienceSource instanceof CraftItemExperienceSource craftItemExperienceSource) {

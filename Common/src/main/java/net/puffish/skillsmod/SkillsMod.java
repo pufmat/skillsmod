@@ -156,7 +156,7 @@ public class SkillsMod {
 	}
 
 	public static MutableText createTranslatable(String type, String path, Object... args) {
-		return Text.translatable(Util.createTranslationKey(type, createIdentifier(path)), args);
+		return Text.stringifiedTranslatable(Util.createTranslationKey(type, createIdentifier(path)), args);
 	}
 
 	public static Identifier createAttribute(String type, String name) {

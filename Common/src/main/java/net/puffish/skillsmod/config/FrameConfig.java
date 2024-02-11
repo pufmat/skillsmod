@@ -21,7 +21,7 @@ public class FrameConfig {
 
 	public static FrameConfig fromAdvancementFrame(AdvancementFrame frame) {
 		var data = new JsonObject();
-		data.addProperty("frame", frame.getId());
+		data.addProperty("frame", frame.asString());
 		return new FrameConfig(
 				"advancement",
 				data

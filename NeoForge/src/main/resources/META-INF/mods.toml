@@ -1,6 +1,9 @@
 modLoader="javafml"
-loaderVersion="[46,)"
+loaderVersion="[2,)"
 license="All Rights Reserved"
+
+[[mixins]]
+config = "puffish_skills.mixins.json"
 
 [[mods]]
 modId="puffish_skills"
@@ -10,15 +13,15 @@ authors="Pufferfish"
 description="Adds a fully configurable skill system to the game."
 
 [[dependencies.puffish_skills]]
-modId="forge"
-mandatory=true
-versionRange="[46,)"
+modId="neoforge"
+type="required"
+versionRange="[20.4,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.puffish_skills]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20,1.21)"
+type="required"
+versionRange="[1.20.4,1.21)"
 ordering="NONE"
 side="BOTH"

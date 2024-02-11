@@ -26,6 +26,5 @@
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"refmap": "puffish_skills-refmap.json"
+	}
 }

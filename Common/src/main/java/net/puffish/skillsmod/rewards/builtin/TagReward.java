@@ -56,7 +56,7 @@ public class TagReward implements Reward {
 		if (context.getCount() > 0) {
 			player.addCommandTag(tag);
 		} else {
-			player.removeScoreboardTag(tag);
+			player.removeCommandTag(tag);
 		}
 	}
 
