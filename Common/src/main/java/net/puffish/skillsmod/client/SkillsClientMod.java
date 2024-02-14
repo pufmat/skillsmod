@@ -12,7 +12,6 @@ import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.gui.SimpleToast;
 import net.puffish.skillsmod.client.gui.SkillsScreen;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
-import net.puffish.skillsmod.client.network.ClientPacketReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
@@ -20,6 +19,7 @@ import net.puffish.skillsmod.client.network.packets.in.InvalidConfigInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowCategoryInPacket;
 import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
+import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.Packets;
 import org.lwjgl.glfw.GLFW;
 
@@ -50,50 +50,52 @@ public class SkillsClientMod {
 	}
 
 	public static void setup(
+			ClientRegistrar registrar,
 			ClientEventReceiver eventReceiver,
 			KeyBindingReceiver keyBindingReceiver,
-			ClientPacketSender packetSender,
-			ClientPacketReceiver packetReceiver
+			ClientPacketSender packetSender
 	) {
 		instance = new SkillsClientMod(packetSender);
 
 		keyBindingReceiver.registerKeyBinding(OPEN_KEY_BINDING, instance::onOpenKeyPress);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.SHOW_CATEGORY,
 				ShowCategoryInPacket::read,
 				instance::onShowCategory
 		);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.HIDE_CATEGORY,
 				HideCategoryInPacket::read,
 				instance::onHideCategory
 		);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.SKILL_UPDATE,
 				SkillUpdateInPacket::read,
 				instance::onSkillUpdatePacket
 		);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.POINTS_UPDATE,
 				PointsUpdateInPacket::read,
 				instance::onPointsUpdatePacket
 		);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.EXPERIENCE_UPDATE,
 				ExperienceUpdateInPacket::read,
 				instance::onExperienceUpdatePacket
 		);
 
-		packetReceiver.registerPacket(
+		registrar.registerInPacket(
 				Packets.INVALID_CONFIG,
 				InvalidConfigInPacket::read,
 				instance::onInvalidConfig
 		);
+
+		registrar.registerOutPacket(Packets.SKILL_CLICK);
 
 		eventReceiver.registerListener(instance.new EventListener());
 	}

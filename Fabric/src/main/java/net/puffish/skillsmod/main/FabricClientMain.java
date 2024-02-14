@@ -14,8 +14,8 @@ import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.keybinding.KeyBindingHandler;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketHandler;
-import net.puffish.skillsmod.client.network.ClientPacketReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
+import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 
@@ -26,11 +26,27 @@ public class FabricClientMain implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		SkillsClientMod.setup(
+				new ClientRegistrarImpl(),
 				new ClientEventReceiverImpl(),
 				new KeyBindingReceiverImpl(),
-				new ClientPacketSenderImpl(),
-				new ClientPacketReceiverImpl()
+				new ClientPacketSenderImpl()
 		);
+	}
+
+	private static class ClientRegistrarImpl implements ClientRegistrar {
+		@Override
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
+			ClientPlayNetworking.registerGlobalReceiver(
+					id,
+					(client, handler2, buf, responseSender) -> {
+						var packet = reader.apply(buf);
+						client.execute(() -> handler.handle(packet));
+					}
+			);
+		}
+
+		@Override
+		public void registerOutPacket(Identifier id) { }
 	}
 
 	private static class ClientEventReceiverImpl implements ClientEventReceiver {
@@ -60,19 +76,6 @@ public class FabricClientMain implements ClientModInitializer {
 		@Override
 		public void send(OutPacket packet) {
 			ClientPlayNetworking.send(packet.getIdentifier(), packet.getBuf());
-		}
-	}
-
-	private static class ClientPacketReceiverImpl implements ClientPacketReceiver {
-		@Override
-		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			ClientPlayNetworking.registerGlobalReceiver(
-					identifier,
-					(client, handler2, buf, responseSender) -> {
-						var packet = reader.apply(buf);
-						client.execute(() -> handler.handle(packet));
-					}
-			);
 		}
 	}
 }

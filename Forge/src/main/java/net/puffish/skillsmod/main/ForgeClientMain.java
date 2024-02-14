@@ -16,8 +16,8 @@ import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.keybinding.KeyBindingHandler;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketHandler;
-import net.puffish.skillsmod.client.network.ClientPacketReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
+import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import org.apache.commons.lang3.ArrayUtils;
@@ -37,10 +37,10 @@ public class ForgeClientMain {
 		forgeEventBus.addListener(this::onInputKey);
 
 		SkillsClientMod.setup(
+				new ClientRegistrarImpl(),
 				new ClientEventReceiverImpl(),
 				new KeyBindingReceiverImpl(),
-				new ClientPacketSenderImpl(),
-				new ClientPacketReceiverImpl()
+				new ClientPacketSenderImpl()
 		);
 	}
 
@@ -59,6 +59,30 @@ public class ForgeClientMain {
 	}
 
 	private record KeyBindingWithHandler(KeyBinding keyBinding, KeyBindingHandler handler) {
+	}
+
+	private static class ClientRegistrarImpl implements ClientRegistrar {
+		@Override
+		public <T extends InPacket> void registerInPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
+			var channel = ChannelBuilder.named(identifier)
+					.serverAcceptedVersions((status, version) -> true)
+					.clientAcceptedVersions((status, version) -> true)
+					.eventNetworkChannel();
+			channel.addListener(networkEvent -> {
+				var context = networkEvent.getSource();
+				if (context.getPacketHandled()) {
+					return;
+				}
+				if (context.isClientSide()) {
+					var packet = reader.apply(networkEvent.getPayload());
+					context.enqueueWork(() -> handler.handle(packet));
+					context.setPacketHandled(true);
+				}
+			});
+		}
+
+		@Override
+		public void registerOutPacket(Identifier id) { }
 	}
 
 	private class ClientEventReceiverImpl implements ClientEventReceiver {
@@ -82,32 +106,8 @@ public class ForgeClientMain {
 		public void send(OutPacket packet) {
 			Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler())
 					.sendPacket(new CustomPayloadC2SPacket(
-							new UnknownCustomPayload(
-									packet.getIdentifier(),
-									packet.getBuf()
-							)
+							new UnknownCustomPayload(packet.getIdentifier(), packet.getBuf())
 					));
-		}
-	}
-
-	private static class ClientPacketReceiverImpl implements ClientPacketReceiver {
-		@Override
-		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var channel = ChannelBuilder.named(identifier)
-					.serverAcceptedVersions((status, version) -> true)
-					.clientAcceptedVersions((status, version) -> true)
-					.eventNetworkChannel();
-			channel.addListener(networkEvent -> {
-				var context = networkEvent.getSource();
-				if (context.getPacketHandled()) {
-					return;
-				}
-				if (context.isClientSide()) {
-					var packet = reader.apply(networkEvent.getPayload());
-					context.enqueueWork(() -> handler.handle(packet));
-					context.setPacketHandled(true);
-				}
-			});
 		}
 	}
 }

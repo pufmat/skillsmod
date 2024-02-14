@@ -21,21 +21,20 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
-import net.puffish.skillsmod.server.network.ServerPacketReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.function.Function;
 
 public class FabricMain implements ModInitializer {
+
 	@Override
 	public void onInitialize() {
 		SkillsMod.setup(
 				FabricLoader.getInstance().getConfigDir(),
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl(),
-				new ServerPacketReceiverImpl()
+				new ServerPacketSenderImpl()
 		);
 
 	}
@@ -55,6 +54,22 @@ public class FabricMain implements ModInitializer {
 		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
 			ArgumentTypeRegistry.registerArgumentType(id, clazz, serializer);
 		}
+
+		@Override
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
+			ServerPlayNetworking.registerGlobalReceiver(
+					id,
+					(server, player, handler2, buf, responseSender) -> {
+						var packet = reader.apply(buf);
+						server.execute(
+								() -> handler.handle(player, packet)
+						);
+					}
+			);
+		}
+
+		@Override
+		public void registerOutPacket(Identifier id) { }
 	}
 
 	private static class ServerEventReceiverImpl implements ServerEventReceiver {
@@ -80,21 +95,6 @@ public class FabricMain implements ModInitializer {
 		@Override
 		public void send(ServerPlayerEntity player, OutPacket packet) {
 			ServerPlayNetworking.send(player, packet.getIdentifier(), packet.getBuf());
-		}
-	}
-
-	private static class ServerPacketReceiverImpl implements ServerPacketReceiver {
-		@Override
-		public <T extends InPacket> void registerPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			ServerPlayNetworking.registerGlobalReceiver(
-					identifier,
-					(server, player, handler2, buf, responseSender) -> {
-						var packet = reader.apply(buf);
-						server.execute(
-								() -> handler.handle(player, packet)
-						);
-					}
-			);
 		}
 	}
 }
