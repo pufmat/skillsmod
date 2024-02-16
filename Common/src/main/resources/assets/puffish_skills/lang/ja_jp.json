@@ -1,0 +1,64 @@
+{
+	"text.puffish_skills.skills": "スキル",
+	"text.puffish_skills.points_left": "残りポイント: ",
+
+	"tooltip.puffish_skills.current_level": "現在のレベル: %s",
+	"tooltip.puffish_skills.experience_progress": "経験値: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "次のレベルまで: %s",
+	"tooltip.puffish_skills.earned_points": "これまで獲得したポイント: %s",
+	"tooltip.puffish_skills.spent_points": "使用済みポイント: %s",
+
+	"category.puffish_skills.skills": "スキル",
+	"key.puffish_skills.open": "スキルツリーの開閉",
+
+	"attribute.puffish_skills.player.stamina": "体力",
+	"attribute.puffish_skills.player.melee_damage": "近接攻撃ダメージ",
+	"attribute.puffish_skills.player.ranged_damage": "範囲ダメージ",
+	"attribute.puffish_skills.player.fortune": "幸運",
+	"attribute.puffish_skills.player.healing": "治癒",
+	"attribute.puffish_skills.player.jump": "ジャンプ",
+	"attribute.puffish_skills.player.resistance": "耐性",
+	"attribute.puffish_skills.player.mining_speed": "採掘速度",
+	"attribute.puffish_skills.player.sprinting_speed": "ダッシュ速度",
+	"attribute.puffish_skills.player.knockback": "ノックバック",
+
+	"chat.puffish_skills.new_point": "スキルポイントを新たに獲得しました。%sを押すとスキルツリーを確認できます。",
+
+	"toast.puffish_skills.invalid_config.description": "構成設定が不正ですので、ゲームログを確認してください。",
+
+	"gamerule.puffish_skills:announceNewPoints": "スキルポイント獲得の通知",
+
+	"command.puffish_skills.no_such_category": "%sというIDのカテゴリはありません",
+	"command.puffish_skills.no_such_skill": "%sというIDのスキルはありません",
+	"command.puffish_skills.no_experience": "このカテゴリでは経験値を有効にすることができません",
+
+	"command.puffish_skills.category.lock.success.single": "%2$sの%1$sカテゴリをロックしました",
+	"command.puffish_skills.category.lock.success.multiple": "%2$s人のプレーヤーの%1$sカテゴリをロックしました",
+
+	"command.puffish_skills.category.unlock.success.single": "%2$sの%1$sカテゴリをアンロックしました",
+	"command.puffish_skills.category.unlock.success.multiple": "%2$s人のプレーヤーの%1$sカテゴリをアンロックしました",
+
+	"command.puffish_skills.category.erase.success.single": "%2$sの%1$sカテゴリを内容をクリアしました",
+	"command.puffish_skills.category.erase.success.multiple": "%2$s人のプレーヤーの%1$sカテゴリを内容をクリアしました",
+
+	"command.puffish_skills.experience.add.success.single": "%3$sに%2$sカテゴリで経験値を %1$s 追加しました",
+	"command.puffish_skills.experience.add.success.multiple": "%3$s人のプレーヤーに%2$sカテゴリで経験値を %1$s 追加しました",
+
+	"command.puffish_skills.experience.set.success.single": "%3$sの%2$sカテゴリでの経験値を %1$s に設定しました",
+	"command.puffish_skills.experience.set.success.multiple": "%3$s人のプレーヤーの%2$sカテゴリでの経験値を %1$s に設定しました",
+
+	"command.puffish_skills.points.add.success.single": "%3$sに%2$sカテゴリでポイントを %1$s 追加しました",
+	"command.puffish_skills.points.add.success.multiple": "%3$s人のプレーヤーに%2$sカテゴリでポイントを %1$s 追加しました",
+
+	"command.puffish_skills.points.set.success.single": "%3$sの%2$sカテゴリでのポイントを %1$s に設定しました",
+	"command.puffish_skills.points.set.success.multiple": "%3$s人のプレーヤーの%2$sカテゴリでのポイントを %1$s に設定しました",
+
+	"command.puffish_skills.skills.unlock.success.single": "%3$sの%2$sカテゴリでのスキル %1$s をアンロックしました",
+	"command.puffish_skills.skills.unlock.success.multiple": "%3$s人のプレーヤーの%2$sカテゴリでのスキル %1$s をアンロックしました",
+
+	"command.puffish_skills.skills.lock.success.single": "%3$sの%2$sカテゴリでのスキル %1$s をロックしました",
+	"command.puffish_skills.skills.lock.success.multiple": "%3$s人のプレーヤーの%2$sカテゴリでのスキル %1$s をロックしました",
+
+	"command.puffish_skills.skills.reset.success.single": "%2$sの%1$sカテゴリでのスキルをすべてリセットしました",
+	"command.puffish_skills.skills.reset.success.multiple": "%2$s人のプレーヤーの%1$sカテゴリでのスキルをすべてリセットしました"
+}
