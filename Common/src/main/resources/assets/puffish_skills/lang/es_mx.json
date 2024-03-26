@@ -1,0 +1,64 @@
+{
+	"text.puffish_skills.skills": "Habilidades",
+	"text.puffish_skills.points_left": "Puntos restantes: ",
+
+	"tooltip.puffish_skills.current_level": "Nivel actual: %s",
+	"tooltip.puffish_skills.experience_progress": "Experiencia: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "Para el próximo nivel: %s",
+	"tooltip.puffish_skills.earned_points": "Puntos ganados: %s",
+	"tooltip.puffish_skills.spent_points": "Puntos gastados: %s",
+
+	"category.puffish_skills.skills": "Habilidades",
+	"key.puffish_skills.open": "Abrir Árbol de Habilidades",
+
+	"attribute.puffish_skills.player.stamina": "Energía",
+	"attribute.puffish_skills.player.melee_damage": "Daño cuerpo a cuerpo",
+	"attribute.puffish_skills.player.ranged_damage": "Daño a distancia",
+	"attribute.puffish_skills.player.fortune": "Fortuna",
+	"attribute.puffish_skills.player.healing": "Curación",
+	"attribute.puffish_skills.player.jump": "Salto",
+	"attribute.puffish_skills.player.resistance": "Resistencia",
+	"attribute.puffish_skills.player.mining_speed": "Velocidad de minería",
+	"attribute.puffish_skills.player.sprinting_speed": "Velocidad de carrera",
+	"attribute.puffish_skills.player.knockback": "Rechazo",
+
+	"chat.puffish_skills.new_point": "Tienes un nuevo punto de habilidad. Presiona %s para abrir tu árbol de habilidades.",
+
+	"toast.puffish_skills.invalid_config.description": "Configuración inválida, revisa los registros del juego.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Anunciar nuevos puntos de habilidad",
+
+	"command.puffish_skills.no_such_category": "No hay una categoría con el ID %s",
+	"command.puffish_skills.no_such_skill": "No hay una habilidad con el ID %s",
+	"command.puffish_skills.no_experience": "La experiencia no está habilitada para esta categoría",
+
+	"command.puffish_skills.category.lock.success.single": "Categoría %s bloqueada para %s",
+	"command.puffish_skills.category.lock.success.multiple": "Categoría %s bloqueada para %s jugadores",
+
+	"command.puffish_skills.category.unlock.success.single": "Categoría %s desbloqueada para %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Categoría %s desbloqueada para %s jugadores",
+
+	"command.puffish_skills.category.erase.success.single": "Categoría %s borrada para %s",
+	"command.puffish_skills.category.erase.success.multiple": "Categoría %s borrada para %s jugadores",
+
+	"command.puffish_skills.experience.add.success.single": "Se añadieron %s de experiencia a la categoría %s para %s",
+	"command.puffish_skills.experience.add.success.multiple": "Se añadieron %s de experiencia a la categoría %s para %s jugadores",
+
+	"command.puffish_skills.experience.set.success.single": "Se estableció %s de experiencia en la categoría %s para %s",
+	"command.puffish_skills.experience.set.success.multiple": "Se estableció %s de experiencia en la categoría %s para %s jugadores",
+
+	"command.puffish_skills.points.add.success.single": "Se añadieron %s puntos a la categoría %s para %s",
+	"command.puffish_skills.points.add.success.multiple": "Se añadieron %s puntos a la categoría %s para %s jugadores",
+
+	"command.puffish_skills.points.set.success.single": "Se establecieron %s puntos en la categoría %s para %s",
+	"command.puffish_skills.points.set.success.multiple": "Se establecieron %s puntos en la categoría %s para %s jugadores",
+
+	"command.puffish_skills.skills.unlock.success.single": "Se desbloqueó la habilidad %s en la categoría %s para %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Se desbloqueó la habilidad %s en la categoría %s para %s jugadores",
+
+	"command.puffish_skills.skills.lock.success.single": "Se bloqueó la habilidad %s en la categoría %s para %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Se bloqueó la habilidad %s en la categoría %s para %s jugadores",
+
+	"command.puffish_skills.skills.reset.success.single": "Se restablecieron todas las habilidades en la categoría %s para %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Se restablecieron todas las habilidades en la categoría %s para %s jugadores"
+}
