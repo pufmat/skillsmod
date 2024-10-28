@@ -8,6 +8,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.JsonPathFailure;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -121,6 +122,8 @@ public class JsonObjectImpl implements JsonObject {
 		if (problems.isEmpty()) {
 			return result;
 		} else {
+			problems = new ArrayList<>(problems);
+			result.ifFailure(problems::add);
 			return Result.failure(Problem.combine(problems));
 		}
 	}

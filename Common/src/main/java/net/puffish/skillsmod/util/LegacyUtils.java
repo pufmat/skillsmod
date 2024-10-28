@@ -7,6 +7,7 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.Config;
 import net.puffish.skillsmod.impl.json.JsonObjectTrackingImpl;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,6 +44,8 @@ public class LegacyUtils {
 			if (!problems.isEmpty()) {
 				if (LegacyUtils.isRemoved(3, context)) {
 					// support for unused fields is removed, report problem
+					problems = new ArrayList<>(problems);
+					result.ifFailure(problems::add);
 					return Result.failure(Problem.combine(problems));
 				} else {
 					// unused fields are still accepted, report warning
