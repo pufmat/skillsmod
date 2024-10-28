@@ -238,20 +238,22 @@ public class SkillsMod {
 				.andThen(modConfig -> loadCategories(reader, modConfig, SkillsAPI.MOD_ID, context)
 						.ifSuccess(map -> {
 							var cumulatedMap = new LinkedHashMap<>(map);
-							showSuccess("Configuration", modConfig.getShowWarnings(), context);
+							showSuccess("Mod configuration", modConfig.getShowWarnings(), context);
 
-							loadPackConfig(server, cumulatedMap, modConfig.getShowWarnings());
-
-							categories.set(Optional.of(cumulatedMap), () -> {
-								for (var category : cumulatedMap.values()) {
-									category.dispose(new DisposeContext(server));
-								}
-							});
+							if (loadPackConfig(server, cumulatedMap, modConfig.getShowWarnings())) {
+								categories.set(Optional.of(cumulatedMap), () -> {
+									for (var category : cumulatedMap.values()) {
+										category.dispose(new DisposeContext(server));
+									}
+								});
+							} else {
+								categories.set(Optional.empty(), () -> { });
+							}
 						})
 				)
 				.ifFailure(problem -> {
 					categories.set(Optional.empty(), () -> { });
-					showFailure("Configuration", problem);
+					showFailure("Mod configuration", problem);
 				});
 	}
 
@@ -261,13 +263,15 @@ public class SkillsMod {
 		return reader.readCategories(namespace, config.getCategories(), versionedContext);
 	}
 
-	private void loadPackConfig(MinecraftServer server, Map<Identifier, CategoryConfig> cumulatedMap, boolean showWarning) {
+	private boolean loadPackConfig(MinecraftServer server, Map<Identifier, CategoryConfig> cumulatedMap, boolean showWarning) {
 		var resourceManager = server.getResourceManager();
 
 		var resources = resourceManager.findResources(
 				SkillsAPI.MOD_ID,
 				id -> id.getPath().endsWith("config.json")
 		);
+
+		var allSuccess = true;
 
 		for (var entry : resources.entrySet()) {
 			var resource = entry.getValue();
@@ -276,7 +280,7 @@ public class SkillsMod {
 			var reader = new PackConfigReader(resourceManager, namespace);
 			var context = new ConfigContextImpl(server);
 
-			reader.readResource(id, resource)
+			if (reader.readResource(id, resource)
 					.andThen(rootElement -> PackConfig.parse(namespace, rootElement, context))
 					.andThen(packConfig -> loadCategories(reader, packConfig, namespace, context))
 					.andThen(map -> {
@@ -298,8 +302,14 @@ public class SkillsMod {
 					.ifSuccess(map -> {
 						cumulatedMap.putAll(map);
 						showSuccess("Data pack `" + namespace + "`", showWarning, context);
-					});
+					})
+					.getSuccess()
+					.isEmpty()) {
+				allSuccess = false;
+			}
 		}
+
+		return allSuccess;
 	}
 
 	private void showSuccess(String name, boolean showWarnings, ConfigContextImpl context) {
