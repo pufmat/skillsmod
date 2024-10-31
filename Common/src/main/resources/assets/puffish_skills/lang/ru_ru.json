@@ -1,25 +1,26 @@
 {
 	"text.puffish_skills.skills": "Навыки",
-	"text.puffish_skills.points_left": "Очков осталось: ",
+	"text.puffish_skills.points_left": "Осталось очков: ",
 
 	"tooltip.puffish_skills.current_level": "Текущий уровень: %s",
 	"tooltip.puffish_skills.experience_progress": "Опыт: %s/%s (%s%%)",
-	"tooltip.puffish_skills.to_next_level": "До след. уровня: %s",
-	"tooltip.puffish_skills.earned_points": "Заработанные очки: %s",
-	"tooltip.puffish_skills.spent_points": "Потраченные очки: %s",
+	"tooltip.puffish_skills.to_next_level": "До следующего уровня: %s",
+	"tooltip.puffish_skills.earned_points": "Заработано очков: %s",
+	"tooltip.puffish_skills.spent_points": "Потрачено очков: %s",
 
 	"category.puffish_skills.skills": "Навыки",
-	"key.puffish_skills.open": "Открыть дерево улучшений",
+	"key.puffish_skills.open": "Открыть дерево навыков",
 
-	"chat.puffish_skills.new_point": "Вы получили новое очко навыка. Нажмите %s чтобы открыть Дерево навыков.",
+	"chat.puffish_skills.new_point": "Вы получили новое очко навыка. Нажатие %s — открыть Дерево навыков.",
 
-	"toast.puffish_skills.invalid_config.description": "Недопустимая конфигурация, проверьте логи игры.",
-	"toast.puffish_skills.missing_config.description": "Вы не добавили ни одного дерева навыков, проверьте файлы конфигурации.",
+	"toast.puffish_skills.invalid_config.description": "Недопустимая конфигурация, проверьте журнал игры.",
+	"toast.puffish_skills.missing_config.description": "Дерево навыков не предоставлено. Убедитесь, что добавили.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Объявлять о новых очках навыков",
+	"gamerule.puffish_skills:announceNewPoints": "Известить о новых очках навыков",
 
 	"command.puffish_skills.no_such_category": "Нет категории с идентификатором %s",
 	"command.puffish_skills.no_such_skill": "Нет навыка с идентификатором %s",
+	"command.puffish_skills.no_experience": "Для этой категории опыт не доступен.",
 
 	"command.puffish_skills.category.lock.success.single": "Заблокирована категория %s для %s",
 	"command.puffish_skills.category.lock.success.multiple": "Заблокирована категория %s для %s игроков",
@@ -45,6 +46,15 @@
 	"command.puffish_skills.skills.unlock.success.single": "Разблокирован %s навык в категории %s для %s",
 	"command.puffish_skills.skills.unlock.success.multiple": "Разблокирован %s навык в категории %s для %s игроков",
 
+	"command.puffish_skills.skills.lock.success.single": "Заблокирован %s навык в категории %s для %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Заблокирован %s навык в категории %s для %s игроков.",
+
 	"command.puffish_skills.skills.reset.success.single": "Сброшены все навыки в категории %s для %s",
-	"command.puffish_skills.skills.reset.success.multiple": "Сброшены все навыки в категории %s для %s игроков"
+	"command.puffish_skills.skills.reset.success.multiple": "Сброшены все навыки в категории %s для %s игроков",
+
+	"command.puffish_skills.category.open.success.single": "Открыт экран категории %s для %s",
+	"command.puffish_skills.category.open.success.multiple": "Открыт экран категории %s для %s игроков",
+
+	"command.puffish_skills.open.success.single": "Открыт экран навыков для %s",
+	"command.puffish_skills.open.success.multiple": "Открыт экран навыкой для %s игроков."
 }
