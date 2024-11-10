@@ -134,6 +134,9 @@ public class SkillDefinitionConfig {
 				)
 				.orElse(0);
 
+		// this field is generated be the editor, access it to avoid unused field error
+		rootObject.get("metadata");
+
 		if (problems.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
