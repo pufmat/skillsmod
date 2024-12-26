@@ -15,7 +15,13 @@ import java.util.Locale;
 
 public class CommandUtils {
 
-	public static int sendSuccess(CommandContext<ServerCommandSource> context, Collection<ServerPlayerEntity> players, String command, Object... args) {
+	public static void sendSuccess(CommandContext<ServerCommandSource> context, ServerPlayerEntity player, String command, Object... args) {
+		context.getSource().sendFeedback(() -> SkillsMod.createTranslatable(
+				"command", command + ".success", ObjectArrays.concat(args, player.getDisplayName())
+		), true);
+	}
+
+	public static void sendSuccess(CommandContext<ServerCommandSource> context, Collection<ServerPlayerEntity> players, String command, Object... args) {
 		if (players.size() == 1) {
 			context.getSource().sendFeedback(() -> SkillsMod.createTranslatable(
 					"command", command + ".success.single", ObjectArrays.concat(args, players.iterator().next().getDisplayName())
@@ -25,7 +31,6 @@ public class CommandUtils {
 					"command", command + ".success.multiple", ObjectArrays.concat(args, players.size())
 			), true);
 		}
-		return players.size();
 	}
 
 	public static void suggestIdentifiers(Iterable<Identifier> ids, SuggestionsBuilder builder) {
