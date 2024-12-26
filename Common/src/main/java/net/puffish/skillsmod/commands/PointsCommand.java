@@ -24,13 +24,14 @@ public class PointsCommand {
 													for (var player : players) {
 														category.addExtraPoints(player, count);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"points.add",
 															count,
 															category.getId()
 													);
+													return players.size();
 												})
 										)
 								)
@@ -48,15 +49,36 @@ public class PointsCommand {
 													for (var player : players) {
 														category.setExtraPoints(player, count);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"points.set",
 															count,
 															category.getId()
 													);
+													return players.size();
 												})
 										)
+								)
+						)
+				)
+				.then(CommandManager.literal("get")
+						.then(CommandManager.argument("player", EntityArgumentType.player())
+								.then(CommandManager.argument("category", CategoryArgumentType.category())
+										.executes(context -> {
+											var player = EntityArgumentType.getPlayer(context, "player");
+											var category = CategoryArgumentType.getCategory(context, "category");
+
+											var count = category.getExtraPoints(player);
+											CommandUtils.sendSuccess(
+													context,
+													player,
+													"points.get",
+													count,
+													category.getId()
+											);
+											return count;
+										})
 								)
 						)
 				);

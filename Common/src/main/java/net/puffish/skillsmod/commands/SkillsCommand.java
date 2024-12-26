@@ -24,13 +24,14 @@ public class SkillsCommand {
 													for (var player : players) {
 														skill.unlock(player);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"skills.unlock",
 															category.getId(),
 															skill.getId()
 													);
+													return players.size();
 												})
 										)
 								)
@@ -48,13 +49,14 @@ public class SkillsCommand {
 													for (var player : players) {
 														skill.lock(player);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"skills.lock",
 															category.getId(),
 															skill.getId()
 													);
+													return players.size();
 												})
 										)
 								)
@@ -70,12 +72,13 @@ public class SkillsCommand {
 											for (var player : players) {
 												category.resetSkills(player);
 											}
-											return CommandUtils.sendSuccess(
+											CommandUtils.sendSuccess(
 													context,
 													players,
 													"skills.reset",
 													category.getId()
 											);
+											return players.size();
 										})
 								)
 						)

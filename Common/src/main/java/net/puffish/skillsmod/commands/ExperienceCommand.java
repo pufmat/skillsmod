@@ -26,13 +26,14 @@ public class ExperienceCommand {
 													for (var player : players) {
 														experience.addTotal(player, amount);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"experience.add",
 															amount,
 															category.getId()
 													);
+													return players.size();
 												})
 										)
 								)
@@ -52,15 +53,38 @@ public class ExperienceCommand {
 													for (var player : players) {
 														experience.setTotal(player, amount);
 													}
-													return CommandUtils.sendSuccess(
+													CommandUtils.sendSuccess(
 															context,
 															players,
 															"experience.set",
 															amount,
 															category.getId()
 													);
+													return players.size();
 												})
 										)
+								)
+						)
+				)
+				.then(CommandManager.literal("get")
+						.then(CommandManager.argument("player", EntityArgumentType.player())
+								.then(CommandManager.argument("category", CategoryArgumentType.categoryOnlyWithExperience())
+										.executes(context -> {
+											var player = EntityArgumentType.getPlayer(context, "player");
+											var category = CategoryArgumentType.getCategoryOnlyWithExperience(context, "category");
+
+											var experience = category.getExperience().orElseThrow();
+
+											var amount = experience.getTotal(player);
+											CommandUtils.sendSuccess(
+													context,
+													player,
+													"experience.get",
+													amount,
+													category.getId()
+											);
+											return amount;
+										})
 								)
 						)
 				);
