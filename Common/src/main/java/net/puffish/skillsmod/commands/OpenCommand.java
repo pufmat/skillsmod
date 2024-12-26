@@ -18,11 +18,12 @@ public class OpenCommand {
 							for (var player : players) {
 								SkillsAPI.openScreen(player);
 							}
-							return CommandUtils.sendSuccess(
+							CommandUtils.sendSuccess(
 									context,
 									players,
 									"open"
 							);
+							return players.size();
 						})
 				);
 	}
