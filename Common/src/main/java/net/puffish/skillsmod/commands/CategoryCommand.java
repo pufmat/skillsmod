@@ -21,12 +21,13 @@ public class CategoryCommand {
 											for (var player : players) {
 												category.lock(player);
 											}
-											return CommandUtils.sendSuccess(
+											CommandUtils.sendSuccess(
 													context,
 													players,
 													"category.lock",
 													category.getId()
 											);
+											return players.size();
 										})
 								)
 						)
@@ -41,12 +42,13 @@ public class CategoryCommand {
 											for (var player : players) {
 												category.unlock(player);
 											}
-											return CommandUtils.sendSuccess(
+											CommandUtils.sendSuccess(
 													context,
 													players,
 													"category.unlock",
 													category.getId()
 											);
+											return players.size();
 										})
 								)
 						)
@@ -61,12 +63,13 @@ public class CategoryCommand {
 											for (var player : players) {
 												category.erase(player);
 											}
-											return CommandUtils.sendSuccess(
+											CommandUtils.sendSuccess(
 													context,
 													players,
 													"category.erase",
 													category.getId()
 											);
+											return players.size();
 										})
 								)
 						)
@@ -81,12 +84,13 @@ public class CategoryCommand {
 											for (var player : players) {
 												category.openScreen(player);
 											}
-											return CommandUtils.sendSuccess(
+											CommandUtils.sendSuccess(
 													context,
 													players,
 													"category.open",
 													category.getId()
 											);
+											return players.size();
 										})
 								)
 						)
