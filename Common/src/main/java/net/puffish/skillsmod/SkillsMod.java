@@ -352,7 +352,7 @@ public class SkillsMod {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			categoryData.lockSkill(skillId);
 			packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
-			applyRewards(player, category, categoryData);
+			syncRewards(player, category, categoryData);
 			syncPoints(player, category, categoryData);
 		}));
 	}
@@ -360,7 +360,7 @@ public class SkillsMod {
 	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 			categoryData.resetSkills();
-			applyRewards(player, category, categoryData);
+			syncRewards(player, category, categoryData);
 			syncCategory(player, category, categoryData);
 		}));
 	}
@@ -575,10 +575,10 @@ public class SkillsMod {
 		));
 	}
 
-	public void refreshReward(ServerPlayerEntity player, Predicate<SkillRewardConfig> reward) {
+	public void updateRewards(ServerPlayerEntity player, Predicate<SkillRewardConfig> reward) {
 		for (var category : getAllCategories()) {
 			getCategoryDataIfUnlocked(player, category)
-					.ifPresent(categoryData -> categoryData.refreshReward(category, player, reward));
+					.ifPresent(categoryData -> categoryData.updateRewards(category, player, reward));
 		}
 	}
 
@@ -601,8 +601,8 @@ public class SkillsMod {
 		}
 	}
 
-	private void applyRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		categoryData.applyRewards(category, player);
+	private void syncRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
+		categoryData.updateRewards(category, player, reward -> true);
 	}
 
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
@@ -637,7 +637,7 @@ public class SkillsMod {
 	}
 
 	private void syncCategory(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		applyRewards(player, category, categoryData);
+		syncRewards(player, category, categoryData);
 		showCategory(player, category, categoryData);
 	}
 
@@ -719,6 +719,13 @@ public class SkillsMod {
 		@Override
 		public void onPlayerJoin(ServerPlayerEntity player) {
 			syncAllCategories(player);
+		}
+
+		@Override
+		public void onPlayerLeave(ServerPlayerEntity player) {
+			for (var category : getAllCategories()) {
+				resetRewards(player, category);
+			}
 		}
 
 		@Override

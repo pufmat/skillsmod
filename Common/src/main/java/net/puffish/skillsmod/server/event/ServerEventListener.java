@@ -12,5 +12,7 @@ public interface ServerEventListener {
 
 	void onPlayerJoin(ServerPlayerEntity player);
 
+	void onPlayerLeave(ServerPlayerEntity player);
+
 	void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher);
 }
