@@ -64,6 +64,7 @@ public class NeoForgeMain {
 
 		var neoForgeEventBus = NeoForge.EVENT_BUS;
 		neoForgeEventBus.addListener(this::onPlayerLoggedIn);
+		neoForgeEventBus.addListener(this::onPlayerLoggedOut);
 		neoForgeEventBus.addListener(this::onServerStarting);
 		neoForgeEventBus.addListener(this::onOnDatapackSyncEvent);
 		neoForgeEventBus.addListener(this::onRegisterCommands);
@@ -73,6 +74,14 @@ public class NeoForgeMain {
 		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
 			for (var listener : serverListeners) {
 				listener.onPlayerJoin(serverPlayer);
+			}
+		}
+	}
+
+	private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+			for (var listener : serverListeners) {
+				listener.onPlayerLeave(serverPlayer);
 			}
 		}
 	}

@@ -98,6 +98,10 @@ public class FabricMain implements ModInitializer {
 					(handler, sender, server) -> eventListener.onPlayerJoin(handler.player)
 			);
 
+			ServerPlayConnectionEvents.DISCONNECT.register(
+					(handler, server) -> eventListener.onPlayerLeave(handler.player)
+			);
+
 			CommandRegistrationCallback.EVENT.register(
 					(dispatcher, registryAccess, environment) -> eventListener.onCommandsRegister(dispatcher)
 			);
