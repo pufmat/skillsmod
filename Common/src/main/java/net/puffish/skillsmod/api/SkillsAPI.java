@@ -21,6 +21,14 @@ public final class SkillsAPI {
 	
 	public static final String MOD_ID = "puffish_skills";
 
+	public static void registerSkillUnlockEvent(Events.SkillUnlock event) {
+		SkillsMod.SKILL_UNLOCK.register(event);
+	}
+
+	public static void registerSkillLockEvent(Events.SkillLock event) {
+		SkillsMod.SKILL_LOCK.register(event);
+	}
+
 	public static void registerReward(Identifier key, RewardFactory factory) {
 		RewardRegistry.register(key, factory);
 	}
