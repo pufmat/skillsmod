@@ -145,7 +145,7 @@ public class CategoryData {
 		).orElse(0L).intValue();
 	}
 
-	public void refreshReward(CategoryConfig category, ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {
+	public void updateRewards(CategoryConfig category, ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {
 		for (var definition : category.getDefinitions().getAll()) {
 			var count = countUnlocked(category, definition.getId());
 
@@ -153,16 +153,6 @@ public class CategoryData {
 				if (predicate.test(reward)) {
 					reward.getInstance().update(new RewardUpdateContextImpl(player, count, false));
 				}
-			}
-		}
-	}
-
-	public void applyRewards(CategoryConfig category, ServerPlayerEntity player) {
-		for (var definition : category.getDefinitions().getAll()) {
-			var count = countUnlocked(category, definition.getId());
-
-			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(new RewardUpdateContextImpl(player, count, false));
 			}
 		}
 	}
