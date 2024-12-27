@@ -14,6 +14,7 @@ import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.experience.source.ExperienceSource;
+import net.puffish.skillsmod.api.Events;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
@@ -57,6 +58,7 @@ import net.puffish.skillsmod.server.setup.SkillsArgumentTypes;
 import net.puffish.skillsmod.server.setup.SkillsGameRules;
 import net.puffish.skillsmod.util.ChangeListener;
 import net.puffish.skillsmod.util.DisposeContext;
+import net.puffish.skillsmod.util.Event;
 import net.puffish.skillsmod.util.PathUtils;
 import net.puffish.skillsmod.util.PrefixedLogger;
 import net.puffish.skillsmod.util.ToastType;
@@ -79,6 +81,13 @@ import java.util.stream.Collectors;
 public class SkillsMod {
 	public static final int MIN_CONFIG_VERSION = 1;
 	public static final int MAX_CONFIG_VERSION = 3;
+
+	public static final Event<Events.SkillUnlock> SKILL_UNLOCK = Event.create(
+			c -> (categoryId, skillId) -> c.forEach(e -> e.onSkillUnlock(categoryId, skillId))
+	);
+	public static final Event<Events.SkillLock> SKILL_LOCK = Event.create(
+			c -> (categoryId, skillId) -> c.forEach(e -> e.onSkillLock(categoryId, skillId))
+	);
 
 	private static SkillsMod instance;
 
@@ -299,6 +308,7 @@ public class SkillsMod {
 							packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
 							syncPoints(player, category, categoryData);
 						});
+						SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
 						updateSkillRewards(player, category, categoryData, skill, true);
 					}
 				});
@@ -315,6 +325,7 @@ public class SkillsMod {
 						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
 						syncPoints(player, category, categoryData);
 					});
+					SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
 					updateSkillRewards(player, category, categoryData, skill, false);
 				});
 			});
