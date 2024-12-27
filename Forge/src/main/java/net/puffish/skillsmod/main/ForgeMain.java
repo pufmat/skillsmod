@@ -49,6 +49,7 @@ public class ForgeMain {
 
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		forgeEventBus.addListener(this::onPlayerLoggedIn);
+		forgeEventBus.addListener(this::onPlayerLoggedOut);
 		forgeEventBus.addListener(this::onServerStarting);
 		forgeEventBus.addListener(this::onOnDatapackSyncEvent);
 		forgeEventBus.addListener(this::onRegisterCommands);
@@ -65,6 +66,14 @@ public class ForgeMain {
 		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
 			for (var listener : serverListeners) {
 				listener.onPlayerJoin(serverPlayer);
+			}
+		}
+	}
+
+	private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+			for (var listener : serverListeners) {
+				listener.onPlayerLeave(serverPlayer);
 			}
 		}
 	}
