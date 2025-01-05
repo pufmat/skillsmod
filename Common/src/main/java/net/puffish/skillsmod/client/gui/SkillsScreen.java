@@ -700,6 +700,8 @@ public class SkillsScreen extends Screen {
 				32
 		));
 
+		context.draw();
+
 		var mouse = getMousePos(mouseX, mouseY);
 
 		var textureRenderer = new TextureBatchedRenderer();
