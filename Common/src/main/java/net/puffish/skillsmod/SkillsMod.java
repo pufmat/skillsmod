@@ -26,6 +26,7 @@ import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ScoreboardOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.StatValueOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.SwitchOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.TagCondition;
@@ -181,6 +182,7 @@ public class SkillsMod {
 		ItemStackCondition.register();
 		ScoreboardOperation.register();
 		StatCondition.register();
+		StatValueOperation.register();
 		StatTypeCondition.register();
 		SwitchOperation.register();
 		TagCondition.register();
