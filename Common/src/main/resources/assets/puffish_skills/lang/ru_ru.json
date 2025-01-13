@@ -13,13 +13,13 @@
 
 	"chat.puffish_skills.new_point": "Вы получили новое очко навыка. Нажатие %s — открыть Дерево навыков.",
 
-	"toast.puffish_skills.invalid_config.description": "Недопустимая конфигурация, проверьте журнал игры.",
+	"toast.puffish_skills.invalid_config.description": "Недопустимая конфигурация, проверьте журналы игры.",
 	"toast.puffish_skills.missing_config.description": "Дерево навыков не предоставлено. Убедитесь, что добавили.",
 
 	"gamerule.puffish_skills:announceNewPoints": "Известить о новых очках навыков",
 
-	"command.puffish_skills.no_such_category": "Нет категории с идентификатором %s",
-	"command.puffish_skills.no_such_skill": "Нет навыка с идентификатором %s",
+	"command.puffish_skills.no_such_category": "Категория с идентификатором %s отсутствует.",
+	"command.puffish_skills.no_such_skill": "Навык с идентификатором %s отсутствует.",
 	"command.puffish_skills.no_experience": "Для этой категории опыт не доступен.",
 
 	"command.puffish_skills.category.lock.success.single": "Заблокирована категория %s для %s",
@@ -37,11 +37,15 @@
 	"command.puffish_skills.experience.set.success.single": "Установлено %s опыта в категории %s для %s",
 	"command.puffish_skills.experience.set.success.multiple": "Установлено %s опыта в категории %s для %s игроков",
 
+    "command.puffish_skills.experience.get.success": "У %3$s есть %1$s опыта в категории %2$s",
+
 	"command.puffish_skills.points.add.success.single": "Добавлено %s очков к категории %s для %s",
 	"command.puffish_skills.points.add.success.multiple": "Добавлено %s очков к категории %s для %s игроков",
 
 	"command.puffish_skills.points.set.success.single": "Установлено %s очков в категории %s для %s",
 	"command.puffish_skills.points.set.success.multiple": "Установлено %s очков в категории %s для %s игроков",
+
+	"command.puffish_skills.points.get.success": "У %3$s есть %1$s очков в категории %2$s",
 
 	"command.puffish_skills.skills.unlock.success.single": "Разблокирован %s навык в категории %s для %s",
 	"command.puffish_skills.skills.unlock.success.multiple": "Разблокирован %s навык в категории %s для %s игроков",
