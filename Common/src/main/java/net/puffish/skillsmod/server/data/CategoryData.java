@@ -4,18 +4,14 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
-import net.puffish.skillsmod.config.skill.SkillRewardConfig;
-import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class CategoryData {
 	private final Set<String> unlockedSkills;
@@ -112,26 +108,13 @@ public class CategoryData {
 				&& getSpentPoints(category) >= definition.getRequiredSpentPoints();
 	}
 
-	public boolean tryUnlockSkill(CategoryConfig category, ServerPlayerEntity player, String skillId, boolean force) {
-		return category.getSkills().getById(skillId).flatMap(skill -> {
-			var definitionId = skill.getDefinitionId();
+	public boolean canUnlockSkill(CategoryConfig category, SkillConfig skill) {
+		var definitionId = skill.getDefinitionId();
 
-			return category.getDefinitions().getById(definitionId).map(definition -> {
-				if (force || getSkillState(category, skill, definition) == Skill.State.AFFORDABLE) {
-					unlockSkill(skillId);
-
-					var count = countUnlocked(category, definitionId);
-
-					for (var reward : definition.getRewards()) {
-						reward.getInstance().update(new RewardUpdateContextImpl(player, count, true));
-					}
-
-					return true;
-				}
-
-				return false;
-			});
-		}).orElse(false);
+		return category.getDefinitions()
+				.getById(definitionId)
+				.map(definition -> getSkillState(category, skill, definition) == Skill.State.AFFORDABLE)
+				.orElse(false);
 	}
 
 	public int countUnlocked(CategoryConfig category, String definitionId) {
@@ -143,18 +126,6 @@ public class CategoryData {
 						.filter(skill -> getSkillState(category, skill, definition) == Skill.State.UNLOCKED)
 						.count()
 		).orElse(0L).intValue();
-	}
-
-	public void updateRewards(CategoryConfig category, ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {
-		for (var definition : category.getDefinitions().getAll()) {
-			var count = countUnlocked(category, definition.getId());
-
-			for (var reward : definition.getRewards()) {
-				if (predicate.test(reward)) {
-					reward.getInstance().update(new RewardUpdateContextImpl(player, count, false));
-				}
-			}
-		}
 	}
 
 	public void unlockSkill(String id) {
