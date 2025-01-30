@@ -3,8 +3,10 @@ package net.puffish.skillsmod.impl.calculation;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.Variables;
+import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
-import net.puffish.skillsmod.api.calculation.prototype.PrototypeView;
+import net.puffish.skillsmod.api.calculation.prototype.PrototypeOperation;
+import net.puffish.skillsmod.api.calculation.prototype.Prototype;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -63,54 +65,55 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 		return new CombineVariables<>(Arrays.asList(variables));
 	}
 
-	public static <T> Result<VariablesImpl<T, Double>, Problem> parse(
+	public static <T> Result<Variables<T, Double>, Problem> parse(
 			JsonElement rootElement,
-			PrototypeView<T> prototypeView,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
-		return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, prototypeView, context));
+		return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, prototype, context));
 	}
 
-	public static <T> Result<VariablesImpl<T, Double>, Problem> parse(
+	public static <T> Result<Variables<T, Double>, Problem> parse(
 			JsonObject rootObject,
-			PrototypeView<T> prototypeView,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
-		return rootObject.getAsMap((key, value) -> parseVariable(value, prototypeView, context))
+		return rootObject.getAsMap((key, value) -> parseVariable(value, prototype, context))
 				.mapFailure(problems -> Problem.combine(problems.values()))
 				.mapSuccess(VariablesImpl::new);
 	}
 
 	public static <T> Result<Function<T, Double>, Problem> parseVariable(
 			JsonElement rootElement,
-			PrototypeView<T> prototypeView,
+			Prototype<T> prototype,
 			ConfigContext context) {
 		return rootElement.getAsObject().andThen(
-				LegacyUtils.wrapNoUnused(rootObject -> parseVariable(rootObject, prototypeView, context), context)
+				LegacyUtils.wrapNoUnused(rootObject -> parseVariable(rootObject, prototype, context), context)
 		);
 	}
 
 	public static <T> Result<Function<T, Double>, Problem> parseVariable(
 			JsonObject rootObject,
-			PrototypeView<T> prototypeView,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
 		var problems = new ArrayList<Problem>();
 
-		var optPrototypeView = rootObject.getArray("operations")
+		var optOperation = rootObject.getArray("operations")
 				.mapSuccess(array -> {
-					var view = Optional.of(prototypeView);
+					Optional<PrototypeOperation<T, ?>> o = Optional.of(PrototypeOperation.createIdentity(prototype));
 					for (var element : (Iterable<JsonElement>) array.stream()::iterator) {
-						view = view.flatMap(
+						o = o.flatMap(
 								v -> parseOperation(element, v, context)
 										.ifFailure(problems::add)
 										.getSuccess()
 						);
 					}
-					return view;
+					return o;
 				})
 				.orElse(LegacyUtils.wrapDeprecated(
-						() -> parseOperation(rootObject, prototypeView, context, "legacy_").mapSuccess(Optional::of),
+						() -> parseOperation(rootObject, PrototypeOperation.createIdentity(prototype), context, "legacy_")
+								.mapSuccess(Optional::of),
 						3,
 						context
 				))
@@ -135,7 +138,7 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 
 		if (problems.isEmpty()) {
 			return buildVariable(
-					optPrototypeView.orElseThrow(),
+					optOperation.orElseThrow(),
 					optFallback,
 					rootObject.getPath().getObject("operations")
 			).orElse(problem -> {
@@ -152,19 +155,19 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 		}
 	}
 
-	public static <T> Result<PrototypeView<T>, Problem> parseOperation(
+	public static <T> Result<PrototypeOperation<T, ?>, Problem> parseOperation(
 			JsonElement rootElement,
-			PrototypeView<T> prototypeView,
+			PrototypeOperation<T, ?> operation,
 			ConfigContext context
 	) {
 		return rootElement.getAsObject().andThen(
-				LegacyUtils.wrapNoUnused(rootObject -> parseOperation(rootObject, prototypeView, context, ""), context)
+				LegacyUtils.wrapNoUnused(rootObject -> parseOperation(rootObject, operation, context, ""), context)
 		);
 	}
 
-	public static <T> Result<PrototypeView<T>, Problem> parseOperation(
+	public static <T> Result<PrototypeOperation<T, ?>, Problem> parseOperation(
 			JsonObject rootObject,
-			PrototypeView<T> prototypeView,
+			PrototypeOperation<T, ?> operation,
 			ConfigContext context,
 			String prefix
 	) {
@@ -179,7 +182,7 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 
 		if (problems.isEmpty()) {
 			return buildOperation(
-					prototypeView,
+					operation,
 					optType.orElseThrow().withPrefixedPath(prefix),
 					rootObject.getPath().getObject("type"),
 					maybeDataElement,
@@ -190,17 +193,17 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 		}
 	}
 
-	private static <T> Result<PrototypeView<T>, Problem> buildOperation(
-			PrototypeView<T> prototypeView,
+	private static <T> Result<PrototypeOperation<T, ?>, Problem> buildOperation(
+			PrototypeOperation<T, ?> operation,
 			Identifier type,
 			JsonPath typePath,
 			Result<JsonElement, Problem> maybeDataElement,
 			ConfigContext context
 	) {
 		if (type.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
-			type = new Identifier(prototypeView.getId().getNamespace(), type.getPath());
+			type = new Identifier(operation.getReturnPrototype().getId().getNamespace(), type.getPath());
 		}
-		var factory = prototypeView.getView(type, new OperationConfigContextImpl(context, maybeDataElement));
+		var factory = operation.andThen(type, new OperationConfigContextImpl(context, maybeDataElement));
 		if (factory.isEmpty()) {
 			return Result.failure(typePath.createProblem("Expected a valid operation type"));
 		}
@@ -208,13 +211,14 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 	}
 
 	private static <T> Result<Function<T, Double>, Problem> buildVariable(
-			PrototypeView<T> prototypeView,
+			PrototypeOperation<T, ?> operation,
 			Optional<Double> fallback,
 			JsonPath operationsPath
 	) {
-		var optOperation = prototypeView.getOperation(BuiltinPrototypes.NUMBER)
-				.or(() -> prototypeView.getOperation(BuiltinPrototypes.BOOLEAN)
-						.map(o -> t -> o.apply(t).map(b -> b ? 1.0 : 0.0))
+		var optOperation = operation.recoverReturnType(BuiltinPrototypes.NUMBER)
+				.map(po -> (Operation<T, Double>) po)
+				.or(() -> operation.recoverReturnType(BuiltinPrototypes.BOOLEAN)
+						.map(c -> t -> c.apply(t).map(b -> b ? 1.0 : 0.0))
 				);
 		if (optOperation.isPresent()) {
 			return Result.success(t -> optOperation.orElseThrow().apply(t).orElseGet(() -> {
