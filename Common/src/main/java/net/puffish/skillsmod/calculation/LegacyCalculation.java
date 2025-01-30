@@ -2,7 +2,7 @@ package net.puffish.skillsmod.calculation;
 
 import net.puffish.skillsmod.api.calculation.Calculation;
 import net.puffish.skillsmod.api.calculation.Variables;
-import net.puffish.skillsmod.api.calculation.prototype.PrototypeView;
+import net.puffish.skillsmod.api.calculation.prototype.Prototype;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
@@ -16,7 +16,7 @@ import java.util.List;
 public class LegacyCalculation {
 	public static <T> Result<Calculation<T>, Problem> parse(
 			JsonElement rootElement,
-			PrototypeView<T> prototype,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
 		return rootElement.getAsObject().andThen(
@@ -26,7 +26,7 @@ public class LegacyCalculation {
 
 	public static <T> Result<Calculation<T>, Problem> parse(
 			JsonObject rootObject,
-			PrototypeView<T> prototype,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
 		var problems = new ArrayList<Problem>();
