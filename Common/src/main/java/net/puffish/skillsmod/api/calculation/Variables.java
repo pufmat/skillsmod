@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.api.calculation;
 
-import net.puffish.skillsmod.api.calculation.prototype.PrototypeView;
+import net.puffish.skillsmod.api.calculation.prototype.Prototype;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.util.Problem;
@@ -16,11 +16,10 @@ public interface Variables<T, R> {
 
 	static <T> Result<Variables<T, Double>, Problem> parse(
 			JsonElement rootElement,
-			PrototypeView<T> prototypeView,
+			Prototype<T> prototype,
 			ConfigContext context
 	) {
-		return VariablesImpl.parse(rootElement, prototypeView, context)
-				.mapSuccess(v -> v);
+		return VariablesImpl.parse(rootElement, prototype, context);
 	}
 
 	static <T, R> Variables<T, R> create(
