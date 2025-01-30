@@ -3,7 +3,7 @@ package net.puffish.skillsmod.impl.rewards;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 
-public record RewardUpdateContextImpl(ServerPlayerEntity player, int count, boolean action) implements RewardUpdateContext {
+public record RewardUpdateContextImpl(ServerPlayerEntity player, int count, boolean isAction) implements RewardUpdateContext {
 
 	@Override
 	public ServerPlayerEntity getPlayer() {
@@ -17,6 +17,7 @@ public record RewardUpdateContextImpl(ServerPlayerEntity player, int count, bool
 
 	@Override
 	public boolean isAction() {
-		return action;
+		return isAction;
 	}
+
 }
