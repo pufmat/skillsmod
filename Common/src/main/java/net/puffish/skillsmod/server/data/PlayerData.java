@@ -47,11 +47,11 @@ public class PlayerData {
 	}
 
 	public void unlockCategory(CategoryConfig category) {
-		getCategoryData(category).setUnlocked(true);
+		getOrCreateCategoryData(category).setUnlocked(true);
 	}
 
 	public void lockCategory(CategoryConfig category) {
-		getCategoryData(category).setUnlocked(false);
+		getOrCreateCategoryData(category).setUnlocked(false);
 	}
 
 	public boolean isCategoryUnlocked(CategoryConfig category) {
@@ -62,13 +62,8 @@ public class PlayerData {
 		return category.getGeneral().isUnlockedByDefault();
 	}
 
-	public CategoryData getCategoryData(CategoryConfig category) {
-		return categories.compute(category.getId(), (key, value) -> {
-			if (value == null) {
-				value = CategoryData.create(category.getGeneral());
-			}
-			return value;
-		});
+	public CategoryData getOrCreateCategoryData(CategoryConfig category) {
+		return categories.computeIfAbsent(category.getId(), key -> CategoryData.create(category.getGeneral()));
 	}
 
 	public void removeCategoryData(CategoryConfig category) {
