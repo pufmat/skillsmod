@@ -29,11 +29,26 @@ public interface Category {
 
 	void erase(ServerPlayerEntity player);
 
-	int getExtraPoints(ServerPlayerEntity player);
+	Stream<Identifier> streamPointsSources(ServerPlayerEntity player);
 
-	void setExtraPoints(ServerPlayerEntity player, int count);
+	int getPoints(ServerPlayerEntity player, Identifier source);
 
-	void addExtraPoints(ServerPlayerEntity player, int count);
+	void setPoints(ServerPlayerEntity player, Identifier source, int count);
+
+	void addPoints(ServerPlayerEntity player, Identifier source, int count);
+
+	int getSpentPoints(ServerPlayerEntity player);
+
+	int getPointsTotal(ServerPlayerEntity player);
 
 	int getPointsLeft(ServerPlayerEntity player);
+
+	@Deprecated
+	int getExtraPoints(ServerPlayerEntity player);
+
+	@Deprecated
+	void setExtraPoints(ServerPlayerEntity player, int count);
+
+	@Deprecated
+	void addExtraPoints(ServerPlayerEntity player, int count);
 }
