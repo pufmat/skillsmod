@@ -2,43 +2,50 @@ package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
+import net.puffish.skillsmod.util.PointSources;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class CategoryData {
 	private final Set<String> unlockedSkills;
-
+	private final Map<Identifier, Integer> points;
 	private boolean unlocked;
-	private int extraPoints;
 	private int earnedExperience;
 
-	private CategoryData(Set<String> unlockedSkills, boolean unlocked, int extraPoints, int earnedExperience) {
+	private CategoryData(Set<String> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int earnedExperience) {
 		this.unlockedSkills = unlockedSkills;
+		this.points = points;
 		this.unlocked = unlocked;
-		this.extraPoints = extraPoints;
 		this.earnedExperience = earnedExperience;
 	}
 
 	public static CategoryData create(GeneralConfig general) {
+		var points = new HashMap<Identifier, Integer>();
+		points.put(PointSources.STARTING, general.getStartingPoints());
+
 		return new CategoryData(
 				new HashSet<>(),
+				points,
 				general.isUnlockedByDefault(),
-				general.getStartingPoints(),
 				0
 		);
 	}
 
 	public static CategoryData read(NbtCompound nbt) {
 		var unlocked = nbt.getBoolean("unlocked");
-		var points = nbt.getInt("points");
 		var experience = nbt.getInt("experience");
 
 		var unlockedSkills = new HashSet<String>();
@@ -49,12 +56,21 @@ public class CategoryData {
 			}
 		}
 
-		return new CategoryData(unlockedSkills, unlocked, points, experience);
+		var points = new HashMap<Identifier, Integer>();
+		var pointsNbt = nbt.get("points");
+		if (pointsNbt instanceof NbtInt pointsNbtInt) {
+			points.put(PointSources.LEGACY, pointsNbtInt.intValue());
+		} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
+			for (var key : pointsNbtCompound.getKeys()) {
+				points.put(new Identifier(key), pointsNbtCompound.getInt(key));
+			}
+		}
+
+		return new CategoryData(unlockedSkills, points, unlocked, experience);
 	}
 
 	public NbtCompound writeNbt(NbtCompound nbt) {
 		nbt.putBoolean("unlocked", unlocked);
-		nbt.putInt("points", extraPoints);
 		nbt.putInt("experience", earnedExperience);
 
 		var unlockedNbt = new NbtList();
@@ -62,6 +78,14 @@ public class CategoryData {
 			unlockedNbt.add(NbtString.of(skill));
 		}
 		nbt.put("unlocked_skills", unlockedNbt);
+
+		var pointsNbt = new NbtCompound();
+		for (var entry : points.entrySet()) {
+			if (entry.getValue() != 0) {
+				pointsNbt.putInt(entry.getKey().toString(), entry.getValue());
+			}
+		}
+		nbt.put("points", pointsNbt);
 
 		return nbt;
 	}
@@ -199,30 +223,46 @@ public class CategoryData {
 	}
 
 	public int getEarnedPoints(CategoryConfig category) {
-		return getExtraPoints() + getPointsForExperience(category);
+		return getPointsForExperience(category) + getPointsTotal();
+	}
+
+	public int getPointsTotal() {
+		var total = 0;
+		for (var count : points.values()) {
+			total += count;
+		}
+		return total;
 	}
 
 	public int getPointsLeft(CategoryConfig category) {
 		return Math.min(getEarnedPoints(category), category.getGeneral().getSpentPointsLimit()) - getSpentPoints(category);
 	}
 
-	public void addExtraPoints(int count) {
-		extraPoints += count;
+	public void addPoints(Identifier source, int count) {
+		points.compute(source, (key, value) -> (value == null ? 0 : value) + count);
 	}
 
-	public int getExtraPoints() {
-		return extraPoints;
+	public int getPoints(Identifier source) {
+		return points.getOrDefault(source, 0);
 	}
 
-	public void setExtraPoints(int points) {
-		this.extraPoints = points;
+	public void setPoints(Identifier source, int points) {
+		this.points.put(source, points);
+	}
+
+	public Stream<Identifier> getPointsSources() {
+		return this.points.entrySet().stream().filter(e -> e.getValue() != 0).map(Map.Entry::getKey);
 	}
 
 	public boolean isUnlocked() {
 		return unlocked;
 	}
 
-	public void setUnlocked(boolean unlocked) {
-		this.unlocked = unlocked;
+	public void unlock() {
+		unlocked = true;
+	}
+
+	public void lock() {
+		unlocked = false;
 	}
 }
