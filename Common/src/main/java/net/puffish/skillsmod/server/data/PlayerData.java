@@ -46,14 +46,6 @@ public class PlayerData {
 		return nbt;
 	}
 
-	public void unlockCategory(CategoryConfig category) {
-		getOrCreateCategoryData(category).setUnlocked(true);
-	}
-
-	public void lockCategory(CategoryConfig category) {
-		getOrCreateCategoryData(category).setUnlocked(false);
-	}
-
 	public boolean isCategoryUnlocked(CategoryConfig category) {
 		var categoryData = categories.get(category.getId());
 		if (categoryData != null) {

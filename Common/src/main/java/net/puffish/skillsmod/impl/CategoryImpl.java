@@ -6,6 +6,7 @@ import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
 import net.puffish.skillsmod.api.Experience;
 import net.puffish.skillsmod.api.Skill;
+import net.puffish.skillsmod.util.PointSources;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -89,22 +90,52 @@ public class CategoryImpl implements Category {
 	}
 
 	@Override
-	public int getExtraPoints(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getExtraPoints(player, categoryId).orElseThrow();
+	public Stream<Identifier> streamPointsSources(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getPointsSources(player, categoryId).orElseThrow().stream();
 	}
 
 	@Override
-	public void setExtraPoints(ServerPlayerEntity player, int count) {
-		SkillsMod.getInstance().setExtraPoints(player, categoryId, count);
+	public int getPoints(ServerPlayerEntity player, Identifier source) {
+		return SkillsMod.getInstance().getPoints(player, categoryId, source).orElseThrow();
 	}
 
 	@Override
-	public void addExtraPoints(ServerPlayerEntity player, int count) {
-		SkillsMod.getInstance().addExtraPoints(player, categoryId, count);
+	public void setPoints(ServerPlayerEntity player, Identifier source, int count) {
+		SkillsMod.getInstance().setPoints(player, categoryId, source, count);
+	}
+
+	@Override
+	public void addPoints(ServerPlayerEntity player, Identifier source, int count) {
+		SkillsMod.getInstance().addPoints(player, categoryId, source, count);
+	}
+
+	@Override
+	public int getSpentPoints(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getSpentPoints(player, categoryId).orElseThrow();
+	}
+
+	@Override
+	public int getPointsTotal(ServerPlayerEntity player) {
+		return SkillsMod.getInstance().getPointsTotal(player, categoryId).orElseThrow();
 	}
 
 	@Override
 	public int getPointsLeft(ServerPlayerEntity player) {
 		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
+	}
+
+	@Override
+	public int getExtraPoints(ServerPlayerEntity player) {
+		return getPointsTotal(player);
+	}
+
+	@Override
+	public void setExtraPoints(ServerPlayerEntity player, int count) {
+		addExtraPoints(player, count - getExtraPoints(player));
+	}
+
+	@Override
+	public void addExtraPoints(ServerPlayerEntity player, int count) {
+		addPoints(player, PointSources.COMMANDS, count);
 	}
 }
