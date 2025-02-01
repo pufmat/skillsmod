@@ -38,6 +38,7 @@ import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
+import net.puffish.skillsmod.reward.builtin.PointsReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.ServerData;
@@ -785,6 +786,7 @@ public class SkillsMod {
 
 		@Override
 		public void onPlayerJoin(ServerPlayerEntity player) {
+			PointsReward.cleanup(player);
 			updateAllCategories(player);
 		}
 
