@@ -101,12 +101,22 @@ public class CategoryImpl implements Category {
 
 	@Override
 	public void setPoints(ServerPlayerEntity player, Identifier source, int count) {
-		SkillsMod.getInstance().setPoints(player, categoryId, source, count);
+		SkillsMod.getInstance().setPoints(player, categoryId, source, count, false);
 	}
 
 	@Override
 	public void addPoints(ServerPlayerEntity player, Identifier source, int count) {
-		SkillsMod.getInstance().addPoints(player, categoryId, source, count);
+		SkillsMod.getInstance().addPoints(player, categoryId, source, count, false);
+	}
+
+	@Override
+	public void setPointsSilently(ServerPlayerEntity player, Identifier source, int count) {
+		SkillsMod.getInstance().setPoints(player, categoryId, source, count, true);
+	}
+
+	@Override
+	public void addPointsSilently(ServerPlayerEntity player, Identifier source, int count) {
+		SkillsMod.getInstance().addPoints(player, categoryId, source, count, true);
 	}
 
 	@Override

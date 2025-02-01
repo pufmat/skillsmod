@@ -37,6 +37,10 @@ public interface Category {
 
 	void addPoints(ServerPlayerEntity player, Identifier source, int count);
 
+	void setPointsSilently(ServerPlayerEntity player, Identifier source, int count);
+
+	void addPointsSilently(ServerPlayerEntity player, Identifier source, int count);
+
 	int getSpentPoints(ServerPlayerEntity player);
 
 	int getPointsTotal(ServerPlayerEntity player);
