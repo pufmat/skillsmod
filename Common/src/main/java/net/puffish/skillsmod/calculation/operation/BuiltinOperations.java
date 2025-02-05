@@ -3,6 +3,7 @@ package net.puffish.skillsmod.calculation.operation;
 import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.BlockCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.BlockStateCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.DamageSourceClassification;
 import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
@@ -24,6 +25,7 @@ public class BuiltinOperations {
 		AttributeOperation.register();
 		BlockCondition.register();
 		BlockStateCondition.register();
+		DamageSourceClassification.register();
 		DamageTypeCondition.register();
 		EffectOperation.register();
 		EntityTypeCondition.register();
