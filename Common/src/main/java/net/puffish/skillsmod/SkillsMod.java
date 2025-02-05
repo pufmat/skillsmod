@@ -45,6 +45,7 @@ import net.puffish.skillsmod.server.network.ServerPacketSender;
 import net.puffish.skillsmod.server.network.packets.in.SkillClickInPacket;
 import net.puffish.skillsmod.server.network.packets.out.ExperienceUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.HideCategoryOutPacket;
+import net.puffish.skillsmod.server.network.packets.out.NewPointOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.OpenScreenOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
@@ -127,6 +128,7 @@ public class SkillsMod {
 		registrar.registerOutPacket(Packets.EXPERIENCE_UPDATE);
 		registrar.registerOutPacket(Packets.SHOW_TOAST);
 		registrar.registerOutPacket(Packets.OPEN_SCREEN);
+		registrar.registerOutPacket(Packets.NEW_POINT);
 
 		eventReceiver.registerListener(instance.new EventListener());
 
@@ -287,9 +289,11 @@ public class SkillsMod {
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 				category.getSkills().getById(skillId).ifPresent(skill -> {
 					if (force || categoryData.canUnlockSkill(category, skill)) {
-						categoryData.unlockSkill(skillId);
-						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
-						syncPoints(player, category, categoryData);
+						watchNewPoints(player, category, categoryData, () -> {
+							categoryData.unlockSkill(skillId);
+							packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
+							syncPoints(player, category, categoryData);
+						});
 						updateSkillRewards(player, category, categoryData, skill, true);
 					}
 				});
@@ -301,9 +305,11 @@ public class SkillsMod {
 		getCategory(categoryId).ifPresent(category -> {
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
 				category.getSkills().getById(skillId).ifPresent(skill -> {
-					categoryData.lockSkill(skillId);
-					packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
-					syncPoints(player, category, categoryData);
+					watchNewPoints(player, category, categoryData, () -> {
+						categoryData.lockSkill(skillId);
+						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+						syncPoints(player, category, categoryData);
+					});
 					updateSkillRewards(player, category, categoryData, skill, false);
 				});
 			});
@@ -358,10 +364,12 @@ public class SkillsMod {
 			}
 
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.addExperience(amount);
+				watchNewPoints(player, category, categoryData, () -> {
+					categoryData.addExperience(amount);
 
-				syncExperience(player, category, categoryData);
-				syncPoints(player, category, categoryData);
+					syncExperience(player, category, categoryData);
+					syncPoints(player, category, categoryData);
+				});
 			});
 		});
 	}
@@ -373,10 +381,12 @@ public class SkillsMod {
 			}
 
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.setEarnedExperience(amount);
+				watchNewPoints(player, category, categoryData, () -> {
+					categoryData.setEarnedExperience(amount);
 
-				syncExperience(player, category, categoryData);
-				syncPoints(player, category, categoryData);
+					syncExperience(player, category, categoryData);
+					syncPoints(player, category, categoryData);
+				});
 			});
 		});
 	}
@@ -394,9 +404,11 @@ public class SkillsMod {
 	public void addExtraPoints(ServerPlayerEntity player, Identifier categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> {
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.addExtraPoints(count);
+				watchNewPoints(player, category, categoryData, () -> {
+					categoryData.addExtraPoints(count);
 
-				syncPoints(player, category, categoryData);
+					syncPoints(player, category, categoryData);
+				});
 			});
 		});
 	}
@@ -404,9 +416,11 @@ public class SkillsMod {
 	public void setExtraPoints(ServerPlayerEntity player, Identifier categoryId, int count) {
 		getCategory(categoryId).ifPresent(category -> {
 			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.setExtraPoints(count);
+				watchNewPoints(player, category, categoryData, () -> {
+					categoryData.setExtraPoints(count);
 
-				syncPoints(player, category, categoryData);
+					syncPoints(player, category, categoryData);
+				});
 			});
 		});
 	}
@@ -519,12 +533,21 @@ public class SkillsMod {
 		packetSender.send(player, new HideCategoryOutPacket(category.getId()));
 	}
 
+	private void watchNewPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, Runnable runnable) {
+		var pointsLeft = categoryData.getPointsLeft(category);
+		runnable.run();
+		if (categoryData.getPointsLeft(category) > pointsLeft) {
+			if (player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
+				packetSender.send(player, new NewPointOutPacket(category.getId()));
+			}
+		}
+	}
+
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, new PointsUpdateOutPacket(
 				category.getId(),
 				categoryData.getSpentPoints(category),
-				categoryData.getEarnedPoints(category),
-				player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)
+				categoryData.getEarnedPoints(category)
 		));
 	}
 
