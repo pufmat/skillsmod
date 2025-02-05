@@ -15,6 +15,7 @@ import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
+import net.puffish.skillsmod.client.network.packets.in.NewPointInPacket;
 import net.puffish.skillsmod.client.network.packets.in.OpenScreenInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowToastInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
@@ -102,6 +103,12 @@ public class SkillsClientMod {
 				instance::onOpenScreenPacket
 		);
 
+		registrar.registerInPacket(
+				Packets.NEW_POINT,
+				NewPointInPacket::read,
+				instance::onNewPointPacket
+		);
+
 		registrar.registerOutPacket(Packets.SKILL_CLICK);
 
 		eventReceiver.registerListener(instance.new EventListener());
@@ -140,17 +147,16 @@ public class SkillsClientMod {
 
 	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
 		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
-			var oldPointsLeft = category.getPointsLeft();
 			category.updatePoints(
 					packet.getSpentPoints(),
 					packet.getEarnedPoints()
 			);
-			var newPointsLeft = category.getPointsLeft();
+		});
+	}
 
-			if (packet.announceNewPoints()
-					&& newPointsLeft > oldPointsLeft
-					&& category.hasAnySkillLeft()
-			) {
+	private void onNewPointPacket(NewPointInPacket packet) {
+		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+			if (category.hasAnySkillLeft()) {
 				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
 						SkillsMod.createTranslatable(
 								"chat",
