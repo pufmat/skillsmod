@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.server.network.packets.out;
 
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
@@ -112,7 +111,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	public static void write(RegistryByteBuf buf, IconConfig icon) {
 		if (icon instanceof IconConfig.EffectIconConfig effectIcon) {
 			buf.writeEnumConstant(IconType.EFFECT);
-			StatusEffect.ENTRY_PACKET_CODEC.encode(buf, Registries.STATUS_EFFECT.getEntry(effectIcon.effect()));
+			buf.writeIdentifier(Registries.STATUS_EFFECT.getId(effectIcon.effect()));
 		} else if (icon instanceof IconConfig.ItemIconConfig itemIcon) {
 			buf.writeEnumConstant(IconType.ITEM);
 			ItemStack.PACKET_CODEC.encode(buf, itemIcon.item());

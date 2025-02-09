@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
 import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.TextCodecs;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.client.config.ClientBackgroundConfig;
@@ -134,8 +134,8 @@ public class ShowCategoryInPacket implements InPacket {
 		var type = buf.readEnumConstant(IconType.class);
 		return switch (type) {
 			case EFFECT -> {
-				var effect = StatusEffect.ENTRY_PACKET_CODEC.decode(buf).value();
-				yield new ClientIconConfig.EffectIconConfig(effect);
+				var effect = buf.readIdentifier();
+				yield new ClientIconConfig.EffectIconConfig(Registries.STATUS_EFFECT.get(effect));
 			}
 			case ITEM -> {
 				var itemStack = ItemStack.PACKET_CODEC.decode(buf);
