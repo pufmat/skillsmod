@@ -131,8 +131,8 @@ public class ShowCategoryInPacket implements InPacket {
 		var type = buf.readEnumConstant(IconType.class);
 		return switch (type) {
 			case EFFECT -> {
-				var effect = buf.readRegistryValue(Registries.STATUS_EFFECT);
-				yield new ClientIconConfig.EffectIconConfig(effect);
+				var effect = buf.readIdentifier();
+				yield new ClientIconConfig.EffectIconConfig(Registries.STATUS_EFFECT.get(effect));
 			}
 			case ITEM -> {
 				var itemStack = buf.readItemStack();
