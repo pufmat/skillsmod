@@ -108,7 +108,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	public static void write(PacketByteBuf buf, IconConfig icon) {
 		if (icon instanceof IconConfig.EffectIconConfig effectIcon) {
 			buf.writeEnumConstant(IconType.EFFECT);
-			buf.writeRegistryValue(Registries.STATUS_EFFECT, effectIcon.effect());
+			buf.writeIdentifier(Registries.STATUS_EFFECT.getId(effectIcon.effect()));
 		} else if (icon instanceof IconConfig.ItemIconConfig itemIcon) {
 			buf.writeEnumConstant(IconType.ITEM);
 			buf.writeItemStack(itemIcon.item());
