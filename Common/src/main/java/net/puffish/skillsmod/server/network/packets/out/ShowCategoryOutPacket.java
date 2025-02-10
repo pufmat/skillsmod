@@ -45,16 +45,14 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 				)
 		);
 		buf.writeInt(categoryData.getSpentPoints(category));
-		buf.writeInt(categoryData.getEarnedPoints(category));
-		if (category.getExperience().isPresent()) {
-			var level = categoryData.getCurrentLevel(category);
+		buf.writeInt(categoryData.getPointsTotal());
+		category.getExperience().ifPresentOrElse(experience -> {
 			buf.writeBoolean(true);
+			var level = experience.getCurrentLevel(categoryData.getExperience());
 			buf.writeInt(level);
-			buf.writeInt(categoryData.getCurrentExperience(category));
-			buf.writeInt(categoryData.getRequiredExperience(category, level));
-		} else {
-			buf.writeBoolean(false);
-		}
+			buf.writeInt(experience.getCurrentExperience(categoryData.getExperience()));
+			buf.writeInt(experience.getRequiredExperience(level));
+		}, () -> buf.writeBoolean(false));
 	}
 
 	public void write(PacketByteBuf buf, SkillDefinitionsConfig definitions) {
