@@ -13,7 +13,13 @@ public interface Experience {
 
 	int getCurrent(ServerPlayerEntity player);
 
+	int getRequired(int level);
+
+	@Deprecated
 	int getRequired(ServerPlayerEntity player, int level);
 
+	int getRequiredTotal(int level);
+
+	@Deprecated
 	int getRequiredTotal(ServerPlayerEntity player, int level);
 }

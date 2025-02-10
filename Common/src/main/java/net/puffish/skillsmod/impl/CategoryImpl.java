@@ -91,7 +91,7 @@ public class CategoryImpl implements Category {
 
 	@Override
 	public Stream<Identifier> streamPointsSources(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getPointsSources(player, categoryId).orElseThrow().stream();
+		return SkillsMod.getInstance().getPointsSources(player, categoryId).orElseThrow();
 	}
 
 	@Override
