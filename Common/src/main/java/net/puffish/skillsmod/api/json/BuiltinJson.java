@@ -26,7 +26,6 @@ import net.puffish.skillsmod.api.util.Result;
 
 import java.util.ArrayList;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class BuiltinJson {
 	private BuiltinJson() { }
@@ -35,8 +34,7 @@ public final class BuiltinJson {
 		return parseFromString(
 				element,
 				Identifier::new,
-				() -> "Expected identifier",
-				s -> "Invalid identifier `" + s + "`"
+				"identifier"
 		);
 	}
 
@@ -44,8 +42,7 @@ public final class BuiltinJson {
 		return parseFromString(
 				element,
 				s -> new Identifier(Identifier.DEFAULT_NAMESPACE, s).getPath(),
-				() -> "Expected identifier path",
-				s -> "Invalid identifier path `" + s + "`"
+				"identifier path"
 		);
 	}
 
@@ -53,9 +50,7 @@ public final class BuiltinJson {
 		return parseSomething(
 				element,
 				Registry.STATUS_EFFECT,
-				() -> "Expected effect",
-				s -> "Invalid effect `" + s + "`",
-				id -> "Unknown effect `" + id + "`"
+				"effect"
 		);
 	}
 
@@ -63,9 +58,7 @@ public final class BuiltinJson {
 		return parseSomethingTag(
 				element,
 				Registry.STATUS_EFFECT,
-				() -> "Expected effect tag",
-				s -> "Invalid effect tag `" + s + "`",
-				id -> "Unknown effect tag `" + id + "`"
+				"effect"
 		);
 	}
 
@@ -73,9 +66,7 @@ public final class BuiltinJson {
 		return parseSomethingOrSomethingTag(
 				element,
 				Registry.STATUS_EFFECT,
-				() -> "Expected effect or effect tag",
-				s -> "Invalid effect or effect tag `" + s + "`",
-				id -> "Unknown effect or effect tag `" + id + "`"
+				"effect"
 		);
 	}
 
@@ -83,9 +74,7 @@ public final class BuiltinJson {
 		return parseSomething(
 				element,
 				Registry.BLOCK,
-				() -> "Expected block",
-				s -> "Invalid block `" + s + "`",
-				id -> "Unknown block `" + id + "`"
+				"block"
 		);
 	}
 
@@ -93,9 +82,7 @@ public final class BuiltinJson {
 		return parseSomethingTag(
 				element,
 				Registry.BLOCK,
-				() -> "Expected block tag",
-				s -> "Invalid block tag `" + s + "`",
-				id -> "Unknown block tag `" + id + "`"
+				"block"
 		);
 	}
 
@@ -103,9 +90,7 @@ public final class BuiltinJson {
 		return parseSomethingOrSomethingTag(
 				element,
 				Registry.BLOCK,
-				() -> "Expected block or block tag",
-				s -> "Invalid block or block tag `" + s + "`",
-				id -> "Unknown block or block tag `" + id + "`"
+				"block"
 		);
 	}
 
@@ -113,9 +98,7 @@ public final class BuiltinJson {
 		return parseSomething(
 				element,
 				Registry.ENTITY_TYPE,
-				() -> "Expected entity type",
-				s -> "Invalid entity type `" + s + "`",
-				id -> "Unknown entity type `" + id + "`"
+				"entity type"
 		);
 	}
 
@@ -123,9 +106,7 @@ public final class BuiltinJson {
 		return parseSomethingTag(
 				element,
 				Registry.ENTITY_TYPE,
-				() -> "Expected entity type tag",
-				s -> "Invalid entity type tag `" + s + "`",
-				id -> "Unknown entity type tag `" + id + "`"
+				"entity type"
 		);
 	}
 
@@ -133,9 +114,7 @@ public final class BuiltinJson {
 		return parseSomethingOrSomethingTag(
 				element,
 				Registry.ENTITY_TYPE,
-				() -> "Expected entity type or entity type tag",
-				s -> "Invalid entity type or entity type tag `" + s + "`",
-				id -> "Unknown entity type or entity type tag `" + id + "`"
+				"entity type"
 		);
 	}
 
@@ -143,9 +122,7 @@ public final class BuiltinJson {
 		return parseSomething(
 				element,
 				Registry.ITEM,
-				() -> "Expected item",
-				s -> "Invalid item `" + s + "`",
-				id -> "Unknown item `" + id + "`"
+				"item"
 		);
 	}
 
@@ -153,9 +130,7 @@ public final class BuiltinJson {
 		return parseSomethingTag(
 				element,
 				Registry.ITEM,
-				() -> "Expected item tag",
-				s -> "Invalid item tag `" + s + "`",
-				id -> "Unknown item tag `" + id + "`"
+				"item"
 		);
 	}
 
@@ -163,9 +138,7 @@ public final class BuiltinJson {
 		return parseSomethingOrSomethingTag(
 				element,
 				Registry.ITEM,
-				() -> "Expected item or item tag",
-				s -> "Invalid item or item tag `" + s + "`",
-				id -> "Unknown item or item tag `" + id + "`"
+				"item"
 		);
 	}
 
@@ -173,9 +146,7 @@ public final class BuiltinJson {
 		return parseSomething(
 				element,
 				Registry.STAT_TYPE,
-				() -> "Expected stat type",
-				s -> "Invalid stat type `" + s + "`",
-				id -> "Unknown stat type `" + id + "`"
+				"stat type"
 		);
 	}
 
@@ -183,9 +154,7 @@ public final class BuiltinJson {
 		return parseSomethingTag(
 				element,
 				Registry.STAT_TYPE,
-				() -> "Expected stat type tag",
-				s -> "Invalid stat type tag `" + s + "`",
-				id -> "Unknown stat type tag `" + id + "`"
+				"stat type"
 		);
 	}
 
@@ -193,9 +162,7 @@ public final class BuiltinJson {
 		return parseSomethingOrSomethingTag(
 				element,
 				Registry.STAT_TYPE,
-				() -> "Expected stat type or stat type tag",
-				s -> "Invalid stat type or stat type tag `" + s + "`",
-				id -> "Unknown stat type or stat type tag `" + id + "`"
+				"stat type"
 		);
 	}
 
@@ -217,8 +184,7 @@ public final class BuiltinJson {
 						throw  new RuntimeException(e);
 					}
 				},
-				() -> "Expected state predicate",
-				s -> "Invalid state predicate `" + s + "`"
+				"state predicate"
 		);
 	}
 
@@ -231,9 +197,7 @@ public final class BuiltinJson {
 						).orElseThrow(),
 						Identifier.splitOn(id.getPath(), '.')
 				),
-				() -> "Expected stat",
-				s -> "Invalid stat `" + s + "`",
-				id -> "Unknown stat `" + id + "`"
+				"stat"
 		);
 	}
 
@@ -251,8 +215,7 @@ public final class BuiltinJson {
 						throw new RuntimeException(e);
 					}
 				},
-				() -> "Expected NBT",
-				s -> "Invalid NBT `" + s + "`"
+				"NBT"
 		);
 	}
 
@@ -311,9 +274,7 @@ public final class BuiltinJson {
 					}
 					return Registry.ATTRIBUTE.getOrEmpty(id).orElseThrow();
 				},
-				() -> "Expected attribute",
-				s -> "Invalid attribute `" + s + "`",
-				id -> "Unknown attribute `" + id + "`"
+				"attribute"
 		);
 	}
 
@@ -326,42 +287,38 @@ public final class BuiltinJson {
 					case "multiply_total", "add_multiplied_total" -> EntityAttributeModifier.Operation.MULTIPLY_TOTAL;
 					default -> throw new RuntimeException();
 				},
-				() -> "Expected attribute operation",
-				s -> "Invalid attribute operation `" + s + "`"
+				"attribute operation"
 		);
 	}
 
 	private static <T> Result<T, Problem> parseFromString(
 			JsonElement element,
 			Function<String, T> parser,
-			Supplier<String> expected,
-			Function<String, String> invalid
+			String what
 	) {
 		try {
 			var s = element.getJson().getAsString();
 			try {
 				return Result.success(parser.apply(s));
 			} catch (Exception ignored) {
-				return Result.failure(element.getPath().createProblem(invalid.apply(s)));
+				return Result.failure(element.getPath().createProblem("Invalid " + what + " `" + s + "`"));
 			}
 		} catch (Exception ignored) {
-			return Result.failure(element.getPath().createProblem(expected.get()));
+			return Result.failure(element.getPath().createProblem("Expected " + what));
 		}
 	}
 
 	private static <T> Result<T, Problem> parseFromIdentifier(
 			JsonElement element,
 			Function<Identifier, T> parser,
-			Supplier<String> expected,
-			Function<String, String> invalid,
-			Function<Identifier, String> unknown
+			String what
 	) {
-		return parseFromString(element, Identifier::new, expected, invalid)
+		return parseFromString(element, Identifier::new, what)
 				.andThen(id -> {
 					try {
 						return Result.success(parser.apply(id));
 					} catch (Exception ignored) {
-						return Result.failure(element.getPath().createProblem(unknown.apply(id)));
+						return Result.failure(element.getPath().createProblem("Unknown " + what + " `" + id + "`"));
 					}
 				});
 	}
@@ -369,37 +326,30 @@ public final class BuiltinJson {
 	private static <T> Result<T, Problem> parseSomething(
 			JsonElement element,
 			Registry<T> registry,
-			Supplier<String> expected,
-			Function<String, String> invalid,
-			Function<Identifier, String> unknown
+			String what
 	) {
 		return parseFromIdentifier(
 				element,
 				id -> registry.getOrEmpty(id).orElseThrow(),
-				expected,
-				invalid,
-				unknown
+				what
 		);
 	}
 
 	private static <T> Result<RegistryEntryList<T>, Problem> parseSomethingTag(
 			JsonElement element,
 			Registry<T> registry,
-			Supplier<String> expected,
-			Function<String, String> invalid,
-			Function<Identifier, String> unknown
+			String what
 	) {
 		return parseFromString(
 				element,
 				s -> s.startsWith("#") ? new Identifier(s.substring(1)) : new Identifier(s),
-				expected,
-				invalid
+				what
 		).andThen(id -> {
 			try {
 				return Result.success(registry.getEntryList(TagKey.of(registry.getKey(), id))
 						.orElseThrow());
 			} catch (Exception ignored) {
-				return Result.failure(element.getPath().createProblem(unknown.apply(id)));
+				return Result.failure(element.getPath().createProblem("Unknown " + what + " tag `" + id + "`"));
 			}
 		});
 	}
@@ -407,9 +357,7 @@ public final class BuiltinJson {
 	private static <T> Result<RegistryEntryList<T>, Problem> parseSomethingOrSomethingTag(
 			JsonElement element,
 			Registry<T> registry,
-			Supplier<String> expected,
-			Function<String, String> invalid,
-			Function<Identifier, String> unknown
+			String what
 	) {
 		try {
 			var s = element.getJson().getAsString();
@@ -419,10 +367,10 @@ public final class BuiltinJson {
 					try {
 					return Result.success(registry.getEntryList(TagKey.of(registry.getKey(), id)).orElseThrow());
 					} catch (Exception ignored) {
-						return Result.failure(element.getPath().createProblem(unknown.apply(id)));
+						return Result.failure(element.getPath().createProblem("Unknown " + what + " tag `" + id + "`"));
 					}
 				} catch (Exception ignored) {
-					return Result.failure(element.getPath().createProblem(invalid.apply(s)));
+					return Result.failure(element.getPath().createProblem("Invalid " + what + " tag `" + s + "`"));
 				}
 			} else {
 				try {
@@ -430,14 +378,14 @@ public final class BuiltinJson {
 					try {
 					return Result.success(RegistryEntryList.of(registry.getEntry(RegistryKey.of(registry.getKey(), id)).orElseThrow()));
 					} catch (Exception ignored) {
-						return Result.failure(element.getPath().createProblem(unknown.apply(id)));
+						return Result.failure(element.getPath().createProblem("Unknown " + what + " `" + id + "`"));
 					}
 				} catch (Exception ignored) {
-					return Result.failure(element.getPath().createProblem(invalid.apply(s)));
+					return Result.failure(element.getPath().createProblem("Invalid " + what + " `" + s + "`"));
 				}
 			}
 		} catch (Exception ignored) {
-			return Result.failure(element.getPath().createProblem(expected.get()));
+			return Result.failure(element.getPath().createProblem("Expected " + what));
 		}
 	}
 }
