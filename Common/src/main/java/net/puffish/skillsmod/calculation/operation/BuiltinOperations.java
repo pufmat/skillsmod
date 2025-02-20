@@ -15,6 +15,7 @@ import net.puffish.skillsmod.calculation.operation.builtin.StatTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.StatValueOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.SwitchOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.TagCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.WorldCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyBlockTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTypeTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
@@ -37,6 +38,7 @@ public class BuiltinOperations {
 		StatValueOperation.register();
 		SwitchOperation.register();
 		TagCondition.register();
+		WorldCondition.register();
 
 		LegacyBlockTagCondition.register();
 		LegacyDamageTypeTagCondition.register();
