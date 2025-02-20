@@ -1,0 +1,64 @@
+{
+	"text.puffish_skills.skills": "Vještine",
+	"text.puffish_skills.points_left": "Preostalih Bodova: ",
+
+	"tooltip.puffish_skills.current_level": "Trenutna razina: %s",
+	"tooltip.puffish_skills.experience_progress": "Iskustvo: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "Do sljedeće razine: %s",
+	"tooltip.puffish_skills.earned_points": "Zarađenih Bodova: %s",
+	"tooltip.puffish_skills.spent_points": "Potrošenih Bodova: %s",
+
+	"category.puffish_skills.skills": "Vještine",
+	"key.puffish_skills.open": "Otvori Stablo Vještina",
+
+	"chat.puffish_skills.new_point": "Zaradio si Novi Bod za Vještine. Pritisni %s za otvaranje Stablo Vještina.",
+
+	"toast.puffish_skills.invalid_config.description": "Dogodila se Greška, provjerite zapise igre.",
+	"toast.puffish_skills.missing_config.description": "Nisu navedena Stabla Vještina, dodajte jedno.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Objavite nove Bodove Vještina",
+
+	"command.puffish_skills.no_such_category": "Nepostoji Kategorija sa ID %s",
+	"command.puffish_skills.no_such_skill": "Nepostoji Vještina sa ID %s",
+	"command.puffish_skills.no_experience": "Iskustvo nije uključeno za ovu kategoriju.",
+
+	"command.puffish_skills.category.lock.success.single": "Zaključana Kategorija %s za %s",
+	"command.puffish_skills.category.lock.success.multiple": "Zaključana Kategorija %s za %s igrače",
+
+	"command.puffish_skills.category.unlock.success.single": "Otključana Kategorija %s za %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Otključana Kategorija %s za %s igrače",
+
+	"command.puffish_skills.category.erase.success.single": "Izbrisana Kategorija %s za %s",
+	"command.puffish_skills.category.erase.success.multiple": "Izbrisana Kategorija %s za %s igrače",
+
+	"command.puffish_skills.experience.add.success.single": "Dodano %s iskustvo u Kategoriju %s za %s",
+	"command.puffish_skills.experience.add.success.multiple": "Dodano %s iskustvo u Kategoriju %s za %s igrače",
+
+	"command.puffish_skills.experience.set.success.single": "Postavite %s iskustvo u Kategoriji %s za %s",
+	"command.puffish_skills.experience.set.success.multiple": "Postavite %s iskustvo u Kategoriji %s za %s igrače",
+
+	"command.puffish_skills.experience.get.success": "%3$s ima %1$s iskustva u Kategoriji %2$s",
+
+	"command.puffish_skills.points.add.success.single": "Dodano %s boda u Kategoriju %s za %s",
+	"command.puffish_skills.points.add.success.multiple": "Dodano %s boda u Kategoriju %s za %s igrače",
+
+	"command.puffish_skills.points.set.success.single": "Postavite %s bodove u Kategoriju %s za %s",
+	"command.puffish_skills.points.set.success.multiple": "Postavite %s bodove u Kategoriju %s za %s igrače",
+
+	"command.puffish_skills.points.get.success": "%3$s ima %1$s bodova u Kategoriji %2$s",
+
+	"command.puffish_skills.skills.unlock.success.single": "Otključana %s vještina u Kategoriji %s za %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Otključana %s vještina u Kategoriji %s za %s igrače",
+
+	"command.puffish_skills.skills.lock.success.single": "Zaključana %s vještina u Kategoriji %s za %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Zaključana %s vještina u Kategoriji %s za %s igrače",
+
+	"command.puffish_skills.skills.reset.success.single": "Poništi sve vještine u Kategoriji %s za %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Poništi sve vještine u Kategoriji %s za %s igrače",
+
+	"command.puffish_skills.category.open.success.single": "Otvorena Kategorija %s zaslon za %s",
+	"command.puffish_skills.category.open.success.multiple": "Otvorena Kategorija %s zaslon za %s igrače",
+
+	"command.puffish_skills.open.success.single": "Otvoren zaslon sa vještinam za %s",
+	"command.puffish_skills.open.success.multiple": "Otvoren zaslon sa vještinam za %s igrače"
+}
