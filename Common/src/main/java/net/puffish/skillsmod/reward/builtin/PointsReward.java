@@ -66,10 +66,14 @@ public class PointsReward implements Reward {
 
 	public static void cleanup(ServerPlayerEntity player) {
 		SkillsAPI.streamCategories().forEach(category -> {
-			category.streamPointsSources(player)
+			var sources = category.streamPointsSources(player)
 					.filter(source -> source.getNamespace().equals(SkillsAPI.MOD_ID))
 					.filter(source -> source.getPath().startsWith(PREFIX))
-					.forEach(source -> category.setPoints(player, source, 0));
+					.toList();
+			// Modify points after the stream is completed.
+			for (var source : sources) {
+				category.setPoints(player, source, 0);
+			};
 		});
 	}
 
