@@ -299,45 +299,42 @@ public class SkillsMod {
 
 	public void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				category.getSkills().getById(skillId).ifPresent(skill -> {
-					if (force || categoryData.canUnlockSkill(category, skill)) {
-						watchNewPoints(player, category, categoryData, false, () -> {
-							categoryData.unlockSkill(skillId);
-							packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
-							syncPoints(player, category, categoryData);
-						});
-						SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
-						updateSkillRewards(player, category, categoryData, skill, true);
-					}
-				});
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			category.getSkills().getById(skillId).ifPresent(skill -> {
+				if (force || categoryData.canUnlockSkill(category, skill)) {
+					watchNewPoints(player, category, categoryData, false, () -> {
+						categoryData.unlockSkill(skillId);
+						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
+						syncPoints(player, category, categoryData);
+					});
+					SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
+					updateSkillRewards(player, category, categoryData, skill, true);
+				}
 			});
 		});
 	}
 
 	public void lockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
 		getCategory(categoryId).ifPresent(category -> {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				category.getSkills().getById(skillId).ifPresent(skill -> {
-					watchNewPoints(player, category, categoryData, false, () -> {
-						categoryData.lockSkill(skillId);
-						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
-						syncPoints(player, category, categoryData);
-					});
-					SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
-					updateSkillRewards(player, category, categoryData, skill, false);
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			category.getSkills().getById(skillId).ifPresent(skill -> {
+				watchNewPoints(player, category, categoryData, false, () -> {
+					categoryData.lockSkill(skillId);
+					packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+					syncPoints(player, category, categoryData);
 				});
+				SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
+				updateSkillRewards(player, category, categoryData, skill, false);
 			});
 		});
 	}
 
 	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				categoryData.resetSkills();
-				updateRewards(player, category, categoryData);
-				showCategory(player, category, categoryData);
-			});
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			categoryData.resetSkills();
+			updateRewards(player, category, categoryData);
+			showCategory(player, category, categoryData);
 		});
 	}
 
@@ -352,8 +349,7 @@ public class SkillsMod {
 
 	public void unlockCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var playerData = getPlayerData(player);
-			var categoryData = playerData.getOrCreateCategoryData(category);
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			categoryData.unlock();
 			showCategory(player, category, categoryData);
 		});
@@ -361,8 +357,7 @@ public class SkillsMod {
 
 	public void lockCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var playerData = getPlayerData(player);
-			var categoryData = playerData.getOrCreateCategoryData(category);
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			categoryData.lock();
 			hideCategory(player, category);
 		});
@@ -375,9 +370,8 @@ public class SkillsMod {
 	public void addExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			category.getExperience().ifPresent(experience -> {
-				getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-					addExperience(player, category, experience, categoryData, amount);
-				});
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				addExperience(player, category, experience, categoryData, amount);
 			});
 		});
 	}
@@ -392,11 +386,8 @@ public class SkillsMod {
 	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			category.getExperience().ifPresent(experience -> {
-				getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-					watchNewPoints(player, category, categoryData, false, () -> {
-						setExperience(player, category, experience, categoryData, amount);
-					});
-				});
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				setExperience(player, category, experience, categoryData, amount);
 			});
 		});
 	}
@@ -414,15 +405,15 @@ public class SkillsMod {
 				return Optional.empty();
 			}
 
-			return getCategoryDataIfUnlocked(player, category).map(CategoryData::getExperience);
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			return Optional.of(categoryData.getExperience());
 		});
 	}
 
 	public void addPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
 		getCategory(categoryId).ifPresent(category -> {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				addPoints(player, category, categoryData, source, count, isSilent);
-			});
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			addPoints(player, category, categoryData, source, count, isSilent);
 		});
 	}
 
@@ -436,9 +427,8 @@ public class SkillsMod {
 
 	public void setPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
 		getCategory(categoryId).ifPresent(category -> {
-			getCategoryDataIfUnlocked(player, category).ifPresent(categoryData -> {
-				setPoints(player, category, categoryData, source, count, isSilent);
-			});
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			setPoints(player, category, categoryData, source, count, isSilent);
 		});
 	}
 
@@ -451,21 +441,24 @@ public class SkillsMod {
 	}
 
 	public Optional<Integer> getPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source) {
-		return getCategory(categoryId).flatMap(category -> getCategoryDataIfUnlocked(player, category)
-				.map(categoryData -> categoryData.getPoints(source))
-		);
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			return categoryData.getPoints(source);
+		});
 	}
 
 	public Optional<Integer> getPointsTotal(ServerPlayerEntity player, Identifier categoryId) {
-		return getCategory(categoryId).flatMap(category -> getCategoryDataIfUnlocked(player, category)
-				.map(CategoryData::getPointsTotal)
-		);
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			return categoryData.getPointsTotal();
+		});
 	}
 
 	public Optional<Stream<Identifier>> getPointsSources(ServerPlayerEntity player, Identifier categoryId) {
-		return getCategory(categoryId).flatMap(category -> getCategoryDataIfUnlocked(player, category)
-				.map(CategoryData::getPointsSources)
-		);
+		return getCategory(categoryId).map(category -> {
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			return categoryData.getPointsSources();
+		});
 	}
 
 	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, Identifier categoryId) {
@@ -588,9 +581,9 @@ public class SkillsMod {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
-			if (player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
-				packetSender.send(player, new NewPointOutPacket(category.getId()));
-			}
+				if (player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
+					packetSender.send(player, new NewPointOutPacket(category.getId()));
+				}
 			}
 		}
 	}
@@ -616,6 +609,10 @@ public class SkillsMod {
 	public void visitExperienceSources(ServerPlayerEntity player, Function<ExperienceSource, Integer> function) {
 		var playerData = getPlayerData(player);
 		for (var category : getAllCategories()) {
+			if (!playerData.isCategoryUnlocked(category)) {
+				continue;
+			}
+
 			category.getExperience().ifPresent(experience -> {
 				var amount = experience.getExperienceSources()
 						.stream()
@@ -623,9 +620,8 @@ public class SkillsMod {
 						.sum();
 
 				if (amount != 0) {
-					getCategoryDataIfUnlocked(playerData, category).ifPresent(categoryData -> {
-						addExperience(player, category, experience, categoryData, amount);
-					});
+					var categoryData = playerData.getOrCreateCategoryData(category);
+					addExperience(player, category, experience, categoryData, amount);
 				}
 			});
 		}
