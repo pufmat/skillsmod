@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.predicate.ComponentPredicate;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -216,6 +217,14 @@ public final class BuiltinJson {
 				},
 				"nbt predicate"
 		);
+	}
+
+	public static Result<ComponentPredicate, Problem> parseComponentPredicate(JsonElement element, DynamicRegistryManager manager) {
+		try {
+			return Result.success(ComponentPredicate.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(element.getPath().createProblem("Expected component predicate"));
+		}
 	}
 
 	public static Result<Stat<?>, Problem> parseStat(JsonElement element) {

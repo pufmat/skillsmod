@@ -2,6 +2,7 @@ package net.puffish.skillsmod.calculation.operation.builtin;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.predicate.ComponentPredicate;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.puffish.skillsmod.SkillsMod;
@@ -21,10 +22,12 @@ import java.util.Optional;
 public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	private final Optional<RegistryEntryList<Item>> optItemEntries;
 	private final Optional<NbtPredicate> optNbt;
+	private final Optional<ComponentPredicate> optComponents;
 
-	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt) {
+	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<ComponentPredicate> optComponents) {
 		this.optItemEntries = optItemEntries;
 		this.optNbt = optNbt;
+		this.optComponents = optComponents;
 	}
 
 	public static void register() {
@@ -38,10 +41,10 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	public static Result<ItemStackCondition, Problem> parse(OperationConfigContext context) {
 		return context.getData()
 				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(ItemStackCondition::parse, context));
+				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
 	}
 
-	public static Result<ItemStackCondition, Problem> parse(JsonObject rootObject) {
+	public static Result<ItemStackCondition, Problem> parse(JsonObject rootObject, OperationConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var optItem = rootObject.get("item")
@@ -58,10 +61,18 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 						.getSuccess()
 				);
 
+		var optComponents = rootObject.get("components")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(stateElement -> BuiltinJson.parseComponentPredicate(stateElement, context.getServer().getRegistryManager())
+						.ifFailure(problems::add)
+						.getSuccess()
+				);
+
 		if (problems.isEmpty()) {
 			return Result.success(new ItemStackCondition(
 					optItem,
-					optNbt
+					optNbt,
+					optComponents
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -73,6 +84,7 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 		return Optional.of(
 				optItemEntries.map(itemStack::isIn).orElse(true)
 						&& optNbt.map(nbt -> nbt.test(itemStack)).orElse(true)
+						&& optComponents.map(components -> components.test(itemStack)).orElse(true)
 		);
 	}
 }
