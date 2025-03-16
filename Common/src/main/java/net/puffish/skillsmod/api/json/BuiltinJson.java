@@ -184,7 +184,7 @@ public final class BuiltinJson {
 						throw  new RuntimeException(e);
 					}
 				},
-				"state predicate"
+				"nbt predicate"
 		);
 	}
 
@@ -215,7 +215,7 @@ public final class BuiltinJson {
 						throw new RuntimeException(e);
 					}
 				},
-				"NBT"
+				"nbt"
 		);
 	}
 
