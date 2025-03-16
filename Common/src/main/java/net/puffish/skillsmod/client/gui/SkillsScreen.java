@@ -957,21 +957,20 @@ public class SkillsScreen extends Screen {
 		);
 
 		optActiveCategoryData.ifPresent(activeCategoryData ->
-				drawWindowWithCategory(context, mouseX, mouseY, tmpText, tmpX, tmpY, activeCategoryData)
+				drawWindowWithCategory(context, mouseX, mouseY, activeCategoryData)
 		);
 	}
 
-	private void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, Text tmpText, int tmpX, int tmpY, ClientCategoryData activeCategoryData) {
+	private void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
-		var leftX = tmpX + this.textRenderer.getWidth(tmpText);
-
-		tmpX = this.width - FRAME_PADDING - 7;
+		var tmpX = this.width - FRAME_PADDING - 7;
+		var tmpY = FRAME_PADDING + TABS_HEIGHT + 6;
 
 		var startX = tmpX;
 
-		tmpText = Text.literal(activeCategoryData.getPointsLeft()
+		var tmpText = Text.literal(activeCategoryData.getPointsLeft()
 				+ (activeCategory.spentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategoryData.getSpentPointsLeft())
 		);
 
@@ -1015,14 +1014,12 @@ public class SkillsScreen extends Screen {
 			setTooltip(lines);
 		}
 
-		var rightX = tmpX;
-
 		if (activeCategoryData.hasExperience()) {
 			if (small) {
 				tmpX = this.width - FRAME_PADDING - 8 - 182;
 				tmpY = TABS_HEIGHT + 25;
 			} else {
-				tmpX = (leftX + rightX - 182) / 2;
+				tmpX = (this.width - 182) / 2;
 				tmpY = TABS_HEIGHT + 15;
 			}
 
