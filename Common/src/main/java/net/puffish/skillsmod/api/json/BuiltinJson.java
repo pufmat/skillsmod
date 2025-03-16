@@ -213,7 +213,7 @@ public final class BuiltinJson {
 						throw  new RuntimeException(e);
 					}
 				},
-				"state predicate"
+				"nbt predicate"
 		);
 	}
 
@@ -244,7 +244,7 @@ public final class BuiltinJson {
 						throw new RuntimeException(e);
 					}
 				},
-				"NBT"
+				"nbt"
 		);
 	}
 
@@ -252,7 +252,7 @@ public final class BuiltinJson {
 		try {
 			return Result.success(ComponentChanges.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected valid nbt"));
+			return Result.failure(element.getPath().createProblem("Expected components"));
 		}
 	}
 
