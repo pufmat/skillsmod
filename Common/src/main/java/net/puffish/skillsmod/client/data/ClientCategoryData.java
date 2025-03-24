@@ -113,7 +113,11 @@ public class ClientCategoryData {
 						case AVAILABLE, AFFORDABLE -> true;
 						default -> false;
 					})
-					.forEach(other -> updateSkillState(other, Skill.State.LOCKED));
+					.forEach(other -> {
+						if (!isAvailable(other)) {
+							updateSkillState(other, Skill.State.LOCKED);
+						}
+					});
 		}
 		var normalNeighborsIds = config.skillNormalNeighbors().get(skillId);
 		if (normalNeighborsIds != null) {
@@ -228,6 +232,19 @@ public class ClientCategoryData {
 	}
 
 	private boolean isAvailable(ClientSkillConfig skill) {
+		var normalNeighborsReversedIds = config.skillNormalNeighborsReversed().get(skill.id());
+		if (normalNeighborsReversedIds != null) {
+			if (config.getDefinitionById(skill.definitionId())
+					.map(definition -> normalNeighborsReversedIds.stream()
+							.map(id -> config.skills().get(id))
+							.filter(Objects::nonNull)
+							.filter(neighbor -> getSkillState(neighbor) == Skill.State.UNLOCKED)
+							.count() >= definition.requiredSkills()
+					)
+					.orElse(false)) {
+				return true;
+			}
+		}
 		if (skill.isRoot()) {
 			return !config.exclusiveRoot() || config.skills()
 					.values()
@@ -235,18 +252,7 @@ public class ClientCategoryData {
 					.filter(ClientSkillConfig::isRoot)
 					.allMatch(other -> getSkillState(other) != Skill.State.UNLOCKED);
 		}
-		var normalNeighborsReversedIds = config.skillNormalNeighborsReversed().get(skill.id());
-		if (normalNeighborsReversedIds == null) {
-			return false;
-		}
-		return config.getDefinitionById(skill.definitionId())
-				.map(definition -> normalNeighborsReversedIds.stream()
-						.map(id -> config.skills().get(id))
-						.filter(Objects::nonNull)
-						.filter(neighbor -> getSkillState(neighbor) == Skill.State.UNLOCKED)
-						.count() >= definition.requiredSkills()
-				)
-				.orElse(false);
+		return false;
 	}
 
 	private boolean isAffordable(ClientSkillConfig skill) {
