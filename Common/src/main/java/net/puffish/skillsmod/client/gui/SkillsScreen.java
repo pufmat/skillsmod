@@ -625,6 +625,7 @@ public class SkillsScreen extends Screen {
 			});
 		}
 
+		context.draw();
 		connectionRenderer.draw();
 
 		var textureRenderer = new TextureBatchedRenderer();
