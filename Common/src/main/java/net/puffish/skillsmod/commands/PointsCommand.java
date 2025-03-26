@@ -130,7 +130,7 @@ public class PointsCommand {
 		var count = IntegerArgumentType.getInteger(context, "count");
 
 		for (var player : players) {
-			category.setPoints(player, PointSources.COMMANDS, count - category.getPointsTotal(player));
+			category.addPoints(player, PointSources.COMMANDS, count - category.getPointsTotal(player));
 		}
 		CommandUtils.sendSuccess(
 				context,
