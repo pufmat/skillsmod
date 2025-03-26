@@ -623,6 +623,8 @@ public class SkillsScreen extends Screen {
 			});
 		}
 
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 		connectionRenderer.draw();
 
 		var textureRenderer = new TextureBatchedRenderer();
