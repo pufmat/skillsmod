@@ -21,9 +21,20 @@ public record ColorConfig(int argb) {
 								(((color & 0xf00) << 8) | ((color & 0xf0) << 4) | (color & 0xf)) * 0x11 | 0xff000000
 						));
 					}
+					case 4 -> {
+						var color = Integer.parseInt(string, 16);
+						return Result.success(new ColorConfig(
+								(((color & 0xf000) << 12) | ((color & 0xf00) << 8) | ((color & 0xf0) << 4) | (color & 0xf)) * 0x11
+						));
+					}
 					case 6 -> {
 						return Result.success(new ColorConfig(
 								Integer.parseInt(string, 16) | 0xff000000
+						));
+					}
+					case 8 -> {
+						return Result.success(new ColorConfig(
+								Integer.parseInt(string, 16)
 						));
 					}
 					default -> { }
