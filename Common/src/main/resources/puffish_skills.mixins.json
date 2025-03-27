@@ -8,6 +8,7 @@
 		"BooleanRuleInvoker",
 		"ConsumeItemCriterionMixin",
 		"DamageSourceMixin",
+		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
 		"GameRulesAccessor",
 		"ItemStackMixin",
