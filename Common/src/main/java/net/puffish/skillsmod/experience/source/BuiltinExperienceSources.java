@@ -4,6 +4,7 @@ import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSourc
 import net.puffish.skillsmod.experience.source.builtin.CraftItemExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.DealDamageExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.EatFoodExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.EnchantItemExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.FishItemExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.HealExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.IncreaseStatExperienceSource;
@@ -18,6 +19,7 @@ public class BuiltinExperienceSources {
 		CraftItemExperienceSource.register();
 		DealDamageExperienceSource.register();
 		EatFoodExperienceSource.register();
+		EnchantItemExperienceSource.register();
 		FishItemExperienceSource.register();
 		HealExperienceSource.register();
 		IncreaseStatExperienceSource.register();
