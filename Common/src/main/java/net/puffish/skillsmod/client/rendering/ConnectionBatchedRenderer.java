@@ -3,13 +3,8 @@ package net.puffish.skillsmod.client.rendering;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -19,13 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConnectionBatchedRenderer {
-	private final Int2ObjectMap<List<TriangleEmit>> strokeBatch = new Int2ObjectOpenHashMap<>();
-	private final Int2ObjectMap<List<TriangleEmit>> fillBatch = new Int2ObjectOpenHashMap<>();
+	private final Int2ObjectMap<List<QuadEmit>> strokeBatch = new Int2ObjectOpenHashMap<>();
+	private final Int2ObjectMap<List<QuadEmit>> fillBatch = new Int2ObjectOpenHashMap<>();
 
-	private record TriangleEmit(
+	private record QuadEmit(
 			float x1, float y1, float z1,
 			float x2, float y2, float z2,
-			float x3, float y3, float z3
+			float x3, float y3, float z3,
+			float x4, float y4, float z4
 	) { }
 
 	public void emitConnection(
@@ -51,7 +47,7 @@ public class ConnectionBatchedRenderer {
 	}
 
 	private void emitLine(
-			Int2ObjectMap<List<TriangleEmit>> batch,
+			Int2ObjectMap<List<QuadEmit>> batch,
 			Matrix4f matrix,
 			int color,
 			float startX,
@@ -66,22 +62,17 @@ public class ConnectionBatchedRenderer {
 				.perpendicular()
 				.mul(thickness / 2f);
 
-		emitTriangle(
+		emitQuad(
 				batch, matrix, color,
 				startX + side.x, startY + side.y,
 				startX - side.x, startY - side.y,
-				endX + side.x, endY + side.y
-		);
-		emitTriangle(
-				batch, matrix, color,
 				endX - side.x, endY - side.y,
-				endX + side.x, endY + side.y,
-				startX - side.x, startY - side.y
+				endX + side.x, endY + side.y
 		);
 	}
 
 	private void emitArrow(
-			Int2ObjectMap<List<TriangleEmit>> batch,
+			Int2ObjectMap<List<QuadEmit>> batch,
 			Matrix4f matrix,
 			int color,
 			float startX,
@@ -106,64 +97,64 @@ public class ConnectionBatchedRenderer {
 				.perpendicular()
 				.mul(MathHelper.sqrt(3f));
 
-		emitTriangle(
+		emitQuad(
 				batch, matrix, color,
 				center.x + forward.x, center.y + forward.y,
 				back.x - side.x, back.y - side.y,
+				back.x, back.y,
 				back.x + side.x, back.y + side.y
 		);
 	}
 
-	private void emitTriangle(
-			Int2ObjectMap<List<TriangleEmit>> batch,
+	private void emitQuad(
+			Int2ObjectMap<List<QuadEmit>> batch,
 			Matrix4f matrix,
 			int color,
 			float x1, float y1,
 			float x2, float y2,
-			float x3, float y3
-
+			float x3, float y3,
+			float x4, float y4
 	) {
 		var v1 = matrix.transformPosition(new Vector3f(x1, y1, 0f));
 		var v2 = matrix.transformPosition(new Vector3f(x2, y2, 0f));
 		var v3 = matrix.transformPosition(new Vector3f(x3, y3, 0f));
+		var v4 = matrix.transformPosition(new Vector3f(x4, y4, 0f));
 
 		var emits = batch.computeIfAbsent(color, key -> new ArrayList<>());
 
-		emits.add(new TriangleEmit(
+		emits.add(new QuadEmit(
 				v1.x, v1.y, v1.z,
 				v2.x, v2.y, v2.z,
-				v3.x, v3.y, v3.z
+				v3.x, v3.y, v3.z,
+				v4.x, v4.y, v4.z
 		));
 	}
 
-	public void draw() {
-		RenderSystem.setShader(ShaderProgramKeys.POSITION);
-
-		drawBatch(strokeBatch);
-		drawBatch(fillBatch);
+	public void draw(DrawContext context) {
+		drawBatch(strokeBatch, context);
+		drawBatch(fillBatch, context);
 	}
 
-	private void drawBatch(Int2ObjectMap<List<TriangleEmit>> batch) {
-		RenderLayer.getGui().startDrawing();
-		RenderSystem.setShader(ShaderProgramKeys.POSITION);
+	private void drawBatch(Int2ObjectMap<List<QuadEmit>> batch, DrawContext context) {
 		for (var entry : batch.int2ObjectEntrySet()) {
-			var color = entry.getIntKey();
-			var a = (float) ((color >> 24) & 0xff) / 255f;
-			var r = (float) ((color >> 16) & 0xff) / 255f;
-			var g = (float) ((color >> 8) & 0xff) / 255f;
-			var b = (float) (color & 0xff) / 255f;
-			RenderSystem.setShaderColor(r, g, b, a);
+			context.draw(vcp -> {
+				var color = entry.getIntKey();
+				var a = (float) ((color >> 24) & 0xff) / 255f;
+				var r = (float) ((color >> 16) & 0xff) / 255f;
+				var g = (float) ((color >> 8) & 0xff) / 255f;
+				var b = (float) (color & 0xff) / 255f;
+				RenderSystem.setShaderColor(r, g, b, a);
 
-			var bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION);
-			for (var emit : entry.getValue()) {
-				bufferBuilder.vertex(emit.x1, emit.y1, emit.z1);
-				bufferBuilder.vertex(emit.x2, emit.y2, emit.z2);
-				bufferBuilder.vertex(emit.x3, emit.y3, emit.z3);
-			}
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+				var vc = vcp.getBuffer(RenderLayer.getGui());
+				for (var emit : entry.getValue()) {
+					vc.vertex(emit.x1, emit.y1, emit.z1).color(r, g, b, a);
+					vc.vertex(emit.x2, emit.y2, emit.z2).color(r, g, b, a);
+					vc.vertex(emit.x3, emit.y3, emit.z3).color(r, g, b, a);
+					vc.vertex(emit.x4, emit.y4, emit.z4).color(r, g, b, a);
+				}
+			});
 		}
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-		RenderLayer.getGui().endDrawing();
 		batch.clear();
 	}
 }

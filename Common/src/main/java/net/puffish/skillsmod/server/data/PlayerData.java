@@ -22,7 +22,7 @@ public class PlayerData {
 	public static PlayerData read(NbtCompound nbt) {
 		var categories = new HashMap<Identifier, CategoryData>();
 
-		var categoriesNbt = nbt.getCompound("categories");
+		var categoriesNbt = nbt.getCompoundOrEmpty("categories");
 		for (var id : categoriesNbt.getKeys()) {
 			var elementNbt = categoriesNbt.get(id);
 			if (elementNbt instanceof NbtCompound categoryNbt) {

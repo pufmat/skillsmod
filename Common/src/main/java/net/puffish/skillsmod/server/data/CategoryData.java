@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -45,14 +44,14 @@ public class CategoryData {
 	}
 
 	public static CategoryData read(NbtCompound nbt) {
-		var unlocked = nbt.getBoolean("unlocked");
-		var experience = nbt.getInt("experience");
+		var unlocked = nbt.getBoolean("unlocked", false);
+		var experience = nbt.getInt("experience", 0);
 
 		var unlockedSkills = new HashSet<String>();
-		var unlockedNbt = nbt.getList("unlocked_skills", NbtElement.STRING_TYPE);
+		var unlockedNbt = nbt.getListOrEmpty("unlocked_skills");
 		for (var elementNbt : unlockedNbt) {
 			if (elementNbt instanceof NbtString stringNbt) {
-				unlockedSkills.add(stringNbt.asString());
+				unlockedSkills.add(stringNbt.value());
 			}
 		}
 
@@ -62,7 +61,7 @@ public class CategoryData {
 			points.put(PointSources.LEGACY, pointsNbtInt.intValue());
 		} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
 			for (var key : pointsNbtCompound.getKeys()) {
-				points.put(Identifier.of(key), pointsNbtCompound.getInt(key));
+				points.put(Identifier.of(key), pointsNbtCompound.getInt(key, 0));
 			}
 		}
 

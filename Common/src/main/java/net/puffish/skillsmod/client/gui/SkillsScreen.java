@@ -626,7 +626,7 @@ public class SkillsScreen extends Screen {
 		}
 
 		context.draw();
-		connectionRenderer.draw();
+		connectionRenderer.draw(context);
 
 		var textureRenderer = new TextureBatchedRenderer();
 		var itemRenderer = new ItemBatchedRenderer();
@@ -656,7 +656,7 @@ public class SkillsScreen extends Screen {
 					});
 		}
 
-		textureRenderer.draw();
+		textureRenderer.draw(context);
 		itemRenderer.draw();
 
 		matrices.pop();
@@ -731,7 +731,7 @@ public class SkillsScreen extends Screen {
 			}
 		});
 
-		textureRenderer.draw();
+		textureRenderer.draw(context);
 		itemBatch.draw();
 	}
 

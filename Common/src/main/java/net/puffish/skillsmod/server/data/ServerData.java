@@ -1,10 +1,15 @@
 package net.puffish.skillsmod.server.data;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.nbt.NbtEnd;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.PersistentState;
+import net.minecraft.world.PersistentStateType;
 import net.puffish.skillsmod.api.SkillsAPI;
 
 import java.util.HashMap;
@@ -18,20 +23,19 @@ public class ServerData extends PersistentState {
 
 	}
 
-	private static ServerData read(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
+	private static ServerData read(NbtCompound tag) {
 		var playersData = new ServerData();
 
-		var playersNbt = tag.getCompound("players");
+		var playersNbt = tag.getCompoundOrEmpty("players");
 		playersNbt.getKeys().forEach(key -> playersData.players.put(
 				UUID.fromString(key),
-				PlayerData.read(playersNbt.getCompound(key))
+				PlayerData.read(playersNbt.getCompoundOrEmpty(key))
 		));
 
 		return playersData;
 	}
 
-	@Override
-	public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+	private NbtCompound writeNbt(NbtCompound nbt) {
 		var playersNbt = new NbtCompound();
 		for (var entry : players.entrySet()) {
 			playersNbt.put(
@@ -44,10 +48,25 @@ public class ServerData extends PersistentState {
 		return nbt;
 	}
 
-	public static PersistentState.Type<ServerData> getPersistentStateType() {
-		return new PersistentState.Type<>(
-				ServerData::new,
-				ServerData::read,
+	public static PersistentStateType<ServerData> getPersistentStateType() {
+		return new PersistentStateType<>(
+				SkillsAPI.MOD_ID,
+				context -> new ServerData(),
+				context -> new Codec<>() {
+					@Override
+					public <T> DataResult<Pair<ServerData, T>> decode(DynamicOps<T> ops, T input) {
+						return DataResult.success(Pair.of(ServerData.read((NbtCompound) input), input));
+					}
+
+					@Override
+					@SuppressWarnings("unchecked")
+					public <T> DataResult<T> encode(ServerData input, DynamicOps<T> ops, T prefix) {
+						if (!(prefix instanceof NbtEnd)) {
+							throw new RuntimeException();
+						}
+						return DataResult.success((T) input.writeNbt(new NbtCompound()));
+					}
+				},
 				null
 		);
 	}
@@ -55,10 +74,7 @@ public class ServerData extends PersistentState {
 	public static ServerData getOrCreate(MinecraftServer server) {
 		var persistentStateManager = server.getOverworld().getPersistentStateManager();
 
-		return persistentStateManager.getOrCreate(
-				getPersistentStateType(),
-				SkillsAPI.MOD_ID
-		);
+		return persistentStateManager.getOrCreate(getPersistentStateType());
 	}
 
 	public PlayerData getPlayerData(ServerPlayerEntity player) {

@@ -18,10 +18,8 @@
 		"WorldChunkMixin"
 	],
 	"client": [
-		"BufferRendererMixin",
-		"BuiltBufferMixin",
 		"MinecraftClientMixin",
-		"RenderLayerMixin"
+		"RenderPassImplMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

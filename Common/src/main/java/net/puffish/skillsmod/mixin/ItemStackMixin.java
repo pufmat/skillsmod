@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemStackMixin {
 
 	@Inject(method = "onCraftByPlayer", at = @At("HEAD"))
-	private void injectAtOnCraftByPlayer(World world, PlayerEntity player, int amount, CallbackInfo ci) {
+	private void injectAtOnCraftByPlayer(PlayerEntity player, int amount, CallbackInfo ci) {
 		if (player instanceof ServerPlayerEntity serverPlayer) {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,

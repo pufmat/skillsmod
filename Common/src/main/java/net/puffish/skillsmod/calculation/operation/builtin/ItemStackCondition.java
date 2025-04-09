@@ -2,8 +2,8 @@ package net.puffish.skillsmod.calculation.operation.builtin;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.predicate.ComponentPredicate;
 import net.minecraft.predicate.NbtPredicate;
+import net.minecraft.predicate.component.ComponentsPredicate;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
@@ -22,9 +22,9 @@ import java.util.Optional;
 public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	private final Optional<RegistryEntryList<Item>> optItemEntries;
 	private final Optional<NbtPredicate> optNbt;
-	private final Optional<ComponentPredicate> optComponents;
+	private final Optional<ComponentsPredicate> optComponents;
 
-	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<ComponentPredicate> optComponents) {
+	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<ComponentsPredicate> optComponents) {
 		this.optItemEntries = optItemEntries;
 		this.optNbt = optNbt;
 		this.optComponents = optComponents;
@@ -63,7 +63,7 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 
 		var optComponents = rootObject.get("components")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseComponentPredicate(stateElement, context.getServer().getRegistryManager())
+				.flatMap(stateElement -> BuiltinJson.parseComponentsPredicate(stateElement, context.getServer().getRegistryManager())
 						.ifFailure(problems::add)
 						.getSuccess()
 				);

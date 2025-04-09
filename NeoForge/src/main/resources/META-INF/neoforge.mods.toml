@@ -15,13 +15,13 @@ description="Adds a fully configurable skill system to the game."
 [[dependencies.puffish_skills]]
 modId="neoforge"
 type="required"
-versionRange="[21.3.29-beta,)"
+versionRange="[21.5.30-beta,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.puffish_skills]]
 modId="minecraft"
 type="required"
-versionRange="[1.21.3,)"
+versionRange="[1.21.5,)"
 ordering="NONE"
 side="BOTH"

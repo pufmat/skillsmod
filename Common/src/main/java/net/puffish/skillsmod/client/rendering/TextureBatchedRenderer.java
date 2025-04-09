@@ -2,9 +2,6 @@ package net.puffish.skillsmod.client.rendering;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
@@ -362,17 +359,18 @@ public class TextureBatchedRenderer {
 		));
 	}
 
-	public void draw() {
-		for (var entry : batch.entrySet()) {
-			var bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-			for (var emit : entry.getValue()) {
-				bufferBuilder.vertex(emit.x1, emit.y1, emit.z1).texture(emit.minU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-				bufferBuilder.vertex(emit.x2, emit.y2, emit.z2).texture(emit.minU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-				bufferBuilder.vertex(emit.x3, emit.y3, emit.z3).texture(emit.maxU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-				bufferBuilder.vertex(emit.x4, emit.y4, emit.z4).texture(emit.maxU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+	public void draw(DrawContext context) {
+		context.draw(vcp -> {
+			for (var entry : batch.entrySet()) {
+				var vc = vcp.getBuffer(RenderLayer.getGuiTextured(entry.getKey()));
+				for (var emit : entry.getValue()) {
+					vc.vertex(emit.x1, emit.y1, emit.z1).texture(emit.minU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+					vc.vertex(emit.x2, emit.y2, emit.z2).texture(emit.minU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+					vc.vertex(emit.x3, emit.y3, emit.z3).texture(emit.maxU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+					vc.vertex(emit.x4, emit.y4, emit.z4).texture(emit.maxU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+				}
 			}
-			RenderLayer.getGuiTextured(entry.getKey()).draw(bufferBuilder.end());
-		}
+		});
 		batch.clear();
 	}
 }

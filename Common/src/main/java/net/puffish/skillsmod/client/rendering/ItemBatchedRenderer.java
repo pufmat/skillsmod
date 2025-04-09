@@ -6,15 +6,13 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.puffish.skillsmod.access.MinecraftClientAccess;
-import net.puffish.skillsmod.access.RenderLayerAccess;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +20,8 @@ public class ItemBatchedRenderer {
 
 	private final Map<ComparableItemStack, List<Matrix4f>> batch = new HashMap<>();
 	private final ItemRenderState itemRenderState = new ItemRenderState();
+
+	public static List<Matrix4f> EMITS;
 
 	public void emitItem(DrawContext context, ItemStack item, int x, int y) {
 		var emits = batch.computeIfAbsent(
@@ -35,6 +35,13 @@ public class ItemBatchedRenderer {
 	}
 
 	public void draw() {
+		var client = MinecraftClient.getInstance();
+
+		var clientAccess = (MinecraftClientAccess) client;
+		var immediate = clientAccess.getBufferBuilders().getEntityVertexConsumers();
+
+		immediate.draw();
+
 		var matrices = new MatrixStack();
 		matrices.translate(0, 0, 150);
 		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
@@ -43,13 +50,10 @@ public class ItemBatchedRenderer {
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
 
-			var client = MinecraftClient.getInstance();
-
-			client.getItemModelManager().update(
+			client.getItemModelManager().clearAndUpdate(
 					itemRenderState,
 					itemStack,
-					ModelTransformationMode.GUI,
-					false,
+					ItemDisplayContext.GUI,
 					client.world,
 					client.player,
 					0
@@ -61,28 +65,18 @@ public class ItemBatchedRenderer {
 				DiffuseLighting.disableGuiDepthLighting();
 			}
 
-			var clientAccess = (MinecraftClientAccess) client;
-			var immediate = clientAccess.getBufferBuilders().getEntityVertexConsumers();
-
-			var layers = new HashSet<RenderLayerAccess>();
+			EMITS = entry.getValue();
 
 			itemRenderState.render(
 					matrices,
-					layer -> {
-						var layerAccess = (RenderLayerAccess) layer;
-						layerAccess.setEmits(entry.getValue());
-						layers.add(layerAccess);
-						return immediate.getBuffer(layer);
-					},
+					immediate,
 					0xF000F0,
 					OverlayTexture.DEFAULT_UV
 			);
 
 			immediate.draw();
 
-			for (var layer : layers) {
-				layer.setEmits(null);
-			}
+			EMITS = null;
 		}
 		batch.clear();
 	}
