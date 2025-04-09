@@ -37,11 +37,15 @@
 	"command.puffish_skills.experience.set.success.single": "Se estableció %s de experiencia en la categoría %s para %s",
 	"command.puffish_skills.experience.set.success.multiple": "Se estableció %s de experiencia en la categoría %s para %s jugadores",
 
+	"command.puffish_skills.experience.get.success": "%3$s tiene %1$s de experiencia en la categoría %2$s",
+
 	"command.puffish_skills.points.add.success.single": "Se añadieron %s puntos a la categoría %s para %s",
 	"command.puffish_skills.points.add.success.multiple": "Se añadieron %s puntos a la categoría %s para %s jugadores",
 
 	"command.puffish_skills.points.set.success.single": "Se establecieron %s puntos en la categoría %s para %s",
 	"command.puffish_skills.points.set.success.multiple": "Se establecieron %s puntos en la categoría %s para %s jugadores",
+
+	"command.puffish_skills.points.get.success": "%3$s tiene %1$s puntos en la categoría %2$s",
 
 	"command.puffish_skills.skills.unlock.success.single": "Se desbloqueó la habilidad %s en la categoría %s para %s",
 	"command.puffish_skills.skills.unlock.success.multiple": "Se desbloqueó la habilidad %s en la categoría %s para %s jugadores",
