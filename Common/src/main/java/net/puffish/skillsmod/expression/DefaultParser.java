@@ -4,7 +4,7 @@ import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,8 +69,20 @@ public class DefaultParser {
 			FunctionOperator.create("mix", "(", ",", ")", 3, l -> v -> MathHelper.lerp(l.get(2).eval(v), l.get(0).eval(v), l.get(1).eval(v))),
 			FunctionOperator.create("clamp", "(", ",", ")", 3, l -> v -> MathHelper.clamp(l.get(0).eval(v), l.get(1).eval(v), l.get(2).eval(v))),
 
-			FunctionOperator.createVariadic("min", "(", ",", ")", l -> v -> l.stream().mapToDouble(e -> e.eval(v)).min().orElse(+Double.MAX_VALUE)),
-			FunctionOperator.createVariadic("max", "(", ",", ")", l -> v -> l.stream().mapToDouble(e -> e.eval(v)).max().orElse(-Double.MAX_VALUE))
+			FunctionOperator.createVariadic("min", "(", ",", ")", l -> v -> {
+				var x = Double.MAX_VALUE;
+				for (var e : l) {
+					x = Math.min(x, e.eval(v));
+				}
+				return x;
+			}),
+			FunctionOperator.createVariadic("max", "(", ",", ")", l -> v -> {
+				var x = -Double.MAX_VALUE;
+				for (var e : l) {
+					x = Math.max(x, e.eval(v));
+				}
+				return x;
+			})
 	);
 
 	public static Result<Expression<Double>, Problem> parse(String expression, Set<String> variables) {
@@ -85,10 +97,70 @@ public class DefaultParser {
 					return Result.failure(Problem.message("Unknown variable `" + token + "`"));
 				}
 			}
-		}).mapSuccess(e -> v -> {
-			var vc = new HashMap<>(CONSTANTS);
-			vc.putAll(v);
-			return e.eval(vc);
-		});
+		}).mapSuccess(e -> v -> e.eval(new WithConstants(v)));
+	}
+
+	private record WithConstants(Map<String, Double> variables) implements Map<String, Double> {
+
+		@Override
+		public boolean containsKey(Object o) {
+			return variables.containsKey(o) || CONSTANTS.containsKey(o);
+		}
+
+		@Override
+		public Double get(Object o) {
+			var v = variables.get(o);
+			return v != null ? v : CONSTANTS.get(o);
+		}
+
+		@Override
+		public int size() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean containsValue(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Double put(String s, Double d) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Double remove(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void putAll(Map<? extends String, ? extends Double> m) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void clear() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Set<String> keySet() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Collection<Double> values() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Set<Entry<String, Double>> entrySet() {
+			throw new UnsupportedOperationException();
+		}
 	}
 }
