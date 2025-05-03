@@ -9,6 +9,7 @@ import net.minecraft.util.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -23,7 +24,6 @@ import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,10 +48,17 @@ public class NeoForgeClientMain {
 		);
 
 		modEventBus.addListener(this::onRegisterPayloadHandler);
+		modEventBus.addListener(this::onRegisterKeyMappings);
 
 		var neoForgeEventBus = NeoForge.EVENT_BUS;
 		neoForgeEventBus.addListener(this::onPlayerLoggedIn);
 		neoForgeEventBus.addListener(this::onInputKey);
+	}
+
+	private void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+		for (var keyBinding : keyBindings) {
+			event.register(keyBinding.keyBinding);
+		}
 	}
 
 	private void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
@@ -68,7 +75,7 @@ public class NeoForgeClientMain {
 		}
 	}
 
-	public void onRegisterPayloadHandler(RegisterPayloadHandlersEvent event) {
+	private void onRegisterPayloadHandler(RegisterPayloadHandlersEvent event) {
 		var registrar = event.registrar(SkillsAPI.MOD_ID);
 		for (var payloadRegistration : payloadRegistrations) {
 			payloadRegistration.accept(registrar);
@@ -103,8 +110,6 @@ public class NeoForgeClientMain {
 		@Override
 		public void registerKeyBinding(KeyBinding keyBinding, KeyBindingHandler handler) {
 			keyBindings.add(new KeyBindingWithHandler(keyBinding, handler));
-			var options = MinecraftClient.getInstance().options;
-			options.allKeys = ArrayUtils.add(options.allKeys, keyBinding);
 		}
 	}
 
