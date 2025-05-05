@@ -380,7 +380,8 @@ public class SkillsMod {
 		categoryData.addExperience(amount);
 		syncExperience(player, category, experience, categoryData);
 
-		setPoints(player, category, categoryData, PointSources.EXPERIENCE, experience.getCurrentLevel(categoryData.getExperience()), false);
+		var level = experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
+		setPoints(player, category, categoryData, PointSources.EXPERIENCE, level, false);
 	}
 
 	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
@@ -396,7 +397,8 @@ public class SkillsMod {
 		categoryData.setExperience(amount);
 		syncExperience(player, category, experience, categoryData);
 
-		setPoints(player, category, categoryData, PointSources.EXPERIENCE, experience.getCurrentLevel(categoryData.getExperience()), false);
+		var level = experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
+		setPoints(player, category, categoryData, PointSources.EXPERIENCE, level, false);
 	}
 
 	public Optional<Integer> getExperience(ServerPlayerEntity player, Identifier categoryId) {
@@ -479,7 +481,7 @@ public class SkillsMod {
 		return getCategory(categoryId).map(category -> category.getExperience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-					return experience.getCurrentLevel(categoryData.getExperience());
+					return experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
 				})
 				.orElse(0));
 	}
@@ -488,20 +490,20 @@ public class SkillsMod {
 		return getCategory(categoryId).map(category -> category.getExperience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-					return experience.getCurrentExperience(categoryData.getExperience());
+					return experience.getCurve().getProgress(categoryData.getExperience()).currentExperience();
 				})
 				.orElse(0));
 	}
 
 	public Optional<Integer> getRequiredExperience(Identifier categoryId, int level) {
 		return getCategory(categoryId).map(category -> category.getExperience()
-				.map(experience -> experience.getRequiredExperience(level))
+				.map(experience -> experience.getCurve().getRequired(level))
 				.orElse(0));
 	}
 
 	public Optional<Integer> getRequiredTotalExperience(Identifier categoryId, int level) {
 		return getCategory(categoryId).map(category -> category.getExperience()
-				.map(experience -> experience.getRequiredTotalExperience(level))
+				.map(experience -> experience.getCurve().getRequiredTotal(level))
 				.orElse(0));
 	}
 
@@ -597,12 +599,12 @@ public class SkillsMod {
 	}
 
 	private void syncExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData) {
-		var level = experience.getCurrentLevel(categoryData.getExperience());
+		var progress = experience.getCurve().getProgress(categoryData.getExperience());
 		packetSender.send(player, new ExperienceUpdateOutPacket(
 				category.getId(),
-				level,
-				experience.getCurrentExperience(categoryData.getExperience()),
-				experience.getRequiredExperience(level)
+				progress.currentLevel(),
+				progress.currentExperience(),
+				progress.requiredExperience()
 		));
 	}
 
@@ -698,7 +700,7 @@ public class SkillsMod {
 	private void updatePoints(CategoryConfig category, CategoryData categoryData) {
 		categoryData.setPoints(PointSources.STARTING, category.getGeneral().getStartingPoints());
 		category.getExperience().ifPresent(experience -> {
-			categoryData.setPoints(PointSources.EXPERIENCE, experience.getCurrentLevel(categoryData.getExperience()));
+			categoryData.setPoints(PointSources.EXPERIENCE, experience.getCurve().getProgress(categoryData.getExperience()).currentLevel());
 		});
 
 		var legacy = categoryData.getPoints(PointSources.LEGACY);
