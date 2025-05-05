@@ -5,6 +5,7 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skillsmod.experience.ExperienceCurve;
 import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
 
@@ -13,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExperienceConfig {
-	private final ExperiencePerLevelConfig experiencePerLevel;
+	private final ExperienceCurve experienceCurve;
 	private final List<ExperienceSourceConfig> experienceSources;
 
-	private ExperienceConfig(ExperiencePerLevelConfig experiencePerLevel, List<ExperienceSourceConfig> experienceSources) {
-		this.experiencePerLevel = experiencePerLevel;
+	private ExperienceConfig(ExperienceCurve experienceCurve, List<ExperienceSourceConfig> experienceSources) {
+		this.experienceCurve = experienceCurve;
 		this.experienceSources = experienceSources;
 	}
 
@@ -49,7 +50,7 @@ public class ExperienceConfig {
 		if (problems.isEmpty()) {
 			if (enabled) {
 				return Result.success(Optional.of(new ExperienceConfig(
-						optExperiencePerLevel.orElseThrow(),
+						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().getFunction()),
 						experienceSources
 				)));
 			} else {
@@ -60,56 +61,14 @@ public class ExperienceConfig {
 		}
 	}
 
-	public int getRequiredExperience(int level) {
-		return experiencePerLevel.getFunction().apply(level);
-	}
-
-	public int getRequiredTotalExperience(int level) {
-		var total = 0;
-		for (var i = 0; i < level; i++) {
-			total += getRequiredExperience(level);
-		}
-		return total;
-	}
-
-	public int getCurrentExperience(int earnedExperience) {
-		var level = 0;
-
-		while (true) {
-			var requiredExperience = getRequiredExperience(level);
-
-			if (earnedExperience < requiredExperience) {
-				return earnedExperience;
-			}
-
-			earnedExperience -= requiredExperience;
-			level++;
-		}
-	}
-
-	public int getCurrentLevel(int earnedExperience) {
-		var level = 0;
-
-		while (true) {
-			var requiredExperience = getRequiredExperience(level);
-
-			if (earnedExperience < requiredExperience) {
-				return level;
-			}
-
-			earnedExperience -= requiredExperience;
-			level++;
-		}
-	}
-
 	public void dispose(DisposeContext context) {
 		for (var experienceSource : experienceSources) {
 			experienceSource.dispose(context);
 		}
 	}
 
-	public ExperiencePerLevelConfig getExperiencePerLevel() {
-		return experiencePerLevel;
+	public ExperienceCurve getCurve() {
+		return experienceCurve;
 	}
 
 	public List<ExperienceSourceConfig> getExperienceSources() {
