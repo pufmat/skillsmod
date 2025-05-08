@@ -15,5 +15,6 @@ public record ClientSkillDefinitionConfig(
 		int cost,
 		int requiredSkills,
 		int requiredPoints,
-		int requiredSpentPoints
+		int requiredSpentPoints,
+		int requiredExclusions
 ) { }

@@ -28,8 +28,9 @@ public class SkillDefinitionConfig {
 	private final int requiredSkills;
 	private final int requiredPoints;
 	private final int requiredSpentPoints;
+	private final int requiredExclusions;
 
-	private SkillDefinitionConfig(String id, Text title, Text description, Text extraDescription, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredSkills, int requiredPoints, int requiredSpentPoints) {
+	private SkillDefinitionConfig(String id, Text title, Text description, Text extraDescription, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredSkills, int requiredPoints, int requiredSpentPoints, int requiredExclusions) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -42,6 +43,7 @@ public class SkillDefinitionConfig {
 		this.requiredSkills = requiredSkills;
 		this.requiredPoints = requiredPoints;
 		this.requiredSpentPoints = requiredSpentPoints;
+		this.requiredExclusions = requiredExclusions;
 	}
 
 	public static Result<SkillDefinitionConfig, Problem> parse(String id, JsonElement rootElement, ConfigContext context) {
@@ -134,6 +136,14 @@ public class SkillDefinitionConfig {
 				)
 				.orElse(0);
 
+		var requiredExclusions = rootObject.get("required_exclusions")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsInt()
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(1);
+
 		// this field is generated be the editor, access it to avoid unused field error
 		rootObject.get("metadata");
 
@@ -150,7 +160,8 @@ public class SkillDefinitionConfig {
 					cost,
 					requiredSkills,
 					requiredPoints,
-					requiredSpentPoints
+					requiredSpentPoints,
+					requiredExclusions
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -209,5 +220,9 @@ public class SkillDefinitionConfig {
 
 	public int getRequiredSpentPoints() {
 		return requiredSpentPoints;
+	}
+
+	public int getRequiredExclusions() {
+		return requiredExclusions;
 	}
 }

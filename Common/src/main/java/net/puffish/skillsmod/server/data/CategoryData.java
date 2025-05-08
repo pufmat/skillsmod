@@ -98,8 +98,8 @@ public class CategoryData {
 		if (category.getConnections()
 				.getExclusive()
 				.getNeighborsFor(skill.getId())
-				.map(neighbors -> neighbors.stream().anyMatch(unlockedSkills::contains))
-				.orElse(false)
+				.map(neighbors -> neighbors.stream().filter(unlockedSkills::contains).count())
+				.orElse(0L) >= definition.getRequiredExclusions()
 		) {
 			return Skill.State.EXCLUDED;
 		}
