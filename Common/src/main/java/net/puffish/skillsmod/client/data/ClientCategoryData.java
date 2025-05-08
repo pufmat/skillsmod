@@ -141,7 +141,11 @@ public class ClientCategoryData {
 					.map(id -> config.skills().get(id))
 					.filter(Objects::nonNull)
 					.filter(neighbor -> getSkillState(neighbor) != Skill.State.UNLOCKED)
-					.forEach(neighbor -> updateSkillState(neighbor, Skill.State.EXCLUDED));
+					.forEach(neighbor -> {
+						if (isExcluded(neighbor)) {
+							updateSkillState(neighbor, Skill.State.EXCLUDED);
+						}
+					});
 		}
 	}
 
@@ -225,10 +229,14 @@ public class ClientCategoryData {
 		if (exclusiveNeighborsReversedIds == null) {
 			return false;
 		}
-		return exclusiveNeighborsReversedIds.stream()
-				.map(id -> config.skills().get(id))
-				.filter(Objects::nonNull)
-				.anyMatch(neighbor -> getSkillState(neighbor) == Skill.State.UNLOCKED);
+		return config.getDefinitionById(skill.definitionId())
+				.map(definition -> exclusiveNeighborsReversedIds.stream()
+					.map(id -> config.skills().get(id))
+					.filter(Objects::nonNull)
+					.filter(neighbor -> getSkillState(neighbor) == Skill.State.UNLOCKED)
+					.count() >= definition.requiredExclusions()
+				)
+				.orElse(false);
 	}
 
 	private boolean isAvailable(ClientSkillConfig skill) {
