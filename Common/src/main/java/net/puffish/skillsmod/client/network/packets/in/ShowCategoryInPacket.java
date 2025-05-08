@@ -117,6 +117,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var requiredSkills = buf.readInt();
 		var requiredPoints = buf.readInt();
 		var requiredSpentPoints = buf.readInt();
+		var requiredExclusions = buf.readInt();
 
 		return new ClientSkillDefinitionConfig(
 				id,
@@ -129,7 +130,8 @@ public class ShowCategoryInPacket implements InPacket {
 				cost,
 				requiredSkills,
 				requiredPoints,
-				requiredSpentPoints
+				requiredSpentPoints,
+				requiredExclusions
 		);
 	}
 

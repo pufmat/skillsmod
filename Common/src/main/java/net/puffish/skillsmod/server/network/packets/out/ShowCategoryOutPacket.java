@@ -85,6 +85,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(definition.getRequiredSkills());
 		buf.writeInt(definition.getRequiredPoints());
 		buf.writeInt(definition.getRequiredSpentPoints());
+		buf.writeInt(definition.getRequiredExclusions());
 	}
 
 	public void write(PacketByteBuf buf, SkillsConfig skills) {
