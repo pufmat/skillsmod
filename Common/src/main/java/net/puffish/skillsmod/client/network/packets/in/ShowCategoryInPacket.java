@@ -65,10 +65,12 @@ public class ShowCategoryInPacket implements InPacket {
 		var spentPoints = buf.readInt();
 		var earnedPoints = buf.readInt();
 
+		var levelLimit = Integer.MAX_VALUE;
 		var currentLevel = Integer.MIN_VALUE;
 		var currentExperience = Integer.MIN_VALUE;
 		var requiredExperience = Integer.MIN_VALUE;
 		if (buf.readBoolean()) {
+			levelLimit = buf.readInt();
 			currentLevel = buf.readInt();
 			currentExperience = buf.readInt();
 			requiredExperience = buf.readInt();
@@ -82,6 +84,7 @@ public class ShowCategoryInPacket implements InPacket {
 				colors,
 				exclusiveRoot,
 				spentPointsLimit,
+				levelLimit,
 				definitions,
 				skills,
 				normalConnections,
