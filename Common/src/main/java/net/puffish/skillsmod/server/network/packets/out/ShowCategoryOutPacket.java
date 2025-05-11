@@ -48,7 +48,9 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(categoryData.getPointsTotal());
 		category.getExperience().ifPresentOrElse(experience -> {
 			buf.writeBoolean(true);
-			var progress = experience.getCurve().getProgress(categoryData.getExperience());
+			var curve = experience.getCurve();
+			buf.writeInt(curve.getLevelLimit());
+			var progress = curve.getProgress(categoryData.getExperience());
 			buf.writeInt(progress.currentLevel());
 			buf.writeInt(progress.currentExperience());
 			buf.writeInt(progress.requiredExperience());
