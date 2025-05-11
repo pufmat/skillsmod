@@ -36,6 +36,14 @@ public class ExperienceConfig {
 				context
 		).orElse(true);
 
+		var levelLimit = rootObject.get("level_limit")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsInt()
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(Integer.MAX_VALUE);
+
 		var optExperiencePerLevel = rootObject.get("experience_per_level")
 				.andThen(element -> ExperiencePerLevelConfig.parse(element, context))
 				.ifFailure(problems::add)
@@ -50,7 +58,7 @@ public class ExperienceConfig {
 		if (problems.isEmpty()) {
 			if (enabled) {
 				return Result.success(Optional.of(new ExperienceConfig(
-						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().getFunction()),
+						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().getFunction(), levelLimit),
 						experienceSources
 				)));
 			} else {
