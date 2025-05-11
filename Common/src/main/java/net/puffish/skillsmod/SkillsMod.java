@@ -377,11 +377,7 @@ public class SkillsMod {
 	}
 
 	public void addExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
-		categoryData.addExperience(amount);
-		syncExperience(player, category, experience, categoryData);
-
-		var level = experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
-		setPoints(player, category, categoryData, PointSources.EXPERIENCE, level, false);
+		setExperience(player, category, experience, categoryData, categoryData.getExperience() + amount);
 	}
 
 	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
@@ -394,10 +390,16 @@ public class SkillsMod {
 	}
 
 	public void setExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
+		var curve = experience.getCurve();
+		var level = curve.getProgress(amount).currentLevel();
+		var levelLimit = curve.getLevelLimit();
+		if (level >= levelLimit) {
+			level = levelLimit;
+			amount = curve.getRequiredTotal(levelLimit - 1);
+		}
 		categoryData.setExperience(amount);
-		syncExperience(player, category, experience, categoryData);
 
-		var level = experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
+		syncExperience(player, category, experience, categoryData);
 		setPoints(player, category, categoryData, PointSources.EXPERIENCE, level, false);
 	}
 
@@ -420,11 +422,7 @@ public class SkillsMod {
 	}
 
 	public void addPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
-		watchNewPoints(player, category, categoryData, isSilent, () -> {
-			categoryData.addPoints(source, count);
-
-			syncPoints(player, category, categoryData);
-		});
+		setPoints(player, category, categoryData, source, categoryData.getPoints(source) + count, isSilent);
 	}
 
 	public void setPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source, int count, boolean isSilent) {

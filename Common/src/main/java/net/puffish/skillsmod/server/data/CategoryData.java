@@ -168,10 +168,6 @@ public class CategoryData {
 		return unlockedSkills;
 	}
 
-	public void addExperience(int experience) {
-		this.experience += experience;
-	}
-
 	public int getExperience() {
 		return experience;
 	}
@@ -201,10 +197,6 @@ public class CategoryData {
 
 	public int getPointsLeft(CategoryConfig category) {
 		return Math.min(getPointsTotal(), category.getGeneral().getSpentPointsLimit()) - getSpentPoints(category);
-	}
-
-	public void addPoints(Identifier source, int count) {
-		points.compute(source, (key, value) -> (value == null ? 0 : value) + count);
 	}
 
 	public int getPoints(Identifier source) {
