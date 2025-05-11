@@ -1054,6 +1054,7 @@ public class SkillsScreen extends Screen {
 						"tooltip",
 						"current_level",
 						activeCategoryData.getCurrentLevel()
+								+ (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
 				).asOrderedText());
 				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
