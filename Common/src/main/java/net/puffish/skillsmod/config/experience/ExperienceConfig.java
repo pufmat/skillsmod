@@ -13,14 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ExperienceConfig {
-	private final ExperienceCurve experienceCurve;
-	private final List<ExperienceSourceConfig> experienceSources;
-
-	private ExperienceConfig(ExperienceCurve experienceCurve, List<ExperienceSourceConfig> experienceSources) {
-		this.experienceCurve = experienceCurve;
-		this.experienceSources = experienceSources;
-	}
+public record ExperienceConfig(
+		ExperienceCurve curve,
+		List<ExperienceSourceConfig> experienceSources
+) {
 
 	public static Result<Optional<ExperienceConfig>, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
@@ -58,7 +54,7 @@ public class ExperienceConfig {
 		if (problems.isEmpty()) {
 			if (enabled) {
 				return Result.success(Optional.of(new ExperienceConfig(
-						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().getFunction(), levelLimit),
+						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().function(), levelLimit),
 						experienceSources
 				)));
 			} else {
@@ -75,11 +71,4 @@ public class ExperienceConfig {
 		}
 	}
 
-	public ExperienceCurve getCurve() {
-		return experienceCurve;
-	}
-
-	public List<ExperienceSourceConfig> getExperienceSources() {
-		return experienceSources;
-	}
 }
