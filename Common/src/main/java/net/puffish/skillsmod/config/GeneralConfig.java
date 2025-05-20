@@ -14,6 +14,8 @@ import java.util.ArrayList;
 
 public record GeneralConfig(
 		Text title,
+		Text description,
+		Text extraDescription,
 		IconConfig icon,
 		BackgroundConfig background,
 		ColorsConfig colors,
@@ -35,6 +37,22 @@ public record GeneralConfig(
 				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().getRegistryManager()))
 				.ifFailure(problems::add)
 				.getSuccess();
+
+		var description = rootObject.get("description")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElseGet(Text::empty);
+
+		var extraDescription = rootObject.get("extra_description")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElseGet(Text::empty);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))
@@ -89,6 +107,8 @@ public record GeneralConfig(
 		if (problems.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
+					description,
+					extraDescription,
 					optIcon.orElseThrow(),
 					optBackground.orElseThrow(),
 					colors,
