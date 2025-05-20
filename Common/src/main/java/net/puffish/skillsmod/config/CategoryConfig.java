@@ -15,29 +15,14 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class CategoryConfig {
-	private final Identifier id;
-	private final GeneralConfig general;
-	private final SkillDefinitionsConfig definitions;
-	private final SkillsConfig skills;
-	private final SkillConnectionsConfig connections;
-	private final Optional<ExperienceConfig> optExperience;
-
-	private CategoryConfig(
-			Identifier id,
-			GeneralConfig general,
-			SkillDefinitionsConfig definitions,
-			SkillsConfig skills,
-			SkillConnectionsConfig connections,
-			Optional<ExperienceConfig> optExperience
-	) {
-		this.id = id;
-		this.general = general;
-		this.definitions = definitions;
-		this.skills = skills;
-		this.connections = connections;
-		this.optExperience = optExperience;
-	}
+public record CategoryConfig(
+		Identifier id,
+		GeneralConfig general,
+		SkillDefinitionsConfig definitions,
+		SkillsConfig skills,
+		SkillConnectionsConfig connections,
+		Optional<ExperienceConfig> experience
+) {
 
 	public static Result<CategoryConfig, Problem> parse(
 			Identifier id,
@@ -93,30 +78,7 @@ public class CategoryConfig {
 
 	public void dispose(DisposeContext context) {
 		definitions.dispose(context);
-		optExperience.ifPresent(experience -> experience.dispose(context));
+		experience.ifPresent(experience -> experience.dispose(context));
 	}
 
-	public Identifier getId() {
-		return id;
-	}
-
-	public GeneralConfig getGeneral() {
-		return general;
-	}
-
-	public SkillDefinitionsConfig getDefinitions() {
-		return definitions;
-	}
-
-	public SkillsConfig getSkills() {
-		return skills;
-	}
-
-	public SkillConnectionsConfig getConnections() {
-		return connections;
-	}
-
-	public Optional<ExperienceConfig> getExperience() {
-		return optExperience;
-	}
 }

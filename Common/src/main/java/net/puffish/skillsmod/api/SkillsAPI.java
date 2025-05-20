@@ -51,11 +51,11 @@ public final class SkillsAPI {
 	}
 
 	public static void updateRewards(ServerPlayerEntity player, Identifier id) {
-		SkillsMod.getInstance().updateRewards(player, reward -> reward.getType().equals(id));
+		SkillsMod.getInstance().updateRewards(player, reward -> reward.type().equals(id));
 	}
 
 	public static void updateRewards(ServerPlayerEntity player, Predicate<Reward> predicate) {
-		SkillsMod.getInstance().updateRewards(player, reward -> predicate.test(reward.getInstance()));
+		SkillsMod.getInstance().updateRewards(player, reward -> predicate.test(reward.instance()));
 	}
 
 	public static <T extends Reward> void updateRewards(ServerPlayerEntity player, Class<T> clazz) {

@@ -84,8 +84,8 @@ public class SkillConnectionsGroupConfig {
 		var directions = new HashMap<SkillPair, SkillPair.Direction>();
 
 		for (var connection : unidirectional) {
-			var a = connection.getSkillAId();
-			var b = connection.getSkillBId();
+			var a = connection.skillAId();
+			var b = connection.skillBId();
 
 			var order = a.compareTo(b);
 			if (order == 0) {
@@ -107,8 +107,8 @@ public class SkillConnectionsGroupConfig {
 		}
 
 		for (var connection : bidirectional) {
-			var a = connection.getSkillAId();
-			var b = connection.getSkillBId();
+			var a = connection.skillAId();
+			var b = connection.skillBId();
 
 			var order = a.compareTo(b);
 			if (order == 0) {
