@@ -12,14 +12,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PackConfig implements Config {
-	private final int version;
-	private final List<String> categories;
-
-	private PackConfig(int version, List<String> categories) {
-		this.version = version;
-		this.categories = categories;
-	}
+public record PackConfig(int version, List<String> categories) implements Config {
 
 	public static Result<PackConfig, Problem> parse(String name, JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -67,13 +60,4 @@ public class PackConfig implements Config {
 		}
 	}
 
-	@Override
-	public int getVersion() {
-		return version;
-	}
-
-	@Override
-	public List<String> getCategories() {
-		return categories;
-	}
 }

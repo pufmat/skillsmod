@@ -17,14 +17,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 
-public class ExperienceSourceConfig {
-	private final Identifier type;
-	private final ExperienceSource instance;
-
-	private ExperienceSourceConfig(Identifier type, ExperienceSource instance) {
-		this.type = type;
-		this.instance = instance;
-	}
+public record ExperienceSourceConfig(
+		Identifier type,
+		ExperienceSource instance
+) {
 
 	public static Result<ExperienceSourceConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -71,11 +67,4 @@ public class ExperienceSourceConfig {
 		this.instance.dispose(new ExperienceSourceDisposeContextImpl(context));
 	}
 
-	public Identifier getType() {
-		return type;
-	}
-
-	public ExperienceSource getInstance() {
-		return instance;
-	}
 }

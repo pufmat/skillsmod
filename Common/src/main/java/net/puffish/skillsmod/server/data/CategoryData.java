@@ -34,12 +34,12 @@ public class CategoryData {
 
 	public static CategoryData create(GeneralConfig general) {
 		var points = new HashMap<Identifier, Integer>();
-		points.put(PointSources.STARTING, general.getStartingPoints());
+		points.put(PointSources.STARTING, general.startingPoints());
 
 		return new CategoryData(
 				new HashSet<>(),
 				points,
-				general.isUnlockedByDefault(),
+				general.unlockedByDefault(),
 				0
 		);
 	}
@@ -91,31 +91,31 @@ public class CategoryData {
 	}
 
 	public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
-		if (unlockedSkills.contains(skill.getId())) {
+		if (unlockedSkills.contains(skill.id())) {
 			return Skill.State.UNLOCKED;
 		}
 
-		if (category.getConnections()
-				.getExclusive()
-				.getNeighborsFor(skill.getId())
+		if (category.connections()
+				.exclusive()
+				.getNeighborsFor(skill.id())
 				.map(neighbors -> neighbors.stream().filter(unlockedSkills::contains).count())
-				.orElse(0L) >= definition.getRequiredExclusions()
+				.orElse(0L) >= definition.requiredExclusions()
 		) {
 			return Skill.State.EXCLUDED;
 		}
 
-		if (category.getConnections()
-				.getNormal()
-				.getNeighborsFor(skill.getId())
+		if (category.connections()
+				.normal()
+				.getNeighborsFor(skill.id())
 				.map(neighbors -> neighbors.stream().filter(unlockedSkills::contains).count())
-				.orElse(0L) >= definition.getRequiredSkills()
+				.orElse(0L) >= definition.requiredSkills()
 		) {
 			return canAfford(category, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
 		}
 
 		if (skill.isRoot()) {
-			if (category.getGeneral().isExclusiveRoot() && unlockedSkills.stream()
-					.flatMap(skillId -> category.getSkills().getById(skillId).stream())
+			if (category.general().exclusiveRoot() && unlockedSkills.stream()
+					.flatMap(skillId -> category.skills().getById(skillId).stream())
 					.anyMatch(SkillConfig::isRoot)
 			) {
 				return Skill.State.LOCKED;
@@ -128,25 +128,25 @@ public class CategoryData {
 	}
 
 	private boolean canAfford(CategoryConfig category, SkillDefinitionConfig definition) {
-		return getPointsLeft(category) >= Math.max(definition.getRequiredPoints(), definition.getCost())
-				&& getSpentPoints(category) >= definition.getRequiredSpentPoints();
+		return getPointsLeft(category) >= Math.max(definition.requiredPoints(), definition.cost())
+				&& getSpentPoints(category) >= definition.requiredSpentPoints();
 	}
 
 	public boolean canUnlockSkill(CategoryConfig category, SkillConfig skill) {
-		var definitionId = skill.getDefinitionId();
+		var definitionId = skill.definitionId();
 
-		return category.getDefinitions()
+		return category.definitions()
 				.getById(definitionId)
 				.map(definition -> getSkillState(category, skill, definition) == Skill.State.AFFORDABLE)
 				.orElse(false);
 	}
 
 	public int countUnlocked(CategoryConfig category, String definitionId) {
-		return category.getDefinitions().getById(definitionId).map(
-				definition -> category.getSkills()
+		return category.definitions().getById(definitionId).map(
+				definition -> category.skills()
 						.getAll()
 						.stream()
-						.filter(skill -> skill.getDefinitionId().equals(definitionId))
+						.filter(skill -> skill.definitionId().equals(definitionId))
 						.filter(skill -> getSkillState(category, skill, definition) == Skill.State.UNLOCKED)
 						.count()
 		).orElse(0L).intValue();
@@ -178,12 +178,12 @@ public class CategoryData {
 
 	public int getSpentPoints(CategoryConfig category) {
 		return unlockedSkills.stream()
-				.flatMap(skillId -> category.getSkills()
+				.flatMap(skillId -> category.skills()
 						.getById(skillId)
-						.flatMap(skill -> category.getDefinitions().getById(skill.getDefinitionId()))
+						.flatMap(skill -> category.definitions().getById(skill.definitionId()))
 						.stream()
 				)
-				.mapToInt(SkillDefinitionConfig::getCost)
+				.mapToInt(SkillDefinitionConfig::cost)
 				.sum();
 	}
 
@@ -196,7 +196,7 @@ public class CategoryData {
 	}
 
 	public int getPointsLeft(CategoryConfig category) {
-		return Math.min(getPointsTotal(), category.getGeneral().getSpentPointsLimit()) - getSpentPoints(category);
+		return Math.min(getPointsTotal(), category.general().spentPointsLimit()) - getSpentPoints(category);
 	}
 
 	public int getPoints(Identifier source) {
