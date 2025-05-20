@@ -15,12 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class ExperiencePerLevelConfig {
-	private final Function<Integer, Integer> function;
-
-	private ExperiencePerLevelConfig(Function<Integer, Integer> function) {
-		this.function = function;
-	}
+public record ExperiencePerLevelConfig(
+		Function<Integer, Integer> function
+) {
 
 	public static Result<ExperiencePerLevelConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -136,7 +133,4 @@ public class ExperiencePerLevelConfig {
 		}
 	}
 
-	public Function<Integer, Integer> getFunction() {
-		return function;
-	}
 }

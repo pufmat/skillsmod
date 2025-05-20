@@ -13,7 +13,7 @@ import java.util.Optional;
 public class SkillsConfig {
 	private final Map<String, SkillConfig> skills;
 
-	private SkillsConfig(Map<String, SkillConfig> skills) {
+	public SkillsConfig(Map<String, SkillConfig> skills) {
 		this.skills = skills;
 	}
 

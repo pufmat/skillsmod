@@ -3,7 +3,7 @@ package net.puffish.skillsmod.config;
 import java.util.List;
 
 public interface Config {
-	int getVersion();
+	int version();
 
-	List<String> getCategories();
+	List<String> categories();
 }
