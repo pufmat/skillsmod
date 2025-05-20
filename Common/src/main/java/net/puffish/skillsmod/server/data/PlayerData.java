@@ -47,18 +47,18 @@ public class PlayerData {
 	}
 
 	public boolean isCategoryUnlocked(CategoryConfig category) {
-		var categoryData = categories.get(category.getId());
+		var categoryData = categories.get(category.id());
 		if (categoryData != null) {
 			return categoryData.isUnlocked();
 		}
-		return category.getGeneral().isUnlockedByDefault();
+		return category.general().unlockedByDefault();
 	}
 
 	public CategoryData getOrCreateCategoryData(CategoryConfig category) {
-		return categories.computeIfAbsent(category.getId(), key -> CategoryData.create(category.getGeneral()));
+		return categories.computeIfAbsent(category.id(), key -> CategoryData.create(category.general()));
 	}
 
 	public void removeCategoryData(CategoryConfig category) {
-		categories.remove(category.getId());
+		categories.remove(category.id());
 	}
 }

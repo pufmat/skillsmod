@@ -12,16 +12,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModConfig implements Config {
-	private final int version;
-	private final List<String> categories;
-	private final boolean showWarnings;
-
-	private ModConfig(int version, boolean showWarnings, List<String> categories) {
-		this.version = version;
-		this.showWarnings = showWarnings;
-		this.categories = categories;
-	}
+public record ModConfig(int version, boolean showWarnings, List<String> categories) implements Config {
 
 	public static Result<ModConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -82,17 +73,4 @@ public class ModConfig implements Config {
 		}
 	}
 
-	@Override
-	public int getVersion() {
-		return version;
-	}
-
-	@Override
-	public List<String> getCategories() {
-		return categories;
-	}
-
-	public boolean getShowWarnings() {
-		return showWarnings;
-	}
 }

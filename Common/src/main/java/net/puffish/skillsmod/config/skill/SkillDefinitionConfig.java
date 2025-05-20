@@ -15,36 +15,21 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SkillDefinitionConfig {
-	private final String id;
-	private final Text title;
-	private final Text description;
-	private final Text extraDescription;
-	private final IconConfig icon;
-	private final FrameConfig frame;
-	private final float size;
-	private final List<SkillRewardConfig> rewards;
-	private final int cost;
-	private final int requiredSkills;
-	private final int requiredPoints;
-	private final int requiredSpentPoints;
-	private final int requiredExclusions;
-
-	private SkillDefinitionConfig(String id, Text title, Text description, Text extraDescription, IconConfig icon, FrameConfig frame, float size, List<SkillRewardConfig> rewards, int cost, int requiredSkills, int requiredPoints, int requiredSpentPoints, int requiredExclusions) {
-		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.extraDescription = extraDescription;
-		this.icon = icon;
-		this.frame = frame;
-		this.size = size;
-		this.rewards = rewards;
-		this.cost = cost;
-		this.requiredSkills = requiredSkills;
-		this.requiredPoints = requiredPoints;
-		this.requiredSpentPoints = requiredSpentPoints;
-		this.requiredExclusions = requiredExclusions;
-	}
+public record SkillDefinitionConfig(
+		String id,
+		Text title,
+		Text description,
+		Text extraDescription,
+		IconConfig icon,
+		FrameConfig frame,
+		float size,
+		List<SkillRewardConfig> rewards,
+		int cost,
+		int requiredSkills,
+		int requiredPoints,
+		int requiredSpentPoints,
+		int requiredExclusions
+) {
 
 	public static Result<SkillDefinitionConfig, Problem> parse(String id, JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -174,55 +159,4 @@ public class SkillDefinitionConfig {
 		}
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public Text getTitle() {
-		return title;
-	}
-
-	public Text getDescription() {
-		return description;
-	}
-
-	public Text getExtraDescription() {
-		return extraDescription;
-	}
-
-	public FrameConfig getFrame() {
-		return frame;
-	}
-
-	public float getSize() {
-		return size;
-	}
-
-	public IconConfig getIcon() {
-		return icon;
-	}
-
-	public List<SkillRewardConfig> getRewards() {
-		return rewards;
-	}
-
-	public int getCost() {
-		return cost;
-	}
-
-	public int getRequiredSkills() {
-		return requiredSkills;
-	}
-
-	public int getRequiredPoints() {
-		return requiredPoints;
-	}
-
-	public int getRequiredSpentPoints() {
-		return requiredSpentPoints;
-	}
-
-	public int getRequiredExclusions() {
-		return requiredExclusions;
-	}
 }
