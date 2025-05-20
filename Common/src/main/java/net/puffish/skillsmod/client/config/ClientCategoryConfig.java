@@ -18,6 +18,8 @@ import java.util.Optional;
 public record ClientCategoryConfig(
 		Identifier id,
 		Text title,
+		Text description,
+		Text extraDescription,
 		ClientIconConfig icon,
 		ClientBackgroundConfig background,
 		ClientColorsConfig colors,
@@ -38,6 +40,8 @@ public record ClientCategoryConfig(
 	public ClientCategoryConfig(
 			Identifier id,
 			Text title,
+			Text description,
+			Text extraDescription,
 			ClientIconConfig icon,
 			ClientBackgroundConfig background,
 			ClientColorsConfig colors,
@@ -52,6 +56,8 @@ public record ClientCategoryConfig(
 		this(
 				id,
 				title,
+				description,
+				extraDescription,
 				icon,
 				background,
 				colors,

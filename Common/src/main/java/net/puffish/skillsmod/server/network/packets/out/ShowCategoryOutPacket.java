@@ -66,6 +66,8 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	public void write(RegistryByteBuf buf, GeneralConfig general) {
 		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.title());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.description());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.extraDescription());
 		write(buf, general.icon());
 		write(buf, general.background());
 		write(buf, general.colors());
