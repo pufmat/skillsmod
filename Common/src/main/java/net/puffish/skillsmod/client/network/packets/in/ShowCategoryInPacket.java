@@ -43,6 +43,8 @@ public class ShowCategoryInPacket implements InPacket {
 		var id = buf.readIdentifier();
 
 		var title = TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.decode(buf);
+		var description = TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.decode(buf);
+		var extraDescription = TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.decode(buf);
 		var icon = readSkillIcon(buf);
 		var background = readBackground(buf);
 		var colors = readColors(buf);
@@ -82,6 +84,8 @@ public class ShowCategoryInPacket implements InPacket {
 		var category = new ClientCategoryConfig(
 				id,
 				title,
+				description,
+				extraDescription,
 				icon,
 				background,
 				colors,
