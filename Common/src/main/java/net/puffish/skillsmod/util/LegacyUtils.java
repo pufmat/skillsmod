@@ -65,7 +65,7 @@ public class LegacyUtils {
 						var problems = tracking.reportUnusedEntries();
 
 						if (!problems.isEmpty()) {
-							if (config.getVersion() >= 3) {
+							if (config.version() >= 3) {
 								// support for unused fields is removed, report problem
 								return Result.failure(Problem.combine(problems));
 							} else {

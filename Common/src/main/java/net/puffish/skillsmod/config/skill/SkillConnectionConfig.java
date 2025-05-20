@@ -7,14 +7,10 @@ import net.puffish.skillsmod.api.util.Problem;
 
 import java.util.ArrayList;
 
-public class SkillConnectionConfig {
-	private final String skillAId;
-	private final String skillBId;
-
-	private SkillConnectionConfig(String skillAId, String skillBId) {
-		this.skillAId = skillAId;
-		this.skillBId = skillBId;
-	}
+public record SkillConnectionConfig(
+		String skillAId,
+		String skillBId
+) {
 
 	public static Result<SkillConnectionConfig, Problem> parse(JsonElement rootElement, SkillsConfig skills) {
 		return rootElement.getAsArray()
@@ -51,11 +47,4 @@ public class SkillConnectionConfig {
 		}
 	}
 
-	public String getSkillAId() {
-		return skillAId;
-	}
-
-	public String getSkillBId() {
-		return skillBId;
-	}
 }
