@@ -31,27 +31,27 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	@Override
 	public void write(RegistryByteBuf buf) {
-		buf.writeIdentifier(category.getId());
-		write(buf, category.getGeneral());
-		write(buf, category.getDefinitions());
-		write(buf, category.getSkills());
-		write(buf, category.getConnections());
+		buf.writeIdentifier(category.id());
+		write(buf, category.general());
+		write(buf, category.definitions());
+		write(buf, category.skills());
+		write(buf, category.connections());
 		buf.writeMap(
-				category.getSkills().getMap(),
+				category.skills().getMap(),
 				PacketByteBuf::writeString,
 				(buf1, skill) -> buf1.writeEnumConstant(
 						categoryData.getSkillState(
 								category,
 								skill,
-								category.getDefinitions().getById(skill.getDefinitionId()).orElseThrow()
+								category.definitions().getById(skill.definitionId()).orElseThrow()
 						)
 				)
 		);
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getPointsTotal());
-		category.getExperience().ifPresentOrElse(experience -> {
+		category.experience().ifPresentOrElse(experience -> {
 			buf.writeBoolean(true);
-			var curve = experience.getCurve();
+			var curve = experience.curve();
 			buf.writeInt(curve.getLevelLimit());
 			var progress = curve.getProgress(categoryData.getExperience());
 			buf.writeInt(progress.currentLevel());
@@ -65,27 +65,27 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	}
 
 	public void write(RegistryByteBuf buf, GeneralConfig general) {
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.getTitle());
-		write(buf, general.getIcon());
-		write(buf, general.getBackground());
-		write(buf, general.getColors());
-		buf.writeBoolean(general.isExclusiveRoot());
-		buf.writeInt(general.getSpentPointsLimit());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.title());
+		write(buf, general.icon());
+		write(buf, general.background());
+		write(buf, general.colors());
+		buf.writeBoolean(general.exclusiveRoot());
+		buf.writeInt(general.spentPointsLimit());
 	}
 
 	public void write(RegistryByteBuf buf, SkillDefinitionConfig definition) {
-		buf.writeString(definition.getId());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.getTitle());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.getDescription());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.getExtraDescription());
-		write(buf, definition.getFrame());
-		write(buf, definition.getIcon());
-		buf.writeFloat(definition.getSize());
-		buf.writeInt(definition.getCost());
-		buf.writeInt(definition.getRequiredSkills());
-		buf.writeInt(definition.getRequiredPoints());
-		buf.writeInt(definition.getRequiredSpentPoints());
-		buf.writeInt(definition.getRequiredExclusions());
+		buf.writeString(definition.id());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.title());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.description());
+		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.extraDescription());
+		write(buf, definition.frame());
+		write(buf, definition.icon());
+		buf.writeFloat(definition.size());
+		buf.writeInt(definition.cost());
+		buf.writeInt(definition.requiredSkills());
+		buf.writeInt(definition.requiredPoints());
+		buf.writeInt(definition.requiredSpentPoints());
+		buf.writeInt(definition.requiredExclusions());
 	}
 
 	public void write(PacketByteBuf buf, SkillsConfig skills) {
@@ -93,15 +93,15 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	}
 
 	public void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
-		buf.writeCollection(connections.getNormal().getAll(), ShowCategoryOutPacket::write);
-		buf.writeCollection(connections.getExclusive().getAll(), ShowCategoryOutPacket::write);
+		buf.writeCollection(connections.normal().getAll(), ShowCategoryOutPacket::write);
+		buf.writeCollection(connections.exclusive().getAll(), ShowCategoryOutPacket::write);
 	}
 
 	public static void write(PacketByteBuf buf, SkillConfig skill) {
-		buf.writeString(skill.getId());
-		buf.writeInt(skill.getX());
-		buf.writeInt(skill.getY());
-		buf.writeString(skill.getDefinitionId());
+		buf.writeString(skill.id());
+		buf.writeInt(skill.x());
+		buf.writeInt(skill.y());
+		buf.writeString(skill.definitionId());
 		buf.writeBoolean(skill.isRoot());
 	}
 

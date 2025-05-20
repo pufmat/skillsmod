@@ -12,35 +12,16 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 
-public class GeneralConfig {
-	private final Text title;
-	private final IconConfig icon;
-	private final BackgroundConfig background;
-	private final ColorsConfig colors;
-	private final boolean unlockedByDefault;
-	private final int startingPoints;
-	private final boolean exclusiveRoot;
-	private final int spentPointsLimit;
-
-	private GeneralConfig(
-			Text title,
-			IconConfig icon,
-			BackgroundConfig background,
-			ColorsConfig colors,
-			boolean unlockedByDefault,
-			int startingPoints,
-			boolean exclusiveRoot,
-			int spentPointsLimit
-	) {
-		this.title = title;
-		this.icon = icon;
-		this.background = background;
-		this.colors = colors;
-		this.unlockedByDefault = unlockedByDefault;
-		this.startingPoints = startingPoints;
-		this.exclusiveRoot = exclusiveRoot;
-		this.spentPointsLimit = spentPointsLimit;
-	}
+public record GeneralConfig(
+		Text title,
+		IconConfig icon,
+		BackgroundConfig background,
+		ColorsConfig colors,
+		boolean unlockedByDefault,
+		int startingPoints,
+		boolean exclusiveRoot,
+		int spentPointsLimit
+) {
 
 	public static Result<GeneralConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject()
@@ -121,35 +102,4 @@ public class GeneralConfig {
 		}
 	}
 
-	public Text getTitle() {
-		return title;
-	}
-
-	public boolean isUnlockedByDefault() {
-		return unlockedByDefault;
-	}
-
-	public int getStartingPoints() {
-		return startingPoints;
-	}
-
-	public boolean isExclusiveRoot() {
-		return exclusiveRoot;
-	}
-
-	public IconConfig getIcon() {
-		return icon;
-	}
-
-	public BackgroundConfig getBackground() {
-		return background;
-	}
-
-	public ColorsConfig getColors() {
-		return colors;
-	}
-
-	public int getSpentPointsLimit() {
-		return spentPointsLimit;
-	}
 }

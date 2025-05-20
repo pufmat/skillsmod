@@ -18,14 +18,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 
-public class SkillRewardConfig {
-	private final Identifier type;
-	private final Reward instance;
-
-	private SkillRewardConfig(Identifier type, Reward instance) {
-		this.type = type;
-		this.instance = instance;
-	}
+public record SkillRewardConfig(
+		Identifier type,
+		Reward instance
+) {
 
 	public static Result<SkillRewardConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -87,11 +83,5 @@ public class SkillRewardConfig {
 		this.instance.dispose(new RewardDisposeContextImpl(context));
 	}
 
-	public Identifier getType() {
-		return type;
-	}
 
-	public Reward getInstance() {
-		return instance;
-	}
 }
