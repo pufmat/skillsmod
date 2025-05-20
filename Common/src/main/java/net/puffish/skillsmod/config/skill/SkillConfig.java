@@ -9,20 +9,13 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 
-public class SkillConfig {
-	private final String id;
-	private final int x;
-	private final int y;
-	private final String definitionId;
-	private final boolean isRoot;
-
-	private SkillConfig(String id, int x, int y, String definitionId, boolean isRoot) {
-		this.id = id;
-		this.x = x;
-		this.y = y;
-		this.definitionId = definitionId;
-		this.isRoot = isRoot;
-	}
+public record SkillConfig(
+		String id,
+		int x,
+		int y,
+		String definitionId,
+		boolean isRoot
+) {
 
 	public static Result<SkillConfig, Problem> parse(String id, JsonElement rootElement, SkillDefinitionsConfig definitions, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
@@ -75,23 +68,4 @@ public class SkillConfig {
 		}
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public String getDefinitionId() {
-		return definitionId;
-	}
-
-	public boolean isRoot() {
-		return isRoot;
-	}
 }

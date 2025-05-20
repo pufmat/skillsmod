@@ -198,9 +198,9 @@ public class SkillsMod {
 				.andThen(modConfig -> loadCategories(reader, modConfig, SkillsAPI.MOD_ID, context)
 						.ifSuccess(map -> {
 							var cumulatedMap = new LinkedHashMap<>(map);
-							showSuccess("Mod configuration", modConfig.getShowWarnings(), context);
+							showSuccess("Mod configuration", modConfig.showWarnings(), context);
 
-							if (loadPackConfig(server, cumulatedMap, modConfig.getShowWarnings())) {
+							if (loadPackConfig(server, cumulatedMap, modConfig.showWarnings())) {
 								categories.set(Optional.of(cumulatedMap), () -> {
 									for (var category : cumulatedMap.values()) {
 										category.dispose(new DisposeContext(server));
@@ -218,9 +218,9 @@ public class SkillsMod {
 	}
 
 	private Result<Map<Identifier, CategoryConfig>, Problem> loadCategories(ConfigReader reader, Config config, String namespace,  ConfigContext context) {
-		var versionedContext = new VersionedConfigContext(context, config.getVersion());
+		var versionedContext = new VersionedConfigContext(context, config.version());
 
-		return reader.readCategories(namespace, config.getCategories(), versionedContext);
+		return reader.readCategories(namespace, config.categories(), versionedContext);
 	}
 
 	private boolean loadPackConfig(MinecraftServer server, Map<Identifier, CategoryConfig> cumulatedMap, boolean showWarning) {
@@ -304,7 +304,7 @@ public class SkillsMod {
 	public void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-			category.getSkills().getById(skillId).ifPresent(skill -> {
+			category.skills().getById(skillId).ifPresent(skill -> {
 				if (force || categoryData.canUnlockSkill(category, skill)) {
 					watchNewPoints(player, category, categoryData, false, () -> {
 						categoryData.unlockSkill(skillId);
@@ -321,7 +321,7 @@ public class SkillsMod {
 	public void lockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-			category.getSkills().getById(skillId).ifPresent(skill -> {
+			category.skills().getById(skillId).ifPresent(skill -> {
 				watchNewPoints(player, category, categoryData, false, () -> {
 					categoryData.lockSkill(skillId);
 					packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
@@ -368,12 +368,12 @@ public class SkillsMod {
 	}
 
 	public Optional<Boolean> hasExperience(Identifier categoryId) {
-		return getCategory(categoryId).map(category -> category.getExperience().isPresent());
+		return getCategory(categoryId).map(category -> category.experience().isPresent());
 	}
 
 	public void addExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
-			category.getExperience().ifPresent(experience -> {
+			category.experience().ifPresent(experience -> {
 				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 				addExperience(player, category, experience, categoryData, amount);
 			});
@@ -386,7 +386,7 @@ public class SkillsMod {
 
 	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
-			category.getExperience().ifPresent(experience -> {
+			category.experience().ifPresent(experience -> {
 				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 				setExperience(player, category, experience, categoryData, amount);
 			});
@@ -394,7 +394,7 @@ public class SkillsMod {
 	}
 
 	public void setExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
-		var curve = experience.getCurve();
+		var curve = experience.curve();
 		var level = curve.getProgress(amount).currentLevel();
 		var levelLimit = curve.getLevelLimit();
 		if (level >= levelLimit) {
@@ -409,7 +409,7 @@ public class SkillsMod {
 
 	public Optional<Integer> getExperience(ServerPlayerEntity player, Identifier categoryId) {
 		return getCategory(categoryId).flatMap(category -> {
-			if (category.getExperience().isEmpty()) {
+			if (category.experience().isEmpty()) {
 				return Optional.empty();
 			}
 
@@ -480,40 +480,40 @@ public class SkillsMod {
 	}
 
 	public Optional<Integer> getCurrentLevel(ServerPlayerEntity player, Identifier categoryId) {
-		return getCategory(categoryId).map(category -> category.getExperience()
+		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-					return experience.getCurve().getProgress(categoryData.getExperience()).currentLevel();
+					return experience.curve().getProgress(categoryData.getExperience()).currentLevel();
 				})
 				.orElse(0));
 	}
 
 	public Optional<Integer> getCurrentExperience(ServerPlayerEntity player, Identifier categoryId) {
-		return getCategory(categoryId).map(category -> category.getExperience()
+		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-					return experience.getCurve().getProgress(categoryData.getExperience()).currentExperience();
+					return experience.curve().getProgress(categoryData.getExperience()).currentExperience();
 				})
 				.orElse(0));
 	}
 
 	public Optional<Integer> getRequiredExperience(Identifier categoryId, int level) {
-		return getCategory(categoryId).map(category -> category.getExperience()
-				.map(experience -> experience.getCurve().getRequired(level))
+		return getCategory(categoryId).map(category -> category.experience()
+				.map(experience -> experience.curve().getRequired(level))
 				.orElse(0));
 	}
 
 	public Optional<Integer> getRequiredTotalExperience(Identifier categoryId, int level) {
-		return getCategory(categoryId).map(category -> category.getExperience()
-				.map(experience -> experience.getCurve().getRequiredTotal(level))
+		return getCategory(categoryId).map(category -> category.experience()
+				.map(experience -> experience.curve().getRequiredTotal(level))
 				.orElse(0));
 	}
 
 	public Optional<Skill.State> getSkillState(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-		return getCategory(categoryId).flatMap(category -> category.getSkills()
+		return getCategory(categoryId).flatMap(category -> category.skills()
 				.getById(skillId)
-				.flatMap(skill -> category.getDefinitions()
-						.getById(skill.getDefinitionId())
+				.flatMap(skill -> category.definitions()
+						.getById(skill.definitionId())
 						.map(definition -> {
 							var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 							return categoryData.getSkillState(category, skill, definition);
@@ -528,15 +528,15 @@ public class SkillsMod {
 		return getAllCategories()
 				.stream()
 				.filter(playerData::isCategoryUnlocked)
-				.map(CategoryConfig::getId)
+				.map(CategoryConfig::id)
 				.toList();
 	}
 
 	public Collection<Identifier> getCategories(boolean onlyWithExperience) {
 		return getAllCategories()
 				.stream()
-				.filter(category -> !onlyWithExperience || category.getExperience().isPresent())
-				.map(CategoryConfig::getId)
+				.filter(category -> !onlyWithExperience || category.experience().isPresent())
+				.map(CategoryConfig::id)
 				.toList();
 	}
 
@@ -549,10 +549,10 @@ public class SkillsMod {
 
 	public Optional<Collection<String>> getSkills(Identifier categoryId) {
 		return getCategory(categoryId).map(
-				category -> category.getSkills()
+				category -> category.skills()
 						.getAll()
 						.stream()
-						.map(SkillConfig::getId)
+						.map(SkillConfig::id)
 						.toList()
 		);
 	}
@@ -563,7 +563,7 @@ public class SkillsMod {
 
 	public boolean hasSkill(Identifier categoryId, String skillId) {
 		return getCategory(categoryId)
-				.map(category -> category.getSkills().getById(skillId).isPresent())
+				.map(category -> category.skills().getById(skillId).isPresent())
 				.orElse(false);
 	}
 
@@ -575,7 +575,7 @@ public class SkillsMod {
 
 	private void hideCategory(ServerPlayerEntity player, CategoryConfig category) {
 		resetRewards(player, category);
-		packetSender.send(player, new HideCategoryOutPacket(category.getId()));
+		packetSender.send(player, new HideCategoryOutPacket(category.id()));
 	}
 
 	private void watchNewPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, boolean isSilent, Runnable runnable) {
@@ -586,7 +586,7 @@ public class SkillsMod {
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
 				if (player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
-					packetSender.send(player, new NewPointOutPacket(category.getId()));
+					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}
 			}
 		}
@@ -594,16 +594,16 @@ public class SkillsMod {
 
 	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, new PointsUpdateOutPacket(
-				category.getId(),
+				category.id(),
 				categoryData.getSpentPoints(category),
 				categoryData.getPointsTotal()
 		));
 	}
 
 	private void syncExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData) {
-		var progress = experience.getCurve().getProgress(categoryData.getExperience());
+		var progress = experience.curve().getProgress(categoryData.getExperience());
 		packetSender.send(player, new ExperienceUpdateOutPacket(
-				category.getId(),
+				category.id(),
 				progress.currentLevel(),
 				progress.currentExperience(),
 				progress.requiredExperience()
@@ -621,10 +621,10 @@ public class SkillsMod {
 				continue;
 			}
 
-			category.getExperience().ifPresent(experience -> {
-				var amount = experience.getExperienceSources()
+			category.experience().ifPresent(experience -> {
+				var amount = experience.experienceSources()
 						.stream()
-						.mapToInt(experienceSource -> function.apply(experienceSource.getInstance()))
+						.mapToInt(experienceSource -> function.apply(experienceSource.instance()))
 						.sum();
 
 				if (amount != 0) {
@@ -643,12 +643,12 @@ public class SkillsMod {
 		var playerData = getPlayerData(player);
 		for (var category : getAllCategories()) {
 			getCategoryDataIfUnlocked(playerData, category).ifPresent(categoryData -> {
-				for (var definition : category.getDefinitions().getAll()) {
-					var count = categoryData.countUnlocked(category, definition.getId());
+				for (var definition : category.definitions().getAll()) {
+					var count = categoryData.countUnlocked(category, definition.id());
 
-					for (var reward : definition.getRewards()) {
+					for (var reward : definition.rewards()) {
 						if (predicate.test(reward)) {
-							reward.getInstance().update(new RewardUpdateContextImpl(player, count, false));
+							reward.instance().update(new RewardUpdateContextImpl(player, count, false));
 						}
 					}
 				}
@@ -657,29 +657,29 @@ public class SkillsMod {
 	}
 
 	private void updateRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		for (var definition : category.getDefinitions().getAll()) {
-			var count = categoryData.countUnlocked(category, definition.getId());
+		for (var definition : category.definitions().getAll()) {
+			var count = categoryData.countUnlocked(category, definition.id());
 
-			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(new RewardUpdateContextImpl(player, count, false));
+			for (var reward : definition.rewards()) {
+				reward.instance().update(new RewardUpdateContextImpl(player, count, false));
 			}
 		}
 	}
 
 	private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
-		category.getDefinitions().getById(skill.getDefinitionId()).ifPresent(definition -> {
-			var count = categoryData.countUnlocked(category, definition.getId());
+		category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
+			var count = categoryData.countUnlocked(category, definition.id());
 
-			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(new RewardUpdateContextImpl(player, count, isUnlock));
+			for (var reward : definition.rewards()) {
+				reward.instance().update(new RewardUpdateContextImpl(player, count, isUnlock));
 			}
 		});
 	}
 
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
-		for (var definition : category.getDefinitions().getAll()) {
-			for (var reward : definition.getRewards()) {
-				reward.getInstance().update(new RewardUpdateContextImpl(player, 0, false));
+		for (var definition : category.definitions().getAll()) {
+			for (var reward : definition.rewards()) {
+				reward.instance().update(new RewardUpdateContextImpl(player, 0, false));
 			}
 		}
 	}
@@ -708,15 +708,15 @@ public class SkillsMod {
 	}
 
 	private void updatePoints(CategoryConfig category, CategoryData categoryData) {
-		categoryData.setPoints(PointSources.STARTING, category.getGeneral().getStartingPoints());
-		category.getExperience().ifPresent(experience -> {
-			categoryData.setPoints(PointSources.EXPERIENCE, experience.getCurve().getProgress(categoryData.getExperience()).currentLevel());
+		categoryData.setPoints(PointSources.STARTING, category.general().startingPoints());
+		category.experience().ifPresent(experience -> {
+			categoryData.setPoints(PointSources.EXPERIENCE, experience.curve().getProgress(categoryData.getExperience()).currentLevel());
 		});
 
 		var legacy = categoryData.getPoints(PointSources.LEGACY);
 		if (legacy != 0) {
 			categoryData.setPoints(PointSources.LEGACY, 0);
-			categoryData.setPoints(PointSources.COMMANDS, legacy - category.getGeneral().getStartingPoints());
+			categoryData.setPoints(PointSources.COMMANDS, legacy - category.general().startingPoints());
 		}
 	}
 

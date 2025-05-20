@@ -10,14 +10,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 
-public class SkillConnectionsConfig {
-	private final SkillConnectionsGroupConfig normal;
-	private final SkillConnectionsGroupConfig exclusive;
-
-	private SkillConnectionsConfig(SkillConnectionsGroupConfig normal, SkillConnectionsGroupConfig exclusive) {
-		this.normal = normal;
-		this.exclusive = exclusive;
-	}
+public record SkillConnectionsConfig(
+		SkillConnectionsGroupConfig normal,
+		SkillConnectionsGroupConfig exclusive
+) {
 
 	public static Result<SkillConnectionsConfig, Problem> parse(JsonElement rootElement, SkillsConfig skills, ConfigContext context) {
 		return rootElement.getAsObject().flatMap(
@@ -64,11 +60,4 @@ public class SkillConnectionsConfig {
 				));
 	}
 
-	public SkillConnectionsGroupConfig getNormal() {
-		return normal;
-	}
-
-	public SkillConnectionsGroupConfig getExclusive() {
-		return exclusive;
-	}
 }
