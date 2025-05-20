@@ -845,6 +845,16 @@ public class SkillsScreen extends Screen {
 			if (isInsideTab(mouse, x)) {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(categoryConfig.title().asOrderedText());
+				lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(
+						categoryConfig.description().copy(),
+						Style.EMPTY.withFormatting(Formatting.GRAY)
+				), LINE_WIDTH));
+				if (Screen.hasShiftDown()) {
+					lines.addAll(textRenderer.wrapLines(Texts.setStyleIfAbsent(
+							categoryConfig.extraDescription().copy(),
+							Style.EMPTY.withFormatting(Formatting.GRAY)
+					), LINE_WIDTH));
+				}
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(categoryConfig.id().toString()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}
