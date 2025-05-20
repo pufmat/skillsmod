@@ -63,6 +63,8 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	public void write(PacketByteBuf buf, GeneralConfig general) {
 		buf.writeText(general.title());
+		buf.writeText(general.description());
+		buf.writeText(general.extraDescription());
 		write(buf, general.icon());
 		write(buf, general.background());
 		write(buf, general.colors());

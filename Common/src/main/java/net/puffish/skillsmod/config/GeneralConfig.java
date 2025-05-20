@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.config;
 
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 
 public record GeneralConfig(
 		Text title,
+		Text description,
+		Text extraDescription,
 		IconConfig icon,
 		BackgroundConfig background,
 		ColorsConfig colors,
@@ -35,6 +38,22 @@ public record GeneralConfig(
 				.andThen(BuiltinJson::parseText)
 				.ifFailure(problems::add)
 				.getSuccess();
+
+		var description = rootObject.get("description")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(LiteralText.EMPTY);
+
+		var extraDescription = rootObject.get("extra_description")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(LiteralText.EMPTY);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))
@@ -89,6 +108,8 @@ public record GeneralConfig(
 		if (problems.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
+					description,
+					extraDescription,
 					optIcon.orElseThrow(),
 					optBackground.orElseThrow(),
 					colors,
