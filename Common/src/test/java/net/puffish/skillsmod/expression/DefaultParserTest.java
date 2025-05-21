@@ -26,6 +26,12 @@ class DefaultParserTest {
 		testValid(3, "+2 ++1");
 		testValid(1, "+2 + -1");
 		testValid(3, "- -2 - -1");
+		testValid(1, "4> 2");
+		testValid(0, "1 + 3< 2");
+		testValid(1, "4 >= 2 *2");
+		testValid(1, "2^ 3<= 2* 4");
+		testValid(0, "1 +1 = 1");
+		testValid(1, "3* 2 <>1");
 		testValid(9, "(1+ 2) * 3");
 		testValid(3, "((1 + 2))");
 		testValid(-4, "min(2, -4)");
