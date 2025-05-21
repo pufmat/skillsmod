@@ -20,18 +20,26 @@ public class DefaultParser {
 			BinaryOperator.createLeft("|", 1, (l, r) -> v -> l.eval(v) == 0.0 && r.eval(v) == 0.0 ? 0.0 : 1.0),
 			BinaryOperator.createLeft("&", 2, (l, r) -> v -> l.eval(v) == 0.0 || r.eval(v) == 0.0 ? 0.0 : 1.0),
 
-			BinaryOperator.createLeft("+", 3, (l, r) -> v -> l.eval(v) + r.eval(v)),
-			BinaryOperator.createLeft("-", 3, (l, r) -> v -> l.eval(v) - r.eval(v)),
-			BinaryOperator.createLeft("*", 4, (l, r) -> v -> l.eval(v) * r.eval(v)),
-			BinaryOperator.createLeft("/", 4, (l, r) -> v -> l.eval(v) / r.eval(v)),
-			BinaryOperator.createRight("^", 6, (l, r) -> v -> Math.pow(l.eval(v), r.eval(v)))
+			BinaryOperator.createLeft("=", 3, (l, r) -> v -> l.eval(v) == r.eval(v) ? 1.0 : 0.0),
+			BinaryOperator.createLeft("<>", 3, (l, r) -> v -> l.eval(v) != r.eval(v) ? 1.0 : 0.0),
+
+			BinaryOperator.createLeft(">=", 4, (l, r) -> v -> l.eval(v) >= r.eval(v) ? 1.0 : 0.0),
+			BinaryOperator.createLeft("<=", 4, (l, r) -> v -> l.eval(v) <= r.eval(v) ? 1.0 : 0.0),
+			BinaryOperator.createLeft(">", 4, (l, r) -> v -> l.eval(v) > r.eval(v) ? 1.0 : 0.0),
+			BinaryOperator.createLeft("<", 4, (l, r) -> v -> l.eval(v) < r.eval(v) ? 1.0 : 0.0),
+
+			BinaryOperator.createLeft("+", 5, (l, r) -> v -> l.eval(v) + r.eval(v)),
+			BinaryOperator.createLeft("-", 5, (l, r) -> v -> l.eval(v) - r.eval(v)),
+			BinaryOperator.createLeft("*", 6, (l, r) -> v -> l.eval(v) * r.eval(v)),
+			BinaryOperator.createLeft("/", 6, (l, r) -> v -> l.eval(v) / r.eval(v)),
+			BinaryOperator.createRight("^", 8, (l, r) -> v -> Math.pow(l.eval(v), r.eval(v)))
 	);
 
 	private static final List<UnaryOperator<Double>> UNARY_OPERATORS = List.of(
-			UnaryOperator.create("!", 5, e -> v -> e.eval(v) == 0.0 ? 1.0 : 0.0),
+			UnaryOperator.create("!", 7, e -> v -> e.eval(v) == 0.0 ? 1.0 : 0.0),
 			
-			UnaryOperator.create("+", 5, e -> v -> +e.eval(v)),
-			UnaryOperator.create("-", 5, e -> v -> -e.eval(v))
+			UnaryOperator.create("+", 7, e -> v -> +e.eval(v)),
+			UnaryOperator.create("-", 7, e -> v -> -e.eval(v))
 	);
 
 	private static final List<GroupOperator> GROUP_OPERATORS = List.of(
