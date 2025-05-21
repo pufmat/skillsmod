@@ -78,7 +78,8 @@ public class SkillsScreen extends Screen {
 
 	private double dragStartX = 0;
 	private double dragStartY = 0;
-	private boolean dragging = false;
+	private double dragTotal = 0;
+	private boolean canDrag = false;
 
 	private Bounds2i bounds = Bounds2i.zero();
 	private boolean small = false;
@@ -202,14 +203,51 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		optActiveCategoryData.ifPresent(activeCategoryData ->
-				mouseClickedWithCategory(mouseX, mouseY, button, activeCategoryData)
-		);
+		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+			optActiveCategoryData.ifPresent(activeCategoryData ->
+					mouseClickedWithCategory(mouseX, mouseY, activeCategoryData)
+			);
+		}
 
-		return super.mouseClicked(mouseX, mouseY, button);
+		return true;
 	}
 
-	private void mouseClickedWithCategory(double mouseX, double mouseY, int button, ClientCategoryData activeCategoryData) {
+	private void mouseClickedWithCategory(double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+		var mouse = getMousePos(mouseX, mouseY);
+
+		if (isInsideContent(mouse)) {
+			dragStartX = mouseX - activeCategoryData.getX();
+			dragStartY = mouseY - activeCategoryData.getY();
+			dragTotal = 0;
+			canDrag = true;
+		} else {
+			canDrag = false;
+		}
+
+		forEachCategory((i, category) -> {
+			if (isInsideTab(mouse, i)) {
+				optActiveCategoryId = Optional.ofNullable(category.getConfig().id());
+				syncCategory();
+			}
+		});
+	}
+
+	@Override
+	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+			if (dragTotal > 2) {
+				return true;
+			}
+
+			optActiveCategoryData.ifPresent(activeCategoryData ->
+					mouseReleasedWithCategory(mouseX, mouseY, activeCategoryData)
+			);
+		}
+
+		return true;
+	}
+
+	private void mouseReleasedWithCategory(double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY, activeCategoryData);
 		var activeCategory = activeCategoryData.getConfig();
@@ -227,22 +265,7 @@ public class SkillsScreen extends Screen {
 							.send(new SkillClickOutPacket(activeCategory.id(), skill.id()));
 				}
 			}
-
-			if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
-				dragStartX = mouseX - activeCategoryData.getX();
-				dragStartY = mouseY - activeCategoryData.getY();
-				dragging = true;
-			}
-		} else {
-			dragging = false;
 		}
-
-		forEachCategory((i, category) -> {
-			if (isInsideTab(mouse, i)) {
-				optActiveCategoryId = Optional.ofNullable(category.getConfig().id());
-				syncCategory();
-			}
-		});
 	}
 
 	@Override
@@ -266,8 +289,14 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		if (dragging) {
-			if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+		if (!canDrag) {
+			return true;
+		}
+
+		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+			dragTotal += Math.abs(deltaX);
+			dragTotal += Math.abs(deltaY);
+			if (dragTotal > 2) {
 				optActiveCategoryData.ifPresent(activeCategoryData -> {
 					applyChangesWithLimits(
 							(int) Math.round(mouseX - dragStartX),
@@ -276,12 +305,10 @@ public class SkillsScreen extends Screen {
 							activeCategoryData
 					);
 				});
-
-				return true;
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override
