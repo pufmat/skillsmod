@@ -183,7 +183,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var height = buf.readInt();
 		var position = buf.readEnumConstant(BackgroundPosition.class);
 
-		return new ClientBackgroundConfig(texture, width, height, position);
+		return ClientBackgroundConfig.create(texture, width, height, position);
 	}
 
 	public static ClientColorsConfig readColors(PacketByteBuf buf) {
