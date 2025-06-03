@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -23,6 +24,7 @@ import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.function.Function;
@@ -36,7 +38,7 @@ public class FabricMain implements ModInitializer {
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
 				new ServerPacketSenderImpl(),
-				new FabricSkillsXplat()
+				new ServerPlatformImpl()
 		);
 
 	}
@@ -103,6 +105,13 @@ public class FabricMain implements ModInitializer {
 			var buf = new PacketByteBuf(Unpooled.buffer());
 			packet.write(buf);
 			ServerPlayNetworking.send(player, packet.getId(), buf);
+		}
+	}
+
+	private static class ServerPlatformImpl implements ServerPlatform {
+		@Override
+		public boolean isFakePlayer(ServerPlayerEntity player) {
+			return player instanceof FakePlayer;
 		}
 	}
 }

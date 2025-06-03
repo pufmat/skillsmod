@@ -2,7 +2,6 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stat;
-import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.IncreaseStatExperienceSource;
 import net.puffish.skillsmod.reward.builtin.AttributeReward;
@@ -15,11 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerEntityMixin {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void injectAtInit(CallbackInfo ci) {
-		ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-
-		if (!SkillsMod.getXPlat().isFakePlayer(player)) {
-			SkillsAPI.updateRewards(player, AttributeReward.class);
-		}
+		SkillsAPI.updateRewards((ServerPlayerEntity) (Object) this, AttributeReward.class);
 	}
 
 	@Inject(method = "increaseStat", at = @At("HEAD"))
