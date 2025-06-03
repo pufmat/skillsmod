@@ -93,6 +93,7 @@ public class SkillsMod {
 	);
 
 	private static SkillsMod instance;
+	private static SkillsXplat xPlat;
 
 	private final PrefixedLogger logger = new PrefixedLogger(SkillsAPI.MOD_ID);
 
@@ -113,11 +114,16 @@ public class SkillsMod {
 		return instance;
 	}
 
+	public static SkillsXplat getXPlat() {
+		return xPlat;
+	}
+
 	public static void setup(
 			Path configDir,
 			ServerRegistrar registrar,
 			ServerEventReceiver eventReceiver,
-			ServerPacketSender packetSender
+			ServerPacketSender packetSender,
+			SkillsXplat xplatImplementation
 	) {
 		var modConfigDir = configDir.resolve(SkillsAPI.MOD_ID);
 		try {
@@ -126,6 +132,7 @@ public class SkillsMod {
 			throw new RuntimeException(e);
 		}
 
+		SkillsMod.xPlat = xplatImplementation;
 		instance = new SkillsMod(modConfigDir, packetSender);
 
 		registrar.registerInPacket(

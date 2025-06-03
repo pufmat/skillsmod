@@ -35,7 +35,8 @@ public class FabricMain implements ModInitializer {
 				FabricLoader.getInstance().getConfigDir(),
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl()
+				new ServerPacketSenderImpl(),
+				new FabricSkillsXplat()
 		);
 
 	}

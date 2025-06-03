@@ -58,7 +58,8 @@ public class ForgeMain {
 				FMLPaths.CONFIGDIR.get(),
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl()
+				new ServerPacketSenderImpl(),
+				new ForgeSkillsXplat()
 		);
 	}
 
