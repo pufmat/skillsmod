@@ -23,6 +23,7 @@ import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.function.Function;
@@ -35,7 +36,8 @@ public class FabricMain implements ModInitializer {
 				FabricLoader.getInstance().getConfigDir(),
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl()
+				new ServerPacketSenderImpl(),
+				new ServerPlatformImpl()
 		);
 
 	}
@@ -102,6 +104,13 @@ public class FabricMain implements ModInitializer {
 			var buf = new PacketByteBuf(Unpooled.buffer());
 			packet.write(buf);
 			ServerPlayNetworking.send(player, packet.getId(), buf);
+		}
+	}
+
+	private static class ServerPlatformImpl implements ServerPlatform {
+		@Override
+		public boolean isFakePlayer(ServerPlayerEntity player) {
+			return false;
 		}
 	}
 }
