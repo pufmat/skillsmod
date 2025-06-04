@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -34,6 +35,7 @@ import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.ArrayList;
@@ -58,7 +60,8 @@ public class ForgeMain {
 				FMLPaths.CONFIGDIR.get(),
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl()
+				new ServerPacketSenderImpl(),
+				new ServerPlatformImpl()
 		);
 	}
 
@@ -166,4 +169,12 @@ public class ForgeMain {
 			player.networkHandler.sendPacket(new CustomPayloadS2CPacket(packet.getId(), buf));
 		}
 	}
+
+	private static class ServerPlatformImpl implements ServerPlatform {
+		@Override
+		public boolean isFakePlayer(ServerPlayerEntity player) {
+			return player instanceof FakePlayer;
+		}
+	}
+
 }
