@@ -16,6 +16,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -33,6 +34,7 @@ import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 
 import java.util.ArrayList;
@@ -57,7 +59,8 @@ public class NeoForgeMain {
 				FMLPaths.CONFIGDIR.get(),
 				new ServerRegistrarImpl(modEventBus),
 				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl()
+				new ServerPacketSenderImpl(),
+				new ServerPlatformImpl()
 		);
 
 		modEventBus.addListener(this::onRegisterPayloadHandler);
@@ -188,4 +191,12 @@ public class NeoForgeMain {
 			return id;
 		}
 	}
+
+	private static class ServerPlatformImpl implements ServerPlatform {
+		@Override
+		public boolean isFakePlayer(ServerPlayerEntity player) {
+			return player instanceof FakePlayer;
+		}
+	}
+
 }
