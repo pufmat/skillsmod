@@ -39,6 +39,7 @@ import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.ServerData;
@@ -98,15 +99,17 @@ public class SkillsMod {
 
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
+	private final ServerPlatform platform;
 
 	private final ChangeListener<Optional<Map<Identifier, CategoryConfig>>> categories = new ChangeListener<>(
 			Optional.empty(),
 			() -> { }
 	);
 
-	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender) {
+	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform) {
 		this.modConfigDir = modConfigDir;
 		this.packetSender = packetSender;
+		this.platform = platform;
 	}
 
 	public static SkillsMod getInstance() {
@@ -117,7 +120,8 @@ public class SkillsMod {
 			Path configDir,
 			ServerRegistrar registrar,
 			ServerEventReceiver eventReceiver,
-			ServerPacketSender packetSender
+			ServerPacketSender packetSender,
+			ServerPlatform platform
 	) {
 		var modConfigDir = configDir.resolve(SkillsAPI.MOD_ID);
 		try {
@@ -126,7 +130,7 @@ public class SkillsMod {
 			throw new RuntimeException(e);
 		}
 
-		instance = new SkillsMod(modConfigDir, packetSender);
+		instance = new SkillsMod(modConfigDir, packetSender, platform);
 
 		registrar.registerInPacket(
 				Packets.SKILL_CLICK,
@@ -607,6 +611,10 @@ public class SkillsMod {
 	}
 
 	public void visitExperienceSources(ServerPlayerEntity player, Function<ExperienceSource, Integer> function) {
+		if (platform.isFakePlayer(player)) {
+			return;
+		}
+
 		var playerData = getPlayerData(player);
 		for (var category : getAllCategories()) {
 			if (!playerData.isCategoryUnlocked(category)) {
@@ -628,6 +636,10 @@ public class SkillsMod {
 	}
 
 	public void updateRewards(ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {
+		if (platform.isFakePlayer(player)) {
+			return;
+		}
+
 		var playerData = getPlayerData(player);
 		for (var category : getAllCategories()) {
 			getCategoryDataIfUnlocked(playerData, category).ifPresent(categoryData -> {
