@@ -39,7 +39,6 @@ import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
-import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.ServerData;
@@ -55,6 +54,7 @@ import net.puffish.skillsmod.server.network.packets.out.PointsUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ShowToastOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.SkillUpdateOutPacket;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.setup.SkillsArgumentTypes;
 import net.puffish.skillsmod.server.setup.SkillsGameRules;
@@ -73,6 +73,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -621,18 +622,44 @@ public class SkillsMod {
 				continue;
 			}
 
-			category.experience().ifPresent(experience -> {
-				var amount = experience.experienceSources()
-						.stream()
-						.mapToInt(experienceSource -> function.apply(experienceSource.instance()))
-						.sum();
+			category.experience().ifPresent(experience -> visitExperienceSources(
+					player, playerData, category, experience, function
+			));
+		}
+	}
 
-				if (amount != 0) {
-					var categoryData = playerData.getOrCreateCategoryData(category);
-					addExperience(player, category, experience, categoryData, amount);
+	private void visitExperienceSources(ServerPlayerEntity player, PlayerData playerData, CategoryConfig category, ExperienceConfig experience, Function<ExperienceSource, Integer> function) {
+		var amount = 0;
+		var teamAmounts = new HashMap<ServerPlayerEntity, Integer>();
+
+		for (var experienceSource : experience.experienceSources()) {
+			var result = function.apply(experienceSource.instance());
+			if (result == 0) {
+				continue;
+			}
+			amount += result;
+
+			experienceSource.teamSharing().ifPresent(teamSharing -> {
+				var teamPlayers = player.getServerWorld().getPlayers(
+						otherPlayer -> player != otherPlayer
+								&& player.isTeammate(otherPlayer)
+								&& player.distanceTo(otherPlayer) <= teamSharing.distanceLimit()
+								&& getPlayerData(otherPlayer).isCategoryUnlocked(category)
+				);
+				for (var teamPlayer : teamPlayers) {
+					teamAmounts.compute(teamPlayer, (key, value) -> (value == null ? 0 : value) + result);
 				}
 			});
 		}
+
+		if (amount != 0) {
+			var categoryData = playerData.getOrCreateCategoryData(category);
+			addExperience(player, category, experience, categoryData, amount);
+		}
+		teamAmounts.forEach((teamPlayer, teamPlayerAmount) -> {
+			var categoryData = getPlayerData(teamPlayer).getOrCreateCategoryData(category);
+			addExperience(teamPlayer, category, experience, categoryData, teamPlayerAmount);
+		});
 	}
 
 	public void updateRewards(ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {

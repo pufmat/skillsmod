@@ -16,10 +16,12 @@ import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public record ExperienceSourceConfig(
 		Identifier type,
-		ExperienceSource instance
+		ExperienceSource instance,
+		Optional<ExperienceTeamSharingConfig> teamSharing
 ) {
 
 	public static Result<ExperienceSourceConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
@@ -43,11 +45,19 @@ public record ExperienceSourceConfig(
 
 		var maybeDataElement = rootObject.get("data");
 
+		var optTeamSharing = rootObject.get("team_sharing")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> ExperienceTeamSharingConfig.parse(element)
+						.ifFailure(problems::add)
+						.getSuccess()
+				);
+
 		if (problems.isEmpty()) {
 			return build(
 					optType.orElseThrow(),
 					maybeDataElement,
 					optTypeElement.orElseThrow().getPath(),
+					optTeamSharing,
 					context
 			);
 		} else {
@@ -55,10 +65,16 @@ public record ExperienceSourceConfig(
 		}
 	}
 
-	private static Result<ExperienceSourceConfig, Problem> build(Identifier type, Result<JsonElement, Problem> maybeDataElement, JsonPath typeElementPath, ConfigContext context) {
+	private static Result<ExperienceSourceConfig, Problem> build(
+			Identifier type,
+			Result<JsonElement, Problem> maybeDataElement,
+			JsonPath typeElementPath,
+			Optional<ExperienceTeamSharingConfig> optTeamSharing,
+			ConfigContext context
+	) {
 		return ExperienceSourceRegistry.getFactory(type)
 				.map(factory -> factory.create(new ExperienceSourceConfigContextImpl(context, maybeDataElement))
-						.mapSuccess(instance -> new ExperienceSourceConfig(type, instance))
+						.mapSuccess(instance -> new ExperienceSourceConfig(type, instance, optTeamSharing))
 				)
 				.orElseGet(() -> Result.failure(typeElementPath.createProblem("Expected a valid source type")));
 	}
