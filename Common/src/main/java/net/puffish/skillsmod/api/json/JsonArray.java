@@ -10,6 +10,8 @@ public interface JsonArray {
 
 	Stream<JsonElement> stream();
 
+	JsonElement getAsElement();
+
 	<S, F> Result<List<S>, List<F>> getAsList(BiFunction<Integer, JsonElement, Result<S, F>> function);
 
 	int getSize();
