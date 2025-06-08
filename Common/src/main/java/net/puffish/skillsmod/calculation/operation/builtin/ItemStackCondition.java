@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.ComponentPredicate;
 import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.predicate.NumberRange;
+import net.minecraft.predicate.item.ItemPredicate;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -17,17 +17,16 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
-	private final Optional<RegistryEntryList<Item>> optItemEntries;
+	private final ItemPredicate predicate;
 	private final Optional<NbtPredicate> optNbt;
-	private final Optional<ComponentPredicate> optComponents;
 
-	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<ComponentPredicate> optComponents) {
-		this.optItemEntries = optItemEntries;
+	private ItemStackCondition(ItemPredicate predicate, Optional<NbtPredicate> optNbt) {
+		this.predicate = predicate;
 		this.optNbt = optNbt;
-		this.optComponents = optComponents;
 	}
 
 	public static void register() {
@@ -56,23 +55,34 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 
 		var optNbt = rootObject.get("nbt")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseNbtPredicate(stateElement)
+				.flatMap(nbtElement -> BuiltinJson.parseNbtPredicate(nbtElement)
 						.ifFailure(problems::add)
 						.getSuccess()
 				);
 
 		var optComponents = rootObject.get("components")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseComponentPredicate(stateElement, context.getServer().getRegistryManager())
+				.flatMap(componentsElement -> BuiltinJson.parseComponentPredicate(componentsElement, context.getServer().getRegistryManager())
+						.ifFailure(problems::add)
+						.getSuccess()
+				);
+
+		var optPredicates = rootObject.get("predicates")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(predicatesElement -> BuiltinJson.parseItemSubPredicates(predicatesElement, context.getServer().getRegistryManager())
 						.ifFailure(problems::add)
 						.getSuccess()
 				);
 
 		if (problems.isEmpty()) {
 			return Result.success(new ItemStackCondition(
-					optItem,
-					optNbt,
-					optComponents
+					new ItemPredicate(
+							optItem,
+							NumberRange.IntRange.ANY,
+							optComponents.orElse(ComponentPredicate.EMPTY),
+							optPredicates.orElseGet(Map::of)
+					),
+					optNbt
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -82,9 +92,8 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	@Override
 	public Optional<Boolean> apply(ItemStack itemStack) {
 		return Optional.of(
-				optItemEntries.map(itemStack::isIn).orElse(true)
+				predicate.test(itemStack)
 						&& optNbt.map(nbt -> nbt.test(itemStack)).orElse(true)
-						&& optComponents.map(components -> components.test(itemStack)).orElse(true)
 		);
 	}
 }
