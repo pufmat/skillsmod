@@ -85,6 +85,11 @@ public class JsonObjectTrackingImpl implements JsonObject {
 	}
 
 	@Override
+	public JsonElement getAsElement() {
+		return parent.getAsElement();
+	}
+
+	@Override
 	public <S, F> Result<Map<String, S>, Map<String, F>> getAsMap(BiFunction<String, JsonElement, Result<S, F>> function) {
 		return parent.getAsMap(function);
 	}

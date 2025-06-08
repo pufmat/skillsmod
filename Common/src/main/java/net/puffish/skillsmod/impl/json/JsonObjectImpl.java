@@ -15,14 +15,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class JsonObjectImpl implements JsonObject {
-	private final com.google.gson.JsonObject json;
-	protected final JsonPath path;
-
-	public JsonObjectImpl(com.google.gson.JsonObject json, JsonPath path) {
-		this.json = json;
-		this.path = path;
-	}
+public record JsonObjectImpl(
+		com.google.gson.JsonObject json,
+		JsonPath path
+) implements JsonObject {
 
 	@Override
 	public Result<JsonElement, Problem> get(String key) {
@@ -93,6 +89,11 @@ public class JsonObjectImpl implements JsonObject {
 						entry.getKey(),
 						new JsonElementImpl(entry.getValue(), path.getObject(entry.getKey()))
 				));
+	}
+
+	@Override
+	public JsonElement getAsElement() {
+		return new JsonElementImpl(json, path);
 	}
 
 	@Override
