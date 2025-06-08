@@ -11,14 +11,10 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class JsonArrayImpl implements JsonArray {
-	private final com.google.gson.JsonArray json;
-	private final JsonPath path;
-
-	public JsonArrayImpl(com.google.gson.JsonArray json, JsonPath path) {
-		this.json = json;
-		this.path = path;
-	}
+public record JsonArrayImpl(
+		com.google.gson.JsonArray json,
+		JsonPath path
+) implements JsonArray {
 
 	@Override
 	public Stream<JsonElement> stream() {
@@ -26,6 +22,11 @@ public class JsonArrayImpl implements JsonArray {
 				json.asList().stream(),
 				(jsonElement, i) -> new JsonElementImpl(jsonElement, path.getArray(i))
 		);
+	}
+
+	@Override
+	public JsonElement getAsElement() {
+		return new JsonElementImpl(json, path);
 	}
 
 	@Override
