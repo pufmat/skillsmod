@@ -16,6 +16,7 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.ComponentPredicate;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
+import net.minecraft.predicate.item.ItemSubPredicate;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -32,6 +33,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.function.Function;
 
 public final class BuiltinJson {
@@ -224,6 +226,14 @@ public final class BuiltinJson {
 			return Result.success(ComponentPredicate.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected component predicate"));
+		}
+	}
+
+	public static Result<Map<ItemSubPredicate.Type<?>, ItemSubPredicate>, Problem> parseItemSubPredicates(JsonElement element, DynamicRegistryManager manager) {
+		try {
+			return Result.success(ItemSubPredicate.PREDICATES_MAP_CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(element.getPath().createProblem("Expected item sub predicates"));
 		}
 	}
 
