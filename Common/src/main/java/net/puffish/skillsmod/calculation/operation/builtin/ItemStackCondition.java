@@ -56,17 +56,18 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 
 		var optNbt = rootObject.get("nbt")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseNbtPredicate(stateElement)
+				.flatMap(nbtElement -> BuiltinJson.parseNbtPredicate(nbtElement)
 						.ifFailure(problems::add)
 						.getSuccess()
 				);
 
-		var optComponents = rootObject.get("components")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseComponentsPredicate(stateElement, context.getServer().getRegistryManager())
-						.ifFailure(problems::add)
-						.getSuccess()
-				);
+		// these fields are used in components predicate, access them to avoid unused field error
+		rootObject.get("components");
+		rootObject.get("predicates");
+
+		var optComponents = BuiltinJson.parseComponentsPredicate(rootObject.getAsElement(), context.getServer().getRegistryManager())
+				.ifFailure(problems::add)
+				.getSuccess();
 
 		if (problems.isEmpty()) {
 			return Result.success(new ItemStackCondition(
