@@ -27,6 +27,8 @@ public interface JsonObject {
 
 	Stream<Map.Entry<String, JsonElement>> stream();
 
+	JsonElement getAsElement();
+
 	<S, F> Result<Map<String, S>, Map<String, F>> getAsMap(BiFunction<String, JsonElement, Result<S, F>> function);
 
 	<S> Result<S, Problem> noUnused(Function<JsonObject, Result<S, Problem>> function);

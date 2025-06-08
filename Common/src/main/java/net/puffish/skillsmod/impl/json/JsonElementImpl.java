@@ -8,14 +8,10 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.JsonPathFailure;
 
-public class JsonElementImpl implements JsonElement {
-	private final com.google.gson.JsonElement json;
-	private final JsonPath path;
-
-	public JsonElementImpl(com.google.gson.JsonElement json, JsonPath path) {
-		this.json = json;
-		this.path = path;
-	}
+public record JsonElementImpl(
+		com.google.gson.JsonElement json,
+		JsonPath path
+) implements JsonElement {
 
 	@Override
 	public Result<JsonObject, Problem> getAsObject() {
