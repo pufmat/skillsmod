@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
+import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
@@ -48,6 +49,7 @@ public class SkillsScreen extends Screen {
 	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
 	private static final Identifier WINDOW_TEXTURE = new Identifier("textures/gui/advancements/window.png");
 	private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
+	private static final Identifier RECIPE_BOOK_TEXTURE = new Identifier("textures/gui/recipe_book.png");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -73,6 +75,9 @@ public class SkillsScreen extends Screen {
 
 	private Optional<Identifier> optActiveCategoryId;
 
+	private ToggleButtonWidget nextButton;
+	private ToggleButtonWidget prevButton;
+
 	private float minScale = 1f;
 	private float maxScale = 1f;
 
@@ -83,6 +88,7 @@ public class SkillsScreen extends Screen {
 
 	private Bounds2i bounds = Bounds2i.zero();
 	private boolean small = false;
+	private int offset = 0;
 
 	private int contentPaddingTop = 0;
 	private int contentPaddingLeft = 0;
@@ -144,6 +150,21 @@ public class SkillsScreen extends Screen {
 				((float) contentHeight) / ((float) this.bounds.height())
 		);
 		this.maxScale = 1f;
+
+		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
+			@Override
+			public void onClick(double mouseX, double mouseY) {
+				offset++;
+			}
+		};
+		this.nextButton.setTextureUV(1, 208, 13, 18, RECIPE_BOOK_TEXTURE);
+		this.prevButton = new ToggleButtonWidget(FRAME_PADDING, FRAME_PADDING + 8, 12, 17, true) {
+			@Override
+			public void onClick(double mouseX, double mouseY) {
+				offset--;
+			}
+		};
+		this.prevButton.setTextureUV(1, 208, 13, 18, RECIPE_BOOK_TEXTURE);
 	}
 
 	private Vec2i getMousePos(double mouseX, double mouseY) {
@@ -160,8 +181,8 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private boolean isInsideTab(Vec2i mouse, int i) {
-		return mouse.x >= FRAME_PADDING + i * 32 && mouse.y >= FRAME_PADDING && mouse.x < FRAME_PADDING + i * 32 + 28 && mouse.y < FRAME_PADDING + 32;
+	private boolean isInsideTab(Vec2i mouse, int x) {
+		return mouse.x >= x && mouse.y >= FRAME_PADDING && mouse.x < x + 28 && mouse.y < FRAME_PADDING + 32;
 	}
 
 	private boolean isInsideSkill(Vec2i transformedMouse, ClientSkillConfig skill, ClientSkillDefinitionConfig definition) {
@@ -194,13 +215,30 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void forEachCategory(BiConsumer<Integer, ClientCategoryData> consumer) {
+	private int getTabX(int i) {
+		return FRAME_PADDING + (i - offset) * 32 + (offset > 0 ? (12 + 3) : 0);
+	}
+
+	private void forEachVisibleTab(BiConsumer<Integer, ClientCategoryData> consumer) {
 		var it = categories.values().iterator();
 		var i = 0;
 		while (it.hasNext()) {
-			consumer.accept(i, it.next());
+			var category = it.next();
+			var x = getTabX(i);
+			if (x >= FRAME_PADDING && x + 28 <= this.width - FRAME_PADDING - 12 - 3) {
+				consumer.accept(x, category);
+			}
 			i++;
 		}
+	}
+
+	private boolean hasNextButton() {
+		var x = getTabX(categories.size() - 1);
+		return x + 28 > this.width - FRAME_PADDING - 12 - 3;
+	}
+
+	private boolean hasPrevButton() {
+		return offset > 0;
 	}
 
 	@Override
@@ -209,6 +247,13 @@ public class SkillsScreen extends Screen {
 			optActiveCategoryData.ifPresent(activeCategoryData ->
 					mouseClickedWithCategory(mouseX, mouseY, activeCategoryData)
 			);
+		}
+
+		if (hasNextButton()) {
+			nextButton.mouseClicked(mouseX, mouseY, button);
+		}
+		if (hasPrevButton()) {
+			prevButton.mouseClicked(mouseX, mouseY, button);
 		}
 
 		return true;
@@ -226,8 +271,8 @@ public class SkillsScreen extends Screen {
 			canDrag = false;
 		}
 
-		forEachCategory((i, category) -> {
-			if (isInsideTab(mouse, i)) {
+		forEachVisibleTab((x, category) -> {
+			if (isInsideTab(mouse, x)) {
 				optActiveCategoryId = Optional.ofNullable(category.getConfig().id());
 				syncCategory();
 			}
@@ -288,7 +333,7 @@ public class SkillsScreen extends Screen {
 		this.renderBackground(matrices);
 		this.drawContent(matrices, mouseX, mouseY);
 		this.drawWindow(matrices, mouseX, mouseY);
-		this.drawTabs(matrices, mouseX, mouseY);
+		this.drawTabs(matrices, mouseX, mouseY, delta);
 
 		if (tooltip != null) {
 			renderOrderedTooltip(matrices, tooltip, mouseX, mouseY);
@@ -732,9 +777,16 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawTabs(MatrixStack matrices, double mouseX, double mouseY) {
+	private void drawTabs(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (client == null) {
 			return;
+		}
+
+		if (hasNextButton()) {
+			nextButton.render(matrices, mouseX, mouseY, delta);
+		}
+		if (hasPrevButton()) {
+			prevButton.render(matrices, mouseX, mouseY, delta);
 		}
 
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
@@ -745,11 +797,11 @@ public class SkillsScreen extends Screen {
 		RenderSystem.disableDepthTest();
 		RenderSystem.setShaderTexture(0, TABS_TEXTURE);
 
-		forEachCategory((i, category) -> DrawableHelper.drawTexture(
+		forEachVisibleTab((x, category) -> DrawableHelper.drawTexture(
 				matrices,
-				FRAME_PADDING + 32 * i,
+				x,
 				FRAME_PADDING,
-				i > 0 ? 28 : 0,
+				x == FRAME_PADDING ? 0 : 28,
 				optActiveCategoryData.orElse(null) == category ? 32 : 0,
 				28,
 				32,
@@ -762,7 +814,7 @@ public class SkillsScreen extends Screen {
 		var textureRenderer = new TextureBatchedRenderer();
 		var itemBatch = new ItemBatchedRenderer();
 
-		forEachCategory((i, category) -> {
+		forEachVisibleTab((x, category) -> {
 			var categoryConfig = category.getConfig();
 
 			drawIcon(
@@ -771,11 +823,11 @@ public class SkillsScreen extends Screen {
 					itemBatch,
 					categoryConfig.icon(),
 					1f,
-					FRAME_PADDING + 32 * i + 6 + 8,
+					x + 6 + 8,
 					FRAME_PADDING + 9 + 8
 			);
 
-			if (isInsideTab(mouse, i)) {
+			if (isInsideTab(mouse, x)) {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(categoryConfig.title().asOrderedText());
 				if (client.options.advancedItemTooltips) {
@@ -806,7 +858,7 @@ public class SkillsScreen extends Screen {
 		DrawableHelper.drawTexture(
 				matrices,
 				FRAME_PADDING,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
 				0,
 				HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
@@ -818,8 +870,8 @@ public class SkillsScreen extends Screen {
 		// bottom right
 		DrawableHelper.drawTexture(
 				matrices,
-				this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
+				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
@@ -834,7 +886,7 @@ public class SkillsScreen extends Screen {
 				FRAME_PADDING,
 				FRAME_PADDING + HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT,
 				0,
 				HALF_FRAME_HEIGHT - 1,
 				HALF_FRAME_WIDTH,
@@ -847,8 +899,8 @@ public class SkillsScreen extends Screen {
 		DrawableHelper.drawTexture(
 				matrices,
 				FRAME_PADDING + HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
-				this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
+				this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 				HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH - 1,
 				HALF_FRAME_HEIGHT,
@@ -861,10 +913,10 @@ public class SkillsScreen extends Screen {
 		// right
 		DrawableHelper.drawTexture(
 				matrices,
-				this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 				FRAME_PADDING + HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				HALF_FRAME_HEIGHT - 1,
 				HALF_FRAME_WIDTH,
@@ -901,7 +953,7 @@ public class SkillsScreen extends Screen {
 			// top right
 			DrawableHelper.drawTexture(
 					matrices,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH,
 					0,
@@ -912,7 +964,7 @@ public class SkillsScreen extends Screen {
 			);
 			DrawableHelper.drawTexture(
 					matrices,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
 					HALF_FRAME_WIDTH,
 					FRAME_CUT * 2 - FRAME_EXPAND,
@@ -927,7 +979,7 @@ public class SkillsScreen extends Screen {
 					matrices,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					FRAME_CUT,
 					HALF_FRAME_WIDTH - 1,
 					0,
@@ -940,7 +992,7 @@ public class SkillsScreen extends Screen {
 					matrices,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					HALF_FRAME_HEIGHT - FRAME_CUT,
 					HALF_FRAME_WIDTH - 1,
 					FRAME_CUT * 2 - FRAME_EXPAND,
@@ -966,7 +1018,7 @@ public class SkillsScreen extends Screen {
 			// top right
 			DrawableHelper.drawTexture(
 					matrices,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH,
 					0,
@@ -981,7 +1033,7 @@ public class SkillsScreen extends Screen {
 					matrices,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					HALF_FRAME_HEIGHT,
 					HALF_FRAME_WIDTH - 1,
 					0,
