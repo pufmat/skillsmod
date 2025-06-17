@@ -1,9 +1,11 @@
 package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.registry.Registries;
@@ -49,6 +51,12 @@ public class SkillsScreen extends Screen {
 	private static final Identifier TAB_ABOVE_MIDDLE_SELECTED_TEXTURE = Identifier.of("advancements/tab_above_middle_selected");
 	private static final Identifier TAB_ABOVE_LEFT_TEXTURE = Identifier.of("advancements/tab_above_left");
 	private static final Identifier TAB_ABOVE_MIDDLE_TEXTURE = Identifier.of("advancements/tab_above_middle");
+	private static final ButtonTextures PAGE_FORWARD_TEXTURES = new ButtonTextures(
+			Identifier.ofVanilla("recipe_book/page_forward"), Identifier.ofVanilla("recipe_book/page_forward_highlighted")
+	);
+	private static final ButtonTextures PAGE_BACKWARD_TEXTURES = new ButtonTextures(
+			Identifier.ofVanilla("recipe_book/page_backward"), Identifier.ofVanilla("recipe_book/page_backward_highlighted")
+	);
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -71,6 +79,9 @@ public class SkillsScreen extends Screen {
 
 	private Optional<Identifier> optActiveCategoryId;
 
+	private ToggleButtonWidget nextButton;
+	private ToggleButtonWidget prevButton;
+
 	private float minScale = 1f;
 	private float maxScale = 1f;
 
@@ -81,6 +92,7 @@ public class SkillsScreen extends Screen {
 
 	private Bounds2i bounds = Bounds2i.zero();
 	private boolean small = false;
+	private int offset = 0;
 
 	private int contentPaddingTop = 0;
 	private int contentPaddingLeft = 0;
@@ -140,6 +152,21 @@ public class SkillsScreen extends Screen {
 				((float) contentHeight) / ((float) this.bounds.height())
 		);
 		this.maxScale = 1f;
+
+		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
+			@Override
+			public void onClick(double mouseX, double mouseY) {
+				offset++;
+			}
+		};
+		this.nextButton.setTextures(PAGE_FORWARD_TEXTURES);
+		this.prevButton = new ToggleButtonWidget(FRAME_PADDING, FRAME_PADDING + 8, 12, 17, true) {
+			@Override
+			public void onClick(double mouseX, double mouseY) {
+				offset--;
+			}
+		};
+		this.prevButton.setTextures(PAGE_BACKWARD_TEXTURES);
 	}
 
 	private Vector2i getMousePos(double mouseX, double mouseY) {
@@ -156,8 +183,8 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private boolean isInsideTab(Vector2i mouse, int i) {
-		return mouse.x >= FRAME_PADDING + i * 32 && mouse.y >= FRAME_PADDING && mouse.x < FRAME_PADDING + i * 32 + 28 && mouse.y < FRAME_PADDING + 32;
+	private boolean isInsideTab(Vector2i mouse, int x) {
+		return mouse.x >= x && mouse.y >= FRAME_PADDING && mouse.x < x + 28 && mouse.y < FRAME_PADDING + 32;
 	}
 
 	private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillConfig skill, ClientSkillDefinitionConfig definition) {
@@ -190,13 +217,30 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void forEachCategory(BiConsumer<Integer, ClientCategoryData> consumer) {
+	private int getTabX(int i) {
+		return FRAME_PADDING + (i - offset) * 32 + (offset > 0 ? (12 + 3) : 0);
+	}
+
+	private void forEachVisibleTab(BiConsumer<Integer, ClientCategoryData> consumer) {
 		var it = categories.values().iterator();
 		var i = 0;
 		while (it.hasNext()) {
-			consumer.accept(i, it.next());
+			var category = it.next();
+			var x = getTabX(i);
+			if (x >= FRAME_PADDING && x + 28 <= this.width - FRAME_PADDING - 12 - 3) {
+				consumer.accept(x, category);
+			}
 			i++;
 		}
+	}
+
+	private boolean hasNextButton() {
+		var x = getTabX(categories.size() - 1);
+		return x + 28 > this.width - FRAME_PADDING - 12 - 3;
+	}
+
+	private boolean hasPrevButton() {
+		return offset > 0;
 	}
 
 	@Override
@@ -205,6 +249,13 @@ public class SkillsScreen extends Screen {
 			optActiveCategoryData.ifPresent(activeCategoryData ->
 					mouseClickedWithCategory(mouseX, mouseY, activeCategoryData)
 			);
+		}
+
+		if (hasNextButton()) {
+			nextButton.mouseClicked(mouseX, mouseY, button);
+		}
+		if (hasPrevButton()) {
+			prevButton.mouseClicked(mouseX, mouseY, button);
 		}
 
 		return true;
@@ -222,8 +273,8 @@ public class SkillsScreen extends Screen {
 			canDrag = false;
 		}
 
-		forEachCategory((i, category) -> {
-			if (isInsideTab(mouse, i)) {
+		forEachVisibleTab((x, category) -> {
+			if (isInsideTab(mouse, x)) {
 				optActiveCategoryId = Optional.ofNullable(category.getConfig().id());
 				syncCategory();
 			}
@@ -282,7 +333,7 @@ public class SkillsScreen extends Screen {
 		this.renderBackground(context, mouseX, mouseY, delta);
 		this.drawContent(context, mouseX, mouseY);
 		this.drawWindow(context, mouseX, mouseY);
-		this.drawTabs(context, mouseX, mouseY);
+		this.drawTabs(context, mouseX, mouseY, delta);
 	}
 
 	@Override
@@ -708,21 +759,28 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawTabs(DrawContext context, double mouseX, double mouseY) {
+	private void drawTabs(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (client == null) {
 			return;
 		}
 
-		forEachCategory((i, category) -> context.drawGuiTexture(
+		if (hasNextButton()) {
+			nextButton.render(context, mouseX, mouseY, delta);
+		}
+		if (hasPrevButton()) {
+			prevButton.render(context, mouseX, mouseY, delta);
+		}
+
+		forEachVisibleTab((x, category) -> context.drawGuiTexture(
 				RenderLayer::getGuiTexturedOverlay,
 				optActiveCategoryData.orElse(null) == category
-						? i == 0
+						? x == FRAME_PADDING
 						? TAB_ABOVE_LEFT_SELECTED_TEXTURE
 						: TAB_ABOVE_MIDDLE_SELECTED_TEXTURE
-						: i == 0
+						: x == FRAME_PADDING
 						? TAB_ABOVE_LEFT_TEXTURE
 						: TAB_ABOVE_MIDDLE_TEXTURE,
-				FRAME_PADDING + 32 * i,
+				x,
 				FRAME_PADDING,
 				28,
 				32
@@ -735,7 +793,7 @@ public class SkillsScreen extends Screen {
 		var textureRenderer = new TextureBatchedRenderer();
 		var itemBatch = new ItemBatchedRenderer();
 
-		forEachCategory((i, category) -> {
+		forEachVisibleTab((x, category) -> {
 			var categoryConfig = category.getConfig();
 
 			drawIcon(
@@ -744,11 +802,11 @@ public class SkillsScreen extends Screen {
 					itemBatch,
 					categoryConfig.icon(),
 					1f,
-					FRAME_PADDING + 32 * i + 6 + 8,
+					x + 6 + 8,
 					FRAME_PADDING + 9 + 8
 			);
 
-			if (isInsideTab(mouse, i)) {
+			if (isInsideTab(mouse, x)) {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(categoryConfig.title().asOrderedText());
 				if (client.options.advancedItemTooltips) {
@@ -772,7 +830,7 @@ public class SkillsScreen extends Screen {
 				RenderLayer::getGuiTexturedOverlay,
 				WINDOW_TEXTURE,
 				FRAME_PADDING,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
 				0,
 				HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
@@ -785,8 +843,8 @@ public class SkillsScreen extends Screen {
 		context.drawTexture(
 				RenderLayer::getGuiTexturedOverlay,
 				WINDOW_TEXTURE,
-				this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
+				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
@@ -804,7 +862,7 @@ public class SkillsScreen extends Screen {
 				0,
 				HALF_FRAME_HEIGHT - 1,
 				HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				2,
 				TEXTURE_WIDTH,
@@ -816,10 +874,10 @@ public class SkillsScreen extends Screen {
 				RenderLayer::getGuiTexturedOverlay,
 				WINDOW_TEXTURE,
 				FRAME_PADDING + HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH - 1,
 				HALF_FRAME_HEIGHT,
-				this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+				this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 				HALF_FRAME_HEIGHT,
 				2,
 				HALF_FRAME_HEIGHT,
@@ -831,12 +889,12 @@ public class SkillsScreen extends Screen {
 		context.drawTexture(
 				RenderLayer::getGuiTexturedOverlay,
 				WINDOW_TEXTURE,
-				this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 				FRAME_PADDING + HALF_FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				HALF_FRAME_HEIGHT - 1,
 				HALF_FRAME_WIDTH,
-				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT + 1,
+				this.height - FRAME_PADDING * 2 - FRAME_HEIGHT,
 				HALF_FRAME_WIDTH,
 				2,
 				TEXTURE_WIDTH,
@@ -874,7 +932,7 @@ public class SkillsScreen extends Screen {
 			context.drawTexture(
 					RenderLayer::getGuiTexturedOverlay,
 					WINDOW_TEXTURE,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH,
 					0,
@@ -886,7 +944,7 @@ public class SkillsScreen extends Screen {
 			context.drawTexture(
 					RenderLayer::getGuiTexturedOverlay,
 					WINDOW_TEXTURE,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
 					HALF_FRAME_WIDTH,
 					FRAME_CUT * 2 - FRAME_EXPAND,
@@ -904,7 +962,7 @@ public class SkillsScreen extends Screen {
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH - 1,
 					0,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					FRAME_CUT,
 					2,
 					FRAME_CUT,
@@ -918,7 +976,7 @@ public class SkillsScreen extends Screen {
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
 					HALF_FRAME_WIDTH - 1,
 					FRAME_CUT * 2 - FRAME_EXPAND,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					HALF_FRAME_HEIGHT - FRAME_CUT,
 					2,
 					HALF_FRAME_HEIGHT - FRAME_CUT,
@@ -944,7 +1002,7 @@ public class SkillsScreen extends Screen {
 			context.drawTexture(
 					RenderLayer::getGuiTexturedOverlay,
 					WINDOW_TEXTURE,
-					this.width - FRAME_PADDING - HALF_FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH,
 					0,
@@ -962,7 +1020,7 @@ public class SkillsScreen extends Screen {
 					FRAME_PADDING + TABS_HEIGHT,
 					HALF_FRAME_WIDTH - 1,
 					0,
-					this.width - FRAME_PADDING * 2 - FRAME_WIDTH + 1,
+					this.width - FRAME_PADDING * 2 - FRAME_WIDTH,
 					HALF_FRAME_HEIGHT,
 					2,
 					HALF_FRAME_HEIGHT,
