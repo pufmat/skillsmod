@@ -7,7 +7,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.client.data.ClientCategoryData;
+import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.gui.SimpleToast;
@@ -18,16 +18,14 @@ import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
 import net.puffish.skillsmod.client.network.packets.in.NewPointInPacket;
 import net.puffish.skillsmod.client.network.packets.in.OpenScreenInPacket;
-import net.puffish.skillsmod.client.network.packets.in.ShowToastInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowCategoryInPacket;
+import net.puffish.skillsmod.client.network.packets.in.ShowToastInPacket;
 import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.Packets;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class SkillsClientMod {
@@ -40,7 +38,7 @@ public class SkillsClientMod {
 
 	private static SkillsClientMod instance;
 
-	private final Map<Identifier, ClientCategoryData> categories = new LinkedHashMap<>();
+	private final ClientSkillScreenData screenData = new ClientSkillScreenData();
 
 	private final ClientPacketSender packetSender;
 
@@ -121,15 +119,15 @@ public class SkillsClientMod {
 
 	private void onShowCategory(ShowCategoryInPacket packet) {
 		var category = packet.getCategory();
-		categories.put(category.getConfig().id(), category);
+		screenData.putCategory(category.getConfig().id(), category);
 	}
 
 	private void onHideCategory(HideCategoryInPacket packet) {
-		categories.remove(packet.getCategoryId());
+		screenData.removeCategory(packet.getCategoryId());
 	}
 
 	private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			if (packet.isUnlocked()) {
 				category.unlock(packet.getSkillId());
 			} else {
@@ -139,7 +137,7 @@ public class SkillsClientMod {
 	}
 
 	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			category.setCurrentLevel(packet.getCurrentLevel());
 			category.setCurrentExperience(packet.getCurrentExperience());
 			category.setRequiredExperience(packet.getRequiredExperience());
@@ -147,7 +145,7 @@ public class SkillsClientMod {
 	}
 
 	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			category.updatePoints(
 					packet.getSpentPoints(),
 					packet.getEarnedPoints()
@@ -156,7 +154,7 @@ public class SkillsClientMod {
 	}
 
 	private void onNewPointPacket(NewPointInPacket packet) {
-		getCategoryById(packet.getCategoryId()).ifPresent(category -> {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			if (category.hasAnySkillLeft()) {
 				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
 						SkillsMod.createTranslatable(
@@ -186,11 +184,7 @@ public class SkillsClientMod {
 	}
 
 	public void openScreen(Optional<Identifier> categoryId) {
-		MinecraftClient.getInstance().setScreen(new SkillsScreen(categories, categoryId));
-	}
-
-	private Optional<ClientCategoryData> getCategoryById(Identifier categoryId) {
-		return Optional.ofNullable(categories.get(categoryId));
+		MinecraftClient.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
 	}
 
 	public ClientPacketSender getPacketSender() {
@@ -200,7 +194,7 @@ public class SkillsClientMod {
 	private class EventListener implements ClientEventListener {
 		@Override
 		public void onPlayerJoin() {
-			categories.clear();
+			screenData.clearCategories();
 		}
 	}
 }
