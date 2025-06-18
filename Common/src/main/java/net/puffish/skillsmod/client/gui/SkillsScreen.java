@@ -27,6 +27,7 @@ import net.puffish.skillsmod.client.config.ClientIconConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
 import net.puffish.skillsmod.client.data.ClientCategoryData;
+import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.ItemBatchedRenderer;
@@ -39,7 +40,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -67,7 +67,7 @@ public class SkillsScreen extends Screen {
 	private static final Vector4f COLOR_WHITE = new Vector4f(1f, 1f, 1f, 1f);
 	private static final Vector4f COLOR_GRAY = new Vector4f(0.25f, 0.25f, 0.25f, 1f);
 
-	private final Map<Identifier, ClientCategoryData> categories;
+	private final ClientSkillScreenData data;
 
 	private Optional<ClientCategoryData> optActiveCategoryData = Optional.empty();
 
@@ -86,7 +86,6 @@ public class SkillsScreen extends Screen {
 
 	private Bounds2i bounds = Bounds2i.zero();
 	private boolean small = false;
-	private int offset = 0;
 
 	private int contentPaddingTop = 0;
 	private int contentPaddingLeft = 0;
@@ -95,9 +94,9 @@ public class SkillsScreen extends Screen {
 
 	private List<OrderedText> tooltip;
 
-	public SkillsScreen(Map<Identifier, ClientCategoryData> categories, Optional<Identifier> optCategoryId) {
+	public SkillsScreen(ClientSkillScreenData data, Optional<Identifier> optCategoryId) {
 		super(ScreenTexts.EMPTY);
-		this.categories = categories;
+		this.data = data;
 		optActiveCategoryId = optCategoryId;
 	}
 
@@ -152,14 +151,14 @@ public class SkillsScreen extends Screen {
 		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
 			@Override
 			public void onClick(double mouseX, double mouseY) {
-				offset++;
+				data.incrementOffset();
 			}
 		};
 		this.nextButton.setTextureUV(1, 208, 13, 18, RECIPE_BOOK_TEXTURE);
 		this.prevButton = new ToggleButtonWidget(FRAME_PADDING, FRAME_PADDING + 8, 12, 17, true) {
 			@Override
 			public void onClick(double mouseX, double mouseY) {
-				offset--;
+				data.decrementOffset();
 			}
 		};
 		this.prevButton.setTextureUV(1, 208, 13, 18, RECIPE_BOOK_TEXTURE);
@@ -201,12 +200,10 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void syncCategory() {
-		var opt = optActiveCategoryId.flatMap(
-				activeCategoryId -> Optional.ofNullable(categories.get(activeCategoryId))
-		);
+		var opt = optActiveCategoryId.flatMap(data::getCategory);
 		opt.ifPresent(ClientCategoryData::updateLastOpen);
 		if (optActiveCategoryData.isEmpty() || optActiveCategoryData.orElseThrow() != opt.orElse(null)) {
-			optActiveCategoryData = categories.values()
+			optActiveCategoryData = data.getCategories()
 					.stream()
 					.max(Comparator.comparing(ClientCategoryData::getLastOpen));
 			resize();
@@ -214,11 +211,11 @@ public class SkillsScreen extends Screen {
 	}
 
 	private int getTabX(int i) {
-		return FRAME_PADDING + (i - offset) * 32 + (offset > 0 ? (12 + 3) : 0);
+		return FRAME_PADDING + (i - data.getOffset()) * 32 + (data.getOffset() > 0 ? (12 + 3) : 0);
 	}
 
 	private void forEachVisibleTab(BiConsumer<Integer, ClientCategoryData> consumer) {
-		var it = categories.values().iterator();
+		var it = data.getCategories().iterator();
 		var i = 0;
 		while (it.hasNext()) {
 			var category = it.next();
@@ -231,12 +228,12 @@ public class SkillsScreen extends Screen {
 	}
 
 	private boolean hasNextButton() {
-		var x = getTabX(categories.size() - 1);
+		var x = getTabX(data.getCategories().size() - 1);
 		return x + 28 > this.width - FRAME_PADDING - 12 - 3;
 	}
 
 	private boolean hasPrevButton() {
-		return offset > 0;
+		return data.getOffset() > 0;
 	}
 
 	@Override
