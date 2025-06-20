@@ -132,12 +132,15 @@ public class CategoryData {
 				&& getSpentPoints(category) >= definition.requiredSpentPoints();
 	}
 
-	public boolean canUnlockSkill(CategoryConfig category, SkillConfig skill) {
+	public boolean canUnlockSkill(CategoryConfig category, SkillConfig skill, boolean force) {
 		var definitionId = skill.definitionId();
 
 		return category.definitions()
 				.getById(definitionId)
-				.map(definition -> getSkillState(category, skill, definition) == Skill.State.AFFORDABLE)
+				.map(definition -> {
+					var state = getSkillState(category, skill, definition);
+					return force ? state != Skill.State.UNLOCKED : state == Skill.State.AFFORDABLE;
+				})
 				.orElse(false);
 	}
 
