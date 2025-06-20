@@ -306,7 +306,7 @@ public class SkillsMod {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			category.skills().getById(skillId).ifPresent(skill -> {
-				if (force || categoryData.canUnlockSkill(category, skill)) {
+				if (categoryData.canUnlockSkill(category, skill, force)) {
 					watchNewPoints(player, category, categoryData, false, () -> {
 						categoryData.unlockSkill(skillId);
 						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
