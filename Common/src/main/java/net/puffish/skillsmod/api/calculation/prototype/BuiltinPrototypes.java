@@ -107,7 +107,7 @@ public final class BuiltinPrototypes {
 		PLAYER.registerOperation(
 				Identifier.of("get_world"),
 				WORLD,
-				OperationFactory.create(player -> (ServerWorld) player.getWorld())
+				OperationFactory.create(ServerPlayerEntity::getWorld)
 		);
 
 		ITEM.registerOperation(

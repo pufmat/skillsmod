@@ -25,6 +25,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.util.Problem;
@@ -305,7 +306,7 @@ public final class BuiltinJson {
 
 	public static Result<Text, Problem> parseText(JsonElement element, DynamicRegistryManager manager) {
 		try {
-			return Result.success(Text.Serialization.fromJsonTree(element.getJson(), manager));
+			return Result.success(TextCodecs.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected text"));
 		}

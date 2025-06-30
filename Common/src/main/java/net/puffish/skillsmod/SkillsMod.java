@@ -586,7 +586,7 @@ public class SkillsMod {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
-				if (player.getServerWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
+				if (player.getWorld().getGameRules().getBoolean(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
 					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}
 			}
@@ -640,7 +640,7 @@ public class SkillsMod {
 			amount += result;
 
 			experienceSource.teamSharing().ifPresent(teamSharing -> {
-				var teamPlayers = player.getServerWorld().getPlayers(
+				var teamPlayers = player.getWorld().getPlayers(
 						otherPlayer -> player != otherPlayer
 								&& player.isTeammate(otherPlayer)
 								&& player.distanceTo(otherPlayer) <= teamSharing.distanceLimit()

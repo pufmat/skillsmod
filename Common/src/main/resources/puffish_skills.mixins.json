@@ -18,8 +18,10 @@
 		"WorldChunkMixin"
 	],
 	"client": [
-		"MinecraftClientMixin",
-		"RenderPassImplMixin"
+		"DrawContextMixin",
+		"GameRendererMixin",
+		"GuiRendererInvoker",
+		"GuiRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

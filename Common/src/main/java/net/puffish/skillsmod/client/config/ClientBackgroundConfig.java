@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.client.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.AbstractTexture;
@@ -32,6 +33,7 @@ public record ClientBackgroundConfig(
 		var id = SkillsMod.createIdentifier(RandomStringUtils.random(16, "abcdefghijklmnopqrstuvwxyz0123456789"));
 		MinecraftClient.getInstance().execute(() -> {
 			var texture = new ClientBackgroundTexture(textureId);
+			texture.setFilter(false, false);
 			MinecraftClient.getInstance()
 					.getTextureManager()
 					.registerTexture(id, texture);
@@ -58,7 +60,16 @@ public record ClientBackgroundConfig(
 					))
 					.orElseGet(MissingSprite::createSpriteContents);
 			this.animator = sprite.createAnimator();
-			this.glTexture = RenderSystem.getDevice().createTexture(id.toString(), TextureFormat.RGBA8, this.sprite.getWidth(), this.sprite.getHeight(), 1);
+			this.glTexture = RenderSystem.getDevice().createTexture(
+					id.toString(),
+					GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING,
+					TextureFormat.RGBA8,
+					this.sprite.getWidth(),
+					this.sprite.getHeight(),
+					1,
+					1
+			);
+			this.glTextureView = RenderSystem.getDevice().createTextureView(this.glTexture);
 
 			sprite.upload(0, 0, glTexture);
 		}

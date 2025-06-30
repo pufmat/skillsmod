@@ -1,12 +1,20 @@
 package net.puffish.skillsmod.client.rendering;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.util.Identifier;
-import org.joml.Vector3f;
-import org.joml.Vector4fc;
+import net.minecraft.util.math.MathHelper;
+import net.puffish.skillsmod.access.DrawContextAccess;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,19 +25,19 @@ public class TextureBatchedRenderer {
 	private final Map<Identifier, List<TextureEmit>> batch = new HashMap<>();
 
 	private record TextureEmit(
-			float x1, float y1, float z1,
-			float x2, float y2, float z2,
-			float x3, float y3, float z3,
-			float x4, float y4, float z4,
+			float x1, float y1,
+			float x2, float y2,
+			float x3, float y3,
+			float x4, float y4,
 
 			float minU, float minV, float maxU, float maxV,
-			Vector4fc color
+			int color
 	) { }
 
 	public void emitTexture(
 			DrawContext context, Identifier texture,
 			int x, int y, int width, int height,
-			Vector4fc color
+			int color
 	) {
 		emitTextureBatched(
 				context,
@@ -43,7 +51,7 @@ public class TextureBatchedRenderer {
 	public void emitSprite(
 			DrawContext context, Sprite sprite, Scaling scaling,
 			int x, int y, int width, int height,
-			Vector4fc color
+			int color
 	) {
 		if (scaling instanceof Scaling.Stretch) {
 			emitSpriteStretch(
@@ -69,7 +77,7 @@ public class TextureBatchedRenderer {
 	private void emitSpriteTile(
 			DrawContext context, Sprite sprite, Scaling.Tile tile,
 			int x, int y, int width, int height,
-			Vector4fc color
+			int color
 	) {
 		if (width <= 0 || height <= 0 || tile.width() <= 0 || tile.height() <= 0) {
 			return;
@@ -90,7 +98,7 @@ public class TextureBatchedRenderer {
 	private void emitSpriteNineSlice(
 			DrawContext context, Sprite sprite, Scaling.NineSlice nineSlice,
 			int x, int y, int width, int height,
-			Vector4fc color
+			int color
 	) {
 		if (width == nineSlice.width() && height == nineSlice.height()) {
 			emitSpriteStretch(
@@ -323,7 +331,7 @@ public class TextureBatchedRenderer {
 	private void emitSpriteStretch(
 			DrawContext context, Sprite sprite,
 			int x, int y, int width, int height,
-			Vector4fc color
+			int color
 	) {
 		emitTextureBatched(
 				context,
@@ -338,39 +346,107 @@ public class TextureBatchedRenderer {
 			DrawContext context, Identifier texture,
 			float minX, float minY, float maxX, float maxY,
 			float minU, float minV, float maxU, float maxV,
-			Vector4fc color
+			int color
 	) {
 		var emits = batch.computeIfAbsent(texture, key -> new ArrayList<>());
 
-		var matrix = context.getMatrices().peek().getPositionMatrix();
+		var matrix = context.getMatrices();
 
-		var v1 = matrix.transformPosition(new Vector3f(minX, minY, 0f));
-		var v2 = matrix.transformPosition(new Vector3f(minX, maxY, 0f));
-		var v3 = matrix.transformPosition(new Vector3f(maxX, maxY, 0f));
-		var v4 = matrix.transformPosition(new Vector3f(maxX, minY, 0f));
+		var v1 = matrix.transformPosition(new Vector2f(minX, minY));
+		var v2 = matrix.transformPosition(new Vector2f(minX, maxY));
+		var v3 = matrix.transformPosition(new Vector2f(maxX, maxY));
+		var v4 = matrix.transformPosition(new Vector2f(maxX, minY));
 
 		emits.add(new TextureEmit(
-				v1.x, v1.y, v1.z,
-				v2.x, v2.y, v2.z,
-				v3.x, v3.y, v3.z,
-				v4.x, v4.y, v4.z,
+				v1.x, v1.y,
+				v2.x, v2.y,
+				v3.x, v3.y,
+				v4.x, v4.y,
 				minU, minV, maxU, maxV,
 				color
 		));
 	}
 
-	public void draw(DrawContext context) {
-		context.draw(vcp -> {
-			for (var entry : batch.entrySet()) {
-				var vc = vcp.getBuffer(RenderLayer.getGuiTextured(entry.getKey()));
-				for (var emit : entry.getValue()) {
-					vc.vertex(emit.x1, emit.y1, emit.z1).texture(emit.minU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-					vc.vertex(emit.x2, emit.y2, emit.z2).texture(emit.minU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-					vc.vertex(emit.x3, emit.y3, emit.z3).texture(emit.maxU, emit.maxV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
-					vc.vertex(emit.x4, emit.y4, emit.z4).texture(emit.maxU, emit.minV).color(emit.color.x(), emit.color.y(), emit.color.z(), emit.color.w());
+	public void draw(DrawContext context, TextureManager textureManager, ScreenRect scissorArea) {
+		if (batch.isEmpty()) {
+			return;
+		}
+
+		for (var entry : batch.entrySet()) {
+			var texture = textureManager.getTexture(entry.getKey()).getGlTextureView();
+			var emits = entry.getValue();
+			var bounds = calcBounds(emits);
+			var emitsCopy = List.copyOf(emits);
+			batch.clear();
+
+			var contextAccess = (DrawContextAccess) context;
+			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
+				@Override
+				public void setupVertices(VertexConsumer vc, float depth) {
+					for (var emit : emitsCopy) {
+						vc.vertex(emit.x1, emit.y1, depth).texture(emit.minU, emit.minV).color(emit.color);
+						vc.vertex(emit.x2, emit.y2, depth).texture(emit.minU, emit.maxV).color(emit.color);
+						vc.vertex(emit.x3, emit.y3, depth).texture(emit.maxU, emit.maxV).color(emit.color);
+						vc.vertex(emit.x4, emit.y4, depth).texture(emit.maxU, emit.minV).color(emit.color);
+					}
 				}
-			}
-		});
-		batch.clear();
+
+				@Override
+				public RenderPipeline pipeline() {
+					return RenderPipelines.GUI_TEXTURED;
+				}
+
+				@Override
+				public TextureSetup textureSetup() {
+					return TextureSetup.withoutGlTexture(texture);
+				}
+
+				@Override
+				public ScreenRect scissorArea() {
+					return scissorArea;
+				}
+
+				@Override
+				public ScreenRect bounds() {
+					return bounds;
+				}
+			});
+		}
+	}
+
+	private static @NotNull ScreenRect calcBounds(List<TextureEmit> emits) {
+		var minX = Float.POSITIVE_INFINITY;
+		var minY = Float.POSITIVE_INFINITY;
+		var maxX = Float.NEGATIVE_INFINITY;
+		var maxY = Float.NEGATIVE_INFINITY;
+
+		for (var emit : emits) {
+			minX = Math.min(minX, emit.x1);
+			minX = Math.min(minX, emit.x2);
+			minX = Math.min(minX, emit.x3);
+			minX = Math.min(minX, emit.x4);
+
+			minY = Math.min(minY, emit.y1);
+			minY = Math.min(minY, emit.y2);
+			minY = Math.min(minY, emit.y3);
+			minY = Math.min(minY, emit.y4);
+
+			maxX = Math.max(maxX, emit.x1);
+			maxX = Math.max(maxX, emit.x2);
+			maxX = Math.max(maxX, emit.x3);
+			maxX = Math.max(maxX, emit.x4);
+
+			maxY = Math.max(maxY, emit.y1);
+			maxY = Math.max(maxY, emit.y2);
+			maxY = Math.max(maxY, emit.y3);
+			maxY = Math.max(maxY, emit.y4);
+		}
+
+		return new ScreenRect(
+				MathHelper.floor(minX),
+				MathHelper.floor(minY),
+				MathHelper.ceil(maxX - minX),
+				MathHelper.ceil(maxY - minY)
+		);
 	}
 }

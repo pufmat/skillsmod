@@ -2,14 +2,23 @@ package net.puffish.skillsmod.client.rendering;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.render.OversizedItemGuiElementRenderer;
+import net.minecraft.client.gui.render.state.ItemGuiElementRenderState;
+import net.minecraft.client.gui.render.state.special.OversizedItemGuiElementRenderState;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.puffish.skillsmod.access.MinecraftClientAccess;
-import org.joml.Matrix4f;
+import net.minecraft.util.math.MathHelper;
+import net.puffish.skillsmod.access.DrawContextAccess;
+import net.puffish.skillsmod.access.GameRendererAccess;
+import net.puffish.skillsmod.access.GuiRendererAccess;
+import net.puffish.skillsmod.mixin.GuiRendererInvoker;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +27,9 @@ import java.util.Map;
 
 public class ItemBatchedRenderer {
 
-	private final Map<ComparableItemStack, List<Matrix4f>> batch = new HashMap<>();
-	private final ItemRenderState itemRenderState = new ItemRenderState();
+	private final Map<ComparableItemStack, List<Matrix3x2f>> batch = new HashMap<>();
 
-	public static List<Matrix4f> EMITS;
+	private static final Object KEY = new Object();
 
 	public void emitItem(DrawContext context, ItemStack item, int x, int y) {
 		var emits = batch.computeIfAbsent(
@@ -29,27 +37,24 @@ public class ItemBatchedRenderer {
 				key -> new ArrayList<>()
 		);
 
-		emits.add(new Matrix4f(
-				context.getMatrices().peek().getPositionMatrix()
-		).translate(x, y, 0));
+		emits.add(new Matrix3x2f(context.getMatrices()).translate(x - 8, y - 8));
 	}
 
-	public void draw() {
+	public void draw(DrawContext context, ScreenRect scissorArea) {
 		var client = MinecraftClient.getInstance();
-
-		var clientAccess = (MinecraftClientAccess) client;
-		var immediate = clientAccess.getBufferBuilders().getEntityVertexConsumers();
-
-		immediate.draw();
-
-		var matrices = new MatrixStack();
-		matrices.translate(0, 0, 150);
-		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1f, -1f, 1f));
-		matrices.scale(16f, 16f, 16f);
+		var gameRenderer = client.gameRenderer;
+		var gameRendererAccess = (GameRendererAccess) gameRenderer;
+		var guiRendererAccess = (GuiRendererAccess) gameRendererAccess.getGuiRenderer();
+		var guiRendererInvoker = (GuiRendererInvoker) gameRendererAccess.getGuiRenderer();
+		var contextAccess = (DrawContextAccess) context;
+		var guiRenderState = contextAccess.getState();
+		var windowScaleFactor = guiRendererInvoker.invokeGetWindowScaleFactor();
+		var vertexConsumers = guiRendererAccess.getVertexConsumers();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
 
+			var itemRenderState = new ItemRenderState();
 			client.getItemModelManager().clearAndUpdate(
 					itemRenderState,
 					itemStack,
@@ -59,24 +64,31 @@ public class ItemBatchedRenderer {
 					0
 			);
 
-			if (itemRenderState.isSideLit()) {
-				DiffuseLighting.enableGuiDepthLighting();
-			} else {
-				DiffuseLighting.disableGuiDepthLighting();
-			}
+			itemRenderState.addModelKey(KEY);
 
-			EMITS = entry.getValue();
-
-			itemRenderState.render(
-					matrices,
-					immediate,
-					0xF000F0,
-					OverlayTexture.DEFAULT_UV
+			var renderer = guiRendererAccess.getOversizedItems().computeIfAbsent(
+					itemRenderState.getModelKey(),
+					object -> new ItemGuiElementRenderer(vertexConsumers)
 			);
 
-			immediate.draw();
-
-			EMITS = null;
+			for (var matrix : entry.getValue()) {
+				var renderState = new ItemGuiElementRenderState(
+						itemStack.getItem().getName().toString(),
+						matrix,
+						itemRenderState,
+						0,
+						0,
+						scissorArea
+				);
+				var box = itemRenderState.getModelBoundingBox();
+				renderer.render(new OversizedItemGuiElementRenderState(
+						renderState,
+						0,
+						0,
+						MathHelper.ceil(box.getLengthX() * 16),
+						MathHelper.ceil(box.getLengthY() * 16)
+				), guiRenderState, windowScaleFactor);
+			}
 		}
 		batch.clear();
 	}
@@ -99,4 +111,40 @@ public class ItemBatchedRenderer {
 			return itemStack.getItem().hashCode();
 		}
 	}
+
+	private static class ItemGuiElementRenderer extends OversizedItemGuiElementRenderer {
+		private Object modelKey;
+
+		public ItemGuiElementRenderer(VertexConsumerProvider.Immediate immediate) {
+			super(immediate);
+		}
+
+		@Override
+		public void clearModel() {
+			this.modelKey = null;
+		}
+
+		@Override
+		protected void render(OversizedItemGuiElementRenderState renderState, MatrixStack matrixStack) {
+			matrixStack.scale(1f, -1f, -1f);
+			var guiItemRenderState = renderState.guiItemRenderState();
+			var itemRenderState = guiItemRenderState.state();
+
+			MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(
+					itemRenderState.isSideLit()
+							? DiffuseLighting.Type.ITEMS_3D
+							: DiffuseLighting.Type.ITEMS_FLAT
+			);
+
+			itemRenderState.render(matrixStack, this.vertexConsumers, 0xF000F0, OverlayTexture.DEFAULT_UV);
+			this.modelKey = itemRenderState.getModelKey();
+		}
+
+		@Override
+		public boolean shouldBypassScaling(OversizedItemGuiElementRenderState renderState) {
+			var itemRenderState = renderState.guiItemRenderState().state();
+			return !itemRenderState.isAnimated() && itemRenderState.getModelKey().equals(this.modelKey);
+		}
+	}
+
 }

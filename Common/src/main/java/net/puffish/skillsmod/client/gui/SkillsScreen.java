@@ -1,12 +1,14 @@
 package net.puffish.skillsmod.client.gui;
 
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenTexts;
@@ -16,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Skill;
@@ -34,8 +37,6 @@ import net.puffish.skillsmod.client.rendering.TextureBatchedRenderer;
 import net.puffish.skillsmod.common.BackgroundPosition;
 import net.puffish.skillsmod.util.Bounds2i;
 import org.joml.Vector2i;
-import org.joml.Vector4f;
-import org.joml.Vector4fc;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -70,8 +71,8 @@ public class SkillsScreen extends Screen {
 	private static final int HALF_FRAME_WIDTH = FRAME_WIDTH / 2;
 	private static final int HALF_FRAME_HEIGHT = FRAME_HEIGHT / 2;
 
-	private static final Vector4fc COLOR_WHITE = new Vector4f(1f, 1f, 1f, 1f);
-	private static final Vector4fc COLOR_GRAY = new Vector4f(0.25f, 0.25f, 0.25f, 1f);
+	private static final int COLOR_WHITE = ColorHelper.fromFloats(1f, 1f, 1f, 1f);
+	private static final int COLOR_GRAY = ColorHelper.fromFloats(1f, 0.25f, 0.25f, 0.25f);
 
 	private final ClientSkillScreenData data;
 
@@ -327,7 +328,6 @@ public class SkillsScreen extends Screen {
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		this.syncCategory();
 
-		this.renderBackground(context, mouseX, mouseY, delta);
 		this.drawContent(context, mouseX, mouseY);
 		this.drawWindow(context, mouseX, mouseY);
 		this.drawTabs(context, mouseX, mouseY, delta);
@@ -411,19 +411,20 @@ public class SkillsScreen extends Screen {
 		}
 
 		var matrices = context.getMatrices();
-		matrices.push();
+		matrices.pushMatrix();
 
 		if (icon instanceof ClientIconConfig.ItemIconConfig itemIcon) {
-			matrices.translate(x * (1f - sizeScale), y * (1f - sizeScale), 1f);
-			matrices.scale(sizeScale, sizeScale, 1);
+			matrices.translate(x * (1f - sizeScale), y * (1f - sizeScale));
+			matrices.scale(sizeScale, sizeScale);
 			itemRenderer.emitItem(
 					context,
 					itemIcon.item(),
 					x, y
 			);
 		} else if (icon instanceof ClientIconConfig.EffectIconConfig effectIcon) {
-			matrices.translate(0f, 0f, 1f);
-			var sprite = client.getStatusEffectSpriteManager().getSprite(Registries.STATUS_EFFECT.getEntry(effectIcon.effect()));
+			var guiAtlasManager = client.getGuiAtlasManager();
+			var texture = InGameHud.getEffectTexture(Registries.STATUS_EFFECT.getEntry(effectIcon.effect()));
+			var sprite = guiAtlasManager.getSprite(texture);
 			var halfSize = Math.round(9f * sizeScale);
 			var size = halfSize * 2;
 			textureRenderer.emitSprite(
@@ -432,7 +433,6 @@ public class SkillsScreen extends Screen {
 					COLOR_WHITE
 			);
 		} else if (icon instanceof ClientIconConfig.TextureIconConfig textureIcon) {
-			matrices.translate(0f, 0f, 1f);
 			var halfSize = Math.round(8f * sizeScale);
 			var size = halfSize * 2;
 			textureRenderer.emitTexture(
@@ -442,7 +442,7 @@ public class SkillsScreen extends Screen {
 			);
 		}
 
-		matrices.pop();
+		matrices.popMatrix();
 	}
 
 	private void drawFrame(DrawContext context, TextureBatchedRenderer textureRenderer, ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
@@ -529,7 +529,7 @@ public class SkillsScreen extends Screen {
 		switch (position) {
 			case TILE -> {
 				context.drawTexture(
-						RenderLayer::getGuiTextured,
+						RenderPipelines.GUI_TEXTURED,
 						background.texture(),
 						bounds.min().x(),
 						bounds.min().y(),
@@ -580,7 +580,7 @@ public class SkillsScreen extends Screen {
 		}
 
 		context.drawTexture(
-				RenderLayer::getGuiTextured,
+				RenderPipelines.GUI_TEXTURED,
 				background.texture(),
 				x,
 				y,
@@ -593,25 +593,28 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawContent(DrawContext context, double mouseX, double mouseY) {
-		context.enableScissor(
-				contentPaddingLeft - 4,
-				contentPaddingTop - 4,
-				this.width - contentPaddingRight + 4,
-				this.height - contentPaddingBottom + 4
-		);
+	private void drawContent(DrawContext context, int mouseX, int mouseY) {
+		var minX = contentPaddingLeft - 4;
+		var minY = contentPaddingTop - 4;
+		var maxX = this.width - contentPaddingRight + 4;
+		var maxY = this.height - contentPaddingBottom + 4;
+
+		var scissorArea = new ScreenRect(minX, minY, maxX - minX, maxY - minY)
+				.transform(context.getMatrices());
+
+		context.enableScissor(minX, minY, maxX, maxY);
 
 		context.fill(0, 0, width, height, 0xff000000);
 
 		optActiveCategoryData.ifPresentOrElse(
-				activeCategoryData -> drawContentWithCategory(context, mouseX, mouseY, activeCategoryData),
+				activeCategoryData -> drawContentWithCategory(context, mouseX, mouseY, scissorArea, activeCategoryData),
 				() -> drawContentWithoutCategory(context)
 		);
 
 		context.disableScissor();
 	}
 
-	private void drawContentWithCategory(DrawContext context, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+	private void drawContentWithCategory(DrawContext context, int mouseX, int mouseY, ScreenRect scissorArea, ClientCategoryData activeCategoryData) {
 		if (client == null) {
 			return;
 		}
@@ -621,14 +624,12 @@ public class SkillsScreen extends Screen {
 		var activeCategory = activeCategoryData.getConfig();
 
 		var matrices = context.getMatrices();
-		matrices.push();
+		matrices.pushMatrix();
 
-		matrices.translate(activeCategoryData.getX() + this.width / 2f, activeCategoryData.getY() + this.height / 2f, 1f);
-		matrices.scale(activeCategoryData.getScale(), activeCategoryData.getScale(), 1f);
+		matrices.translate(activeCategoryData.getX() + this.width / 2f, activeCategoryData.getY() + this.height / 2f);
+		matrices.scale(activeCategoryData.getScale(), activeCategoryData.getScale());
 
 		drawBackground(context, activeCategory.background());
-
-		matrices.translate(0f, 0f, 1f);
 
 		var connectionRenderer = new ConnectionBatchedRenderer();
 
@@ -679,7 +680,7 @@ public class SkillsScreen extends Screen {
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(hoveredSkill.id()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}
-				setTooltip(lines);
+				context.drawTooltip(lines, mouseX, mouseY);
 
 				var connections = activeCategory.skillExclusiveConnections().get(hoveredSkill.id());
 				if (connections != null) {
@@ -700,41 +701,45 @@ public class SkillsScreen extends Screen {
 			});
 		}
 
-		context.draw();
-		connectionRenderer.draw(context);
+		connectionRenderer.draw(context, scissorArea);
 
 		var textureRenderer = new TextureBatchedRenderer();
+
+		for (var skill : activeCategory.skills().values()) {
+			activeCategory
+					.getDefinitionById(skill.definitionId())
+					.ifPresent(definition -> drawFrame(
+							context,
+							textureRenderer,
+							definition.frame(),
+							definition.size(),
+							skill.x(),
+							skill.y(),
+							activeCategoryData.getSkillState(skill)
+					));
+		}
+
+		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
 		var itemRenderer = new ItemBatchedRenderer();
 
 		for (var skill : activeCategory.skills().values()) {
 			activeCategory
 					.getDefinitionById(skill.definitionId())
-					.ifPresent(definition -> {
-						drawFrame(
-								context,
-								textureRenderer,
-								definition.frame(),
-								definition.size(),
-								skill.x(),
-								skill.y(),
-								activeCategoryData.getSkillState(skill)
-						);
-						drawIcon(
-								context,
-								textureRenderer,
-								itemRenderer,
-								definition.icon(),
-								definition.size(),
-								skill.x(),
-								skill.y()
-						);
-					});
+					.ifPresent(definition -> drawIcon(
+							context,
+							textureRenderer,
+							itemRenderer,
+							definition.icon(),
+							definition.size(),
+							skill.x(),
+							skill.y()
+					));
 		}
 
-		textureRenderer.draw(context);
-		itemRenderer.draw();
+		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
+		itemRenderer.draw(context, scissorArea);
 
-		matrices.pop();
+		matrices.popMatrix();
 	}
 
 	private void drawContentWithoutCategory(DrawContext context) {
@@ -769,7 +774,7 @@ public class SkillsScreen extends Screen {
 		}
 
 		forEachVisibleTab((x, category) -> context.drawGuiTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				optActiveCategoryData.orElse(null) == category
 						? x == FRAME_PADDING
 						? TAB_ABOVE_LEFT_SELECTED_TEXTURE
@@ -783,12 +788,12 @@ public class SkillsScreen extends Screen {
 				32
 		));
 
-		context.draw();
+		context.createNewRootLayer();
 
 		var mouse = getMousePos(mouseX, mouseY);
 
 		var textureRenderer = new TextureBatchedRenderer();
-		var itemBatch = new ItemBatchedRenderer();
+		var itemRenderer = new ItemBatchedRenderer();
 
 		forEachVisibleTab((x, category) -> {
 			var categoryConfig = category.getConfig();
@@ -796,7 +801,7 @@ public class SkillsScreen extends Screen {
 			drawIcon(
 					context,
 					textureRenderer,
-					itemBatch,
+					itemRenderer,
 					categoryConfig.icon(),
 					1f,
 					x + 6 + 8,
@@ -809,22 +814,23 @@ public class SkillsScreen extends Screen {
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(categoryConfig.id().toString()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}
-				setTooltip(lines);
+				context.drawTooltip(lines, mouseX, mouseY);
 			}
 		});
 
-		textureRenderer.draw(context);
-		itemBatch.draw();
+		var scissorArea = new ScreenRect(0, 0, width, height);
+		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
+		itemRenderer.draw(context, scissorArea);
 	}
 
-	private void drawWindow(DrawContext context, double mouseX, double mouseY) {
+	private void drawWindow(DrawContext context, int mouseX, int mouseY) {
 		if (client == null) {
 			return;
 		}
 
 		// bottom left
 		context.drawTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING,
 				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
@@ -838,7 +844,7 @@ public class SkillsScreen extends Screen {
 
 		// bottom right
 		context.drawTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
@@ -852,7 +858,7 @@ public class SkillsScreen extends Screen {
 
 		// left
 		context.drawTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING,
 				FRAME_PADDING + HALF_FRAME_HEIGHT,
@@ -868,7 +874,7 @@ public class SkillsScreen extends Screen {
 
 		// bottom
 		context.drawTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING + HALF_FRAME_WIDTH,
 				this.height - FRAME_PADDING - HALF_FRAME_HEIGHT,
@@ -884,7 +890,7 @@ public class SkillsScreen extends Screen {
 
 		// right
 		context.drawTexture(
-				RenderLayer::getGuiTexturedOverlay,
+				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 				FRAME_PADDING + HALF_FRAME_HEIGHT,
@@ -901,7 +907,7 @@ public class SkillsScreen extends Screen {
 		if (small) {
 			// top left
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -913,7 +919,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_HEIGHT
 			);
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
@@ -927,7 +933,7 @@ public class SkillsScreen extends Screen {
 
 			// top right
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -939,7 +945,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_HEIGHT
 			);
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
@@ -953,7 +959,7 @@ public class SkillsScreen extends Screen {
 
 			// top
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -967,7 +973,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_HEIGHT
 			);
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT + FRAME_CUT,
@@ -983,7 +989,7 @@ public class SkillsScreen extends Screen {
 		} else {
 			// top left
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -997,7 +1003,7 @@ public class SkillsScreen extends Screen {
 
 			// top right
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -1011,7 +1017,7 @@ public class SkillsScreen extends Screen {
 
 			// top
 			context.drawTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
 					FRAME_PADDING + TABS_HEIGHT,
@@ -1044,7 +1050,7 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+	private void drawWindowWithCategory(DrawContext context, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1094,7 +1100,7 @@ public class SkillsScreen extends Screen {
 					activeCategoryData.getSpentPoints()
 							+ (activeCategory.spentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.spentPointsLimit())
 			).asOrderedText());
-			setTooltip(lines);
+			context.drawTooltip(lines, mouseX, mouseY);
 		}
 
 		if (activeCategoryData.hasExperience()) {
@@ -1107,7 +1113,7 @@ public class SkillsScreen extends Screen {
 			}
 
 			context.drawGuiTexture(
-					RenderLayer::getGuiTexturedOverlay,
+					RenderPipelines.GUI_TEXTURED,
 					EXPERIENCE_BAR_BACKGROUND_TEXTURE,
 					tmpX,
 					tmpY,
@@ -1117,7 +1123,7 @@ public class SkillsScreen extends Screen {
 			var width = Math.min(182, (int) (activeCategoryData.getExperienceProgress() * 183f));
 			if (width > 0) {
 				context.drawGuiTexture(
-						RenderLayer::getGuiTexturedOverlay,
+						RenderPipelines.GUI_TEXTURED,
 						EXPERIENCE_BAR_PROGRESS_TEXTURE,
 						182,
 						5,
@@ -1150,7 +1156,7 @@ public class SkillsScreen extends Screen {
 						"to_next_level",
 						activeCategoryData.getExperienceToNextLevel()
 				).asOrderedText());
-				setTooltip(lines);
+				context.drawTooltip(lines, mouseX, mouseY);
 			}
 		}
 	}
