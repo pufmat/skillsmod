@@ -9,7 +9,7 @@ import net.minecraft.client.gui.render.state.special.OversizedItemGuiElementRend
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.render.item.KeyedItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
@@ -54,7 +54,7 @@ public class ItemBatchedRenderer {
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
 
-			var itemRenderState = new ItemRenderState();
+			var itemRenderState = new KeyedItemRenderState();
 			client.getItemModelManager().clearAndUpdate(
 					itemRenderState,
 					itemStack,
