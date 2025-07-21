@@ -377,7 +377,6 @@ public class TextureBatchedRenderer {
 			var emits = entry.getValue();
 			var bounds = calcBounds(emits);
 			var emitsCopy = List.copyOf(emits);
-			batch.clear();
 
 			var contextAccess = (DrawContextAccess) context;
 			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
@@ -412,6 +411,8 @@ public class TextureBatchedRenderer {
 				}
 			});
 		}
+
+		batch.clear();
 	}
 
 	private static @NotNull ScreenRect calcBounds(List<TextureEmit> emits) {
