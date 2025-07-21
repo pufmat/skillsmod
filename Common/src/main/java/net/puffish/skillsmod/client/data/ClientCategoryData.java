@@ -31,6 +31,8 @@ public class ClientCategoryData {
 
 	private long lastOpen;
 
+	private boolean unseenPoints;
+
 	public ClientCategoryData(
 			ClientCategoryConfig config,
 			Map<String, Skill.State> skillStates,
@@ -81,6 +83,8 @@ public class ClientCategoryData {
 					this.config.colors().connections().excluded()
 			));
 		}
+
+		this.unseenPoints = getPointsLeft() > 0;
 	}
 
 	private void updateSkillState(ClientSkillConfig skill, Skill.State state) {
@@ -281,8 +285,14 @@ public class ClientCategoryData {
 	}
 
 	public void updatePoints(int spentPoints, int earnedPoints) {
+		var prevPointsLeft = getPointsLeft();
+
 		this.spentPoints = spentPoints;
 		this.earnedPoints = earnedPoints;
+
+		if (getPointsLeft() > prevPointsLeft) {
+			unseenPoints = true;
+		}
 
 		config.skills()
 				.values()
@@ -421,6 +431,14 @@ public class ClientCategoryData {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public boolean hasUnseenPoints() {
+		return unseenPoints;
+	}
+
+	public void updateUnseenPoints() {
+		this.unseenPoints = false;
 	}
 
 	public long getLastOpen() {
