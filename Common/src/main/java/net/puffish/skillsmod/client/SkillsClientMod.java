@@ -113,7 +113,11 @@ public class SkillsClientMod {
 	}
 
 	private void onOpenKeyPress() {
-		openScreen(Optional.empty());
+		if (MinecraftClient.getInstance().currentScreen instanceof SkillsScreen screen) {
+			screen.close();
+		} else {
+			openScreen(Optional.empty());
+		}
 	}
 
 	private void onShowCategory(ShowCategoryInPacket packet) {
