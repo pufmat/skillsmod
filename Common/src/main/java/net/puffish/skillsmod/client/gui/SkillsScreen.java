@@ -58,6 +58,7 @@ public class SkillsScreen extends Screen {
 	private static final ButtonTextures PAGE_BACKWARD_TEXTURES = new ButtonTextures(
 			new Identifier("recipe_book/page_backward"), new Identifier("recipe_book/page_backward_highlighted")
 	);
+	private static final Identifier TRIAL_AVAILABLE_TEXTURE = new Identifier("icon/trial_available");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -213,6 +214,7 @@ public class SkillsScreen extends Screen {
 					.max(Comparator.comparing(ClientCategoryData::getLastOpen));
 			resize();
 		}
+		optActiveCategoryData.ifPresent(ClientCategoryData::updateUnseenPoints);
 	}
 
 	private int getTabX(int i) {
@@ -824,6 +826,18 @@ public class SkillsScreen extends Screen {
 
 		textureRenderer.draw();
 		itemBatch.draw();
+
+		forEachVisibleTab((x, category) -> {
+			if (category.hasUnseenPoints()) {
+				context.drawGuiTexture(
+						TRIAL_AVAILABLE_TEXTURE,
+						x + 10,
+						FRAME_PADDING - 5,
+						8,
+						8
+				);
+			}
+		});
 	}
 
 	private void drawWindow(DrawContext context, double mouseX, double mouseY) {
