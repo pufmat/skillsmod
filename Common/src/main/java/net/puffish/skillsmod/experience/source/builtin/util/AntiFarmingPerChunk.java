@@ -2,6 +2,8 @@ package net.puffish.skillsmod.experience.source.builtin.util;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
@@ -10,8 +12,6 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public record AntiFarmingPerChunk(int limitPerChunk, int resetAfterSeconds) {
@@ -53,7 +53,7 @@ public record AntiFarmingPerChunk(int limitPerChunk, int resetAfterSeconds) {
 	}
 
 	public static class Data {
-		private final Map<AntiFarmingPerChunk, LongList> antiFarmingData = new HashMap<>();
+		private final Reference2ObjectMap<AntiFarmingPerChunk, LongList> antiFarmingData = new Reference2ObjectOpenHashMap<>();
 
 		public boolean tryIncrement(AntiFarmingPerChunk antiFarming) {
 			var data = antiFarmingData.computeIfAbsent(antiFarming, key -> new LongArrayList());

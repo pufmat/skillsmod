@@ -1,5 +1,7 @@
 package net.puffish.skillsmod.experience.source.builtin.util;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
@@ -8,9 +10,7 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
 public record AntiFarmingPerEntity(float limitPerEntity, int resetAfterSeconds) {
@@ -42,7 +42,7 @@ public record AntiFarmingPerEntity(float limitPerEntity, int resetAfterSeconds) 
 	}
 
 	public static class Data {
-		private final Map<AntiFarmingPerEntity, Instance> antiFarmingData = new HashMap<>();
+		private final Reference2ObjectMap<AntiFarmingPerEntity, Instance> antiFarmingData = new Reference2ObjectOpenHashMap<>();
 
 		public float addAndLimit(AntiFarmingPerEntity antiFarming, float damage) {
 			return antiFarmingData
