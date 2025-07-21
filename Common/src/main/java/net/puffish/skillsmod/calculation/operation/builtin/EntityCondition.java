@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.puffish.skillsmod.SkillsMod;
@@ -13,40 +13,39 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
-public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
-	private final Optional<RegistryEntryList<Item>> optItemEntries;
+public final class EntityCondition implements Operation<Entity, Boolean> {
+	private final Optional<RegistryEntryList<EntityType<?>>> optEntityEntries;
 	private final Optional<NbtPredicate> optNbt;
 
-	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt) {
-		this.optItemEntries = optItemEntries;
+	private EntityCondition(Optional<RegistryEntryList<EntityType<?>>> optEntityEntries, Optional<NbtPredicate> optNbt) {
+		this.optEntityEntries = optEntityEntries;
 		this.optNbt = optNbt;
 	}
 
 	public static void register() {
-		BuiltinPrototypes.ITEM_STACK.registerOperation(
+		BuiltinPrototypes.ENTITY.registerOperation(
 				SkillsMod.createIdentifier("test"),
 				BuiltinPrototypes.BOOLEAN,
-				ItemStackCondition::parse
+				EntityCondition::parse
 		);
 	}
 
-	public static Result<ItemStackCondition, Problem> parse(OperationConfigContext context) {
+	public static Result<EntityCondition, Problem> parse(OperationConfigContext context) {
 		return context.getData()
 				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(ItemStackCondition::parse, context));
+				.andThen(rootObject -> rootObject.noUnused(EntityCondition::parse));
 	}
 
-	public static Result<ItemStackCondition, Problem> parse(JsonObject rootObject) {
+	public static Result<EntityCondition, Problem> parse(JsonObject rootObject) {
 		var problems = new ArrayList<Problem>();
 
-		var optItem = rootObject.get("item")
+		var optEntityType = rootObject.get("entity_type")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(itemElement -> BuiltinJson.parseItemOrItemTag(itemElement)
+				.flatMap(entityElement -> BuiltinJson.parseEntityTypeOrEntityTypeTag(entityElement)
 						.ifFailure(problems::add)
 						.getSuccess()
 				);
@@ -59,8 +58,8 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 				);
 
 		if (problems.isEmpty()) {
-			return Result.success(new ItemStackCondition(
-					optItem,
+			return Result.success(new EntityCondition(
+					optEntityType,
 					optNbt
 			));
 		} else {
@@ -69,10 +68,10 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	}
 
 	@Override
-	public Optional<Boolean> apply(ItemStack itemStack) {
+	public Optional<Boolean> apply(Entity entity) {
 		return Optional.of(
-				optItemEntries.map(itemEntries -> itemEntries.contains(itemStack.getRegistryEntry())).orElse(true)
-						&& optNbt.map(nbt -> nbt.test(itemStack)).orElse(true)
+				optEntityEntries.map(entityEntries -> entityEntries.contains(entity.getType().getRegistryEntry())).orElse(true)
+						&& optNbt.map(nbt -> nbt.test(entity)).orElse(true)
 		);
 	}
 }
