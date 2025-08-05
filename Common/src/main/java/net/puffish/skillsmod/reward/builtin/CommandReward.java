@@ -17,7 +17,6 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class CommandReward implements Reward {
@@ -91,7 +90,7 @@ public class CommandReward implements Reward {
 			return;
 		}
 
-		var server = Objects.requireNonNull(player.getServer());
+		var server = SkillsMod.getInstance().getPlayerServer(player);
 
 		server.getCommandManager().executeWithPrefix(
 				player.getCommandSource()
