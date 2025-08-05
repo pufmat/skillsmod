@@ -36,6 +36,7 @@ import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.experience.source.BuiltinExperienceSources;
 import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
+import net.puffish.skillsmod.mixin.ServerPlayerEntityAccessor;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
@@ -76,7 +77,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -787,8 +787,8 @@ public class SkillsMod {
 		return ServerData.getOrCreate(getPlayerServer(player)).getPlayerData(player);
 	}
 
-	private MinecraftServer getPlayerServer(ServerPlayerEntity player) {
-		return Objects.requireNonNull(player.getServer());
+	public MinecraftServer getPlayerServer(ServerPlayerEntity player) {
+		return ((ServerPlayerEntityAccessor) player).getServer();
 	}
 
 	private boolean isOperatorOrHost(ServerPlayerEntity player) {
