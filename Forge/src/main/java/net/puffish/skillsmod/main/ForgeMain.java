@@ -169,7 +169,12 @@ public class ForgeMain {
 	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
 		public boolean isFakePlayer(ServerPlayerEntity player) {
-			return player instanceof FakePlayer;
+			try {
+				return player instanceof FakePlayer;
+			} catch (NoClassDefFoundError ignored) {
+				// FakePlayer was removed in newer Forge versions.
+				return false;
+			}
 		}
 	}
 
