@@ -77,7 +77,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -792,8 +791,8 @@ public class SkillsMod {
 		return ServerData.getOrCreate(getPlayerServer(player)).getPlayerData(player);
 	}
 
-	private MinecraftServer getPlayerServer(ServerPlayerEntity player) {
-		return Objects.requireNonNull(player.getServer());
+	public MinecraftServer getPlayerServer(ServerPlayerEntity player) {
+		return player.server;
 	}
 
 	private boolean isOperatorOrHost(ServerPlayerEntity player) {
