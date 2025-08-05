@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.client.gui;
 
+import net.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
@@ -112,6 +113,12 @@ public class SkillsScreen extends Screen {
 		resize();
 	}
 
+	@Override
+	public void resize(MinecraftClient client, int width, int height) {
+		super.resize(client, width, height);
+		resize();
+	}
+
 	private void resize() {
 		this.small = optActiveCategoryData
 				.map(activeCategoryData -> activeCategoryData.hasExperience() && this.width < 450)
@@ -153,6 +160,15 @@ public class SkillsScreen extends Screen {
 				((float) contentHeight) / ((float) this.bounds.height())
 		);
 		this.maxScale = 1f;
+
+		this.optActiveCategoryData.ifPresent(
+				activeCategoryData -> applyChangesWithLimits(
+						activeCategoryData.getX(),
+						activeCategoryData.getY(),
+						activeCategoryData.getScale(),
+						activeCategoryData
+				)
+		);
 
 		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
 			@Override
@@ -405,7 +421,11 @@ public class SkillsScreen extends Screen {
 				(int) Math.ceil(halfHeight - contentPaddingBottom - bounds.max().y() * scale),
 				(int) Math.floor(contentPaddingTop - halfHeight - bounds.min().y() * scale)
 		));
-		activeCategoryData.setScale(scale);
+		activeCategoryData.setScale(MathHelper.clamp(
+				scale,
+				minScale,
+				maxScale
+		));
 	}
 
 	private void drawIcon(DrawContext context, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
