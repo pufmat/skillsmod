@@ -27,7 +27,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.Environment;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
-import net.puffish.skillsmod.mixin.GameRulesAccessor;
+import net.puffish.skillsmod.mixin.GameRulesInvoker;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
@@ -135,8 +135,8 @@ public class NeoForgeMain {
 		}
 
 		@Override
-		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
-			GameRulesAccessor.getRuleTypes().put(key, type);
+		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String name, GameRules.Category category, GameRules.Type<T> type) {
+			return GameRulesInvoker.invokeRegister(name, category, type);
 		}
 
 		@Override
