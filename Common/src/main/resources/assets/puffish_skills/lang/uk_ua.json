@@ -1,0 +1,66 @@
+{
+	"text.puffish_skills.skills": "Навички",
+	"text.puffish_skills.points_left": "Залишилося очок: ",
+
+	"tooltip.puffish_skills.current_level": "Поточний рівень: %s",
+	"tooltip.puffish_skills.experience_progress": "Досвід: %s/%s (%s%%)",
+	"tooltip.puffish_skills.to_next_level": "До наступного рівня: %s",
+	"tooltip.puffish_skills.earned_points": "Зароблені очки: %s",
+	"tooltip.puffish_skills.spent_points": "Витрачені очки: %s",
+
+	"category.puffish_skills.skills": "Pufferfish's Skills",
+	"key.puffish_skills.open": "Відкрити дерево навичок",
+
+	"chat.puffish_skills.new_point": "У вас є нове очко навичок. Натисніть %s, щоб відкрити дерево навичок.",
+
+	"toast.puffish_skills.invalid_config.description": "Неправильне налаштування, перевірте журнали гри.",
+	"toast.puffish_skills.missing_config.description": "Немає дерев навичок, обов'язково додайте їх.",
+
+	"gamerule.puffish_skills:announceNewPoints": "Оголошувати нові очки навичок",
+
+	"command.puffish_skills.no_such_category": "Немає категорії з ID %s",
+	"command.puffish_skills.no_such_skill": "Немає навичок з ID %s",
+	"command.puffish_skills.no_experience": "Немає досвіду для цієї категорії",
+
+	"command.puffish_skills.category.lock.success.single": "Заблоковано категорію %s для %s",
+	"command.puffish_skills.category.lock.success.multiple": "Заблоковано категорію %s для %s гравців",
+
+	"command.puffish_skills.category.unlock.success.single": "Розблоковано категорію %s для %s",
+	"command.puffish_skills.category.unlock.success.multiple": "Розблоковано категорію %s для %s гравців",
+
+	"command.puffish_skills.category.erase.success.single": "Стерто категорію %s для %s",
+	"command.puffish_skills.category.erase.success.multiple": "Стерто категорію %s для %s гравців",
+
+	"command.puffish_skills.experience.add.success.single": "Надано %s досвіду до категорії %s для %s",
+	"command.puffish_skills.experience.add.success.multiple": "Надано %s досвіду до категорії %s для %s гравців",
+
+	"command.puffish_skills.experience.set.success.single": "Установлено %s досвіду в категорії %s для %s",
+	"command.puffish_skills.experience.set.success.multiple": "Установлено %s досвіду в категорії %s для %s гравців",
+
+	"command.puffish_skills.experience.get.success": "%3$s має %1$s досвіду в категорії %2$s",
+
+	"command.puffish_skills.points.add.success.single": "Надано %s очок до категорії %s для %s",
+	"command.puffish_skills.points.add.success.multiple": "Надано %s очок до категорії %s для %s гравців",
+
+	"command.puffish_skills.points.set.success.single": "Установлено %s очок у категорії %s для %s",
+	"command.puffish_skills.points.set.success.multiple": "Установлено %s очок у категорії %s для %s гравців",
+
+	"command.puffish_skills.points.get.success": "%3$s має %1$s очок у категорії %2$s",
+
+	"command.puffish_skills.skills.unlock.success.single": "Розблоковано %s навик у категорії %s для %s",
+	"command.puffish_skills.skills.unlock.success.multiple": "Розблоковано %s навик у категорії %s для %s гравців",
+
+	"command.puffish_skills.skills.lock.success.single": "Заблоковано %s навик у категорії %s для %s",
+	"command.puffish_skills.skills.lock.success.multiple": "Заблоковано %s навик у категорії %s для %s гравців",
+
+	"command.puffish_skills.skills.reset.success.single": "Скинуто всі навички в категорії %s для %s",
+	"command.puffish_skills.skills.reset.success.multiple": "Скинуто всі навички в категорії %s для %s гравців",
+
+	"command.puffish_skills.category.open.success.single": "Відкрито екран категорії %s для %s",
+	"command.puffish_skills.category.open.success.multiple": "Відкрито екран категорії %s для %s гравців",
+
+	"command.puffish_skills.open.success.single": "Відкрито екран навичок для %s",
+	"command.puffish_skills.open.success.multiple": "Відкритий екран навичок для %s гравців",
+
+	"modmenu.descriptionTranslation.puffish_skills": "Додає повністю налаштовувану систему навичок у гру"
+}
