@@ -10,7 +10,7 @@
 		"DamageSourceMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
-		"GameRulesAccessor",
+		"GameRulesInvoker",
 		"ItemStackMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
