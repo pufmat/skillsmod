@@ -130,5 +130,10 @@ public class FabricMain implements ModInitializer {
 		public boolean isFakePlayer(ServerPlayerEntity player) {
 			return player instanceof FakePlayer;
 		}
+
+		@Override
+		public boolean isModLoaded(String id) {
+			return FabricLoader.getInstance().isModLoaded(id);
+		}
 	}
 }
