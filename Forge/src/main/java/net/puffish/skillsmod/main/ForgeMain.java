@@ -20,6 +20,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -175,6 +176,11 @@ public class ForgeMain {
 				// FakePlayer was removed in newer Forge versions.
 				return false;
 			}
+		}
+
+		@Override
+		public boolean isModLoaded(String id) {
+			return ModList.get().isLoaded(id);
 		}
 	}
 
