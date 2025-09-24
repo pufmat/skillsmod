@@ -8,6 +8,7 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public record SkillConfig(
 		String id,
@@ -17,13 +18,13 @@ public record SkillConfig(
 		boolean isRoot
 ) {
 
-	public static Result<SkillConfig, Problem> parse(String id, JsonElement rootElement, SkillDefinitionsConfig definitions, ConfigContext context) {
+	public static Result<Optional<SkillConfig>, Problem> parse(String id, JsonElement rootElement, SkillDefinitionsConfig definitions, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
 				LegacyUtils.wrapNoUnused(rootObject -> parse(id, rootObject, definitions), context)
 		);
 	}
 
-	private static Result<SkillConfig, Problem> parse(String id, JsonObject rootObject, SkillDefinitionsConfig definitions) {
+	private static Result<Optional<SkillConfig>, Problem> parse(String id, JsonObject rootObject, SkillDefinitionsConfig definitions) {
 		var problems = new ArrayList<Problem>();
 
 		var optX = rootObject.getInt("x")
@@ -37,7 +38,7 @@ public record SkillConfig(
 		var optDefinitionId = rootObject.get("definition")
 				.andThen(definitionElement -> definitionElement.getAsString()
 						.andThen(definitionId -> {
-							if (definitions.getById(definitionId).isPresent()) {
+							if (definitions.isValid(definitionId)) {
 								return Result.success(definitionId);
 							} else {
 								return Result.failure(definitionElement.getPath().createProblem("Expected a valid definition"));
@@ -56,13 +57,18 @@ public record SkillConfig(
 				.orElse(false);
 
 		if (problems.isEmpty()) {
-			return Result.success(new SkillConfig(
-					id,
-					optX.orElseThrow(),
-					optY.orElseThrow(),
-					optDefinitionId.orElseThrow(),
-					isRoot
-			));
+			var definitionId = optDefinitionId.orElseThrow();
+			if (definitions.isLoaded(definitionId)) {
+				return Result.success(Optional.of(new SkillConfig(
+						id,
+						optX.orElseThrow(),
+						optY.orElseThrow(),
+						definitionId,
+						isRoot
+				)));
+			} else {
+				return Result.success(Optional.empty());
+			}
 		} else {
 			return Result.failure(Problem.combine(problems));
 		}

@@ -118,6 +118,10 @@ public class SkillsMod {
 		return instance;
 	}
 
+	public ServerPlatform getPlatform() {
+		return platform;
+	}
+
 	public static void setup(
 			Path configDir,
 			ServerRegistrar registrar,
