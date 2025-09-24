@@ -10,11 +10,15 @@ import net.puffish.skillsmod.util.DisposeContext;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SkillDefinitionsConfig {
+	private final Set<String> valid;
 	private final Map<String, SkillDefinitionConfig> definitions;
 
-	private SkillDefinitionsConfig(Map<String, SkillDefinitionConfig> definitions) {
+	private SkillDefinitionsConfig(Set<String> valid, Map<String, SkillDefinitionConfig> definitions) {
+		this.valid = valid;
 		this.definitions = definitions;
 	}
 
@@ -25,7 +29,24 @@ public class SkillDefinitionsConfig {
 	public static Result<SkillDefinitionsConfig, Problem> parse(JsonObject rootObject, ConfigContext context) {
 		return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
 				.mapFailure(problems -> Problem.combine(problems.values()))
-				.mapSuccess(SkillDefinitionsConfig::new);
+				.mapSuccess(map -> new SkillDefinitionsConfig(
+						map.keySet(),
+						map.entrySet()
+								.stream()
+								.flatMap(entry -> entry.getValue()
+										.map(value -> Map.entry(entry.getKey(), value))
+										.stream()
+								)
+								.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+				));
+	}
+
+	public boolean isValid(String id) {
+		return valid.contains(id);
+	}
+
+	public boolean isLoaded(String id) {
+		return definitions.containsKey(id);
 	}
 
 	public Optional<SkillDefinitionConfig> getById(String id) {
