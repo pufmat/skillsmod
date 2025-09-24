@@ -77,51 +77,55 @@ public class SkillConnectionsGroupConfig {
 	}
 
 	private static SkillConnectionsGroupConfig build(
-			List<SkillConnectionConfig> bidirectional,
-			List<SkillConnectionConfig> unidirectional
+			List<Optional<SkillConnectionConfig>> bidirectional,
+			List<Optional<SkillConnectionConfig>> unidirectional
 	) {
 		var neighbors = new HashMap<String, Collection<String>>();
 		var directions = new HashMap<SkillPair, SkillPair.Direction>();
 
-		for (var connection : unidirectional) {
-			var a = connection.skillAId();
-			var b = connection.skillBId();
+		for (var optConnection : unidirectional) {
+			optConnection.ifPresent(connection -> {
+				var a = connection.skillAId();
+				var b = connection.skillBId();
 
-			var order = a.compareTo(b);
-			if (order == 0) {
-				continue;
-			}
+				var order = a.compareTo(b);
+				if (order == 0) {
+					return;
+				}
 
-			neighbors.computeIfAbsent(b, k -> new HashSet<>()).add(a);
+				neighbors.computeIfAbsent(b, k -> new HashSet<>()).add(a);
 
-			directions.compute(
-					order > 0 ? new SkillPair(a, b) : new SkillPair(b, a),
-					(k, v) -> {
-						var dir = order > 0 ? SkillPair.Direction.A_TO_B : SkillPair.Direction.B_TO_A;
-						if (v == null || v == dir) {
-							return dir;
+				directions.compute(
+						order > 0 ? new SkillPair(a, b) : new SkillPair(b, a),
+						(k, v) -> {
+							var dir = order > 0 ? SkillPair.Direction.A_TO_B : SkillPair.Direction.B_TO_A;
+							if (v == null || v == dir) {
+								return dir;
+							}
+							return SkillPair.Direction.BOTH;
 						}
-						return SkillPair.Direction.BOTH;
-					}
-			);
+				);
+			});
 		}
 
-		for (var connection : bidirectional) {
-			var a = connection.skillAId();
-			var b = connection.skillBId();
+		for (var optConnection : bidirectional) {
+			optConnection.ifPresent(connection -> {
+				var a = connection.skillAId();
+				var b = connection.skillBId();
 
-			var order = a.compareTo(b);
-			if (order == 0) {
-				continue;
-			}
+				var order = a.compareTo(b);
+				if (order == 0) {
+					return;
+				}
 
-			neighbors.computeIfAbsent(a, k -> new HashSet<>()).add(b);
-			neighbors.computeIfAbsent(b, k -> new HashSet<>()).add(a);
+				neighbors.computeIfAbsent(a, k -> new HashSet<>()).add(b);
+				neighbors.computeIfAbsent(b, k -> new HashSet<>()).add(a);
 
-			directions.compute(
-					order > 0 ? new SkillPair(a, b) : new SkillPair(b, a),
-					(k, v) -> SkillPair.Direction.BOTH
-			);
+				directions.compute(
+						order > 0 ? new SkillPair(a, b) : new SkillPair(b, a),
+						(k, v) -> SkillPair.Direction.BOTH
+				);
+			});
 		}
 
 		return new SkillConnectionsGroupConfig(

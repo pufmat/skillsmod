@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -196,6 +197,11 @@ public class NeoForgeMain {
 		@Override
 		public boolean isFakePlayer(ServerPlayerEntity player) {
 			return player instanceof FakePlayer;
+		}
+
+		@Override
+		public boolean isModLoaded(String id) {
+			return ModList.get().isLoaded(id);
 		}
 	}
 
