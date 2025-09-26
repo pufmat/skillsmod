@@ -34,7 +34,7 @@ public record ColorConfig(int argb) {
 					}
 					case 8 -> {
 						return Result.success(new ColorConfig(
-								Integer.parseInt(string, 16)
+								(int) Long.parseLong(string, 16)
 						));
 					}
 					default -> { }
