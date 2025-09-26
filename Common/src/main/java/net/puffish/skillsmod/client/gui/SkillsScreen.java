@@ -228,6 +228,8 @@ public class SkillsScreen extends Screen {
 			optActiveCategoryData = data.getCategories()
 					.stream()
 					.max(Comparator.comparing(ClientCategoryData::getLastOpen));
+			optActiveCategoryId = optActiveCategoryData
+					.map(data -> data.getConfig().id());
 			resize();
 		}
 		optActiveCategoryData.ifPresent(ClientCategoryData::updateUnseenPoints);
@@ -417,6 +419,12 @@ public class SkillsScreen extends Screen {
 		var halfWidth = this.width / 2;
 		var halfHeight = this.height / 2;
 
+		scale = MathHelper.clamp(
+				scale,
+				minScale,
+				maxScale
+		);
+
 		activeCategoryData.setX(MathHelper.clamp(
 				x,
 				(int) Math.ceil(halfWidth - contentPaddingRight - bounds.max().x * scale),
@@ -427,11 +435,7 @@ public class SkillsScreen extends Screen {
 				(int) Math.ceil(halfHeight - contentPaddingBottom - bounds.max().y * scale),
 				(int) Math.floor(contentPaddingTop - halfHeight - bounds.min().y * scale)
 		));
-		activeCategoryData.setScale(MathHelper.clamp(
-				scale,
-				minScale,
-				maxScale
-		));
+		activeCategoryData.setScale(scale);
 	}
 
 	private void drawIcon(MatrixStack matrices, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
