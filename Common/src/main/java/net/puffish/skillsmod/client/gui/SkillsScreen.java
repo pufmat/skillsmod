@@ -3,7 +3,6 @@ package net.puffish.skillsmod.client.gui;
 import net.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.Screen;
@@ -147,11 +146,15 @@ public class SkillsScreen extends Screen {
 		var contentWidth = this.width - contentPaddingLeft - contentPaddingRight;
 		var contentHeight = this.height - contentPaddingTop - contentPaddingBottom;
 
-		var halfContentWidth = MathHelper.ceilDiv(this.bounds.height() * contentWidth, contentHeight * 2);
-		var halfContentHeight = MathHelper.ceilDiv(this.bounds.width() * contentHeight, contentWidth * 2);
-
-		this.bounds.extend(new Vec2i(-halfContentWidth, -halfContentHeight));
-		this.bounds.extend(new Vec2i(halfContentWidth, halfContentHeight));
+		if (bounds.width() * contentHeight > contentWidth * bounds.height()) {
+			var halfSize = MathHelper.ceilDiv(this.bounds.width() * contentHeight, contentWidth * 2);
+			bounds.extendY(-halfSize);
+			bounds.extendY(halfSize);
+		} else {
+			var halfSize = MathHelper.ceilDiv(this.bounds.height() * contentWidth, contentHeight * 2);
+			bounds.extendX(-halfSize);
+			bounds.extendX(halfSize);
+		}
 
 		this.minScale = Math.max(
 				((float) contentWidth) / ((float) this.bounds.width()),
@@ -593,14 +596,14 @@ public class SkillsScreen extends Screen {
 			case FILL_WIDTH -> {
 				x = bounds.min().x;
 				width = bounds.width();
-				y = -MathHelper.ceilDiv(background.height() * width, 2 * background.width());
-				height = -2 * y;
+				y = bounds.min().y + bounds.height() / 2 - MathHelper.ceilDiv(background.height() * width, 2 * background.width());
+				height = MathHelper.ceilDiv(background.height() * width, background.width());
 			}
 			case FILL_HEIGHT -> {
 				y = bounds.min().y;
 				height = bounds.height();
-				x = -MathHelper.ceilDiv(background.width() * height, 2 * background.height());
-				width = -2 * x;
+				x = bounds.min().x + bounds.width() / 2 - MathHelper.ceilDiv(background.width() * height, 2 * background.height());
+				width = MathHelper.ceilDiv(background.width() * height, background.height());
 			}
 			default -> throw new IllegalStateException();
 		}
