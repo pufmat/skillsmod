@@ -2,6 +2,7 @@ package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -10,6 +11,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.resource.metadata.GuiResourceMetadata;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenTexts;
@@ -17,6 +20,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
+import net.minecraft.util.Atlases;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
@@ -176,14 +180,14 @@ public class SkillsScreen extends Screen {
 
 		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
 			@Override
-			public void onClick(double mouseX, double mouseY) {
+			public void onClick(Click click, boolean doubled) {
 				data.incrementOffset();
 			}
 		};
 		this.nextButton.setTextures(PAGE_FORWARD_TEXTURES);
 		this.prevButton = new ToggleButtonWidget(FRAME_PADDING, FRAME_PADDING + 8, 12, 17, true) {
 			@Override
-			public void onClick(double mouseX, double mouseY) {
+			public void onClick(Click click, boolean doubled) {
 				data.decrementOffset();
 			}
 		};
@@ -266,18 +270,18 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseClicked(Click click, boolean doubled) {
+		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
 			optActiveCategoryData.ifPresent(activeCategoryData ->
-					mouseClickedWithCategory(mouseX, mouseY, activeCategoryData)
+					mouseClickedWithCategory(click.x(), click.y(), activeCategoryData)
 			);
 		}
 
 		if (hasNextButton()) {
-			nextButton.mouseClicked(mouseX, mouseY, button);
+			nextButton.mouseClicked(click, doubled);
 		}
 		if (hasPrevButton()) {
-			prevButton.mouseClicked(mouseX, mouseY, button);
+			prevButton.mouseClicked(click, doubled);
 		}
 
 		return true;
@@ -304,14 +308,14 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseReleased(Click click) {
+		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
 			if (dragTotal > 2) {
 				return true;
 			}
 
 			optActiveCategoryData.ifPresent(activeCategoryData ->
-					mouseReleasedWithCategory(mouseX, mouseY, activeCategoryData)
+					mouseReleasedWithCategory(click.x(), click.y(), activeCategoryData)
 			);
 		}
 
@@ -340,12 +344,12 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (SkillsClientMod.OPEN_KEY_BINDING.matchesKey(keyCode, scanCode)) {
+	public boolean keyPressed(KeyInput input) {
+		if (SkillsClientMod.OPEN_KEY_BINDING.matchesKey(input)) {
 			this.close();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(input);
 	}
 
 	@Override
@@ -358,19 +362,19 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(Click click, double offsetX, double offsetY) {
 		if (!canDrag) {
 			return true;
 		}
 
-		if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
-			dragTotal += Math.abs(deltaX);
-			dragTotal += Math.abs(deltaY);
+		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+			dragTotal += Math.abs(offsetX);
+			dragTotal += Math.abs(offsetY);
 			if (dragTotal > 2) {
 				optActiveCategoryData.ifPresent(activeCategoryData -> {
 					applyChangesWithLimits(
-							(int) Math.round(mouseX - dragStartX),
-							(int) Math.round(mouseY - dragStartY),
+							(int) Math.round(click.x() - dragStartX),
+							(int) Math.round(click.y() - dragStartY),
 							activeCategoryData.getScale(),
 							activeCategoryData
 					);
@@ -452,7 +456,7 @@ public class SkillsScreen extends Screen {
 					x, y
 			);
 		} else if (icon instanceof ClientIconConfig.EffectIconConfig effectIcon) {
-			var guiAtlasManager = client.getGuiAtlasManager();
+			var guiAtlasManager = client.getAtlasManager().getAtlasTexture(Atlases.GUI);
 			var texture = InGameHud.getEffectTexture(Registries.STATUS_EFFECT.getEntry(effectIcon.effect()));
 			var sprite = guiAtlasManager.getSprite(texture);
 			var halfSize = Math.round(9f * sizeScale);
@@ -484,14 +488,17 @@ public class SkillsScreen extends Screen {
 		var size = halfSize * 2;
 
 		if (frame instanceof ClientFrameConfig.AdvancementFrameConfig advancementFrame) {
-			var guiAtlasManager = client.getGuiAtlasManager();
+			var guiAtlasManager = client.getAtlasManager().getAtlasTexture(Atlases.GUI);
 			var status = switch (state) {
 				case LOCKED, EXCLUDED, AVAILABLE, AFFORDABLE -> AdvancementObtainedStatus.UNOBTAINED;
 				case UNLOCKED -> AdvancementObtainedStatus.OBTAINED;
 			};
 			var texture = status.getFrameTexture(advancementFrame.frame());
 			var sprite = guiAtlasManager.getSprite(texture);
-			var scaling = guiAtlasManager.getScaling(sprite);
+			var scaling = sprite.getContents()
+					.getAdditionalMetadataValue(GuiResourceMetadata.SERIALIZER)
+					.orElse(GuiResourceMetadata.DEFAULT)
+					.scaling();
 			var color = switch (state) {
 				case LOCKED, EXCLUDED -> COLOR_GRAY;
 				case AVAILABLE, AFFORDABLE, UNLOCKED -> COLOR_WHITE;
@@ -701,7 +708,7 @@ public class SkillsScreen extends Screen {
 						definition.description().copy(),
 						Style.EMPTY.withFormatting(Formatting.GRAY)
 				)));
-				if (Screen.hasShiftDown()) {
+				if (client.isShiftPressed()) {
 					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
 							definition.extraDescription().copy(),
 							Style.EMPTY.withFormatting(Formatting.GRAY)

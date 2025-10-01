@@ -60,7 +60,7 @@ public final class ScoreboardOperation implements Operation<Entity, Double> {
 
 	@Override
 	public Optional<Double> apply(Entity entity) {
-		var scoreboard = entity.getWorld().getScoreboard();
+		var scoreboard = entity.getEntityWorld().getScoreboard();
 		return Optional.ofNullable(scoreboard.getNullableObjective(objectiveName))
 				.map(objective -> Optional.ofNullable(scoreboard.getScore(entity, objective))
 						.map(score -> (double) score.getScore())

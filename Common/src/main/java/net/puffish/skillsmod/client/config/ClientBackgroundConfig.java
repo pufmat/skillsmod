@@ -4,11 +4,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.metadata.GuiResourceMetadata;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.Animator;
 import net.minecraft.client.texture.MissingSprite;
 import net.minecraft.client.texture.SpriteContents;
-import net.minecraft.client.texture.SpriteLoader;
 import net.minecraft.client.texture.SpriteOpener;
 import net.minecraft.client.texture.TextureTickListener;
 import net.minecraft.util.Identifier;
@@ -17,6 +17,7 @@ import net.puffish.skillsmod.common.BackgroundPosition;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Optional;
+import java.util.Set;
 
 public record ClientBackgroundConfig(
 		Identifier texture,
@@ -56,7 +57,7 @@ public record ClientBackgroundConfig(
 					.getResourceManager()
 					.getResource(id)
 					.flatMap(resource -> Optional.ofNullable(
-							SpriteOpener.create(SpriteLoader.METADATA_SERIALIZERS).loadSprite(id, resource)
+							SpriteOpener.create(Set.of(GuiResourceMetadata.SERIALIZER)).loadSprite(id, resource)
 					))
 					.orElseGet(MissingSprite::createSpriteContents);
 			this.animator = sprite.createAnimator();

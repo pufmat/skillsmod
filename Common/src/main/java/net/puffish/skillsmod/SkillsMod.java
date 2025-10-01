@@ -593,7 +593,7 @@ public class SkillsMod {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
-				if (player.getWorld().getGameRules().getBoolean(gameRules.announceNewPoints())) {
+				if (player.getEntityWorld().getGameRules().getBoolean(gameRules.announceNewPoints())) {
 					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}
 			}
@@ -647,7 +647,7 @@ public class SkillsMod {
 			amount += result;
 
 			experienceSource.teamSharing().ifPresent(teamSharing -> {
-				var teamPlayers = player.getWorld().getPlayers(
+				var teamPlayers = player.getEntityWorld().getPlayers(
 						otherPlayer -> player != otherPlayer
 								&& player.isTeammate(otherPlayer)
 								&& player.distanceTo(otherPlayer) <= teamSharing.distanceLimit()
@@ -800,8 +800,8 @@ public class SkillsMod {
 
 	private boolean isOperatorOrHost(ServerPlayerEntity player) {
 		var server = getPlayerServer(player);
-		return server.isHost(player.getGameProfile())
-				|| server.getPlayerManager().isOperator(player.getGameProfile());
+		return server.isHost(player.getPlayerConfigEntry())
+				|| server.getPlayerManager().isOperator(player.getPlayerConfigEntry());
 	}
 
 	private class EventListener implements ServerEventListener {

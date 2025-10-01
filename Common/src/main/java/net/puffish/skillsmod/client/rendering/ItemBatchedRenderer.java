@@ -127,16 +127,27 @@ public class ItemBatchedRenderer {
 		@Override
 		protected void render(OversizedItemGuiElementRenderState renderState, MatrixStack matrixStack) {
 			matrixStack.scale(1f, -1f, -1f);
+
 			var guiItemRenderState = renderState.guiItemRenderState();
 			var itemRenderState = guiItemRenderState.state();
+			var gameRenderer = MinecraftClient.getInstance().gameRenderer;
+			var renderDispatcher = gameRenderer.getEntityRenderDispatcher();
 
-			MinecraftClient.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(
+			gameRenderer.getDiffuseLighting().setShaderLights(
 					itemRenderState.isSideLit()
 							? DiffuseLighting.Type.ITEMS_3D
 							: DiffuseLighting.Type.ITEMS_FLAT
 			);
 
-			itemRenderState.render(matrixStack, this.vertexConsumers, 0xF000F0, OverlayTexture.DEFAULT_UV);
+			itemRenderState.render(
+					matrixStack,
+					renderDispatcher.getQueue(),
+					0xF000F0,
+					OverlayTexture.DEFAULT_UV,
+					0
+			);
+			renderDispatcher.render();
+
 			this.modelKey = itemRenderState.getModelKey();
 		}
 

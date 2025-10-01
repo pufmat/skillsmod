@@ -381,12 +381,12 @@ public class TextureBatchedRenderer {
 			var contextAccess = (DrawContextAccess) context;
 			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
 				@Override
-				public void setupVertices(VertexConsumer vc, float depth) {
+				public void setupVertices(VertexConsumer vc) {
 					for (var emit : emitsCopy) {
-						vc.vertex(emit.x1, emit.y1, depth).texture(emit.minU, emit.minV).color(emit.color);
-						vc.vertex(emit.x2, emit.y2, depth).texture(emit.minU, emit.maxV).color(emit.color);
-						vc.vertex(emit.x3, emit.y3, depth).texture(emit.maxU, emit.maxV).color(emit.color);
-						vc.vertex(emit.x4, emit.y4, depth).texture(emit.maxU, emit.minV).color(emit.color);
+						vc.vertex(emit.x1, emit.y1, 0).texture(emit.minU, emit.minV).color(emit.color);
+						vc.vertex(emit.x2, emit.y2, 0).texture(emit.minU, emit.maxV).color(emit.color);
+						vc.vertex(emit.x3, emit.y3, 0).texture(emit.maxU, emit.maxV).color(emit.color);
+						vc.vertex(emit.x4, emit.y4, 0).texture(emit.maxU, emit.minV).color(emit.color);
 					}
 				}
 

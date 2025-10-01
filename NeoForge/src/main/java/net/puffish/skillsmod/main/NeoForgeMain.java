@@ -15,6 +15,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -25,7 +26,6 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforgespi.Environment;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.mixin.GameRulesInvoker;
@@ -160,7 +160,7 @@ public class NeoForgeMain {
 		@Override
 		public void registerOutPacket(Identifier id) {
 			outPackets.put(id, new CustomPayload.Id<>(id));
-			if (Environment.get().getDist().isDedicatedServer()) {
+			if (FMLEnvironment.getDist().isDedicatedServer()) {
 				var pId = new CustomPayload.Id<InOutPayload<?>>(id);
 				payloadRegistrations.add(registrar -> registrar.playToClient(pId, CustomPayload.codecOf(
 						(value, buf) -> value.outPacket.write(buf),

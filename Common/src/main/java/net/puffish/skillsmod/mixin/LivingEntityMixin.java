@@ -86,7 +86,7 @@ public abstract class LivingEntityMixin {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 
-			var antiFarmingData = ((WorldChunkAccess) entity.getWorld()
+			var antiFarmingData = ((WorldChunkAccess) entity.getEntityWorld()
 					.getWorldChunk(entity.getBlockPos()))
 					.getAntiFarmingData();
 			antiFarmingData.removeOutdated();

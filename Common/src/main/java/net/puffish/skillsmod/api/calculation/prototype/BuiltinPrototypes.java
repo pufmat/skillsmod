@@ -65,7 +65,7 @@ public final class BuiltinPrototypes {
 		ENTITY.registerOperation(
 				Identifier.of("get_world"),
 				WORLD,
-				OperationFactory.create(entity -> (ServerWorld) entity.getWorld())
+				OperationFactory.create(entity -> (ServerWorld) entity.getEntityWorld())
 		);
 
 		LIVING_ENTITY.registerOperation(
@@ -76,7 +76,7 @@ public final class BuiltinPrototypes {
 		LIVING_ENTITY.registerOperation(
 				Identifier.of("get_world"),
 				WORLD,
-				OperationFactory.create(livingEntity -> (ServerWorld) livingEntity.getWorld())
+				OperationFactory.create(livingEntity -> (ServerWorld) livingEntity.getEntityWorld())
 		);
 		LIVING_ENTITY.registerOperation(
 				Identifier.of("get_type"),
@@ -107,7 +107,7 @@ public final class BuiltinPrototypes {
 		PLAYER.registerOperation(
 				Identifier.of("get_world"),
 				WORLD,
-				OperationFactory.create(ServerPlayerEntity::getWorld)
+				OperationFactory.create(ServerPlayerEntity::getEntityWorld)
 		);
 
 		ITEM.registerOperation(

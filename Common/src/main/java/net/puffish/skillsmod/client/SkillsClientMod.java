@@ -28,11 +28,12 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Optional;
 
 public class SkillsClientMod {
+	private static final KeyBinding.Category SKILLS_CATEGORY = KeyBinding.Category.create(SkillsMod.createIdentifier("skills"));
 	public static final KeyBinding OPEN_KEY_BINDING = new KeyBinding(
 			"key.puffish_skills.open",
 			InputUtil.Type.KEYSYM,
 			GLFW.GLFW_KEY_K,
-			"category.puffish_skills.skills"
+			SKILLS_CATEGORY
 	);
 
 	private static SkillsClientMod instance;

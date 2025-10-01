@@ -150,12 +150,12 @@ public class ConnectionBatchedRenderer {
 		var contextAccess = (DrawContextAccess) context;
 		contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
 			@Override
-			public void setupVertices(VertexConsumer vc, float depth) {
+			public void setupVertices(VertexConsumer vc) {
 				for (var emit : batchCopy) {
-					vc.vertex(emit.x1, emit.y1, depth).color(emit.color());
-					vc.vertex(emit.x2, emit.y2, depth).color(emit.color());
-					vc.vertex(emit.x3, emit.y3, depth).color(emit.color());
-					vc.vertex(emit.x4, emit.y4, depth).color(emit.color());
+					vc.vertex(emit.x1, emit.y1, 0).color(emit.color());
+					vc.vertex(emit.x2, emit.y2, 0).color(emit.color());
+					vc.vertex(emit.x3, emit.y3, 0).color(emit.color());
+					vc.vertex(emit.x4, emit.y4, 0).color(emit.color());
 				}
 			}
 
