@@ -31,10 +31,12 @@ public record ClientBackgroundConfig(
 			BackgroundPosition position
 	) {
 		var id = SkillsMod.createIdentifier(RandomStringUtils.random(16, "abcdefghijklmnopqrstuvwxyz0123456789"));
-		var texture = new ClientBackgroundTexture(textureId);
-		MinecraftClient.getInstance()
-				.getTextureManager()
-				.registerTexture(id, texture);
+		MinecraftClient.getInstance().execute(() -> {
+			var texture = new ClientBackgroundTexture(textureId);
+			MinecraftClient.getInstance()
+					.getTextureManager()
+					.registerTexture(id, texture);
+		});
 
 		return new ClientBackgroundConfig(
 				id,
