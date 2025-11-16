@@ -1,6 +1,7 @@
 package net.puffish.skillsmod;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -586,6 +587,18 @@ public class SkillsMod {
 		packetSender.send(player, new HideCategoryOutPacket(category.id()));
 	}
 
+	public void exportPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+		getPlayerData(player).writeNbt(nbt);
+	}
+
+	public void importPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+		for (var category : getAllCategories()) {
+			resetRewards(player, category);
+		}
+		putPlayerData(player, PlayerData.read(nbt));
+		updateAllCategories(player);
+	}
+
 	private void watchNewPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, boolean isSilent, Runnable runnable) {
 		if (isSilent) {
 			runnable.run();
@@ -792,6 +805,10 @@ public class SkillsMod {
 
 	private PlayerData getPlayerData(ServerPlayerEntity player) {
 		return ServerData.getOrCreate(getPlayerServer(player)).getPlayerData(player);
+	}
+
+	private void putPlayerData(ServerPlayerEntity player, PlayerData playerData) {
+		ServerData.getOrCreate(getPlayerServer(player)).putPlayerData(player, playerData);
 	}
 
 	public MinecraftServer getPlayerServer(ServerPlayerEntity player) {
