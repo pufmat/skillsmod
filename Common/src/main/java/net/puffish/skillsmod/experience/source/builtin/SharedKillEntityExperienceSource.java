@@ -28,7 +28,12 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class SharedKillEntityExperienceSource implements ExperienceSource {
+public record SharedKillEntityExperienceSource(
+		Calculation<Data> calculation,
+		Optional<AntiFarmingPerChunk> antiFarming,
+		TamedActivity tamedActivity
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("shared_kill_entity");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -75,16 +80,6 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
-	private final Optional<AntiFarmingPerChunk> optAntiFarming;
-	private final TamedActivity tamedActivity;
-
-	private SharedKillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming, TamedActivity tamedActivity) {
-		this.calculation = calculation;
-		this.optAntiFarming = optAntiFarming;
-		this.tamedActivity = tamedActivity;
-	}
-
 	public static void register() {
 		SkillsAPI.registerExperienceSource(
 				ID,
@@ -97,6 +92,7 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 				.andThen(JsonElement::getAsObject)
 				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
 	}
+
 	private static Result<SharedKillEntityExperienceSource, Problem> parse(JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
@@ -131,7 +127,7 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(
+	public record Data(
 			ServerPlayerEntity player,
 			LivingEntity entity,
 			ItemStack weapon,
@@ -141,29 +137,6 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 			int participants,
 			double share
 	) { }
-
-	public int getValue(
-			ServerPlayerEntity player,
-			LivingEntity entity,
-			ItemStack weapon,
-			DamageSource damageSource,
-			double entityDroppedXp,
-			double totalDamage,
-			int participants,
-			double share
-	) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, entity, weapon, damageSource, entityDroppedXp, totalDamage, participants, share)
-		));
-	}
-
-	public Optional<AntiFarmingPerChunk> getAntiFarming() {
-		return optAntiFarming;
-	}
-
-	public TamedActivity getTamedActivity() {
-		return tamedActivity;
-	}
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
