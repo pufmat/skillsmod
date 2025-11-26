@@ -23,7 +23,9 @@ public abstract class ServerPlayerEntityMixin {
 		SkillsAPI.updateExperienceSources(
 				player,
 				IncreaseStatExperienceSource.class,
-				experienceSource -> experienceSource.getValue(player, stat, amount)
+				es -> (int) Math.round(es.calculation().evaluate(
+						new IncreaseStatExperienceSource.Data(player, stat, amount)
+				))
 		);
 	}
 }
