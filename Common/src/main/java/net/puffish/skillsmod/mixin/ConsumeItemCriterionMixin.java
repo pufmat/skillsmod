@@ -21,7 +21,9 @@ public class ConsumeItemCriterionMixin {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,
 					EatFoodExperienceSource.class,
-					experienceSource -> experienceSource.getValue(serverPlayer, stack)
+					es -> (int) Math.round(es.calculation().evaluate(
+							new EatFoodExperienceSource.Data(serverPlayer, stack)
+					))
 			);
 		}
 	}

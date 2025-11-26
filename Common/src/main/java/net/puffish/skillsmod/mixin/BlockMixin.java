@@ -21,12 +21,13 @@ public abstract class BlockMixin {
 	@Inject(method = "afterBreak", at = @At("HEAD"))
 	private void injectAtAfterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack stack, CallbackInfo ci) {
 		if (player instanceof ServerPlayerEntity serverPlayer) {
-			SkillsAPI.updateExperienceSources(serverPlayer, experienceSource -> {
-				if (experienceSource instanceof MineBlockExperienceSource mineBlockExperienceSource) {
-					return mineBlockExperienceSource.getValue(serverPlayer, state, stack);
-				}
-				return 0;
-			});
+			SkillsAPI.updateExperienceSources(
+					serverPlayer,
+					MineBlockExperienceSource.class,
+					es -> (int) Math.round(es.calculation().evaluate(
+							new MineBlockExperienceSource.Data(serverPlayer, state, stack)
+					))
+			);
 		}
 	}
 }
