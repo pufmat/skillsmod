@@ -21,6 +21,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerChunk;
+import net.puffish.skillsmod.experience.source.builtin.util.TamedActivity;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
@@ -76,10 +77,12 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 
 	private final Calculation<Data> calculation;
 	private final Optional<AntiFarmingPerChunk> optAntiFarming;
+	private final TamedActivity tamedActivity;
 
-	private SharedKillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
+	private SharedKillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming, TamedActivity tamedActivity) {
 		this.calculation = calculation;
 		this.optAntiFarming = optAntiFarming;
+		this.tamedActivity = tamedActivity;
 	}
 
 	public static void register() {
@@ -109,10 +112,19 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 						.flatMap(Function.identity())
 				);
 
+		var tamed = rootObject.get("tamed")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> TamedActivity.parse(element)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(TamedActivity.EXCLUDE);
+
 		if (problems.isEmpty()) {
 			return Result.success(new SharedKillEntityExperienceSource(
 					optCalculation.orElseThrow(),
-					optAntiFarming
+					optAntiFarming,
+					tamed
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -147,6 +159,10 @@ public class SharedKillEntityExperienceSource implements ExperienceSource {
 
 	public Optional<AntiFarmingPerChunk> getAntiFarming() {
 		return optAntiFarming;
+	}
+
+	public TamedActivity getTamedActivity() {
+		return tamedActivity;
 	}
 
 	@Override

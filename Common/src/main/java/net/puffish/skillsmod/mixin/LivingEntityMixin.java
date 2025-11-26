@@ -14,6 +14,7 @@ import net.puffish.skillsmod.experience.source.builtin.HealExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.SharedKillEntityExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerEntity;
+import net.puffish.skillsmod.util.AttackerInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,10 +52,11 @@ public abstract class LivingEntityMixin {
 
 	@Inject(method = "applyDamage", at = @At("TAIL"))
 	private void injectAtApplyDamage(ServerWorld world, DamageSource source, float damage, CallbackInfo ci) {
-		var entity = ((LivingEntity) (Object) this);
-		var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
+			var entity = ((LivingEntity) (Object) this);
+			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+			var player = attackerInfo.player();
 
-		if (source.getAttacker() instanceof ServerPlayerEntity player) {
 			damageShare.compute(player, (key, value) -> {
 				if (value == null) {
 					return damage;
@@ -68,23 +70,26 @@ public abstract class LivingEntityMixin {
 					player,
 					DealDamageExperienceSource.class,
 					experienceSource -> {
-						float limitedDamage = experienceSource.getAntiFarming()
-								.map(antiFarming -> antiFarmingData.addAndLimit(antiFarming, damage))
-								.orElse(damage);
-						if (limitedDamage > MathHelper.EPSILON) {
-							return experienceSource.getValue(player, entity, weapon, limitedDamage, source);
+						if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())) {
+							float limitedDamage = experienceSource.getAntiFarming()
+									.map(antiFarming -> antiFarmingData.addAndLimit(antiFarming, damage))
+									.orElse(damage);
+							if (limitedDamage > MathHelper.EPSILON) {
+								return experienceSource.getValue(player, entity, weapon, limitedDamage, source);
+							}
 						}
 						return 0;
 					}
 			);
-		}
+		});
 	}
 
 	@Inject(method = "drop", at = @At("TAIL"))
 	private void injectAtDrop(ServerWorld world, DamageSource source, CallbackInfo ci) {
-		if (source.getAttacker() instanceof ServerPlayerEntity player) {
+		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+			var player = attackerInfo.player();
 
 			var antiFarmingData = ((WorldChunkAccess) entity.getEntityWorld()
 					.getWorldChunk(entity.getBlockPos()))
@@ -95,7 +100,8 @@ public abstract class LivingEntityMixin {
 					player,
 					KillEntityExperienceSource.class,
 					experienceSource -> {
-						if (experienceSource
+						if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())
+								&& experienceSource
 								.getAntiFarming()
 								.map(antiFarmingData::tryIncrement)
 								.orElse(true)
@@ -119,7 +125,8 @@ public abstract class LivingEntityMixin {
 						entry.getKey(),
 						SharedKillEntityExperienceSource.class,
 						experienceSource -> {
-							if (experienceSource
+							if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())
+									&& experienceSource
 									.getAntiFarming()
 									.map(antiFarmingData::tryIncrement)
 									.orElse(true)
@@ -139,7 +146,7 @@ public abstract class LivingEntityMixin {
 						}
 				);
 			}
-		}
+		});
 	}
 
 	@ModifyArg(
