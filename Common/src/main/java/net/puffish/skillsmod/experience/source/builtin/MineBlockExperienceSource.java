@@ -26,7 +26,10 @@ import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyBlockTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
-public class MineBlockExperienceSource implements ExperienceSource {
+public record MineBlockExperienceSource(
+		Calculation<Data> calculation
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("mine_block");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -48,12 +51,6 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
-
-	private MineBlockExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
-	}
-
 	public static void register() {
 		SkillsAPI.registerExperienceSource(
 				ID,
@@ -68,13 +65,7 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
-
-	public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, blockState, tool)
-		));
-	}
+	public record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
