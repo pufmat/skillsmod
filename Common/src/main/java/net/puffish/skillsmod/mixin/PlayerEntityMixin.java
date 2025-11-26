@@ -31,7 +31,9 @@ public abstract class PlayerEntityMixin {
 			SkillsAPI.updateExperienceSources(
 					player,
 					TakeDamageExperienceSource.class,
-					experienceSource -> experienceSource.getValue(player, weapon, takenDamage, source)
+					experienceSource -> (int) Math.round(experienceSource.calculation()
+							.evaluate(new TakeDamageExperienceSource.Data(player, weapon, takenDamage, source)
+					))
 			);
 		}
 	}
