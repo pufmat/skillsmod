@@ -21,7 +21,10 @@ import net.puffish.skillsmod.api.util.Result;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class EnchantItemExperienceSource implements ExperienceSource {
+public record EnchantItemExperienceSource(
+		Calculation<Data> calculation
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("enchant_item");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -41,12 +44,6 @@ public class EnchantItemExperienceSource implements ExperienceSource {
 				BuiltinPrototypes.NUMBER,
 				OperationFactory.create(Data::levels)
 		);
-	}
-
-	private final Calculation<Data> calculation;
-
-	private EnchantItemExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
 	}
 
 	public static void register() {
@@ -91,13 +88,7 @@ public class EnchantItemExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, ItemStack itemStack, double levels) { }
-
-	public int getValue(ServerPlayerEntity player, ItemStack itemStack, int levels) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, itemStack, levels)
-		));
-	}
+	public record Data(ServerPlayerEntity player, ItemStack itemStack, double levels) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
