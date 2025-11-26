@@ -23,7 +23,9 @@ public class ItemStackMixin {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,
 					CraftItemExperienceSource.class,
-					experienceSource -> experienceSource.getValue(serverPlayer, (ItemStack) (Object) this) * amount
+					es -> (int) Math.round(es.calculation().evaluate(
+							new CraftItemExperienceSource.Data(serverPlayer, (ItemStack) (Object) this)
+					) * amount)
 			);
 		}
 	}
@@ -34,7 +36,9 @@ public class ItemStackMixin {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,
 					BreakBlockExperienceSource.class,
-					experienceSource -> experienceSource.getValue(serverPlayer, state, (ItemStack) (Object) this)
+					experienceSource -> (int) Math.round(experienceSource.calculation().evaluate(
+							new BreakBlockExperienceSource.Data(serverPlayer, state, (ItemStack) (Object) this)
+					))
 			);
 		}
 	}

@@ -44,7 +44,9 @@ public abstract class LivingEntityMixin {
 				SkillsAPI.updateExperienceSources(
 						player,
 						HealExperienceSource.class,
-						experienceSource -> experienceSource.getValue(player, amount)
+						es -> (int) Math.round(es.calculation().evaluate(
+								new HealExperienceSource.Data(player, amount)
+						))
 				);
 			}
 		}
@@ -69,13 +71,24 @@ public abstract class LivingEntityMixin {
 			SkillsAPI.updateExperienceSources(
 					player,
 					DealDamageExperienceSource.class,
-					experienceSource -> {
-						if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())) {
-							float limitedDamage = experienceSource.getAntiFarming()
-									.map(antiFarming -> antiFarmingData.addAndLimit(antiFarming, damage))
+					es -> {
+						if (attackerInfo.matchesTamedActivity(es.tamedActivity())) {
+							float limitedDamage = es.antiFarming()
+									.map(antiFarming -> antiFarmingData.addAndLimit(
+											antiFarming,
+											damage
+									))
 									.orElse(damage);
 							if (limitedDamage > MathHelper.EPSILON) {
-								return experienceSource.getValue(player, entity, weapon, limitedDamage, source);
+								return (int) Math.round(es.calculation().evaluate(
+										new DealDamageExperienceSource.Data(
+												player,
+												entity,
+												weapon,
+												limitedDamage,
+												source
+										)
+								));
 							}
 						}
 						return 0;
@@ -99,20 +112,22 @@ public abstract class LivingEntityMixin {
 			SkillsAPI.updateExperienceSources(
 					player,
 					KillEntityExperienceSource.class,
-					experienceSource -> {
-						if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())
-								&& experienceSource
-								.getAntiFarming()
+					es -> {
+						if (attackerInfo.matchesTamedActivity(es.tamedActivity())
+								&& es
+								.antiFarming()
 								.map(antiFarmingData::tryIncrement)
 								.orElse(true)
 						) {
-							return experienceSource.getValue(
-									player,
-									entity,
-									weapon,
-									source,
-									entityDroppedXp
-							);
+							return (int) Math.round(es.calculation().evaluate(
+									new KillEntityExperienceSource.Data(
+											player,
+											entity,
+											weapon,
+											source,
+											entityDroppedXp
+									)
+							));
 						}
 						return 0;
 					}
@@ -124,23 +139,24 @@ public abstract class LivingEntityMixin {
 				SkillsAPI.updateExperienceSources(
 						entry.getKey(),
 						SharedKillEntityExperienceSource.class,
-						experienceSource -> {
-							if (attackerInfo.matchesTamedActivity(experienceSource.getTamedActivity())
-									&& experienceSource
-									.getAntiFarming()
+						es -> {
+							if (attackerInfo.matchesTamedActivity(es.tamedActivity())
+									&& es.antiFarming()
 									.map(antiFarmingData::tryIncrement)
 									.orElse(true)
 							) {
-								return experienceSource.getValue(
-										entry.getKey(),
-										entity,
-										weapon,
-										source,
-										entityDroppedXp,
-										totalDamage,
-										entries.size(),
-										entry.getValue() / totalDamage
-								);
+								return (int) Math.round(es.calculation().evaluate(
+										new SharedKillEntityExperienceSource.Data(
+												entry.getKey(),
+												entity,
+												weapon,
+												source,
+												entityDroppedXp,
+												totalDamage,
+												entries.size(),
+												entry.getValue() / totalDamage
+										)
+								));
 							}
 							return 0;
 						}

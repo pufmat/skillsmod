@@ -22,7 +22,10 @@ import net.puffish.skillsmod.api.util.Result;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class BreakBlockExperienceSource implements ExperienceSource {
+public record BreakBlockExperienceSource(
+		Calculation<Data> calculation
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("break_block");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -42,12 +45,6 @@ public class BreakBlockExperienceSource implements ExperienceSource {
 				BuiltinPrototypes.ITEM_STACK,
 				OperationFactory.create(Data::tool)
 		);
-	}
-
-	private final Calculation<Data> calculation;
-
-	private BreakBlockExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
 	}
 
 	public static void register() {
@@ -92,13 +89,7 @@ public class BreakBlockExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
-
-	public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, blockState, tool)
-		));
-	}
+	public record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {

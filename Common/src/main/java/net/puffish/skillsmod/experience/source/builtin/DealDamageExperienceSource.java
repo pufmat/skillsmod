@@ -27,7 +27,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
-public class DealDamageExperienceSource implements ExperienceSource {
+public record DealDamageExperienceSource(
+		Calculation<Data> calculation,
+		Optional<AntiFarmingPerEntity> antiFarming,
+		TamedActivity tamedActivity
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("deal_damage");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -57,16 +62,6 @@ public class DealDamageExperienceSource implements ExperienceSource {
 				BuiltinPrototypes.NUMBER,
 				OperationFactory.create(data -> (double) data.damage())
 		);
-	}
-
-	private final Calculation<Data> calculation;
-	private final Optional<AntiFarmingPerEntity> optAntiFarming;
-	private final TamedActivity tamedActivity;
-
-	private DealDamageExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerEntity> optAntiFarming, TamedActivity tamedActivity) {
-		this.calculation = calculation;
-		this.optAntiFarming = optAntiFarming;
-		this.tamedActivity = tamedActivity;
 	}
 
 	public static void register() {
@@ -128,21 +123,13 @@ public class DealDamageExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, float damage, DamageSource damageSource) { }
-
-	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, float damage, DamageSource damageSource) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, entity, weapon, damage, damageSource)
-		));
-	}
-
-	public Optional<AntiFarmingPerEntity> getAntiFarming() {
-		return optAntiFarming;
-	}
-
-	public TamedActivity getTamedActivity() {
-		return tamedActivity;
-	}
+	public record Data(
+			ServerPlayerEntity player,
+			LivingEntity entity,
+			ItemStack weapon,
+			float damage,
+			DamageSource damageSource
+	) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {

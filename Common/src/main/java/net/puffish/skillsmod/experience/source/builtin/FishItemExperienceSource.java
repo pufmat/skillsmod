@@ -22,7 +22,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class FishItemExperienceSource implements ExperienceSource {
+public record FishItemExperienceSource(
+		Calculation<Data> calculation
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("fish_item");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -42,12 +45,6 @@ public class FishItemExperienceSource implements ExperienceSource {
 				BuiltinPrototypes.ITEM_STACK,
 				OperationFactory.create(Data::fished)
 		);
-	}
-
-	private final Calculation<Data> calculation;
-
-	private FishItemExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
 	}
 
 	public static void register() {
@@ -92,13 +89,7 @@ public class FishItemExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, ItemStack rod, ItemStack fished) { }
-
-	public int getValue(ServerPlayerEntity player, ItemStack rod, ItemStack fished) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, rod, fished)
-		));
-	}
+	public record Data(ServerPlayerEntity player, ItemStack rod, ItemStack fished) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
