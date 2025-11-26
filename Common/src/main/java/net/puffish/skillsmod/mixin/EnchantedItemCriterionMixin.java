@@ -18,7 +18,9 @@ public class EnchantedItemCriterionMixin {
 		SkillsAPI.updateExperienceSources(
 				serverPlayer,
 				EnchantItemExperienceSource.class,
-				experienceSource -> experienceSource.getValue(serverPlayer, stack, levels)
+				es -> (int) Math.round(es.calculation().evaluate(
+						new EnchantItemExperienceSource.Data(serverPlayer, stack, levels)
+				))
 		);
 	}
 }
