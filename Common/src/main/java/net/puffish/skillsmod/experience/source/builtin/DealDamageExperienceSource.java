@@ -20,6 +20,7 @@ import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerEntity;
+import net.puffish.skillsmod.experience.source.builtin.util.TamedActivity;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
@@ -60,10 +61,12 @@ public class DealDamageExperienceSource implements ExperienceSource {
 
 	private final Calculation<Data> calculation;
 	private final Optional<AntiFarmingPerEntity> optAntiFarming;
+	private final TamedActivity tamedActivity;
 
-	private DealDamageExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerEntity> optAntiFarming) {
+	private DealDamageExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerEntity> optAntiFarming, TamedActivity tamedActivity) {
 		this.calculation = calculation;
 		this.optAntiFarming = optAntiFarming;
+		this.tamedActivity = tamedActivity;
 	}
 
 	public static void register() {
@@ -106,10 +109,19 @@ public class DealDamageExperienceSource implements ExperienceSource {
 						.getSuccess()
 				);
 
+		var tamed = rootObject.get("tamed")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> TamedActivity.parse(element)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(TamedActivity.EXCLUDE);
+
 		if (problems.isEmpty()) {
 			return Result.success(new DealDamageExperienceSource(
 					optCalculation.orElseThrow(),
-					optAntiFarming
+					optAntiFarming,
+					tamed
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -126,6 +138,10 @@ public class DealDamageExperienceSource implements ExperienceSource {
 
 	public Optional<AntiFarmingPerEntity> getAntiFarming() {
 		return optAntiFarming;
+	}
+
+	public TamedActivity getTamedActivity() {
+		return tamedActivity;
 	}
 
 	@Override
