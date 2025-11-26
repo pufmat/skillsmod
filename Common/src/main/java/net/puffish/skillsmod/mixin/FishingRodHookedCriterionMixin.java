@@ -22,7 +22,9 @@ public class FishingRodHookedCriterionMixin {
 			SkillsAPI.updateExperienceSources(
 					player,
 					FishItemExperienceSource.class,
-					fishItemExperienceSource -> fishItemExperienceSource.getValue(player, rod, fishedItem)
+					es -> (int) Math.round(es.calculation().evaluate(
+							new FishItemExperienceSource.Data(player, rod, fishedItem)
+					))
 			);
 		}
 	}
