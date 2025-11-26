@@ -20,7 +20,10 @@ import net.puffish.skillsmod.api.util.Result;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class HealExperienceSource implements ExperienceSource {
+public record HealExperienceSource(
+		Calculation<Data> calculation
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("heal");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -36,12 +39,6 @@ public class HealExperienceSource implements ExperienceSource {
 				BuiltinPrototypes.NUMBER,
 				OperationFactory.create(data -> (double) data.damage())
 		);
-	}
-
-	private final Calculation<Data> calculation;
-
-	private HealExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
 	}
 
 	public static void register() {
@@ -86,13 +83,7 @@ public class HealExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, float damage) { }
-
-	public int getValue(ServerPlayerEntity player, float damage) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, damage)
-		));
-	}
+	public record Data(ServerPlayerEntity player, float damage) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
