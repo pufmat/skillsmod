@@ -32,6 +32,7 @@ import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTy
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerChunk;
+import net.puffish.skillsmod.experience.source.builtin.util.TamedActivity;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
@@ -72,10 +73,12 @@ public class KillEntityExperienceSource implements ExperienceSource {
 
 	private final Calculation<Data> calculation;
 	private final Optional<AntiFarmingPerChunk> optAntiFarming;
+	private final TamedActivity tamedActivity;
 
-	private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
+	private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming, TamedActivity tamedActivity) {
 		this.calculation = calculation;
 		this.optAntiFarming = optAntiFarming;
+		this.tamedActivity = tamedActivity;
 	}
 
 	public static void register() {
@@ -105,10 +108,19 @@ public class KillEntityExperienceSource implements ExperienceSource {
 						.flatMap(Function.identity())
 				);
 
+		var tamed = rootObject.get("tamed")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> TamedActivity.parse(element)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(TamedActivity.EXCLUDE);
+
 		if (problems.isEmpty()) {
 			return Result.success(new KillEntityExperienceSource(
 					optCalculation.orElseThrow(),
-					optAntiFarming
+					optAntiFarming,
+					tamed
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
@@ -125,6 +137,10 @@ public class KillEntityExperienceSource implements ExperienceSource {
 
 	public Optional<AntiFarmingPerChunk> getAntiFarming() {
 		return optAntiFarming;
+	}
+
+	public TamedActivity getTamedActivity() {
+		return tamedActivity;
 	}
 
 	@Override
