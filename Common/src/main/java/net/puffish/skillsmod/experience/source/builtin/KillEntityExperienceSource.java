@@ -38,7 +38,12 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class KillEntityExperienceSource implements ExperienceSource {
+public record KillEntityExperienceSource(
+		Calculation<Data> calculation,
+		Optional<AntiFarmingPerChunk> antiFarming,
+		TamedActivity tamedActivity
+) implements ExperienceSource {
+
 	private static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
 	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
@@ -70,16 +75,6 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
-	private final Optional<AntiFarmingPerChunk> optAntiFarming;
-	private final TamedActivity tamedActivity;
-
-	private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming, TamedActivity tamedActivity) {
-		this.calculation = calculation;
-		this.optAntiFarming = optAntiFarming;
-		this.tamedActivity = tamedActivity;
-	}
-
 	public static void register() {
 		SkillsAPI.registerExperienceSource(
 				ID,
@@ -92,6 +87,7 @@ public class KillEntityExperienceSource implements ExperienceSource {
 				.andThen(JsonElement::getAsObject)
 				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
 	}
+
 	private static Result<KillEntityExperienceSource, Problem> parse(JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
@@ -126,21 +122,13 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) { }
-
-	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, entity, weapon, damageSource, entityDroppedXp)
-		));
-	}
-
-	public Optional<AntiFarmingPerChunk> getAntiFarming() {
-		return optAntiFarming;
-	}
-
-	public TamedActivity getTamedActivity() {
-		return tamedActivity;
-	}
+	public record Data(
+			ServerPlayerEntity player,
+			LivingEntity entity,
+			ItemStack weapon,
+			DamageSource damageSource,
+			double entityDroppedXp
+	) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
