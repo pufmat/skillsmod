@@ -35,7 +35,7 @@ public abstract class LivingEntityMixin {
 	private final Map<ServerPlayerEntity, Float> damageShare = new WeakHashMap<>();
 
 	@Unique
-	private final AntiFarmingPerEntity.Data antiFarmingData = new AntiFarmingPerEntity.Data();
+	private final AntiFarmingPerEntity.State antiFarmingPerEntityState = new AntiFarmingPerEntity.State();
 
 	@Inject(method = "heal", at = @At("TAIL"))
 	private void injectAtHeal(float amount, CallbackInfo ci) {
@@ -59,6 +59,11 @@ public abstract class LivingEntityMixin {
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
+			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getEntityWorld()
+					.getWorldChunk(entity.getBlockPos()))
+					.getAntiFarmingPerChunkState();
+			antiFarmingPerChunkState.removeOutdated();
+
 			damageShare.compute(player, (key, value) -> {
 				if (value == null) {
 					return damage;
@@ -67,14 +72,18 @@ public abstract class LivingEntityMixin {
 				}
 			});
 
-			antiFarmingData.removeOutdated();
+			antiFarmingPerEntityState.removeOutdated();
 			SkillsAPI.updateExperienceSources(
 					player,
 					DealDamageExperienceSource.class,
 					es -> {
-						if (attackerInfo.matchesTamedActivity(es.tamedActivity())) {
-							float limitedDamage = es.antiFarming()
-									.map(antiFarming -> antiFarmingData.addAndLimit(
+						if (attackerInfo.matchesTamedActivity(es.tamedActivity())
+								&& es.antiFarmingPerChunk()
+								.map(antiFarmingPerChunkState::tryIncrement)
+								.orElse(true)
+						) {
+							float limitedDamage = es.antiFarmingPerEntity()
+									.map(antiFarming -> antiFarmingPerEntityState.addAndLimit(
 											antiFarming,
 											damage
 									))
@@ -104,10 +113,10 @@ public abstract class LivingEntityMixin {
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
-			var antiFarmingData = ((WorldChunkAccess) entity.getEntityWorld()
+			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getEntityWorld()
 					.getWorldChunk(entity.getBlockPos()))
-					.getAntiFarmingData();
-			antiFarmingData.removeOutdated();
+					.getAntiFarmingPerChunkState();
+			antiFarmingPerChunkState.removeOutdated();
 
 			SkillsAPI.updateExperienceSources(
 					player,
@@ -115,8 +124,8 @@ public abstract class LivingEntityMixin {
 					es -> {
 						if (attackerInfo.matchesTamedActivity(es.tamedActivity())
 								&& es
-								.antiFarming()
-								.map(antiFarmingData::tryIncrement)
+								.antiFarmingPerChunk()
+								.map(antiFarmingPerChunkState::tryIncrement)
 								.orElse(true)
 						) {
 							return (int) Math.round(es.calculation().evaluate(
@@ -141,8 +150,8 @@ public abstract class LivingEntityMixin {
 						SharedKillEntityExperienceSource.class,
 						es -> {
 							if (attackerInfo.matchesTamedActivity(es.tamedActivity())
-									&& es.antiFarming()
-									.map(antiFarmingData::tryIncrement)
+									&& es.antiFarmingPerChunk()
+									.map(antiFarmingPerChunkState::tryIncrement)
 									.orElse(true)
 							) {
 								return (int) Math.round(es.calculation().evaluate(
