@@ -30,7 +30,7 @@ import java.util.function.Function;
 
 public record SharedKillEntityExperienceSource(
 		Calculation<Data> calculation,
-		Optional<AntiFarmingPerChunk> antiFarming,
+		Optional<AntiFarmingPerChunk> antiFarmingPerChunk,
 		TamedActivity tamedActivity
 ) implements ExperienceSource {
 
@@ -100,7 +100,8 @@ public record SharedKillEntityExperienceSource(
 				.ifFailure(problems::add)
 				.getSuccess();
 
-		var optAntiFarming = rootObject.get("anti_farming")
+		var antiFarmingPerChunk = rootObject.get("anti_farming_per_chunk")
+				.orElse(LegacyUtils.wrapDeprecated(() -> rootObject.get("anti_farming"), 4, context))
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(element -> AntiFarmingPerChunk.parse(element, context)
 						.ifFailure(problems::add)
@@ -119,7 +120,7 @@ public record SharedKillEntityExperienceSource(
 		if (problems.isEmpty()) {
 			return Result.success(new SharedKillEntityExperienceSource(
 					optCalculation.orElseThrow(),
-					optAntiFarming,
+					antiFarmingPerChunk,
 					tamed
 			));
 		} else {
