@@ -41,54 +41,54 @@ public record AntiFarmingPerEntity(float limitPerEntity, int resetAfterSeconds) 
 		}
 	}
 
-	public static class Data {
+	public static class State {
 		private final Reference2ObjectMap<AntiFarmingPerEntity, Instance> antiFarmingData = new Reference2ObjectOpenHashMap<>();
 
 		public float addAndLimit(AntiFarmingPerEntity antiFarming, float damage) {
 			return antiFarmingData
-					.computeIfAbsent(antiFarming, key -> new AntiFarmingPerEntity.Instance())
+					.computeIfAbsent(antiFarming, key -> new Instance())
 					.addAndLimit(damage, antiFarming.limitPerEntity(), antiFarming.resetAfterSeconds());
 		}
 
 		public void removeOutdated() {
-			antiFarmingData.values().removeIf(AntiFarmingPerEntity.Instance::cleanupOutdated);
-		}
-	}
-
-	private static class Instance {
-		private final Queue<TimeDamage> queue = new LinkedList<>();
-		private float totalDamage = 0;
-
-		public float addAndLimit(float damage, float limitPerEntity, long resetAfterSeconds) {
-			if (totalDamage < limitPerEntity) {
-				damage = Math.min(damage, limitPerEntity - totalDamage);
-				queue.add(new TimeDamage(
-						System.currentTimeMillis() + resetAfterSeconds * 1000L,
-						damage
-				));
-				totalDamage += damage;
-				return damage;
-			} else {
-				return 0;
-			}
+			antiFarmingData.values().removeIf(Instance::cleanupOutdated);
 		}
 
-		public boolean cleanupOutdated() {
-			var currentTime = System.currentTimeMillis();
+		private static class Instance {
+			private final Queue<TimeDamage> queue = new LinkedList<>();
+			private float totalDamage = 0;
 
-			var it = queue.iterator();
-			while (it.hasNext()) {
-				var el = it.next();
-				if (el.time >= currentTime) {
-					break;
+			public float addAndLimit(float damage, float limitPerEntity, long resetAfterSeconds) {
+				if (totalDamage < limitPerEntity) {
+					damage = Math.min(damage, limitPerEntity - totalDamage);
+					queue.add(new TimeDamage(
+							System.currentTimeMillis() + resetAfterSeconds * 1000L,
+							damage
+					));
+					totalDamage += damage;
+					return damage;
+				} else {
+					return 0;
 				}
-				totalDamage -= el.damage;
-				it.remove();
 			}
 
-			return queue.isEmpty();
-		}
+			public boolean cleanupOutdated() {
+				var currentTime = System.currentTimeMillis();
 
-		private record TimeDamage(long time, float damage) { }
+				var it = queue.iterator();
+				while (it.hasNext()) {
+					var el = it.next();
+					if (el.time >= currentTime) {
+						break;
+					}
+					totalDamage -= el.damage;
+					it.remove();
+				}
+
+				return queue.isEmpty();
+			}
+
+			private record TimeDamage(long time, float damage) { }
+		}
 	}
 }
