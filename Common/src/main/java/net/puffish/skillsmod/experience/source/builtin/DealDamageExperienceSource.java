@@ -19,6 +19,7 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerChunk;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerEntity;
 import net.puffish.skillsmod.experience.source.builtin.util.TamedActivity;
 import net.puffish.skillsmod.util.LegacyUtils;
@@ -26,10 +27,12 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public record DealDamageExperienceSource(
 		Calculation<Data> calculation,
-		Optional<AntiFarmingPerEntity> antiFarming,
+		Optional<AntiFarmingPerEntity> antiFarmingPerEntity,
+		Optional<AntiFarmingPerChunk> antiFarmingPerChunk,
 		TamedActivity tamedActivity
 ) implements ExperienceSource {
 
@@ -97,11 +100,20 @@ public record DealDamageExperienceSource(
 				.ifFailure(problems::add)
 				.getSuccess();
 
-		var optAntiFarming = rootObject.get("anti_farming")
+		var antiFarmingPerEntity = rootObject.get("anti_farming_per_entity")
+				.orElse(LegacyUtils.wrapDeprecated(() -> rootObject.get("anti_farming"), 4, context))
 				.getSuccess() // ignore failure because this property is optional
 				.flatMap(element -> AntiFarmingPerEntity.parse(element, context)
 						.ifFailure(problems::add)
 						.getSuccess()
+				);
+
+		var antiFarmingPerChunk = rootObject.get("anti_farming_per_chunk")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> AntiFarmingPerChunk.parse(element, context)
+						.ifFailure(problems::add)
+						.getSuccess()
+						.flatMap(Function.identity())
 				);
 
 		var tamed = rootObject.get("tamed")
@@ -115,7 +127,8 @@ public record DealDamageExperienceSource(
 		if (problems.isEmpty()) {
 			return Result.success(new DealDamageExperienceSource(
 					optCalculation.orElseThrow(),
-					optAntiFarming,
+					antiFarmingPerEntity,
+					antiFarmingPerChunk,
 					tamed
 			));
 		} else {
