@@ -52,7 +52,7 @@ public record AntiFarmingPerChunk(int limitPerChunk, int resetAfterSeconds) {
 		}
 	}
 
-	public static class Data {
+	public static class State {
 		private final Reference2ObjectMap<AntiFarmingPerChunk, LongList> antiFarmingData = new Reference2ObjectOpenHashMap<>();
 
 		public boolean tryIncrement(AntiFarmingPerChunk antiFarming) {
