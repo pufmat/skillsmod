@@ -268,15 +268,26 @@ public final class BuiltinJson {
 		);
 	}
 
+	@Deprecated
 	public static Result<ComponentChanges, Problem> parseComponentChanges(JsonElement element) {
+		return parseComponentChanges(element, null);
+	}
+
+	public static Result<ComponentChanges, Problem> parseComponentChanges(JsonElement element, DynamicRegistryManager manager) {
 		try {
-			return Result.success(ComponentChanges.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
+			var ops = manager == null ? JsonOps.INSTANCE : manager.getOps(JsonOps.INSTANCE);
+			return Result.success(ComponentChanges.CODEC.parse(ops, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected components"));
 		}
 	}
 
+	@Deprecated
 	public static Result<ItemStack, Problem> parseItemStack(JsonElement element) {
+		return parseItemStack(element, null);
+	}
+
+	public static Result<ItemStack, Problem> parseItemStack(JsonElement element, DynamicRegistryManager manager) {
 		try {
 			return element.getAsObject().andThen(rootObject -> {
 				var problems = new ArrayList<Problem>();
@@ -288,7 +299,7 @@ public final class BuiltinJson {
 
 				var components = rootObject.get("components")
 						.getSuccess()
-						.flatMap(nbtElement -> BuiltinJson.parseComponentChanges(nbtElement)
+						.flatMap(nbtElement -> BuiltinJson.parseComponentChanges(nbtElement, manager)
 								.ifFailure(problems::add)
 								.getSuccess()
 						);
