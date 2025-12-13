@@ -53,7 +53,7 @@ public sealed interface IconConfig permits IconConfig.EffectIconConfig, IconConf
 
 	private static Result<IconConfig, Problem> build(String type, JsonElement dataElement, JsonPath typeElementPath, ConfigContext context) {
 		return switch (type) {
-			case "item" -> ItemIconConfig.parse(dataElement).mapSuccess(Function.identity());
+			case "item" -> ItemIconConfig.parse(dataElement, context).mapSuccess(Function.identity());
 			case "effect" -> EffectIconConfig.parse(dataElement, context).mapSuccess(Function.identity());
 			case "texture" -> TextureIconConfig.parse(dataElement, context).mapSuccess(Function.identity());
 			default -> Result.failure(typeElementPath.createProblem("Expected a valid icon type"));
@@ -61,8 +61,8 @@ public sealed interface IconConfig permits IconConfig.EffectIconConfig, IconConf
 	}
 
 	record ItemIconConfig(ItemStack item) implements IconConfig {
-		public static Result<ItemIconConfig, Problem> parse(JsonElement rootElement) {
-			return BuiltinJson.parseItemStack(rootElement).mapSuccess(ItemIconConfig::new);
+		public static Result<ItemIconConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
+			return BuiltinJson.parseItemStack(rootElement, context.getServer().getRegistryManager()).mapSuccess(ItemIconConfig::new);
 		}
 	}
 
