@@ -17,9 +17,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.GameRules;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.mixin.GameRulesInvoker;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
@@ -50,11 +48,6 @@ public class FabricMain implements ModInitializer {
 		@Override
 		public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
 			Registry.register(registry, id, entry);
-		}
-
-		@Override
-		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String name, GameRules.Category category, GameRules.Type<T> type) {
-			return GameRulesInvoker.invokeRegister(name, category, type);
 		}
 
 		@Override

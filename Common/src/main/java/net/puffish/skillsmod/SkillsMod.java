@@ -102,18 +102,16 @@ public class SkillsMod {
 	private final Path modConfigDir;
 	private final ServerPacketSender packetSender;
 	private final ServerPlatform platform;
-	private final SkillsGameRules gameRules;
 
 	private final ChangeListener<Optional<Map<Identifier, CategoryConfig>>> categories = new ChangeListener<>(
 			Optional.empty(),
 			() -> { }
 	);
 
-	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform, SkillsGameRules gameRules) {
+	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform) {
 		this.modConfigDir = modConfigDir;
 		this.packetSender = packetSender;
 		this.platform = platform;
-		this.gameRules = gameRules;
 	}
 
 	public static SkillsMod getInstance() {
@@ -138,9 +136,7 @@ public class SkillsMod {
 			throw new RuntimeException(e);
 		}
 
-		var gameRules = SkillsGameRules.register(registrar);
-
-		instance = new SkillsMod(modConfigDir, packetSender, platform, gameRules);
+		instance = new SkillsMod(modConfigDir, packetSender, platform);
 
 		registrar.registerInPacket(
 				Packets.SKILL_CLICK,
@@ -159,6 +155,7 @@ public class SkillsMod {
 
 		eventReceiver.registerListener(instance.new EventListener());
 
+		SkillsGameRules.register(registrar);
 		SkillsArgumentTypes.register(registrar);
 
 		BuiltinRewards.register();
@@ -606,7 +603,7 @@ public class SkillsMod {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
-				if (player.getEntityWorld().getGameRules().getBoolean(gameRules.announceNewPoints())) {
+				if (player.getEntityWorld().getGameRules().getValue(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
 					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}
 			}

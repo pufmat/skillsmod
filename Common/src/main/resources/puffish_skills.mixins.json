@@ -5,12 +5,10 @@
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"BlockMixin",
-		"BooleanRuleInvoker",
 		"ConsumeItemCriterionMixin",
 		"DamageSourceMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
-		"GameRulesInvoker",
 		"ItemStackMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",

@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.client.gui;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -10,7 +9,8 @@ import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
 import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ToggleButtonWidget;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.resource.metadata.GuiResourceMetadata;
 import net.minecraft.client.texture.Scaling;
@@ -86,8 +86,8 @@ public class SkillsScreen extends Screen {
 
 	private Optional<Identifier> optActiveCategoryId;
 
-	private ToggleButtonWidget nextButton;
-	private ToggleButtonWidget prevButton;
+	private ButtonWidget nextButton;
+	private ButtonWidget prevButton;
 
 	private float minScale = 1f;
 	private float maxScale = 1f;
@@ -118,8 +118,8 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		super.resize(client, width, height);
+	public void resize(int width, int height) {
+		super.resize(width, height);
 		resize();
 	}
 
@@ -178,20 +178,22 @@ public class SkillsScreen extends Screen {
 				)
 		);
 
-		this.nextButton = new ToggleButtonWidget(this.width - FRAME_PADDING - 12, FRAME_PADDING + 8, 12, 17, false) {
-			@Override
-			public void onClick(Click click, boolean doubled) {
-				data.incrementOffset();
-			}
-		};
-		this.nextButton.setTextures(PAGE_FORWARD_TEXTURES);
-		this.prevButton = new ToggleButtonWidget(FRAME_PADDING, FRAME_PADDING + 8, 12, 17, true) {
-			@Override
-			public void onClick(Click click, boolean doubled) {
-				data.decrementOffset();
-			}
-		};
-		this.prevButton.setTextures(PAGE_BACKWARD_TEXTURES);
+		this.nextButton = new TexturedButtonWidget(
+				width - FRAME_PADDING - 12,
+				FRAME_PADDING + 8,
+				12,
+				17,
+				PAGE_FORWARD_TEXTURES,
+				button -> data.incrementOffset()
+		);
+		this.prevButton = new TexturedButtonWidget(
+				FRAME_PADDING,
+				FRAME_PADDING + 8,
+				12,
+				17,
+				PAGE_BACKWARD_TEXTURES,
+				button -> data.decrementOffset()
+		);
 	}
 
 	private Vector2i getMousePos(double mouseX, double mouseY) {

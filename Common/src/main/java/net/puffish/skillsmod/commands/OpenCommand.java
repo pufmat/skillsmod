@@ -12,7 +12,7 @@ import net.puffish.skillsmod.util.CommandUtils;
 public class OpenCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
 		return CommandManager.literal("open")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
 				.then(CommandManager.argument("players", EntityArgumentType.players())
 						.executes(OpenCommand::open)
 				);

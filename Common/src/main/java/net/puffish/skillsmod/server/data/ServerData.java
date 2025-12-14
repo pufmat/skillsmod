@@ -51,8 +51,8 @@ public class ServerData extends PersistentState {
 	public static PersistentStateType<ServerData> getPersistentStateType() {
 		return new PersistentStateType<>(
 				SkillsAPI.MOD_ID,
-				context -> new ServerData(),
-				context -> new Codec<>() {
+				ServerData::new,
+				new Codec<>() {
 					@Override
 					public <T> DataResult<Pair<ServerData, T>> decode(DynamicOps<T> ops, T input) {
 						return DataResult.success(Pair.of(ServerData.read((NbtCompound) input), input));

@@ -1,6 +1,8 @@
 package net.puffish.skillsmod.client.rendering;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
@@ -397,7 +399,7 @@ public class TextureBatchedRenderer {
 
 				@Override
 				public TextureSetup textureSetup() {
-					return TextureSetup.withoutGlTexture(texture);
+					return TextureSetup.of(texture, RenderSystem.getSamplerCache().getRepeated(FilterMode.NEAREST));
 				}
 
 				@Override

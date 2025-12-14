@@ -10,7 +10,6 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.GameRules;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -28,7 +27,6 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
-import net.puffish.skillsmod.mixin.GameRulesInvoker;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
@@ -133,11 +131,6 @@ public class NeoForgeMain {
 			var deferredRegister = DeferredRegister.create(registry.getKey(), id.getNamespace());
 			deferredRegister.register(id.getPath(), () -> entry);
 			deferredRegister.register(modEventBus);
-		}
-
-		@Override
-		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String name, GameRules.Category category, GameRules.Type<T> type) {
-			return GameRulesInvoker.invokeRegister(name, category, type);
 		}
 
 		@Override

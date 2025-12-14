@@ -12,7 +12,7 @@ import net.puffish.skillsmod.util.CommandUtils;
 public class CategoryCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
 		return CommandManager.literal("category")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
 				.then(CommandManager.literal("lock")
 						.then(CommandManager.argument("players", EntityArgumentType.players())
 								.then(CommandManager.argument("category", CategoryArgumentType.category())
