@@ -13,7 +13,6 @@ import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.access.DrawContextAccess;
 import net.puffish.skillsmod.access.GameRendererAccess;
 import net.puffish.skillsmod.access.GuiRendererAccess;
@@ -80,13 +79,12 @@ public class ItemBatchedRenderer {
 						0,
 						scissorArea
 				);
-				var box = itemRenderState.getModelBoundingBox();
 				renderer.render(new OversizedItemGuiElementRenderState(
 						renderState,
 						0,
 						0,
-						MathHelper.ceil(box.getLengthX() * 16),
-						MathHelper.ceil(box.getLengthY() * 16)
+						16,
+						16
 				), guiRenderState, windowScaleFactor);
 			}
 		}
