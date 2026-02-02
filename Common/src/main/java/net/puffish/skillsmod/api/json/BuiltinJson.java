@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.api.json;
 
 import com.mojang.serialization.JsonOps;
+import net.minecraft.advancement.AdvancementCriterion;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.block.Block;
 import net.minecraft.component.ComponentChanges;
@@ -252,6 +253,14 @@ public final class BuiltinJson {
 
 	private static <T> Stat<T> getOrCreateStat(StatType<T> statType, Identifier id) {
 		return statType.getOrCreateStat(statType.getRegistry().getOrEmpty(id).orElseThrow());
+	}
+
+	public static Result<AdvancementCriterion<?>, Problem> parseAdvancementCriterion(JsonElement element, DynamicRegistryManager manager) {
+		try {
+			return Result.success(AdvancementCriterion.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+		} catch (Exception e) {
+			return Result.failure(element.getPath().createProblem("Expected advancement criterion"));
+		}
 	}
 
 	public static Result<NbtCompound, Problem> parseNbt(JsonElement element) {
