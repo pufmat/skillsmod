@@ -2,6 +2,7 @@ package net.puffish.skillsmod.experience.source;
 
 import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.CraftItemExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.CriterionExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.DealDamageExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.EatFoodExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.EnchantItemExperienceSource;
@@ -17,6 +18,7 @@ public class BuiltinExperienceSources {
 	public static void register() {
 		BreakBlockExperienceSource.register();
 		CraftItemExperienceSource.register();
+		CriterionExperienceSource.register();
 		DealDamageExperienceSource.register();
 		EatFoodExperienceSource.register();
 		EnchantItemExperienceSource.register();
