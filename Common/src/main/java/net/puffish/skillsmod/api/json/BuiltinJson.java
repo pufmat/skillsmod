@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.api.json;
 
+import net.minecraft.advancement.AdvancementCriterion;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
@@ -12,15 +13,16 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.StatePredicate;
+import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.RegistryKey;
-import net.puffish.skillsmod.api.SkillsAPI;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntryList;
+import net.minecraft.util.registry.RegistryKey;
+import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 
@@ -203,6 +205,14 @@ public final class BuiltinJson {
 
 	private static <T> Stat<T> getOrCreateStat(StatType<T> statType, Identifier id) {
 		return statType.getOrCreateStat(statType.getRegistry().getOrEmpty(id).orElseThrow());
+	}
+
+	public static Result<AdvancementCriterion, Problem> parseAdvancementCriterion(JsonElement element, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+		try {
+			return element.getAsObject().mapSuccess(rootObject -> AdvancementCriterion.fromJson(rootObject.getJson(), predicateDeserializer));
+		} catch (Exception e) {
+			return Result.failure(element.getPath().createProblem("Expected advancement criterion"));
+		}
 	}
 
 	public static Result<NbtCompound, Problem> parseNbt(JsonElement element) {
