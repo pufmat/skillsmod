@@ -4,6 +4,7 @@
 	"package": "net.puffish.skillsmod.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
+		"AbstractCriterionMixin",
 		"BlockMixin",
 		"BooleanRuleInvoker",
 		"ConsumeItemCriterionMixin",
