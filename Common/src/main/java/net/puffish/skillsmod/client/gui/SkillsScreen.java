@@ -1208,6 +1208,17 @@ public class SkillsScreen extends Screen {
 
 				tooltip = lines;
 			}
+
+			if (activeCategoryData.getCurrentLevel() > 0) {
+				tmpText = new LiteralText("" + activeCategoryData.getCurrentLevel());
+				tmpX += (182 - this.textRenderer.getWidth(tmpText)) / 2;
+				tmpY -= 1;
+				this.textRenderer.draw(matrices, tmpText, tmpX - 1, tmpY, pointsStrokeColor);
+				this.textRenderer.draw(matrices, tmpText, tmpX, tmpY - 1, pointsStrokeColor);
+				this.textRenderer.draw(matrices, tmpText, tmpX + 1, tmpY, pointsStrokeColor);
+				this.textRenderer.draw(matrices, tmpText, tmpX, tmpY + 1, pointsStrokeColor);
+				this.textRenderer.draw(matrices, tmpText, tmpX, tmpY, pointsFillColor);
+			}
 		}
 	}
 
