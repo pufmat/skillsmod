@@ -12,6 +12,7 @@ import net.puffish.skillsmod.experience.source.builtin.IncreaseStatExperienceSou
 import net.puffish.skillsmod.experience.source.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.SharedKillEntityExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.SmeltItemExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.TakeDamageExperienceSource;
 
 public class BuiltinExperienceSources {
@@ -28,6 +29,7 @@ public class BuiltinExperienceSources {
 		KillEntityExperienceSource.register();
 		MineBlockExperienceSource.register();
 		SharedKillEntityExperienceSource.register();
+		SmeltItemExperienceSource.register();
 		TakeDamageExperienceSource.register();
 	}
 }
