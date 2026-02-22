@@ -8,6 +8,7 @@
 		"BlockMixin",
 		"BooleanRuleInvoker",
 		"ConsumeItemCriterionMixin",
+		"CraftingResultSlotMixin",
 		"DamageSourceMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
