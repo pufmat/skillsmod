@@ -12,6 +12,7 @@
 		"DamageSourceMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
+		"FurnaceOutputSlotMixin",
 		"GameRulesInvoker",
 		"ItemStackMixin",
 		"LivingEntityInvoker",
