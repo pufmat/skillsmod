@@ -11,6 +11,7 @@
 		"DamageSourceMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
+		"FurnaceOutputSlotMixin",
 		"ItemStackMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
