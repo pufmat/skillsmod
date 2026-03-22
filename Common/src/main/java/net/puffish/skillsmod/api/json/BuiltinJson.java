@@ -1,33 +1,33 @@
 package net.puffish.skillsmod.api.json;
 
 import com.mojang.serialization.JsonOps;
-import net.minecraft.advancement.AdvancementCriterion;
-import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.block.Block;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.predicate.StatePredicate;
-import net.minecraft.predicate.component.ComponentsPredicate;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.stat.Stat;
-import net.minecraft.stat.StatType;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.criterion.NbtPredicate;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatType;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
@@ -41,7 +41,7 @@ public final class BuiltinJson {
 	public static Result<Identifier, Problem> parseIdentifier(JsonElement element) {
 		return parseFromString(
 				element,
-				Identifier::of,
+				Identifier::parse,
 				"identifier"
 		);
 	}
@@ -49,31 +49,31 @@ public final class BuiltinJson {
 	public static Result<String, Problem> parseIdentifierPath(JsonElement element) {
 		return parseFromString(
 				element,
-				s -> Identifier.ofVanilla(s).getPath(),
+				s -> Identifier.withDefaultNamespace(s).getPath(),
 				"identifier path"
 		);
 	}
 
-	public static Result<StatusEffect, Problem> parseEffect(JsonElement element) {
+	public static Result<MobEffect, Problem> parseEffect(JsonElement element) {
 		return parseSomething(
 				element,
-				Registries.STATUS_EFFECT,
+				BuiltInRegistries.MOB_EFFECT,
 				"effect"
 		);
 	}
 
-	public static Result<RegistryEntryList<StatusEffect>, Problem> parseEffectTag(JsonElement element) {
+	public static Result<HolderSet<MobEffect>, Problem> parseEffectTag(JsonElement element) {
 		return parseSomethingTag(
 				element,
-				Registries.STATUS_EFFECT,
+				BuiltInRegistries.MOB_EFFECT,
 				"effect"
 		);
 	}
 
-	public static Result<RegistryEntryList<StatusEffect>, Problem> parseEffectOrEffectTag(JsonElement element) {
+	public static Result<HolderSet<MobEffect>, Problem> parseEffectOrEffectTag(JsonElement element) {
 		return parseSomethingOrSomethingTag(
 				element,
-				Registries.STATUS_EFFECT,
+				BuiltInRegistries.MOB_EFFECT,
 				"effect"
 		);
 	}
@@ -81,47 +81,47 @@ public final class BuiltinJson {
 	public static Result<Block, Problem> parseBlock(JsonElement element) {
 		return parseSomething(
 				element,
-				Registries.BLOCK,
+				BuiltInRegistries.BLOCK,
 				"block"
 		);
 	}
 
-	public static Result<RegistryEntryList<Block>, Problem> parseBlockTag(JsonElement element) {
+	public static Result<HolderSet<Block>, Problem> parseBlockTag(JsonElement element) {
 		return parseSomethingTag(
 				element,
-				Registries.BLOCK,
+				BuiltInRegistries.BLOCK,
 				"block"
 		);
 	}
 
-	public static Result<RegistryEntryList<Block>, Problem> parseBlockOrBlockTag(JsonElement element) {
+	public static Result<HolderSet<Block>, Problem> parseBlockOrBlockTag(JsonElement element) {
 		return parseSomethingOrSomethingTag(
 				element,
-				Registries.BLOCK,
+				BuiltInRegistries.BLOCK,
 				"block"
 		);
 	}
 
-	public static Result<DamageType, Problem> parseDamageType(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<DamageType, Problem> parseDamageType(JsonElement element, RegistryAccess manager) {
 		return parseSomething(
 				element,
-				manager.getOrThrow(RegistryKeys.DAMAGE_TYPE),
+				manager.lookupOrThrow(Registries.DAMAGE_TYPE),
 				"damage type"
 		);
 	}
 
-	public static Result<RegistryEntryList<DamageType>, Problem> parseDamageTypeTag(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<HolderSet<DamageType>, Problem> parseDamageTypeTag(JsonElement element, RegistryAccess manager) {
 		return parseSomethingTag(
 				element,
-				manager.getOrThrow(RegistryKeys.DAMAGE_TYPE),
+				manager.lookupOrThrow(Registries.DAMAGE_TYPE),
 				"damage type"
 		);
 	}
 
-	public static Result<RegistryEntryList<DamageType>, Problem> parseDamageTypeOrDamageTypeTag(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<HolderSet<DamageType>, Problem> parseDamageTypeOrDamageTypeTag(JsonElement element, RegistryAccess manager) {
 		return parseSomethingOrSomethingTag(
 				element,
-				manager.getOrThrow(RegistryKeys.DAMAGE_TYPE),
+				manager.lookupOrThrow(Registries.DAMAGE_TYPE),
 				"damage type"
 		);
 	}
@@ -129,23 +129,23 @@ public final class BuiltinJson {
 	public static Result<EntityType<?>, Problem> parseEntityType(JsonElement element) {
 		return parseSomething(
 				element,
-				Registries.ENTITY_TYPE,
+				BuiltInRegistries.ENTITY_TYPE,
 				"entity type"
 		);
 	}
 
-	public static Result<RegistryEntryList<EntityType<?>>, Problem> parseEntityTypeTag(JsonElement element) {
+	public static Result<HolderSet<EntityType<?>>, Problem> parseEntityTypeTag(JsonElement element) {
 		return parseSomethingTag(
 				element,
-				Registries.ENTITY_TYPE,
+				BuiltInRegistries.ENTITY_TYPE,
 				"entity type"
 		);
 	}
 
-	public static Result<RegistryEntryList<EntityType<?>>, Problem> parseEntityTypeOrEntityTypeTag(JsonElement element) {
+	public static Result<HolderSet<EntityType<?>>, Problem> parseEntityTypeOrEntityTypeTag(JsonElement element) {
 		return parseSomethingOrSomethingTag(
 				element,
-				Registries.ENTITY_TYPE,
+				BuiltInRegistries.ENTITY_TYPE,
 				"entity type"
 		);
 	}
@@ -153,23 +153,23 @@ public final class BuiltinJson {
 	public static Result<Item, Problem> parseItem(JsonElement element) {
 		return parseSomething(
 				element,
-				Registries.ITEM,
+				BuiltInRegistries.ITEM,
 				"item"
 		);
 	}
 
-	public static Result<RegistryEntryList<Item>, Problem> parseItemTag(JsonElement element) {
+	public static Result<HolderSet<Item>, Problem> parseItemTag(JsonElement element) {
 		return parseSomethingTag(
 				element,
-				Registries.ITEM,
+				BuiltInRegistries.ITEM,
 				"item"
 		);
 	}
 
-	public static Result<RegistryEntryList<Item>, Problem> parseItemOrItemTag(JsonElement element) {
+	public static Result<HolderSet<Item>, Problem> parseItemOrItemTag(JsonElement element) {
 		return parseSomethingOrSomethingTag(
 				element,
-				Registries.ITEM,
+				BuiltInRegistries.ITEM,
 				"item"
 		);
 	}
@@ -177,30 +177,30 @@ public final class BuiltinJson {
 	public static Result<StatType<?>, Problem> parseStatType(JsonElement element) {
 		return parseSomething(
 				element,
-				Registries.STAT_TYPE,
+				BuiltInRegistries.STAT_TYPE,
 				"stat type"
 		);
 	}
 
-	public static Result<RegistryEntryList<StatType<?>>, Problem> parseStatTypeTag(JsonElement element) {
+	public static Result<HolderSet<StatType<?>>, Problem> parseStatTypeTag(JsonElement element) {
 		return parseSomethingTag(
 				element,
-				Registries.STAT_TYPE,
+				BuiltInRegistries.STAT_TYPE,
 				"stat type"
 		);
 	}
 
-	public static Result<RegistryEntryList<StatType<?>>, Problem> parseStatTypeOrStatTypeTag(JsonElement element) {
+	public static Result<HolderSet<StatType<?>>, Problem> parseStatTypeOrStatTypeTag(JsonElement element) {
 		return parseSomethingOrSomethingTag(
 				element,
-				Registries.STAT_TYPE,
+				BuiltInRegistries.STAT_TYPE,
 				"stat type"
 		);
 	}
 
-	public static Result<StatePredicate, Problem> parseStatePredicate(JsonElement element) {
+	public static Result<StatePropertiesPredicate, Problem> parseStatePredicate(JsonElement element) {
 		try {
-			return Result.success(StatePredicate.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
+			return Result.success(StatePropertiesPredicate.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected state predicate"));
 		}
@@ -211,7 +211,7 @@ public final class BuiltinJson {
 				element,
 				s -> {
 					try {
-						return new NbtPredicate(StringNbtReader.readCompound(s));
+						return new NbtPredicate(TagParser.parseCompoundFully(s));
 					} catch (Exception e) {
 						throw  new RuntimeException(e);
 					}
@@ -220,9 +220,9 @@ public final class BuiltinJson {
 		);
 	}
 
-	public static Result<ComponentsPredicate, Problem> parseComponentsPredicate(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<DataComponentMatchers, Problem> parseComponentsPredicate(JsonElement element, RegistryAccess manager) {
 		try {
-			return Result.success(ComponentsPredicate.CODEC.codec().parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+			return Result.success(DataComponentMatchers.CODEC.codec().parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected component predicate"));
 		}
@@ -232,33 +232,33 @@ public final class BuiltinJson {
 		return parseFromIdentifier(
 				element,
 				id -> getOrCreateStat(
-						Registries.STAT_TYPE.getOptionalValue(
-								Identifier.splitOn(id.getNamespace(), '.')
+						BuiltInRegistries.STAT_TYPE.getOptional(
+								Identifier.bySeparator(id.getNamespace(), '.')
 						).orElseThrow(),
-						Identifier.splitOn(id.getPath(), '.')
+						Identifier.bySeparator(id.getPath(), '.')
 				),
 				"stat"
 		);
 	}
 
 	private static <T> Stat<T> getOrCreateStat(StatType<T> statType, Identifier id) {
-		return statType.getOrCreateStat(statType.getRegistry().getOptionalValue(id).orElseThrow());
+		return statType.get(statType.getRegistry().getOptional(id).orElseThrow());
 	}
 
-	public static Result<AdvancementCriterion<?>, Problem> parseAdvancementCriterion(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<Criterion<?>, Problem> parseAdvancementCriterion(JsonElement element, RegistryAccess manager) {
 		try {
-			return Result.success(AdvancementCriterion.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+			return Result.success(Criterion.CODEC.parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected advancement criterion"));
 		}
 	}
 
-	public static Result<NbtCompound, Problem> parseNbt(JsonElement element) {
+	public static Result<CompoundTag, Problem> parseNbt(JsonElement element) {
 		return parseFromString(
 				element,
 				s -> {
 					try {
-						return StringNbtReader.readCompound(s);
+						return TagParser.parseCompoundFully(s);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -268,14 +268,14 @@ public final class BuiltinJson {
 	}
 
 	@Deprecated
-	public static Result<ComponentChanges, Problem> parseComponentChanges(JsonElement element) {
+	public static Result<DataComponentPatch, Problem> parseComponentChanges(JsonElement element) {
 		return parseComponentChanges(element, null);
 	}
 
-	public static Result<ComponentChanges, Problem> parseComponentChanges(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<DataComponentPatch, Problem> parseComponentChanges(JsonElement element, RegistryAccess manager) {
 		try {
-			var ops = manager == null ? JsonOps.INSTANCE : manager.getOps(JsonOps.INSTANCE);
-			return Result.success(ComponentChanges.CODEC.parse(ops, element.getJson()).result().orElseThrow());
+			var ops = manager == null ? JsonOps.INSTANCE : manager.createSerializationContext(JsonOps.INSTANCE);
+			return Result.success(DataComponentPatch.CODEC.parse(ops, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected components"));
 		}
@@ -286,7 +286,7 @@ public final class BuiltinJson {
 		return parseItemStack(element, null);
 	}
 
-	public static Result<ItemStack, Problem> parseItemStack(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<ItemStack, Problem> parseItemStack(JsonElement element, RegistryAccess manager) {
 		try {
 			return element.getAsObject().andThen(rootObject -> {
 				var problems = new ArrayList<Problem>();
@@ -305,7 +305,7 @@ public final class BuiltinJson {
 
 				if (problems.isEmpty()) {
 					var itemStack = new ItemStack(item.orElseThrow());
-					components.ifPresent(itemStack::applyChanges);
+					components.ifPresent(itemStack::applyComponentsAndValidate);
 					return Result.success(itemStack);
 				} else {
 					return Result.failure(Problem.combine(problems));
@@ -316,42 +316,42 @@ public final class BuiltinJson {
 		}
 	}
 
-	public static Result<AdvancementFrame, Problem> parseFrame(JsonElement element) {
+	public static Result<AdvancementType, Problem> parseFrame(JsonElement element) {
 		try {
-			return Result.success(AdvancementFrame.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
+			return Result.success(AdvancementType.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected frame"));
 		}
 	}
 
-	public static Result<Text, Problem> parseText(JsonElement element, DynamicRegistryManager manager) {
+	public static Result<Component, Problem> parseText(JsonElement element, RegistryAccess manager) {
 		try {
-			return Result.success(TextCodecs.CODEC.parse(manager.getOps(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
+			return Result.success(ComponentSerialization.CODEC.parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
 			return Result.failure(element.getPath().createProblem("Expected text"));
 		}
 	}
 
-	public static Result<EntityAttribute, Problem> parseAttribute(JsonElement element) {
+	public static Result<Attribute, Problem> parseAttribute(JsonElement element) {
 		return parseFromIdentifier(
 				element,
 				id -> {
 					if (id.getNamespace().equals(SkillsAPI.MOD_ID)) {
-					id = Identifier.of("puffish_attributes", id.getPath());
+					id = Identifier.fromNamespaceAndPath("puffish_attributes", id.getPath());
 					}
-					return Registries.ATTRIBUTE.getOptionalValue(id).orElseThrow();
+					return BuiltInRegistries.ATTRIBUTE.getOptional(id).orElseThrow();
 				},
 				"attribute"
 		);
 	}
 
-	public static Result<EntityAttributeModifier.Operation, Problem> parseAttributeOperation(JsonElement element) {
+	public static Result<AttributeModifier.Operation, Problem> parseAttributeOperation(JsonElement element) {
 		return parseFromString(
 				element,
 				s -> switch (s) {
-					case "add", "add_value", "addition" -> EntityAttributeModifier.Operation.ADD_VALUE;
-					case "multiply_base", "add_multiplied_base" -> EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE;
-					case "multiply_total", "add_multiplied_total" -> EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+					case "add", "add_value", "addition" -> AttributeModifier.Operation.ADD_VALUE;
+					case "multiply_base", "add_multiplied_base" -> AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+					case "multiply_total", "add_multiplied_total" -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
 					default -> throw new RuntimeException();
 				},
 				"attribute operation"
@@ -380,7 +380,7 @@ public final class BuiltinJson {
 			Function<Identifier, T> parser,
 			String what
 	) {
-		return parseFromString(element, Identifier::of, what)
+		return parseFromString(element, Identifier::parse, what)
 				.andThen(id -> {
 					try {
 						return Result.success(parser.apply(id));
@@ -397,24 +397,24 @@ public final class BuiltinJson {
 	) {
 		return parseFromIdentifier(
 				element,
-				id -> registry.getOptionalValue(id).orElseThrow(),
+				id -> registry.getOptional(id).orElseThrow(),
 				what
 		);
 	}
 
-	private static <T> Result<RegistryEntryList<T>, Problem> parseSomethingTag(
+	private static <T> Result<HolderSet<T>, Problem> parseSomethingTag(
 			JsonElement element,
 			Registry<T> registry,
 			String what
 	) {
 		return parseFromString(
 				element,
-				s -> s.startsWith("#") ? Identifier.of(s.substring(1)) : Identifier.of(s),
+				s -> s.startsWith("#") ? Identifier.parse(s.substring(1)) : Identifier.parse(s),
 				what
 		).andThen(id -> {
 			try {
 				return Result.success(registry
-						.getOptional(TagKey.of(registry.getKey(), id))
+						.get(TagKey.create(registry.key(), id))
 						.orElseThrow());
 			} catch (Exception ignored) {
 				return Result.failure(element.getPath().createProblem("Unknown " + what + " tag `" + id + "`"));
@@ -422,7 +422,7 @@ public final class BuiltinJson {
 		});
 	}
 
-	private static <T> Result<RegistryEntryList<T>, Problem> parseSomethingOrSomethingTag(
+	private static <T> Result<HolderSet<T>, Problem> parseSomethingOrSomethingTag(
 			JsonElement element,
 			Registry<T> registry,
 			String what
@@ -431,9 +431,9 @@ public final class BuiltinJson {
 			var s = element.getJson().getAsString();
 			if (s.startsWith("#")) {
 				try {
-					var id = Identifier.of(s.substring(1));
+					var id = Identifier.parse(s.substring(1));
 					try {
-						return Result.success(registry.getOptional(TagKey.of(registry.getKey(), id)).orElseThrow());
+						return Result.success(registry.get(TagKey.create(registry.key(), id)).orElseThrow());
 					} catch (Exception ignored) {
 						return Result.failure(element.getPath().createProblem("Unknown " + what + " tag `" + id + "`"));
 					}
@@ -442,9 +442,9 @@ public final class BuiltinJson {
 				}
 			} else {
 				try {
-					var id = Identifier.of(s);
+					var id = Identifier.parse(s);
 					try {
-						return Result.success(RegistryEntryList.of(registry.getEntry(id).orElseThrow()));
+						return Result.success(HolderSet.direct(registry.get(id).orElseThrow()));
 					} catch (Exception ignored) {
 						return Result.failure(element.getPath().createProblem("Unknown " + what + " `" + id + "`"));
 					}

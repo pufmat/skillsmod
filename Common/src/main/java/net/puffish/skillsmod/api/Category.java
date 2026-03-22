@@ -1,10 +1,9 @@
 package net.puffish.skillsmod.api;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
 import java.util.Optional;
 import java.util.stream.Stream;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface Category {
 	Identifier getId();
@@ -15,44 +14,44 @@ public interface Category {
 
 	Stream<Skill> streamSkills();
 
-	Stream<Skill> streamUnlockedSkills(ServerPlayerEntity player);
+	Stream<Skill> streamUnlockedSkills(ServerPlayer player);
 
-	void openScreen(ServerPlayerEntity player);
+	void openScreen(ServerPlayer player);
 
-	void resetSkills(ServerPlayerEntity player);
+	void resetSkills(ServerPlayer player);
 
-	void unlock(ServerPlayerEntity player);
+	void unlock(ServerPlayer player);
 
-	void lock(ServerPlayerEntity player);
+	void lock(ServerPlayer player);
 
-	boolean isUnlocked(ServerPlayerEntity player);
+	boolean isUnlocked(ServerPlayer player);
 
-	void erase(ServerPlayerEntity player);
+	void erase(ServerPlayer player);
 
-	Stream<Identifier> streamPointsSources(ServerPlayerEntity player);
+	Stream<Identifier> streamPointsSources(ServerPlayer player);
 
-	int getPoints(ServerPlayerEntity player, Identifier source);
+	int getPoints(ServerPlayer player, Identifier source);
 
-	void setPoints(ServerPlayerEntity player, Identifier source, int count);
+	void setPoints(ServerPlayer player, Identifier source, int count);
 
-	void addPoints(ServerPlayerEntity player, Identifier source, int count);
+	void addPoints(ServerPlayer player, Identifier source, int count);
 
-	void setPointsSilently(ServerPlayerEntity player, Identifier source, int count);
+	void setPointsSilently(ServerPlayer player, Identifier source, int count);
 
-	void addPointsSilently(ServerPlayerEntity player, Identifier source, int count);
+	void addPointsSilently(ServerPlayer player, Identifier source, int count);
 
-	int getSpentPoints(ServerPlayerEntity player);
+	int getSpentPoints(ServerPlayer player);
 
-	int getPointsTotal(ServerPlayerEntity player);
+	int getPointsTotal(ServerPlayer player);
 
-	int getPointsLeft(ServerPlayerEntity player);
-
-	@Deprecated
-	int getExtraPoints(ServerPlayerEntity player);
+	int getPointsLeft(ServerPlayer player);
 
 	@Deprecated
-	void setExtraPoints(ServerPlayerEntity player, int count);
+	int getExtraPoints(ServerPlayer player);
 
 	@Deprecated
-	void addExtraPoints(ServerPlayerEntity player, int count);
+	void setExtraPoints(ServerPlayer player, int count);
+
+	@Deprecated
+	void addExtraPoints(ServerPlayer player, int count);
 }

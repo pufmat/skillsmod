@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -60,6 +60,6 @@ public final class TagCondition implements Operation<Entity, Boolean> {
 
 	@Override
 	public Optional<Boolean> apply(Entity entity) {
-		return Optional.of(entity.getCommandTags().contains(tag));
+		return Optional.of(entity.getTags().contains(tag));
 	}
 }

@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.reward.Reward;
 import net.puffish.skillsmod.api.reward.RewardDisposeContext;

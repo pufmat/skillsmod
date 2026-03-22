@@ -5,16 +5,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.metadata.GuiResourceMetadata;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.texture.MissingSprite;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteContents;
-import net.minecraft.client.texture.SpriteOpener;
-import net.minecraft.client.texture.TextureTickListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TickableTexture;
+import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
+import net.minecraft.client.resources.metadata.gui.GuiMetadataSection;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.common.BackgroundPosition;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,9 +38,9 @@ public record ClientBackgroundConfig(
 	) {
 		var id = SkillsMod.createIdentifier(RandomStringUtils.insecure()
 				.next(16, "abcdefghijklmnopqrstuvwxyz0123456789"));
-		var client = MinecraftClient.getInstance();
+		var client = Minecraft.getInstance();
 		client.execute(() -> client.getTextureManager()
-				.registerTexture(id, new ClientBackgroundTexture(textureId)));
+				.register(id, new ClientBackgroundTexture(textureId)));
 
 		return new ClientBackgroundConfig(
 				id,
@@ -50,59 +50,59 @@ public record ClientBackgroundConfig(
 		);
 	}
 
-	private static class ClientBackgroundSprite extends Sprite {
+	private static class ClientBackgroundSprite extends TextureAtlasSprite {
 		private ClientBackgroundSprite(Identifier id, SpriteContents contents) {
-			super(id, contents, contents.getWidth(), contents.getHeight(), 0, 0, 0);
+			super(id, contents, contents.width(), contents.height(), 0, 0, 0);
 		}
 	}
 
-	private static class ClientBackgroundTexture extends AbstractTexture implements TextureTickListener {
+	private static class ClientBackgroundTexture extends AbstractTexture implements TickableTexture {
 		private final SpriteContents contents;
-		private final SpriteContents.Animator animator;
+		private final SpriteContents.AnimationState animationState;
 		private final GpuBuffer gpuBuffer;
 
 		public ClientBackgroundTexture(Identifier id) {
-			sampler = RenderSystem.getSamplerCache().getRepeated(FilterMode.NEAREST);
-			contents = MinecraftClient.getInstance()
+			sampler = RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST);
+			contents = Minecraft.getInstance()
 					.getResourceManager()
 					.getResource(id)
 					.flatMap(resource -> Optional.ofNullable(
-							SpriteOpener.create(Set.of(GuiResourceMetadata.SERIALIZER)).loadSprite(id, resource)
+							SpriteResourceLoader.create(Set.of(GuiMetadataSection.TYPE)).loadSprite(id, resource)
 					))
-					.orElseGet(MissingSprite::createSpriteContents);
+					.orElseGet(MissingTextureAtlasSprite::create);
 
-			var size = MathHelper.roundUpToMultiple(SpriteContents.SPRITE_INFO_SIZE, RenderSystem.getDevice().getUniformOffsetAlignment());
+			var size = Mth.roundToward(SpriteContents.UBO_SIZE, RenderSystem.getDevice().getUniformOffsetAlignment());
 			var byteBuffer = MemoryUtil.memAlloc(size);
 
 			var sprite = new ClientBackgroundSprite(id, contents);
-			sprite.putSpriteInfo(byteBuffer, 0, 0, contents.getWidth(), contents.getHeight(), size);
+			sprite.uploadSpriteUbo(byteBuffer, 0, 0, contents.width(), contents.height(), size);
 
 			gpuBuffer = RenderSystem.getDevice().createBuffer(id::toString, GpuBuffer.USAGE_UNIFORM, byteBuffer);
-			animator = contents.createAnimator(gpuBuffer.slice(), size);
+			animationState = contents.createAnimationState(gpuBuffer.slice(), size);
 
-			glTexture = RenderSystem.getDevice().createTexture(
+			texture = RenderSystem.getDevice().createTexture(
 					id.toString(),
 					GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT,
 					TextureFormat.RGBA8,
-					contents.getWidth(),
-					contents.getHeight(),
+					contents.width(),
+					contents.height(),
 					1,
 					1
 			);
-			glTextureView = RenderSystem.getDevice().createTextureView(glTexture);
+			textureView = RenderSystem.getDevice().createTextureView(texture);
 
-			contents.upload(glTexture, 0);
+			contents.uploadFirstFrame(texture, 0);
 		}
 
 		@Override
 		public void tick() {
-			if (animator != null) {
-				animator.tick();
+			if (animationState != null) {
+				animationState.tick();
 				try (var renderPass = RenderSystem.getDevice()
 						.createCommandEncoder()
-						.createRenderPass(() -> "Animate " + contents.getId(), glTextureView, OptionalInt.empty())) {
-					if (animator.isDirty()) {
-						animator.upload(renderPass, animator.getBufferSlice(0));
+						.createRenderPass(() -> "Animate " + contents.name(), textureView, OptionalInt.empty())) {
+					if (animationState.needsToDraw()) {
+						animationState.drawToAtlas(renderPass, animationState.getDrawUbo(0));
 					}
 				}
 			}
@@ -112,8 +112,8 @@ public record ClientBackgroundConfig(
 		public void close() {
 			gpuBuffer.close();
 			contents.close();
-			if (animator != null) {
-				animator.close();
+			if (animationState != null) {
+				animationState.close();
 			}
 
 			super.close();

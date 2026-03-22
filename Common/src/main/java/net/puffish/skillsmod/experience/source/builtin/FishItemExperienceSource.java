@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -89,7 +89,7 @@ public record FishItemExperienceSource(
 		}
 	}
 
-	public record Data(ServerPlayerEntity player, ItemStack rod, ItemStack fished) { }
+	public record Data(ServerPlayer player, ItemStack rod, ItemStack fished) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {

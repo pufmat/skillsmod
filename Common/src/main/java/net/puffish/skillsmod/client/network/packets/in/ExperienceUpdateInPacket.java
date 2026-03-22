@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class ExperienceUpdateInPacket implements InPacket {
@@ -17,7 +17,7 @@ public class ExperienceUpdateInPacket implements InPacket {
 		this.requiredExperience = requiredExperience;
 	}
 
-	public static ExperienceUpdateInPacket read(PacketByteBuf buf) {
+	public static ExperienceUpdateInPacket read(FriendlyByteBuf buf) {
 		var categoryId = buf.readIdentifier();
 		var currentLevel = buf.readInt();
 		var currentExperience = buf.readInt();

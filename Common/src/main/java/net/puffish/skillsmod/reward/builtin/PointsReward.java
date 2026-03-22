@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.BuiltinJson;
@@ -64,7 +64,7 @@ public class PointsReward implements Reward {
 		}
 	}
 
-	public static void cleanup(ServerPlayerEntity player) {
+	public static void cleanup(ServerPlayer player) {
 		SkillsAPI.streamCategories().forEach(category -> {
 			var sources = category.streamPointsSources(player)
 					.filter(source -> source.getNamespace().equals(SkillsAPI.MOD_ID))
@@ -92,8 +92,8 @@ public class PointsReward implements Reward {
 	public void dispose(RewardDisposeContext context) {
 		SkillsAPI.getCategory(categoryId).ifPresent(category -> {
 			context.getServer()
-					.getPlayerManager()
 					.getPlayerList()
+					.getPlayers()
 					.forEach(player -> category.setPoints(player, source, 0));
 		});
 	}

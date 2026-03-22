@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.stat.StatType;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.stats.StatType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -19,9 +19,9 @@ import java.util.Optional;
 
 public class StatTypeCondition implements Operation<StatType<?>, Boolean> {
 
-	private final RegistryEntryList<StatType<?>> statTypeEntries;
+	private final HolderSet<StatType<?>> statTypeEntries;
 
-	private StatTypeCondition(RegistryEntryList<StatType<?>> statTypeEntries) {
+	private StatTypeCondition(HolderSet<StatType<?>> statTypeEntries) {
 		this.statTypeEntries = statTypeEntries;
 	}
 
@@ -58,6 +58,6 @@ public class StatTypeCondition implements Operation<StatType<?>, Boolean> {
 
 	@Override
 	public Optional<Boolean> apply(StatType<?> statType) {
-		return Optional.of(statTypeEntries.contains(Registries.STAT_TYPE.getEntry(statType)));
+		return Optional.of(statTypeEntries.contains(BuiltInRegistries.STAT_TYPE.wrapAsHolder(statType)));
 	}
 }

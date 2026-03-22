@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -57,9 +57,9 @@ public class TagReward implements Reward {
 	public void update(RewardUpdateContext context) {
 		var player = context.getPlayer();
 		if (context.getCount() > 0) {
-			player.addCommandTag(tag);
+			player.addTag(tag);
 		} else {
-			player.removeCommandTag(tag);
+			player.removeTag(tag);
 		}
 	}
 

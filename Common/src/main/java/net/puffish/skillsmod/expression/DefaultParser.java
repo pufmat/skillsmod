@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.expression;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 
@@ -72,10 +72,10 @@ public class DefaultParser {
 
 			FunctionOperator.create("abs", "(", ",", ")", 1, l -> v -> Math.abs(l.get(0).eval(v))),
 			FunctionOperator.create("sign", "(", ",", ")", 1, l -> v -> Math.signum(l.get(0).eval(v))),
-			FunctionOperator.create("fract", "(", ",", ")", 1, l -> v -> MathHelper.fractionalPart(l.get(0).eval(v))),
-			FunctionOperator.create("mod", "(", ",", ")", 2, l -> v -> MathHelper.floorMod(l.get(0).eval(v), l.get(1).eval(v))),
-			FunctionOperator.create("mix", "(", ",", ")", 3, l -> v -> MathHelper.lerp(l.get(2).eval(v), l.get(0).eval(v), l.get(1).eval(v))),
-			FunctionOperator.create("clamp", "(", ",", ")", 3, l -> v -> MathHelper.clamp(l.get(0).eval(v), l.get(1).eval(v), l.get(2).eval(v))),
+			FunctionOperator.create("fract", "(", ",", ")", 1, l -> v -> Mth.frac(l.get(0).eval(v))),
+			FunctionOperator.create("mod", "(", ",", ")", 2, l -> v -> Mth.positiveModulo(l.get(0).eval(v), l.get(1).eval(v))),
+			FunctionOperator.create("mix", "(", ",", ")", 3, l -> v -> Mth.lerp(l.get(2).eval(v), l.get(0).eval(v), l.get(1).eval(v))),
+			FunctionOperator.create("clamp", "(", ",", ")", 3, l -> v -> Mth.clamp(l.get(0).eval(v), l.get(1).eval(v), l.get(2).eval(v))),
 
 			FunctionOperator.createVariadic("min", "(", ",", ")", l -> v -> {
 				var x = Double.MAX_VALUE;

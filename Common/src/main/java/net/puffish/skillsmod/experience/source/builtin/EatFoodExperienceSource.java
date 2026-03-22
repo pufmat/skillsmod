@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -58,7 +58,7 @@ public record EatFoodExperienceSource(
 		);
 	}
 
-	public record Data(ServerPlayerEntity player, ItemStack itemStack) { }
+	public record Data(ServerPlayer player, ItemStack itemStack) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
@@ -93,21 +93,21 @@ public record EatFoodExperienceSource(
 		);
 		legacy.registerNumberFunction(
 				"player_attribute",
-				EntityAttributeInstance::getValue,
+				AttributeInstance::getValue,
 				AttributeOperation::parse,
 				Data::player
 		);
 		legacy.registerNumberFunction(
 				"food_hunger",
 				data -> {
-					var fc = data.itemStack().getComponents().get(DataComponentTypes.FOOD);
+					var fc = data.itemStack().getComponents().get(DataComponents.FOOD);
 					return fc == null ? 0.0 : fc.nutrition();
 				}
 		);
 		legacy.registerNumberFunction(
 				"food_saturation",
 				data -> {
-					var fc = data.itemStack().get(DataComponentTypes.FOOD);
+					var fc = data.itemStack().get(DataComponents.FOOD);
 					return fc == null ? 0.0 : fc.saturation();
 				}
 		);

@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.CraftingResultSlot;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.CraftItemExperienceSource;
 import org.spongepowered.asm.mixin.Final;
@@ -13,31 +13,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CraftingResultSlot.class)
+@Mixin(ResultSlot.class)
 public abstract class CraftingResultSlotMixin {
 
 	@Shadow
 	@Final
-	private PlayerEntity player;
+	private Player player;
 
 	@Shadow
-	private int amount;
+	private int removeCount;
 
 	@Inject(
-			method = "onCrafted(Lnet/minecraft/item/ItemStack;)V",
+			method = "checkTakeAchievements(Lnet/minecraft/world/item/ItemStack;)V",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/item/ItemStack;onCraftByPlayer(Lnet/minecraft/entity/player/PlayerEntity;I)V"
+					target = "Lnet/minecraft/world/item/ItemStack;onCraftedBy(Lnet/minecraft/world/entity/player/Player;I)V"
 			)
 	)
 	private void injectAtOnCraftByPlayer(ItemStack stack, CallbackInfo ci) {
-		if (player instanceof ServerPlayerEntity serverPlayer) {
+		if (player instanceof ServerPlayer serverPlayer) {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,
 					CraftItemExperienceSource.class,
 					es -> (int) Math.round(es.calculation().evaluate(
 							new CraftItemExperienceSource.Data(serverPlayer, stack)
-					) * amount)
+					) * removeCount)
 			);
 		}
 	}

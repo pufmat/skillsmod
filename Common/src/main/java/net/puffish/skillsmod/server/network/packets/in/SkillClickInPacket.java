@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.server.network.packets.in;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class SkillClickInPacket implements InPacket {
@@ -13,10 +13,10 @@ public class SkillClickInPacket implements InPacket {
 		this.skillId = skillId;
 	}
 
-	public static SkillClickInPacket read(PacketByteBuf buf) {
+	public static SkillClickInPacket read(FriendlyByteBuf buf) {
 		return new SkillClickInPacket(
 				buf.readIdentifier(),
-				buf.readString()
+				buf.readUtf()
 		);
 	}
 

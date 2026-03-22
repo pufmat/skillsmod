@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.api.reward;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface RewardUpdateContext {
-	ServerPlayerEntity getPlayer();
+	ServerPlayer getPlayer();
 
 	int getCount();
 

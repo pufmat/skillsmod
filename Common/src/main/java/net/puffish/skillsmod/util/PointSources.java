@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.util;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 
 public class PointSources {

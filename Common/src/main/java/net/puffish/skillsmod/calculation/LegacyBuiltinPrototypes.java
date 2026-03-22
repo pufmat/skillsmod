@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.calculation;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
 import net.puffish.skillsmod.api.calculation.prototype.Prototype;
 import net.puffish.skillsmod.impl.calculation.prototype.PrototypeImpl;
@@ -9,138 +9,138 @@ public final class LegacyBuiltinPrototypes {
 	public static void register() {
 		registerAlias(
 				BuiltinPrototypes.WORLD,
-				Identifier.of("server"),
-				Identifier.of("get_server")
+				Identifier.parse("server"),
+				Identifier.parse("get_server")
 		);
 		registerAlias(
 				BuiltinPrototypes.WORLD,
-				Identifier.of("time_of_day"),
-				Identifier.of("get_time_of_day")
+				Identifier.parse("time_of_day"),
+				Identifier.parse("get_time_of_day")
 		);
 		registerAlias(
 				BuiltinPrototypes.ENTITY,
-				Identifier.of("type"),
-				Identifier.of("get_type")
+				Identifier.parse("type"),
+				Identifier.parse("get_type")
 		);
 		registerAlias(
 				BuiltinPrototypes.ENTITY,
-				Identifier.of("world"),
-				Identifier.of("get_world")
+				Identifier.parse("world"),
+				Identifier.parse("get_world")
 		);
 		registerAlias(
 				BuiltinPrototypes.LIVING_ENTITY,
-				Identifier.of("entity"),
-				Identifier.of("as_entity")
+				Identifier.parse("entity"),
+				Identifier.parse("as_entity")
 		);
 		registerAlias(
 				BuiltinPrototypes.LIVING_ENTITY,
-				Identifier.of("world"),
-				Identifier.of("get_world")
+				Identifier.parse("world"),
+				Identifier.parse("get_world")
 		);
 		registerAlias(
 				BuiltinPrototypes.LIVING_ENTITY,
-				Identifier.of("type"),
-				Identifier.of("get_type")
+				Identifier.parse("type"),
+				Identifier.parse("get_type")
 		);
 		registerAlias(
 				BuiltinPrototypes.LIVING_ENTITY,
-				Identifier.of("max_health"),
-				Identifier.of("get_max_health")
+				Identifier.parse("max_health"),
+				Identifier.parse("get_max_health")
 		);
 		registerAlias(
 				BuiltinPrototypes.LIVING_ENTITY,
-				Identifier.of("health"),
-				Identifier.of("get_health")
+				Identifier.parse("health"),
+				Identifier.parse("get_health")
 		);
 		registerAlias(
 				BuiltinPrototypes.PLAYER,
-				Identifier.of("living_entity"),
-				Identifier.of("as_living_entity")
+				Identifier.parse("living_entity"),
+				Identifier.parse("as_living_entity")
 		);
 		registerAlias(
 				BuiltinPrototypes.PLAYER,
-				Identifier.of("entity"),
-				Identifier.of("as_entity")
+				Identifier.parse("entity"),
+				Identifier.parse("as_entity")
 		);
 		registerAlias(
 				BuiltinPrototypes.PLAYER,
-				Identifier.of("world"),
-				Identifier.of("get_world")
+				Identifier.parse("world"),
+				Identifier.parse("get_world")
 		);
 		registerAlias(
 				BuiltinPrototypes.ITEM,
-				Identifier.of("saturation_modifier"),
-				Identifier.of("get_saturation_modifier")
+				Identifier.parse("saturation_modifier"),
+				Identifier.parse("get_saturation_modifier")
 		);
 		registerAlias(
 				BuiltinPrototypes.ITEM,
-				Identifier.of("nutrition"),
-				Identifier.of("get_nutrition")
+				Identifier.parse("nutrition"),
+				Identifier.parse("get_nutrition")
 		);
 		registerAlias(
 				BuiltinPrototypes.ITEM_STACK,
-				Identifier.of("item"),
-				Identifier.of("get_item")
+				Identifier.parse("item"),
+				Identifier.parse("get_item")
 		);
 		registerAlias(
 				BuiltinPrototypes.ITEM_STACK,
-				Identifier.of("count"),
-				Identifier.of("get_count")
+				Identifier.parse("count"),
+				Identifier.parse("get_count")
 		);
 		registerAlias(
 				BuiltinPrototypes.BLOCK,
-				Identifier.of("hardness"),
-				Identifier.of("get_hardness")
+				Identifier.parse("hardness"),
+				Identifier.parse("get_hardness")
 		);
 		registerAlias(
 				BuiltinPrototypes.BLOCK,
-				Identifier.of("blast_resistance"),
-				Identifier.of("get_blast_resistance")
+				Identifier.parse("blast_resistance"),
+				Identifier.parse("get_blast_resistance")
 		);
 		registerAlias(
 				BuiltinPrototypes.BLOCK_STATE,
-				Identifier.of("block"),
-				Identifier.of("get_block")
+				Identifier.parse("block"),
+				Identifier.parse("get_block")
 		);
 		registerAlias(
 				BuiltinPrototypes.DAMAGE_SOURCE,
-				Identifier.of("type"),
-				Identifier.of("get_type")
+				Identifier.parse("type"),
+				Identifier.parse("get_type")
 		);
 		registerAlias(
 				BuiltinPrototypes.DAMAGE_SOURCE,
-				Identifier.of("attacker"),
-				Identifier.of("get_attacker")
+				Identifier.parse("attacker"),
+				Identifier.parse("get_attacker")
 		);
 		registerAlias(
 				BuiltinPrototypes.DAMAGE_SOURCE,
-				Identifier.of("source"),
-				Identifier.of("get_source")
+				Identifier.parse("source"),
+				Identifier.parse("get_source")
 		);
 		registerAlias(
 				BuiltinPrototypes.STAT,
-				Identifier.of("type"),
-				Identifier.of("get_type")
+				Identifier.parse("type"),
+				Identifier.parse("get_type")
 		);
 		registerAlias(
 				BuiltinPrototypes.STATUS_EFFECT_INSTANCE,
-				Identifier.of("level"),
-				Identifier.of("get_level")
+				Identifier.parse("level"),
+				Identifier.parse("get_level")
 		);
 		registerAlias(
 				BuiltinPrototypes.STATUS_EFFECT_INSTANCE,
-				Identifier.of("duration"),
-				Identifier.of("get_duration")
+				Identifier.parse("duration"),
+				Identifier.parse("get_duration")
 		);
 		registerAlias(
 				BuiltinPrototypes.ENTITY_ATTRIBUTE_INSTANCE,
-				Identifier.of("value"),
-				Identifier.of("get_value")
+				Identifier.parse("value"),
+				Identifier.parse("get_value")
 		);
 		registerAlias(
 				BuiltinPrototypes.ENTITY_ATTRIBUTE_INSTANCE,
-				Identifier.of("base_value"),
-				Identifier.of("get_base_value")
+				Identifier.parse("base_value"),
+				Identifier.parse("get_base_value")
 		);
 	}
 

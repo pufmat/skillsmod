@@ -1,15 +1,15 @@
 package net.puffish.skillsmod.main;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.argument.ArgumentTypes;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -46,7 +46,7 @@ import java.util.function.Function;
 @Mod(SkillsAPI.MOD_ID)
 public class NeoForgeMain {
 	private final List<ServerEventListener> serverListeners = new ArrayList<>();
-	private final Map<Identifier, CustomPayload.Id<InOutPayload<?>>> outPackets = new HashMap<>();
+	private final Map<Identifier, CustomPacketPayload.Type<InOutPayload<?>>> outPackets = new HashMap<>();
 	private final List<Consumer<PayloadRegistrar>> payloadRegistrations = new ArrayList<>();
 
 	public NeoForgeMain(IEventBus modEventBus, Dist dist) {
@@ -73,7 +73,7 @@ public class NeoForgeMain {
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+		if (event.getEntity() instanceof ServerPlayer serverPlayer) {
 			for (var listener : serverListeners) {
 				listener.onPlayerJoin(serverPlayer);
 			}
@@ -81,7 +81,7 @@ public class NeoForgeMain {
 	}
 
 	private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+		if (event.getEntity() instanceof ServerPlayer serverPlayer) {
 			for (var listener : serverListeners) {
 				listener.onPlayerLeave(serverPlayer);
 			}
@@ -128,34 +128,34 @@ public class NeoForgeMain {
 
 		@Override
 		public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
-			var deferredRegister = DeferredRegister.create(registry.getKey(), id.getNamespace());
+			var deferredRegister = DeferredRegister.create(registry.key(), id.getNamespace());
 			deferredRegister.register(id.getPath(), () -> entry);
 			deferredRegister.register(modEventBus);
 		}
 
 		@Override
-		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
-			var deferredRegister = DeferredRegister.create(RegistryKeys.COMMAND_ARGUMENT_TYPE, id.getNamespace());
-			deferredRegister.register(id.getPath(), () -> serializer);
+		public <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentTypeInfo<A, T> info) {
+			var deferredRegister = DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, id.getNamespace());
+			deferredRegister.register(id.getPath(), () -> info);
 			deferredRegister.register(modEventBus);
-			ArgumentTypes.registerByClass(clazz, serializer);
+			ArgumentTypeInfos.registerByClass(clazz, info);
 		}
 
 		@Override
-		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			var pId = new CustomPayload.Id<InOutPayload<T>>(id);
-			payloadRegistrations.add(registrar -> registrar.playToServer(pId, CustomPayload.codecOf(
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ServerPacketHandler<T> handler) {
+			var pId = new CustomPacketPayload.Type<InOutPayload<T>>(id);
+			payloadRegistrations.add(registrar -> registrar.playToServer(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket.write(buf),
 					buf -> new InOutPayload<>(pId, reader.apply(buf), null)
-			), (payload, context) -> handler.handle((ServerPlayerEntity) context.player(), payload.inValue())));
+			), (payload, context) -> handler.handle((ServerPlayer) context.player(), payload.inValue())));
 		}
 
 		@Override
 		public void registerOutPacket(Identifier id) {
-			outPackets.put(id, new CustomPayload.Id<>(id));
+			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 			if (FMLEnvironment.getDist().isDedicatedServer()) {
-				var pId = new CustomPayload.Id<InOutPayload<?>>(id);
-				payloadRegistrations.add(registrar -> registrar.playToClient(pId, CustomPayload.codecOf(
+				var pId = new CustomPacketPayload.Type<InOutPayload<?>>(id);
+				payloadRegistrations.add(registrar -> registrar.playToClient(pId, CustomPacketPayload.codec(
 						(value, buf) -> value.outPacket.write(buf),
 						buf -> null
 				), (payload, context) -> { }));
@@ -172,23 +172,23 @@ public class NeoForgeMain {
 
 	private class ServerPacketSenderImpl implements ServerPacketSender {
 		@Override
-		public void send(ServerPlayerEntity player, OutPacket packet) {
-			player.networkHandler.send(new CustomPayloadS2CPacket(
+		public void send(ServerPlayer player, OutPacket packet) {
+			player.connection.send(new ClientboundCustomPayloadPacket(
 					new InOutPayload<>(outPackets.get(packet.getId()), null, packet)
 			));
 		}
 	}
 
-	public record InOutPayload<T>(Id<? extends CustomPayload> id, T inValue, OutPacket outPacket) implements CustomPayload {
+	public record InOutPayload<T>(Type<? extends CustomPacketPayload> type, T inValue, OutPacket outPacket) implements CustomPacketPayload {
 		@Override
-		public Id<? extends CustomPayload> getId() {
-			return id;
+		public Type<? extends CustomPacketPayload> type() {
+			return type;
 		}
 	}
 
 	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
-		public boolean isFakePlayer(ServerPlayerEntity player) {
+		public boolean isFakePlayer(ServerPlayer player) {
 			return player instanceof FakePlayer;
 		}
 

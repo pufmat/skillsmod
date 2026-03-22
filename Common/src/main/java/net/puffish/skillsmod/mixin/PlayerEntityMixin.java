@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.TakeDamageExperienceSource;
@@ -13,18 +13,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerEntityMixin {
 
 	@Inject(
-			method = "applyDamage",
+			method = "actuallyHurt",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/entity/player/PlayerEntity;setHealth(F)V"
+					target = "Lnet/minecraft/world/entity/player/Player;setHealth(F)V"
 			)
 	)
-	private void injectAtSetHealth(ServerWorld world, DamageSource source, float damage, CallbackInfo ci) {
-		if (((PlayerEntity) (Object) this) instanceof ServerPlayerEntity player) {
+	private void injectAtSetHealth(ServerLevel world, DamageSource source, float damage, CallbackInfo ci) {
+		if (((Player) (Object) this) instanceof ServerPlayer player) {
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var takenDamage = Math.min(damage, player.getHealth());
 

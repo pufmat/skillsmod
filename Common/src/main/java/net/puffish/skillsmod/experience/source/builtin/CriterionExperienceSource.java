@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.advancement.AdvancementCriterion;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -25,7 +25,7 @@ import java.util.Map;
 
 public record CriterionExperienceSource(
 		Calculation<Data> calculation,
-		AdvancementCriterion<?> criterion
+		Criterion<?> criterion
 ) implements ExperienceSource {
 
 	private static final Identifier ID = SkillsMod.createIdentifier("criterion");
@@ -56,7 +56,7 @@ public record CriterionExperienceSource(
 		var problems = new ArrayList<Problem>();
 
 		var criterion = rootObject.get("criterion")
-				.andThen(element -> BuiltinJson.parseAdvancementCriterion(element, context.getServer().getRegistryManager()))
+				.andThen(element -> BuiltinJson.parseAdvancementCriterion(element, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 
@@ -88,7 +88,7 @@ public record CriterionExperienceSource(
 	}
 
 	public record Data(
-			ServerPlayerEntity player
+			ServerPlayer player
 	) { }
 
 	@Override

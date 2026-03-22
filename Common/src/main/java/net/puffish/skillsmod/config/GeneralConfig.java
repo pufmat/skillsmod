@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.config;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -13,9 +13,9 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 
 public record GeneralConfig(
-		Text title,
-		Text description,
-		Text extraDescription,
+		Component title,
+		Component description,
+		Component extraDescription,
 		IconConfig icon,
 		BackgroundConfig background,
 		ColorsConfig colors,
@@ -34,25 +34,25 @@ public record GeneralConfig(
 		var problems = new ArrayList<Problem>();
 
 		var optTitle = rootObject.get("title")
-				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().getRegistryManager()))
+				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 
 		var description = rootObject.get("description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)
-				.orElseGet(Text::empty);
+				.orElseGet(Component::empty);
 
 		var extraDescription = rootObject.get("extra_description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)
-				.orElseGet(Text::empty);
+				.orElseGet(Component::empty);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))

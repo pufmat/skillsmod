@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.damagesource.DamageType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class DamageTypeCondition implements Operation<DamageType, Boolean> {
-	private final RegistryEntryList<DamageType> damageTypeEntries;
+	private final HolderSet<DamageType> damageTypeEntries;
 
-	private DamageTypeCondition(RegistryEntryList<DamageType> damageTypeEntries) {
+	private DamageTypeCondition(HolderSet<DamageType> damageTypeEntries) {
 		this.damageTypeEntries = damageTypeEntries;
 	}
 
@@ -47,7 +47,7 @@ public final class DamageTypeCondition implements Operation<DamageType, Boolean>
 						3,
 						context
 				))
-				.andThen(damageElement -> BuiltinJson.parseDamageTypeOrDamageTypeTag(damageElement, context.getServer().getRegistryManager()))
+				.andThen(damageElement -> BuiltinJson.parseDamageTypeOrDamageTypeTag(damageElement, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 

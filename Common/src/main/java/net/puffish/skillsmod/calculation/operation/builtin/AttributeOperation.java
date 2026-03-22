@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -20,10 +20,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class AttributeOperation implements Operation<LivingEntity, EntityAttributeInstance> {
-	private final RegistryEntry<EntityAttribute> attribute;
+public class AttributeOperation implements Operation<LivingEntity, AttributeInstance> {
+	private final Holder<Attribute> attribute;
 
-	private AttributeOperation(RegistryEntry<EntityAttribute> attribute) {
+	private AttributeOperation(Holder<Attribute> attribute) {
 		this.attribute = attribute;
 	}
 
@@ -54,7 +54,7 @@ public class AttributeOperation implements Operation<LivingEntity, EntityAttribu
 				.andThen(BuiltinJson::parseAttribute)
 				.ifFailure(problems::add)
 				.getSuccess()
-				.map(Registries.ATTRIBUTE::getEntry);
+				.map(BuiltInRegistries.ATTRIBUTE::wrapAsHolder);
 
 		if (problems.isEmpty()) {
 			return Result.success(new AttributeOperation(
@@ -66,7 +66,7 @@ public class AttributeOperation implements Operation<LivingEntity, EntityAttribu
 	}
 
 	@Override
-	public Optional<EntityAttributeInstance> apply(LivingEntity entity) {
-		return Optional.ofNullable(entity.getAttributeInstance(attribute));
+	public Optional<AttributeInstance> apply(LivingEntity entity) {
+		return Optional.ofNullable(entity.getAttribute(attribute));
 	}
 }

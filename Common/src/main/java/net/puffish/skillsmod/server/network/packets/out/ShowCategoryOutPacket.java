@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.server.network.packets.out;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.common.FrameType;
 import net.puffish.skillsmod.common.IconType;
 import net.puffish.skillsmod.common.SkillConnection;
@@ -30,7 +30,7 @@ import net.puffish.skillsmod.server.data.CategoryData;
 public record ShowCategoryOutPacket(CategoryConfig category, CategoryData categoryData) implements OutPacket {
 
 	@Override
-	public void write(RegistryByteBuf buf) {
+	public void write(RegistryFriendlyByteBuf buf) {
 		buf.writeIdentifier(category.id());
 		write(buf, category.general());
 		write(buf, category.definitions());
@@ -38,8 +38,8 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		write(buf, category.connections());
 		buf.writeMap(
 				category.skills().getMap(),
-				PacketByteBuf::writeString,
-				(buf1, skill) -> buf1.writeEnumConstant(
+				FriendlyByteBuf::writeUtf,
+				(buf1, skill) -> buf1.writeEnum(
 						categoryData.getSkillState(
 								category,
 								skill,
@@ -60,14 +60,14 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		}, () -> buf.writeBoolean(false));
 	}
 
-	public void write(RegistryByteBuf buf, SkillDefinitionsConfig definitions) {
+	public void write(RegistryFriendlyByteBuf buf, SkillDefinitionsConfig definitions) {
 		buf.writeCollection(definitions.getAll(), (buf1, definition) -> write(buf, definition));
 	}
 
-	public void write(RegistryByteBuf buf, GeneralConfig general) {
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.title());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.description());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, general.extraDescription());
+	public void write(RegistryFriendlyByteBuf buf, GeneralConfig general) {
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, general.title());
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, general.description());
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, general.extraDescription());
 		write(buf, general.icon());
 		write(buf, general.background());
 		write(buf, general.colors());
@@ -75,11 +75,11 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(general.spentPointsLimit());
 	}
 
-	public void write(RegistryByteBuf buf, SkillDefinitionConfig definition) {
-		buf.writeString(definition.id());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.title());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.description());
-		TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.encode(buf, definition.extraDescription());
+	public void write(RegistryFriendlyByteBuf buf, SkillDefinitionConfig definition) {
+		buf.writeUtf(definition.id());
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, definition.title());
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, definition.description());
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, definition.extraDescription());
 		write(buf, definition.frame());
 		write(buf, definition.icon());
 		buf.writeFloat(definition.size());
@@ -90,69 +90,69 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(definition.requiredExclusions());
 	}
 
-	public void write(PacketByteBuf buf, SkillsConfig skills) {
+	public void write(FriendlyByteBuf buf, SkillsConfig skills) {
 		buf.writeCollection(skills.getAll(), ShowCategoryOutPacket::write);
 	}
 
-	public void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
+	public void write(FriendlyByteBuf buf, SkillConnectionsConfig connections) {
 		buf.writeCollection(connections.normal().getAll(), ShowCategoryOutPacket::write);
 		buf.writeCollection(connections.exclusive().getAll(), ShowCategoryOutPacket::write);
 	}
 
-	public static void write(PacketByteBuf buf, SkillConfig skill) {
-		buf.writeString(skill.id());
+	public static void write(FriendlyByteBuf buf, SkillConfig skill) {
+		buf.writeUtf(skill.id());
 		buf.writeInt(skill.x());
 		buf.writeInt(skill.y());
-		buf.writeString(skill.definitionId());
+		buf.writeUtf(skill.definitionId());
 		buf.writeBoolean(skill.isRoot());
 	}
 
-	public static void write(PacketByteBuf buf, SkillConnection skill) {
-		buf.writeString(skill.skillAId());
-		buf.writeString(skill.skillBId());
+	public static void write(FriendlyByteBuf buf, SkillConnection skill) {
+		buf.writeUtf(skill.skillAId());
+		buf.writeUtf(skill.skillBId());
 		buf.writeBoolean(skill.bidirectional());
 	}
 
-	public static void write(RegistryByteBuf buf, IconConfig icon) {
+	public static void write(RegistryFriendlyByteBuf buf, IconConfig icon) {
 		if (icon instanceof IconConfig.EffectIconConfig effectIcon) {
-			buf.writeEnumConstant(IconType.EFFECT);
-			buf.writeIdentifier(Registries.STATUS_EFFECT.getId(effectIcon.effect()));
+			buf.writeEnum(IconType.EFFECT);
+			buf.writeIdentifier(BuiltInRegistries.MOB_EFFECT.getKey(effectIcon.effect()));
 		} else if (icon instanceof IconConfig.ItemIconConfig itemIcon) {
-			buf.writeEnumConstant(IconType.ITEM);
-			ItemStack.PACKET_CODEC.encode(buf, itemIcon.item());
+			buf.writeEnum(IconType.ITEM);
+			ItemStack.STREAM_CODEC.encode(buf, itemIcon.item());
 		} else if (icon instanceof IconConfig.TextureIconConfig textureIcon) {
-			buf.writeEnumConstant(IconType.TEXTURE);
+			buf.writeEnum(IconType.TEXTURE);
 			buf.writeIdentifier(textureIcon.texture());
 		}
 	}
 
-	public static void write(PacketByteBuf buf, FrameConfig frame) {
+	public static void write(FriendlyByteBuf buf, FrameConfig frame) {
 		if (frame instanceof FrameConfig.AdvancementFrameConfig advancementFrame) {
-			buf.writeEnumConstant(FrameType.ADVANCEMENT);
-			buf.writeEnumConstant(advancementFrame.frame());
+			buf.writeEnum(FrameType.ADVANCEMENT);
+			buf.writeEnum(advancementFrame.frame());
 		} else if (frame instanceof FrameConfig.TextureFrameConfig textureFrame) {
-			buf.writeEnumConstant(FrameType.TEXTURE);
-			buf.writeOptional(textureFrame.lockedTexture(), PacketByteBuf::writeIdentifier);
+			buf.writeEnum(FrameType.TEXTURE);
+			buf.writeOptional(textureFrame.lockedTexture(), FriendlyByteBuf::writeIdentifier);
 			buf.writeIdentifier(textureFrame.availableTexture());
-			buf.writeOptional(textureFrame.affordableTexture(), PacketByteBuf::writeIdentifier);
+			buf.writeOptional(textureFrame.affordableTexture(), FriendlyByteBuf::writeIdentifier);
 			buf.writeIdentifier(textureFrame.unlockedTexture());
-			buf.writeOptional(textureFrame.excludedTexture(), PacketByteBuf::writeIdentifier);
+			buf.writeOptional(textureFrame.excludedTexture(), FriendlyByteBuf::writeIdentifier);
 		}
 	}
 
-	public static void write(PacketByteBuf buf, BackgroundConfig background) {
+	public static void write(FriendlyByteBuf buf, BackgroundConfig background) {
 		buf.writeIdentifier(background.texture());
 		buf.writeInt(background.width());
 		buf.writeInt(background.height());
-		buf.writeEnumConstant(background.position());
+		buf.writeEnum(background.position());
 	}
 
-	public static void write(PacketByteBuf buf, ColorsConfig colors) {
+	public static void write(FriendlyByteBuf buf, ColorsConfig colors) {
 		write(buf, colors.connections());
 		write(buf, colors.points());
 	}
 
-	public static void write(PacketByteBuf buf, ConnectionsColorsConfig connectionsColors) {
+	public static void write(FriendlyByteBuf buf, ConnectionsColorsConfig connectionsColors) {
 		write(buf, connectionsColors.locked());
 		write(buf, connectionsColors.available());
 		write(buf, connectionsColors.affordable());
@@ -160,12 +160,12 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		write(buf, connectionsColors.excluded());
 	}
 
-	public static void write(PacketByteBuf buf, FillStrokeColorsConfig fillStrokeColors) {
+	public static void write(FriendlyByteBuf buf, FillStrokeColorsConfig fillStrokeColors) {
 		write(buf, fillStrokeColors.fill());
 		write(buf, fillStrokeColors.stroke());
 	}
 
-	public static void write(PacketByteBuf buf, ColorConfig color) {
+	public static void write(FriendlyByteBuf buf, ColorConfig color) {
 		buf.writeInt(color.argb());
 	}
 

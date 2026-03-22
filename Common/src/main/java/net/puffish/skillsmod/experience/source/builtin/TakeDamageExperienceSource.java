@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -74,7 +74,7 @@ public record TakeDamageExperienceSource(
 	}
 
 	public record Data(
-			ServerPlayerEntity player,
+			ServerPlayer player,
 			ItemStack weapon,
 			float damage,
 			DamageSource damageSource
@@ -91,32 +91,32 @@ public record TakeDamageExperienceSource(
 		legacy.registerBooleanFunction(
 				"damage_type",
 				DamageTypeCondition::parse,
-				data -> data.damageSource().getType()
+				data -> data.damageSource().type()
 		);
 		legacy.registerBooleanFunction(
 				"damage_type_tag",
 				LegacyDamageTypeTagCondition::parse,
-				data -> data.damageSource().getType()
+				data -> data.damageSource().type()
 		);
 		legacy.registerOptionalBooleanFunction(
 				"attacker",
 				EntityTypeCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getAttacker()).map(Entity::getType)
+				data -> Optional.ofNullable(data.damageSource().getEntity()).map(Entity::getType)
 		);
 		legacy.registerOptionalBooleanFunction(
 				"attacker_tag",
 				LegacyEntityTypeTagCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getAttacker()).map(Entity::getType)
+				data -> Optional.ofNullable(data.damageSource().getEntity()).map(Entity::getType)
 		);
 		legacy.registerOptionalBooleanFunction(
 				"source",
 				EntityTypeCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getSource()).map(Entity::getType)
+				data -> Optional.ofNullable(data.damageSource().getDirectEntity()).map(Entity::getType)
 		);
 		legacy.registerOptionalBooleanFunction(
 				"source_tag",
 				LegacyEntityTypeTagCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getSource()).map(Entity::getType)
+				data -> Optional.ofNullable(data.damageSource().getDirectEntity()).map(Entity::getType)
 		);
 		legacy.registerNumberFunction(
 				"player_effect",
@@ -126,7 +126,7 @@ public record TakeDamageExperienceSource(
 		);
 		legacy.registerNumberFunction(
 				"player_attribute",
-				EntityAttributeInstance::getValue,
+				AttributeInstance::getValue,
 				AttributeOperation::parse,
 				Data::player
 		);

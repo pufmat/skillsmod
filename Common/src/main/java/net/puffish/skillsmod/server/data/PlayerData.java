@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.server.data;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.config.CategoryConfig;
 
@@ -19,26 +19,26 @@ public class PlayerData {
 		return new PlayerData(new HashMap<>());
 	}
 
-	public static PlayerData read(NbtCompound nbt) {
+	public static PlayerData read(CompoundTag nbt) {
 		var categories = new HashMap<Identifier, CategoryData>();
 
 		var categoriesNbt = nbt.getCompoundOrEmpty("categories");
-		for (var id : categoriesNbt.getKeys()) {
+		for (var id : categoriesNbt.keySet()) {
 			var elementNbt = categoriesNbt.get(id);
-			if (elementNbt instanceof NbtCompound categoryNbt) {
-				categories.put(SkillsMod.convertIdentifier(Identifier.of(id)), CategoryData.read(categoryNbt));
+			if (elementNbt instanceof CompoundTag categoryNbt) {
+				categories.put(SkillsMod.convertIdentifier(Identifier.parse(id)), CategoryData.read(categoryNbt));
 			}
 		}
 
 		return new PlayerData(categories);
 	}
 
-	public NbtCompound writeNbt(NbtCompound nbt) {
-		var categoriesNbt = new NbtCompound();
+	public CompoundTag writeNbt(CompoundTag nbt) {
+		var categoriesNbt = new CompoundTag();
 		for (var entry : categories.entrySet()) {
 			categoriesNbt.put(
 					entry.getKey().toString(),
-					entry.getValue().writeNbt(new NbtCompound())
+					entry.getValue().writeNbt(new CompoundTag())
 			);
 		}
 		nbt.put("categories", categoriesNbt);

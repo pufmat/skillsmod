@@ -20,7 +20,7 @@
 		"WorldChunkMixin"
 	],
 	"client": [
-		"DrawContextMixin",
+		"GuiGraphicsMixin",
 		"GameRendererMixin",
 		"GuiRendererInvoker",
 		"GuiRendererMixin"

@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.calculation.operation;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.calculation.operation.OperationFactory;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
 import net.puffish.skillsmod.api.calculation.prototype.Prototype;
@@ -66,6 +66,6 @@ public class LegacyOperationRegistry<T> {
 	}
 
 	private Identifier createId(String name) {
-		return Identifier.of(prototype.getId().getNamespace(), "legacy_" + name);
+		return Identifier.fromNamespaceAndPath(prototype.getId().getNamespace(), "legacy_" + name);
 	}
 }

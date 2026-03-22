@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.server.data;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
@@ -43,42 +43,42 @@ public class CategoryData {
 		);
 	}
 
-	public static CategoryData read(NbtCompound nbt) {
-		var unlocked = nbt.getBoolean("unlocked", false);
-		var experience = nbt.getInt("experience", 0);
+	public static CategoryData read(CompoundTag nbt) {
+		var unlocked = nbt.getBooleanOr("unlocked", false);
+		var experience = nbt.getIntOr("experience", 0);
 
 		var unlockedSkills = new HashSet<String>();
 		var unlockedNbt = nbt.getListOrEmpty("unlocked_skills");
 		for (var elementNbt : unlockedNbt) {
-			if (elementNbt instanceof NbtString stringNbt) {
+			if (elementNbt instanceof StringTag stringNbt) {
 				unlockedSkills.add(stringNbt.value());
 			}
 		}
 
 		var points = new HashMap<Identifier, Integer>();
 		var pointsNbt = nbt.get("points");
-		if (pointsNbt instanceof NbtInt pointsNbtInt) {
+		if (pointsNbt instanceof IntTag pointsNbtInt) {
 			points.put(PointSources.LEGACY, pointsNbtInt.intValue());
-		} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
-			for (var key : pointsNbtCompound.getKeys()) {
-				points.put(Identifier.of(key), pointsNbtCompound.getInt(key, 0));
+		} else if (pointsNbt instanceof CompoundTag pointsNbtCompound) {
+			for (var key : pointsNbtCompound.keySet()) {
+				points.put(Identifier.parse(key), pointsNbtCompound.getIntOr(key, 0));
 			}
 		}
 
 		return new CategoryData(unlockedSkills, points, unlocked, experience);
 	}
 
-	public NbtCompound writeNbt(NbtCompound nbt) {
+	public CompoundTag writeNbt(CompoundTag nbt) {
 		nbt.putBoolean("unlocked", unlocked);
 		nbt.putInt("experience", experience);
 
-		var unlockedNbt = new NbtList();
+		var unlockedNbt = new ListTag();
 		for (var skill : unlockedSkills) {
-			unlockedNbt.add(NbtString.of(skill));
+			unlockedNbt.add(StringTag.valueOf(skill));
 		}
 		nbt.put("unlocked_skills", unlockedNbt);
 
-		var pointsNbt = new NbtCompound();
+		var pointsNbt = new CompoundTag();
 		for (var entry : points.entrySet()) {
 			if (entry.getValue() != 0) {
 				pointsNbt.putInt(entry.getKey().toString(), entry.getValue());

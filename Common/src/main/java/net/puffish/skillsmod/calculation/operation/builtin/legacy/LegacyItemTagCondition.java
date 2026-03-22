@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.calculation.operation.builtin.legacy;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyItemTagCondition implements Operation<ItemStack, Boolean> {
-	private final RegistryEntryList<Item> entries;
+	private final HolderSet<Item> entries;
 
-	private LegacyItemTagCondition(RegistryEntryList<Item> entries) {
+	private LegacyItemTagCondition(HolderSet<Item> entries) {
 		this.entries = entries;
 	}
 
@@ -56,6 +56,6 @@ public final class LegacyItemTagCondition implements Operation<ItemStack, Boolea
 
 	@Override
 	public Optional<Boolean> apply(ItemStack itemStack) {
-		return Optional.of(itemStack.isIn(entries));
+		return Optional.of(itemStack.is(entries));
 	}
 }

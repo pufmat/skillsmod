@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.calculation.operation.builtin.legacy;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyBlockTagCondition implements Operation<BlockState, Boolean> {
-	private final RegistryEntryList<Block> entries;
+	private final HolderSet<Block> entries;
 
-	private LegacyBlockTagCondition(RegistryEntryList<Block> entries) {
+	private LegacyBlockTagCondition(HolderSet<Block> entries) {
 		this.entries = entries;
 	}
 
@@ -56,6 +56,6 @@ public final class LegacyBlockTagCondition implements Operation<BlockState, Bool
 
 	@Override
 	public Optional<Boolean> apply(BlockState blockState) {
-		return Optional.of(blockState.isIn(entries));
+		return Optional.of(blockState.is(entries));
 	}
 }

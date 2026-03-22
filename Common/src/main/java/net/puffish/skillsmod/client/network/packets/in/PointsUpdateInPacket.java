@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class PointsUpdateInPacket implements InPacket {
@@ -15,7 +15,7 @@ public class PointsUpdateInPacket implements InPacket {
 		this.earnedPoints = earnedPoints;
 	}
 
-	public static PointsUpdateInPacket read(PacketByteBuf buf) {
+	public static PointsUpdateInPacket read(FriendlyByteBuf buf) {
 		var categoryId = buf.readIdentifier();
 		var spentPoints = buf.readInt();
 		var earnedPoints = buf.readInt();

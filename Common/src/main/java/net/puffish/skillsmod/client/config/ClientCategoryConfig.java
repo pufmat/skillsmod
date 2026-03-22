@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.config;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.client.config.colors.ClientColorsConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig;
@@ -17,9 +17,9 @@ import java.util.Optional;
 
 public record ClientCategoryConfig(
 		Identifier id,
-		Text title,
-		Text description,
-		Text extraDescription,
+		Component title,
+		Component description,
+		Component extraDescription,
 		ClientIconConfig icon,
 		ClientBackgroundConfig background,
 		ClientColorsConfig colors,
@@ -39,9 +39,9 @@ public record ClientCategoryConfig(
 ) {
 	public ClientCategoryConfig(
 			Identifier id,
-			Text title,
-			Text description,
-			Text extraDescription,
+			Component title,
+			Component description,
+			Component extraDescription,
 			ClientIconConfig icon,
 			ClientBackgroundConfig background,
 			ClientColorsConfig colors,

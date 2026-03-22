@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.experience.source;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceFactory;
 
 import java.util.HashMap;

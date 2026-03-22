@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -129,7 +129,7 @@ public record SharedKillEntityExperienceSource(
 	}
 
 	public record Data(
-			ServerPlayerEntity player,
+			ServerPlayer player,
 			LivingEntity entity,
 			ItemStack weapon,
 			DamageSource damageSource,

@@ -1,17 +1,17 @@
 package net.puffish.skillsmod.api;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface Skill {
 	Category getCategory();
 
 	String getId();
 
-	State getState(ServerPlayerEntity player);
+	State getState(ServerPlayer player);
 
-	void unlock(ServerPlayerEntity player);
+	void unlock(ServerPlayer player);
 
-	void lock(ServerPlayerEntity player);
+	void lock(ServerPlayer player);
 
 	enum State {
 		LOCKED,

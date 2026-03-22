@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.calculation.operation.builtin.legacy;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EntityType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyEntityTypeTagCondition implements Operation<EntityType<?>, Boolean> {
-	private final RegistryEntryList<EntityType<?>> entries;
+	private final HolderSet<EntityType<?>> entries;
 
-	private LegacyEntityTypeTagCondition(RegistryEntryList<EntityType<?>> entries) {
+	private LegacyEntityTypeTagCondition(HolderSet<EntityType<?>> entries) {
 		this.entries = entries;
 	}
 
@@ -56,6 +56,6 @@ public final class LegacyEntityTypeTagCondition implements Operation<EntityType<
 
 	@Override
 	public Optional<Boolean> apply(EntityType<?> entityType) {
-		return Optional.of(entries.contains(Registries.ENTITY_TYPE.getEntry(entityType)));
+		return Optional.of(entries.contains(BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entityType)));
 	}
 }

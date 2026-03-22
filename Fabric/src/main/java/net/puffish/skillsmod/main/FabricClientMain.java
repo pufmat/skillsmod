@@ -6,10 +6,10 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class FabricClientMain implements ClientModInitializer {
-	private final Map<Identifier, CustomPayload.Id<FabricMain.InOutPayload<?>>> outPackets = new HashMap<>();
+	private final Map<Identifier, CustomPacketPayload.Type<FabricMain.InOutPayload<?>>> outPackets = new HashMap<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -40,9 +40,9 @@ public class FabricClientMain implements ClientModInitializer {
 
 	private class ClientRegistrarImpl implements ClientRegistrar {
 		@Override
-		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var pId = new CustomPayload.Id<FabricMain.InOutPayload<T>>(id);
-			PayloadTypeRegistry.playS2C().register(pId, CustomPayload.codecOf(
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ClientPacketHandler<T> handler) {
+			var pId = new CustomPacketPayload.Type<FabricMain.InOutPayload<T>>(id);
+			PayloadTypeRegistry.playS2C().register(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket().write(buf),
 					buf -> new FabricMain.InOutPayload<>(pId, reader.apply(buf), null)
 			));
@@ -54,7 +54,7 @@ public class FabricClientMain implements ClientModInitializer {
 
 		@Override
 		public void registerOutPacket(Identifier id) {
-			outPackets.put(id, new CustomPayload.Id<>(id));
+			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 		}
 	}
 
@@ -69,10 +69,10 @@ public class FabricClientMain implements ClientModInitializer {
 
 	private static class KeyBindingReceiverImpl implements KeyBindingReceiver {
 		@Override
-		public void registerKeyBinding(KeyBinding keyBinding, KeyBindingHandler handler) {
+		public void registerKeyBinding(KeyMapping keyBinding, KeyBindingHandler handler) {
 			ClientTickEvents.END_CLIENT_TICK.register(
 					client -> {
-						if (keyBinding.wasPressed()) {
+						if (keyBinding.consumeClick()) {
 							handler.handle();
 						}
 					}

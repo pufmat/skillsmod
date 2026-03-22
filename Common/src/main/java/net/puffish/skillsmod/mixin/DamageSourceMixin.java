@@ -1,12 +1,12 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.Holder;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.puffish.skillsmod.access.DamageSourceAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,9 +22,9 @@ public class DamageSourceMixin implements DamageSourceAccess {
 	private ItemStack weapon;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	private void injectAtInit(RegistryEntry<DamageType> type, Entity source, Entity attacker, Vec3d position, CallbackInfo ci) {
+	private void injectAtInit(Holder<DamageType> type, Entity source, Entity attacker, Vec3 position, CallbackInfo ci) {
 		if (attacker instanceof LivingEntity livingEntity) {
-			weapon = livingEntity.getMainHandStack(); // not really correct
+			weapon = livingEntity.getMainHandItem(); // not really correct
 		}
 	}
 

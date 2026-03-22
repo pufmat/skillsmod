@@ -11,13 +11,14 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.registry.Registry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
@@ -31,7 +32,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class FabricMain implements ModInitializer {
-	private final Map<Identifier, CustomPayload.Id<InOutPayload<?>>> outPackets = new HashMap<>();
+	private final Map<Identifier, CustomPacketPayload.Type<InOutPayload<?>>> outPackets = new HashMap<>();
 
 	@Override
 	public void onInitialize() {
@@ -51,14 +52,14 @@ public class FabricMain implements ModInitializer {
 		}
 
 		@Override
-		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+		public <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentTypeInfo<A, T> serializer) {
 			ArgumentTypeRegistry.registerArgumentType(id, clazz, serializer);
 		}
 
 		@Override
-		public <T extends net.puffish.skillsmod.network.InPacket> void registerInPacket(Identifier id, Function<RegistryByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			var pId = new CustomPayload.Id<InOutPayload<T>>(id);
-			PayloadTypeRegistry.playC2S().register(pId, CustomPayload.codecOf(
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ServerPacketHandler<T> handler) {
+			var pId = new CustomPacketPayload.Type<InOutPayload<T>>(id);
+			PayloadTypeRegistry.playC2S().register(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket.write(buf),
 					buf -> new InOutPayload<>(pId, reader.apply(buf), null)
 			));
@@ -70,10 +71,10 @@ public class FabricMain implements ModInitializer {
 
 		@Override
 		public void registerOutPacket(Identifier id) {
-			outPackets.put(id, new CustomPayload.Id<>(id));
+			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 			if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-				var pId = new CustomPayload.Id<InOutPayload<?>>(id);
-				PayloadTypeRegistry.playS2C().register(pId, CustomPayload.codecOf(
+				var pId = new CustomPacketPayload.Type<InOutPayload<?>>(id);
+				PayloadTypeRegistry.playS2C().register(pId, CustomPacketPayload.codec(
 						(value, buf) -> value.outPacket.write(buf),
 						buf -> null
 				));
@@ -106,21 +107,21 @@ public class FabricMain implements ModInitializer {
 
 	private class ServerPacketSenderImpl implements ServerPacketSender {
 		@Override
-		public void send(ServerPlayerEntity player, OutPacket packet) {
+		public void send(ServerPlayer player, OutPacket packet) {
 			ServerPlayNetworking.send(player, new InOutPayload<>(outPackets.get(packet.getId()), null, packet));
 		}
 	}
 
-	public record InOutPayload<T>(Id<? extends CustomPayload> id, T inValue, OutPacket outPacket) implements CustomPayload {
+	public record InOutPayload<T>(Type<? extends CustomPacketPayload> id, T inValue, OutPacket outPacket) implements CustomPacketPayload {
 		@Override
-		public Id<? extends CustomPayload> getId() {
+		public Type<? extends CustomPacketPayload> type() {
 			return id;
 		}
 	}
 
 	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
-		public boolean isFakePlayer(ServerPlayerEntity player) {
+		public boolean isFakePlayer(ServerPlayer player) {
 			return player instanceof FakePlayer;
 		}
 

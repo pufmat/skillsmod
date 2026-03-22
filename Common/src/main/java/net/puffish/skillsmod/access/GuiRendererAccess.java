@@ -1,12 +1,11 @@
 package net.puffish.skillsmod.access;
 
-import net.minecraft.client.gui.render.OversizedItemGuiElementRenderer;
-import net.minecraft.client.render.VertexConsumerProvider;
-
 import java.util.Map;
+import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public interface GuiRendererAccess {
-	Map<Object, OversizedItemGuiElementRenderer> getOversizedItems();
+	Map<Object, OversizedItemRenderer> getOversizedItems();
 
-	VertexConsumerProvider.Immediate getVertexConsumers();
+	MultiBufferSource.BufferSource getVertexConsumers();
 }

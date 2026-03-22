@@ -1,11 +1,10 @@
 package net.puffish.skillsmod.client.data;
 
-import net.minecraft.util.Identifier;
-
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.resources.Identifier;
 
 public class ClientSkillScreenData {
 	private final Map<Identifier, ClientCategoryData> categories = new LinkedHashMap<>();

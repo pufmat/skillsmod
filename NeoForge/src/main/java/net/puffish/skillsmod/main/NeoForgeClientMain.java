@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.main;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -36,7 +36,7 @@ import java.util.function.Function;
 public class NeoForgeClientMain {
 	private final List<ClientEventListener> clientListeners = new ArrayList<>();
 	private final List<KeyBindingWithHandler> keyBindings = new ArrayList<>();
-	private final Map<Identifier, CustomPayload.Id<NeoForgeMain.InOutPayload<?>>> outPackets = new HashMap<>();
+	private final Map<Identifier, CustomPacketPayload.Type<NeoForgeMain.InOutPayload<?>>> outPackets = new HashMap<>();
 	private final List<Consumer<PayloadRegistrar>> payloadRegistrations = new ArrayList<>();
 
 	public NeoForgeClientMain(IEventBus modEventBus) {
@@ -57,7 +57,7 @@ public class NeoForgeClientMain {
 
 	private void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
 		for (var keyBinding : keyBindings) {
-			event.register(keyBinding.keyBinding);
+			event.register(keyBinding.keyMapping);
 		}
 	}
 
@@ -69,7 +69,7 @@ public class NeoForgeClientMain {
 
 	private void onInputKey(InputEvent.Key event) {
 		for (var keyBinding : keyBindings) {
-			if (keyBinding.keyBinding.wasPressed()) {
+			if (keyBinding.keyMapping.consumeClick()) {
 				keyBinding.handler.handle();
 			}
 		}
@@ -82,20 +82,20 @@ public class NeoForgeClientMain {
 		}
 	}
 
-	private record KeyBindingWithHandler(KeyBinding keyBinding, KeyBindingHandler handler) { }
+	private record KeyBindingWithHandler(KeyMapping keyMapping, KeyBindingHandler handler) { }
 
 	private class ClientRegistrarImpl implements ClientRegistrar {
 		@Override
-		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			var pId = new CustomPayload.Id<NeoForgeMain.InOutPayload<T>>(id);
-			payloadRegistrations.add(registrar -> registrar.playToClient(pId, CustomPayload.codecOf(
+		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ClientPacketHandler<T> handler) {
+			var pId = new CustomPacketPayload.Type<NeoForgeMain.InOutPayload<T>>(id);
+			payloadRegistrations.add(registrar -> registrar.playToClient(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket().write(buf),
 					buf -> new NeoForgeMain.InOutPayload<>(pId, reader.apply(buf), null)
 			), (payload, context) -> handler.handle(payload.inValue())));
 		}
 		@Override
 		public void registerOutPacket(Identifier id) {
-			outPackets.put(id, new CustomPayload.Id<>(id));
+			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 		}
 	}
 
@@ -108,16 +108,16 @@ public class NeoForgeClientMain {
 
 	private class KeyBindingReceiverImpl implements KeyBindingReceiver {
 		@Override
-		public void registerKeyBinding(KeyBinding keyBinding, KeyBindingHandler handler) {
-			keyBindings.add(new KeyBindingWithHandler(keyBinding, handler));
+		public void registerKeyBinding(KeyMapping keyMapping, KeyBindingHandler handler) {
+			keyBindings.add(new KeyBindingWithHandler(keyMapping, handler));
 		}
 	}
 
 	private class ClientPacketSenderImpl implements ClientPacketSender {
 		@Override
 		public void send(OutPacket packet) {
-			Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler())
-					.send(new CustomPayloadC2SPacket(
+			Objects.requireNonNull(Minecraft.getInstance().getConnection())
+					.send(new ServerboundCustomPayloadPacket(
 							new NeoForgeMain.InOutPayload<>(outPackets.get(packet.getId()), null, packet)
 					));
 		}

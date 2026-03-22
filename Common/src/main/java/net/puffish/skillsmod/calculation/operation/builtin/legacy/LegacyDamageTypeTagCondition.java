@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin.legacy;
 
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.damagesource.DamageType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.prototype.BuiltinPrototypes;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyDamageTypeTagCondition implements Operation<DamageType, Boolean> {
-	private final RegistryEntryList<DamageType> entries;
+	private final HolderSet<DamageType> entries;
 
-	private LegacyDamageTypeTagCondition(RegistryEntryList<DamageType> entries) {
+	private LegacyDamageTypeTagCondition(HolderSet<DamageType> entries) {
 		this.entries = entries;
 	}
 
@@ -41,7 +41,7 @@ public final class LegacyDamageTypeTagCondition implements Operation<DamageType,
 		var problems = new ArrayList<Problem>();
 
 		var optTag = rootObject.get("tag")
-				.andThen(element -> BuiltinJson.parseDamageTypeTag(element, context.getServer().getRegistryManager()))
+				.andThen(element -> BuiltinJson.parseDamageTypeTag(element, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 

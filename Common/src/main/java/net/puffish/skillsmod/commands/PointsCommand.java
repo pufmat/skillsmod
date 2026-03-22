@@ -4,47 +4,47 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.util.CommandUtils;
 import net.puffish.skillsmod.util.PointSources;
 
 public class PointsCommand {
-	public static LiteralArgumentBuilder<ServerCommandSource> create() {
-		return CommandManager.literal("points")
-				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
-				.then(CommandManager.literal("add")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("count", IntegerArgumentType.integer())
+	public static LiteralArgumentBuilder<CommandSourceStack> create() {
+		return Commands.literal("points")
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.literal("add")
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("category", CategoryArgumentType.category())
+										.then(Commands.argument("count", IntegerArgumentType.integer())
 												.executes(PointsCommand::addTotal)
-												.then(CommandManager.argument("source", IdentifierArgumentType.identifier())
+												.then(Commands.argument("source", IdentifierArgument.id())
 														.executes(PointsCommand::add)
 												)
 										)
 								)
 						)
 				)
-				.then(CommandManager.literal("set")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("count", IntegerArgumentType.integer())
+				.then(Commands.literal("set")
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("category", CategoryArgumentType.category())
+										.then(Commands.argument("count", IntegerArgumentType.integer())
 												.executes(PointsCommand::setTotal)
-												.then(CommandManager.argument("source", IdentifierArgumentType.identifier())
+												.then(Commands.argument("source", IdentifierArgument.id())
 														.executes(PointsCommand::set)
 												)
 										)
 								)
 						)
 				)
-				.then(CommandManager.literal("get")
-						.then(CommandManager.argument("player", EntityArgumentType.player())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
+				.then(Commands.literal("get")
+						.then(Commands.argument("player", EntityArgument.player())
+								.then(Commands.argument("category", CategoryArgumentType.category())
 										.executes(PointsCommand::getTotal)
-										.then(CommandManager.argument("source", IdentifierArgumentType.identifier())
+										.then(Commands.argument("source", IdentifierArgument.id())
 												.executes(PointsCommand::get)
 										)
 								)
@@ -52,11 +52,11 @@ public class PointsCommand {
 				);
 	}
 
-	private static int add(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var count = IntegerArgumentType.getInteger(context, "count");
-		var source = IdentifierArgumentType.getIdentifier(context, "source");
+		var source = IdentifierArgument.getId(context, "source");
 
 		for (var player : players) {
 			category.addPoints(player, source, count);
@@ -71,11 +71,11 @@ public class PointsCommand {
 		return players.size();
 	}
 
-	private static int set(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int set(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var count = IntegerArgumentType.getInteger(context, "count");
-		var source = IdentifierArgumentType.getIdentifier(context, "source");
+		var source = IdentifierArgument.getId(context, "source");
 
 		for (var player : players) {
 			category.setPoints(player, source, count);
@@ -90,10 +90,10 @@ public class PointsCommand {
 		return players.size();
 	}
 
-	private static int get(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var player = EntityArgumentType.getPlayer(context, "player");
+	private static int get(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var player = EntityArgument.getPlayer(context, "player");
 		var category = CategoryArgumentType.getCategory(context, "category");
-		var source = IdentifierArgumentType.getIdentifier(context, "source");
+		var source = IdentifierArgument.getId(context, "source");
 
 		var count = category.getPoints(player, source);
 		CommandUtils.sendSuccess(
@@ -106,8 +106,8 @@ public class PointsCommand {
 		return count;
 	}
 
-	private static int addTotal(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int addTotal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var count = IntegerArgumentType.getInteger(context, "count");
 
@@ -124,8 +124,8 @@ public class PointsCommand {
 		return players.size();
 	}
 
-	private static int setTotal(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int setTotal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var count = IntegerArgumentType.getInteger(context, "count");
 
@@ -142,8 +142,8 @@ public class PointsCommand {
 		return players.size();
 	}
 
-	private static int getTotal(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var player = EntityArgumentType.getPlayer(context, "player");
+	private static int getTotal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var player = EntityArgument.getPlayer(context, "player");
 		var category = CategoryArgumentType.getCategory(context, "category");
 
 		var count = category.getPointsTotal(player);

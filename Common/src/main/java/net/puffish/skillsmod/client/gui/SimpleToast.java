@@ -1,12 +1,12 @@
 package net.puffish.skillsmod.client.gui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.network.chat.Component;
 
 public class SimpleToast implements Toast {
 	private final SystemToast toast;
@@ -15,13 +15,13 @@ public class SimpleToast implements Toast {
 		this.toast = toast;
 	}
 
-	public static SimpleToast create(MinecraftClient client, Text title, Text description) {
-		return new SimpleToast(SystemToast.create(client, SystemToast.Type.PACK_LOAD_FAILURE, title, description));
+	public static SimpleToast create(Minecraft client, Component title, Component description) {
+		return new SimpleToast(SystemToast.multiline(client, SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, description));
 	}
 
 	@Override
-	public Visibility getVisibility() {
-		return toast.getVisibility();
+	public Visibility getWantedVisibility() {
+		return toast.getWantedVisibility();
 	}
 
 	@Override
@@ -30,22 +30,22 @@ public class SimpleToast implements Toast {
 	}
 
 	@Override
-	public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-		toast.draw(context, textRenderer, startTime);
+	public void render(GuiGraphics graphics, Font font, long startTime) {
+		toast.render(graphics, font, startTime);
 	}
 
 	@Override
-	public int getWidth() {
-		return toast.getWidth();
+	public int width() {
+		return toast.width();
 	}
 
 	@Override
-	public int getHeight() {
-		return toast.getHeight();
+	public int height() {
+		return toast.height();
 	}
 
 	@Override
-	public int getRequiredSpaceCount() {
-		return toast.getRequiredSpaceCount();
+	public int occcupiedSlotCount() {
+		return toast.occcupiedSlotCount();
 	}
 }

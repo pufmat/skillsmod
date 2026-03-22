@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class SkillUpdateInPacket implements InPacket {
@@ -15,9 +15,9 @@ public class SkillUpdateInPacket implements InPacket {
 		this.unlocked = unlocked;
 	}
 
-	public static SkillUpdateInPacket read(PacketByteBuf buf) {
+	public static SkillUpdateInPacket read(FriendlyByteBuf buf) {
 		var categoryId = buf.readIdentifier();
-		var skillId = buf.readString();
+		var skillId = buf.readUtf();
 		var unlocked = buf.readBoolean();
 		return new SkillUpdateInPacket(
 				categoryId,

@@ -1,29 +1,29 @@
 package net.puffish.skillsmod.api;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface Experience {
-	int getTotal(ServerPlayerEntity player);
+	int getTotal(ServerPlayer player);
 
-	void setTotal(ServerPlayerEntity player, int amount);
+	void setTotal(ServerPlayer player, int amount);
 
-	void addTotal(ServerPlayerEntity player, int amount);
+	void addTotal(ServerPlayer player, int amount);
 
 	/// Returns the current level based on the total experience.
-	int getLevel(ServerPlayerEntity player);
+	int getLevel(ServerPlayer player);
 
 	/// Returns the current experience based on the total experience.
-	int getCurrent(ServerPlayerEntity player);
+	int getCurrent(ServerPlayer player);
 
 	/// Returns the experience required at the specified level.
 	int getRequired(int level);
 
 	@Deprecated
-	int getRequired(ServerPlayerEntity player, int level);
+	int getRequired(ServerPlayer player, int level);
 
 	/// Returns the total experience required at the specified level.
 	int getRequiredTotal(int level);
 
 	@Deprecated
-	int getRequiredTotal(ServerPlayerEntity player, int level);
+	int getRequiredTotal(ServerPlayer player, int level);
 }

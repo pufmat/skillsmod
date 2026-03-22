@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.config;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -62,11 +62,11 @@ public sealed interface IconConfig permits IconConfig.EffectIconConfig, IconConf
 
 	record ItemIconConfig(ItemStack item) implements IconConfig {
 		public static Result<ItemIconConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
-			return BuiltinJson.parseItemStack(rootElement, context.getServer().getRegistryManager()).mapSuccess(ItemIconConfig::new);
+			return BuiltinJson.parseItemStack(rootElement, context.getServer().registryAccess()).mapSuccess(ItemIconConfig::new);
 		}
 	}
 
-	record EffectIconConfig(StatusEffect effect) implements IconConfig {
+	record EffectIconConfig(MobEffect effect) implements IconConfig {
 		public static Result<EffectIconConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 			return rootElement.getAsObject().andThen(
 					LegacyUtils.wrapNoUnused(EffectIconConfig::parse, context)

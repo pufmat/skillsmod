@@ -1,22 +1,22 @@
 package net.puffish.skillsmod.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.Tameable;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.puffish.skillsmod.experience.source.builtin.util.TamedActivity;
 
 import java.util.function.Consumer;
 
 public record AttackerInfo(
-		ServerPlayerEntity player,
+		ServerPlayer player,
 		boolean isTamed
 ) {
 
 	public static void detect(Entity entity, Consumer<AttackerInfo> consumer) {
-		if (entity instanceof ServerPlayerEntity player) {
+		if (entity instanceof ServerPlayer player) {
 			consumer.accept(new AttackerInfo(player, false));
-		} else if (entity instanceof Tameable tameable) {
-			if (tameable.getOwner() instanceof ServerPlayerEntity player) {
+		} else if (entity instanceof OwnableEntity tameable) {
+			if (tameable.getOwner() instanceof ServerPlayer player) {
 				consumer.accept(new AttackerInfo(player, true));
 			}
 		}

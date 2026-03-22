@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -85,17 +85,17 @@ public class CommandReward implements Reward {
 		}
 	}
 
-	private void executeCommand(ServerPlayerEntity player, String command) {
+	private void executeCommand(ServerPlayer player, String command) {
 		if (command.isBlank()) {
 			return;
 		}
 
 		var server = SkillsMod.getInstance().getPlayerServer(player);
 
-		server.getCommandManager().parseAndExecute(
-				player.getCommandSource()
-						.withSilent()
-						.withPermissions(server.getFunctionPermissions()),
+		server.getCommands().performPrefixedCommand(
+				player.createCommandSourceStack()
+						.withSuppressedOutput()
+						.withPermission(server.getFunctionCompilationPermissions()),
 				command
 		);
 	}
@@ -108,7 +108,7 @@ public class CommandReward implements Reward {
 			executeCommand(player, command);
 		}
 
-		counts.compute(player.getUuid(), (uuid, count) -> {
+		counts.compute(player.getUUID(), (uuid, count) -> {
 			if (count == null) {
 				count = 0;
 			}
@@ -129,7 +129,7 @@ public class CommandReward implements Reward {
 	@Override
 	public void dispose(RewardDisposeContext context) {
 		for (var entry : counts.entrySet()) {
-			var player = context.getServer().getPlayerManager().getPlayer(entry.getKey());
+			var player = context.getServer().getPlayerList().getPlayer(entry.getKey());
 			if (player == null) {
 				continue;
 			}

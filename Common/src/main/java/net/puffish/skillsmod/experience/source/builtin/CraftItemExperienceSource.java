@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -57,7 +57,7 @@ public record CraftItemExperienceSource(
 		);
 	}
 
-	public record Data(ServerPlayerEntity player, ItemStack itemStack) { }
+	public record Data(ServerPlayer player, ItemStack itemStack) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
@@ -92,7 +92,7 @@ public record CraftItemExperienceSource(
 		);
 		legacy.registerNumberFunction(
 				"player_attribute",
-				EntityAttributeInstance::getValue,
+				AttributeInstance::getValue,
 				AttributeOperation::parse,
 				Data::player
 		);

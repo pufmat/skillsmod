@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.mixin;
 
 import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.puffish.skillsmod.access.GameRendererAccess;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

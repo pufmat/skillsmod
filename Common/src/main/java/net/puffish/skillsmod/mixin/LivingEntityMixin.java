@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.access.DamageSourceAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.api.SkillsAPI;
@@ -32,7 +32,7 @@ public abstract class LivingEntityMixin {
 	private int entityDroppedXp = 0;
 
 	@Unique
-	private final Map<ServerPlayerEntity, Float> damageShare = new WeakHashMap<>();
+	private final Map<ServerPlayer, Float> damageShare = new WeakHashMap<>();
 
 	@Unique
 	private final AntiFarmingPerEntity.State antiFarmingPerEntityState = new AntiFarmingPerEntity.State();
@@ -40,7 +40,7 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "heal", at = @At("TAIL"))
 	private void injectAtHeal(float amount, CallbackInfo ci) {
 		if (amount > 0) {
-			if (((LivingEntity) (Object) this) instanceof ServerPlayerEntity player) {
+			if (((LivingEntity) (Object) this) instanceof ServerPlayer player) {
 				SkillsAPI.updateExperienceSources(
 						player,
 						HealExperienceSource.class,
@@ -52,15 +52,15 @@ public abstract class LivingEntityMixin {
 		}
 	}
 
-	@Inject(method = "applyDamage", at = @At("TAIL"))
-	private void injectAtApplyDamage(ServerWorld world, DamageSource source, float damage, CallbackInfo ci) {
-		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
+	@Inject(method = "actuallyHurt", at = @At("TAIL"))
+	private void injectAtApplyDamage(ServerLevel world, DamageSource source, float damage, CallbackInfo ci) {
+		AttackerInfo.detect(source.getEntity(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
-			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getEntityWorld()
-					.getWorldChunk(entity.getBlockPos()))
+			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.level()
+					.getChunkAt(entity.blockPosition()))
 					.getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
 
@@ -88,7 +88,7 @@ public abstract class LivingEntityMixin {
 											damage
 									))
 									.orElse(damage);
-							if (limitedDamage > MathHelper.EPSILON) {
+							if (limitedDamage > Mth.EPSILON) {
 								return (int) Math.round(es.calculation().evaluate(
 										new DealDamageExperienceSource.Data(
 												player,
@@ -106,15 +106,15 @@ public abstract class LivingEntityMixin {
 		});
 	}
 
-	@Inject(method = "drop", at = @At("TAIL"))
-	private void injectAtDrop(ServerWorld world, DamageSource source, CallbackInfo ci) {
-		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
+	@Inject(method = "dropAllDeathLoot", at = @At("TAIL"))
+	private void injectAtDrop(ServerLevel world, DamageSource source, CallbackInfo ci) {
+		AttackerInfo.detect(source.getEntity(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
-			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getEntityWorld()
-					.getWorldChunk(entity.getBlockPos()))
+			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.level()
+					.getChunkAt(entity.blockPosition()))
 					.getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
 
@@ -178,7 +178,7 @@ public abstract class LivingEntityMixin {
 			method = "dropExperience",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/entity/ExperienceOrbEntity;spawn(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/Vec3d;I)V"
+					target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"
 			),
 			index = 2
 	)

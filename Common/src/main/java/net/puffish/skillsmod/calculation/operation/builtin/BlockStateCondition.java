@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.predicate.StatePredicate;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class BlockStateCondition implements Operation<BlockState, Boolean> {
-	private final Optional<RegistryEntryList<Block>> optBlockEntries;
-	private final Optional<StatePredicate> optState;
+	private final Optional<HolderSet<Block>> optBlockEntries;
+	private final Optional<StatePropertiesPredicate> optState;
 
-	private BlockStateCondition(Optional<RegistryEntryList<Block>> optBlockEntries, Optional<StatePredicate> optState) {
+	private BlockStateCondition(Optional<HolderSet<Block>> optBlockEntries, Optional<StatePropertiesPredicate> optState) {
 		this.optBlockEntries = optBlockEntries;
 		this.optState = optState;
 	}
@@ -71,8 +71,8 @@ public final class BlockStateCondition implements Operation<BlockState, Boolean>
 	@Override
 	public Optional<Boolean> apply(BlockState blockState) {
 		return Optional.of(
-				optBlockEntries.map(blockState::isIn).orElse(true)
-						&& optState.map(state -> state.test(blockState)).orElse(true)
+				optBlockEntries.map(blockState::is).orElse(true)
+						&& optState.map(state -> state.matches(blockState)).orElse(true)
 		);
 	}
 }

@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Experience;
 
@@ -13,27 +13,27 @@ public class ExperienceImpl implements Experience {
 	}
 
 	@Override
-	public int getTotal(ServerPlayerEntity player) {
+	public int getTotal(ServerPlayer player) {
 		return SkillsMod.getInstance().getExperience(player, categoryId).orElseThrow();
 	}
 
 	@Override
-	public void setTotal(ServerPlayerEntity player, int amount) {
+	public void setTotal(ServerPlayer player, int amount) {
 		SkillsMod.getInstance().setExperience(player, categoryId, amount);
 	}
 
 	@Override
-	public void addTotal(ServerPlayerEntity player, int amount) {
+	public void addTotal(ServerPlayer player, int amount) {
 		SkillsMod.getInstance().addExperience(player, categoryId, amount);
 	}
 
 	@Override
-	public int getLevel(ServerPlayerEntity player) {
+	public int getLevel(ServerPlayer player) {
 		return SkillsMod.getInstance().getCurrentLevel(player, categoryId).orElseThrow();
 	}
 
 	@Override
-	public int getCurrent(ServerPlayerEntity player) {
+	public int getCurrent(ServerPlayer player) {
 		return SkillsMod.getInstance().getCurrentExperience(player, categoryId).orElseThrow();
 	}
 
@@ -43,7 +43,7 @@ public class ExperienceImpl implements Experience {
 	}
 
 	@Override
-	public int getRequired(ServerPlayerEntity player, int level) {
+	public int getRequired(ServerPlayer player, int level) {
 		return getRequired(level);
 	}
 
@@ -53,7 +53,7 @@ public class ExperienceImpl implements Experience {
 	}
 
 	@Override
-	public int getRequiredTotal(ServerPlayerEntity player, int level) {
+	public int getRequiredTotal(ServerPlayer player, int level) {
 		return getRequiredTotal(level);
 	}
 }

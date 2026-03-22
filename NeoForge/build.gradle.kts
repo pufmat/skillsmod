@@ -20,11 +20,7 @@ java {
 
 dependencies {
 	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-	mappings(loom.layered {
-		mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
-		mappings("dev.architectury:yarn-mappings-patch-neoforge:${project.properties["yarn_mappings_patch"]}")
-	})
-
+	mappings(loom.officialMojangMappings())
 
 	neoForge("net.neoforged:neoforge:${project.properties["neoforge_version"]}")
 

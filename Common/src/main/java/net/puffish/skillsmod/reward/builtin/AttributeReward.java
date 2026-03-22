@@ -1,12 +1,12 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.DefaultAttributeRegistry;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.BuiltinJson;
@@ -30,11 +30,11 @@ public class AttributeReward implements Reward {
 
 	private final List<Identifier> ids = new ArrayList<>();
 
-	private final RegistryEntry<EntityAttribute> attribute;
+	private final Holder<Attribute> attribute;
 	private final float value;
-	private final EntityAttributeModifier.Operation operation;
+	private final AttributeModifier.Operation operation;
 
-	private AttributeReward(RegistryEntry<EntityAttribute> attribute, float value, EntityAttributeModifier.Operation operation) {
+	private AttributeReward(Holder<Attribute> attribute, float value, AttributeModifier.Operation operation) {
 		this.attribute = attribute;
 		this.value = value;
 		this.operation = operation;
@@ -59,8 +59,8 @@ public class AttributeReward implements Reward {
 		var optAttribute = rootObject.get("attribute")
 				.andThen(attributeElement -> BuiltinJson.parseAttribute(attributeElement)
 						.andThen(attribute -> {
-							var attributeEntry = Registries.ATTRIBUTE.getEntry(attribute);
-							if (DefaultAttributeRegistry.get(EntityType.PLAYER).has(attributeEntry)) {
+							var attributeEntry = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute);
+							if (DefaultAttributes.getSupplier(EntityType.PLAYER).hasAttribute(attributeEntry)) {
 								return Result.success(attributeEntry);
 							} else {
 								return Result.failure(attributeElement.getPath().createProblem("Expected a valid player attribute"));
@@ -93,7 +93,7 @@ public class AttributeReward implements Reward {
 	@Override
 	public void update(RewardUpdateContext context) {
 		var count = context.getCount();
-		var instance = Objects.requireNonNull(context.getPlayer().getAttributeInstance(attribute));
+		var instance = Objects.requireNonNull(context.getPlayer().getAttribute(attribute));
 
 		while (ids.size() < count) {
 			ids.add(SkillsMod.createIdentifier(
@@ -105,7 +105,7 @@ public class AttributeReward implements Reward {
 			var id = ids.get(i);
 			if (instance.getModifier(id) == null) {
 				if (i < count) {
-					instance.addTemporaryModifier(new EntityAttributeModifier(
+					instance.addTransientModifier(new AttributeModifier(
 							id,
 							value,
 							operation
@@ -121,8 +121,8 @@ public class AttributeReward implements Reward {
 
 	@Override
 	public void dispose(RewardDisposeContext context) {
-		for (var player : context.getServer().getPlayerManager().getPlayerList()) {
-			var instance = Objects.requireNonNull(player.getAttributeInstance(attribute));
+		for (var player : context.getServer().getPlayerList().getPlayers()) {
+			var instance = Objects.requireNonNull(player.getAttribute(attribute));
 			for (var id : ids) {
 				instance.removeModifier(id);
 			}

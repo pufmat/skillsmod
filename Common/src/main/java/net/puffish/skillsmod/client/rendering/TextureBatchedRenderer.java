@@ -3,18 +3,18 @@ package net.puffish.skillsmod.client.rendering;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.Scaling;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.texture.TextureSetup;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.puffish.skillsmod.access.DrawContextAccess;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.puffish.skillsmod.access.GuiGraphicsAccess;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2f;
 
@@ -37,12 +37,12 @@ public class TextureBatchedRenderer {
 	) { }
 
 	public void emitTexture(
-			DrawContext context, Identifier texture,
+			GuiGraphics graphics, Identifier texture,
 			int x, int y, int width, int height,
 			int color
 	) {
 		emitTextureBatched(
-				context,
+				graphics,
 				texture,
 				x, y, x + width, y + height,
 				0f, 0f, 1f, 1f,
@@ -51,25 +51,25 @@ public class TextureBatchedRenderer {
 	}
 
 	public void emitSprite(
-			DrawContext context, Sprite sprite, Scaling scaling,
+			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling scaling,
 			int x, int y, int width, int height,
 			int color
 	) {
-		if (scaling instanceof Scaling.Stretch) {
+		if (scaling instanceof GuiSpriteScaling.Stretch) {
 			emitSpriteStretch(
-					context, sprite,
+					graphics, sprite,
 					x, y, width, height,
 					color
 			);
-		} else if (scaling instanceof Scaling.Tile tile) {
+		} else if (scaling instanceof GuiSpriteScaling.Tile tile) {
 			emitSpriteTile(
-					context, sprite, tile,
+					graphics, sprite, tile,
 					x, y, width, height,
 					color
 			);
-		} else if (scaling instanceof Scaling.NineSlice nineSlice) {
+		} else if (scaling instanceof GuiSpriteScaling.NineSlice nineSlice) {
 			emitSpriteNineSlice(
-					context, sprite, nineSlice,
+					graphics, sprite, nineSlice,
 					x, y, width, height,
 					color
 			);
@@ -77,7 +77,7 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteTile(
-			DrawContext context, Sprite sprite, Scaling.Tile tile,
+			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling.Tile tile,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -89,7 +89,7 @@ public class TextureBatchedRenderer {
 			for (var tileY = 0; tileY < height; tileY += tile.height()) {
 				var tileHeight = Math.min(tile.height(), height - tileY);
 				emitSpriteStretch(
-						context, sprite,
+						graphics, sprite,
 						x + tileX, y + tileY, tileWidth, tileHeight,
 						color
 				);
@@ -98,13 +98,13 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteNineSlice(
-			DrawContext context, Sprite sprite, Scaling.NineSlice nineSlice,
+			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling.NineSlice nineSlice,
 			int x, int y, int width, int height,
 			int color
 	) {
 		if (width == nineSlice.width() && height == nineSlice.height()) {
 			emitSpriteStretch(
-					context, sprite,
+					graphics, sprite,
 					x, y, width, height,
 					color
 			);
@@ -120,13 +120,13 @@ public class TextureBatchedRenderer {
 		if (width == nineSlice.width()) {
 			// top
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x, y, x + width, y + top,
-					sprite.getMinU(),
-					sprite.getMinV(),
-					sprite.getMaxU(),
-					sprite.getFrameV((float) top / nineSlice.height()),
+					sprite.getU0(),
+					sprite.getV0(),
+					sprite.getU1(),
+					sprite.getV((float) top / nineSlice.height()),
 					color
 			);
 
@@ -135,26 +135,26 @@ public class TextureBatchedRenderer {
 				var tileHeight = Math.min(nineSlice.height() - top - bottom, height - bottom - tileY);
 
 				emitTextureBatched(
-						context,
-						sprite.getAtlasId(),
+						graphics,
+						sprite.atlasLocation(),
 						x, y + tileY, x + nineSlice.width(), y + tileY + tileHeight,
-						sprite.getMinU(),
-						sprite.getFrameV((float) top / nineSlice.height()),
-						sprite.getMaxU(),
-						sprite.getFrameV((float) (top + tileHeight) / nineSlice.height()),
+						sprite.getU0(),
+						sprite.getV((float) top / nineSlice.height()),
+						sprite.getU1(),
+						sprite.getV((float) (top + tileHeight) / nineSlice.height()),
 						color
 				);
 			}
 
 			// bottom
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x, y + height - bottom, x + width, y + height,
-					sprite.getMinU(),
-					sprite.getFrameV((float) (nineSlice.height() - bottom) / nineSlice.height()),
-					sprite.getMaxU(),
-					sprite.getMaxV(),
+					sprite.getU0(),
+					sprite.getV((float) (nineSlice.height() - bottom) / nineSlice.height()),
+					sprite.getU1(),
+					sprite.getV1(),
 					color
 			);
 			return;
@@ -163,13 +163,13 @@ public class TextureBatchedRenderer {
 		if (height == nineSlice.height()) {
 			// left
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x, y, x + left, y + height,
-					sprite.getMinU(),
-					sprite.getMinV(),
-					sprite.getFrameU((float) left / nineSlice.width()),
-					sprite.getMaxV(),
+					sprite.getU0(),
+					sprite.getV0(),
+					sprite.getU((float) left / nineSlice.width()),
+					sprite.getV1(),
 					color
 			);
 
@@ -178,26 +178,26 @@ public class TextureBatchedRenderer {
 				var tileWidth = Math.min(nineSlice.width() - left - right, width - right - tileX);
 
 				emitTextureBatched(
-						context,
-						sprite.getAtlasId(),
+						graphics,
+						sprite.atlasLocation(),
 						x + tileX, y, x + tileX + tileWidth, y + nineSlice.height(),
-						sprite.getFrameU((float) left / nineSlice.width()),
-						sprite.getMinV(),
-						sprite.getFrameU((float) (left + tileWidth) / nineSlice.width()),
-						sprite.getMaxV(),
+						sprite.getU((float) left / nineSlice.width()),
+						sprite.getV0(),
+						sprite.getU((float) (left + tileWidth) / nineSlice.width()),
+						sprite.getV1(),
 						color
 				);
 			}
 
 			// right
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x + width - right, y, x + width, y + height,
-					sprite.getFrameU((float) (nineSlice.width() - right) / nineSlice.width()),
-					sprite.getMinV(),
-					sprite.getMaxU(),
-					sprite.getMaxV(),
+					sprite.getU((float) (nineSlice.width() - right) / nineSlice.width()),
+					sprite.getV0(),
+					sprite.getU1(),
+					sprite.getV1(),
 					color
 			);
 			return;
@@ -205,49 +205,49 @@ public class TextureBatchedRenderer {
 
 		// top left
 		emitTextureBatched(
-				context,
-				sprite.getAtlasId(),
+				graphics,
+				sprite.atlasLocation(),
 				x, y, x + left, y + right,
-				sprite.getMinU(),
-				sprite.getMinV(),
-				sprite.getFrameU((float) left / nineSlice.width()),
-				sprite.getFrameV((float) right / nineSlice.width()),
+				sprite.getU0(),
+				sprite.getV0(),
+				sprite.getU((float) left / nineSlice.width()),
+				sprite.getV((float) right / nineSlice.width()),
 				color
 		);
 
 		//top right
 		emitTextureBatched(
-				context,
-				sprite.getAtlasId(),
+				graphics,
+				sprite.atlasLocation(),
 				x + width - right, y, x + width, y + top,
-				sprite.getFrameU((float) (nineSlice.width() - right) / nineSlice.width()),
-				sprite.getMinV(),
-				sprite.getMaxU(),
-				sprite.getFrameV((float) top / nineSlice.height()),
+				sprite.getU((float) (nineSlice.width() - right) / nineSlice.width()),
+				sprite.getV0(),
+				sprite.getU1(),
+				sprite.getV((float) top / nineSlice.height()),
 				color
 		);
 
 		// bottom right
 		emitTextureBatched(
-				context,
-				sprite.getAtlasId(),
+				graphics,
+				sprite.atlasLocation(),
 				x + width - right, y + height - bottom, x + width, y + height,
-				sprite.getFrameU((float) (nineSlice.width() - right) / nineSlice.width()),
-				sprite.getFrameV((float) (nineSlice.height() - bottom) / nineSlice.height()),
-				sprite.getMaxU(),
-				sprite.getMaxV(),
+				sprite.getU((float) (nineSlice.width() - right) / nineSlice.width()),
+				sprite.getV((float) (nineSlice.height() - bottom) / nineSlice.height()),
+				sprite.getU1(),
+				sprite.getV1(),
 				color
 		);
 
 		// bottom left
 		emitTextureBatched(
-				context,
-				sprite.getAtlasId(),
+				graphics,
+				sprite.atlasLocation(),
 				x, y + height - bottom, x + left, y + height,
-				sprite.getMinU(),
-				sprite.getFrameV((float) (nineSlice.height() - bottom) / nineSlice.height()),
-				sprite.getFrameU((float) left / nineSlice.width()),
-				sprite.getMaxV(),
+				sprite.getU0(),
+				sprite.getV((float) (nineSlice.height() - bottom) / nineSlice.height()),
+				sprite.getU((float) left / nineSlice.width()),
+				sprite.getV1(),
 				color
 		);
 
@@ -257,25 +257,25 @@ public class TextureBatchedRenderer {
 
 			// top
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x + tileX, y, x + tileX + tileWidth, y + top,
-					sprite.getFrameU((float) left / nineSlice.width()),
-					sprite.getMinV(),
-					sprite.getFrameU((float) (left + tileWidth) / nineSlice.width()),
-					sprite.getFrameV((float) top / nineSlice.height()),
+					sprite.getU((float) left / nineSlice.width()),
+					sprite.getV0(),
+					sprite.getU((float) (left + tileWidth) / nineSlice.width()),
+					sprite.getV((float) top / nineSlice.height()),
 					color
 			);
 
 			// bottom
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x + tileX, y + height - bottom, x + tileX + tileWidth, y + height,
-					sprite.getFrameU((float) left / nineSlice.width()),
-					sprite.getFrameV((float) (nineSlice.height() - bottom) / nineSlice.height()),
-					sprite.getFrameU((float) (left + tileWidth) / nineSlice.width()),
-					sprite.getMaxV(),
+					sprite.getU((float) left / nineSlice.width()),
+					sprite.getV((float) (nineSlice.height() - bottom) / nineSlice.height()),
+					sprite.getU((float) (left + tileWidth) / nineSlice.width()),
+					sprite.getV1(),
 					color
 			);
 		}
@@ -286,25 +286,25 @@ public class TextureBatchedRenderer {
 
 			// left
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x, y + tileY, x + left, y + tileY + tileHeight,
-					sprite.getMinU(),
-					sprite.getFrameV((float) top / nineSlice.height()),
-					sprite.getFrameU((float) left / nineSlice.width()),
-					sprite.getFrameV((float) (top + tileHeight) / nineSlice.height()),
+					sprite.getU0(),
+					sprite.getV((float) top / nineSlice.height()),
+					sprite.getU((float) left / nineSlice.width()),
+					sprite.getV((float) (top + tileHeight) / nineSlice.height()),
 					color
 			);
 
 			// right
 			emitTextureBatched(
-					context,
-					sprite.getAtlasId(),
+					graphics,
+					sprite.atlasLocation(),
 					x + width - right, y + tileY, x + width, y + tileY + tileHeight,
-					sprite.getFrameU((float) (nineSlice.width() - right) / nineSlice.width()),
-					sprite.getFrameV((float) top / nineSlice.height()),
-					sprite.getMaxU(),
-					sprite.getFrameV((float) (top + tileHeight) / nineSlice.height()),
+					sprite.getU((float) (nineSlice.width() - right) / nineSlice.width()),
+					sprite.getV((float) top / nineSlice.height()),
+					sprite.getU1(),
+					sprite.getV((float) (top + tileHeight) / nineSlice.height()),
 					color
 			);
 		}
@@ -317,13 +317,13 @@ public class TextureBatchedRenderer {
 				var tileHeight = Math.min(nineSlice.height() - top - bottom, height - bottom - tileY);
 
 				emitTextureBatched(
-						context,
-						sprite.getAtlasId(),
+						graphics,
+						sprite.atlasLocation(),
 						x + tileX, y + tileY, x + tileX + tileWidth, y + tileY + tileHeight,
-						sprite.getFrameU((float) left / nineSlice.width()),
-						sprite.getFrameV((float) top / nineSlice.height()),
-						sprite.getFrameU((float) (left + tileWidth) / nineSlice.width()),
-						sprite.getFrameV((float) (top + tileHeight) / nineSlice.height()),
+						sprite.getU((float) left / nineSlice.width()),
+						sprite.getV((float) top / nineSlice.height()),
+						sprite.getU((float) (left + tileWidth) / nineSlice.width()),
+						sprite.getV((float) (top + tileHeight) / nineSlice.height()),
 						color
 				);
 			}
@@ -331,28 +331,28 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteStretch(
-			DrawContext context, Sprite sprite,
+			GuiGraphics graphics, TextureAtlasSprite sprite,
 			int x, int y, int width, int height,
 			int color
 	) {
 		emitTextureBatched(
-				context,
-				sprite.getAtlasId(),
+				graphics,
+				sprite.atlasLocation(),
 				x, y, x + width, y + height,
-				sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV(),
+				sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(),
 				color
 		);
 	}
 
 	private void emitTextureBatched(
-			DrawContext context, Identifier texture,
+			GuiGraphics graphics, Identifier texture,
 			float minX, float minY, float maxX, float maxY,
 			float minU, float minV, float maxU, float maxV,
 			int color
 	) {
 		var emits = batch.computeIfAbsent(texture, key -> new ArrayList<>());
 
-		var matrix = context.getMatrices();
+		var matrix = graphics.pose();
 
 		var v1 = matrix.transformPosition(new Vector2f(minX, minY));
 		var v2 = matrix.transformPosition(new Vector2f(minX, maxY));
@@ -369,26 +369,26 @@ public class TextureBatchedRenderer {
 		));
 	}
 
-	public void draw(DrawContext context, TextureManager textureManager, ScreenRect scissorArea) {
+	public void draw(GuiGraphics graphics, TextureManager textureManager, ScreenRectangle scissorArea) {
 		if (batch.isEmpty()) {
 			return;
 		}
 
 		for (var entry : batch.entrySet()) {
-			var texture = textureManager.getTexture(entry.getKey()).getGlTextureView();
+			var texture = textureManager.getTexture(entry.getKey()).getTextureView();
 			var emits = entry.getValue();
 			var bounds = calcBounds(emits);
 			var emitsCopy = List.copyOf(emits);
 
-			var contextAccess = (DrawContextAccess) context;
-			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
+			var graphicsAccess = (GuiGraphicsAccess) graphics;
+			graphicsAccess.getState().submitGuiElement(new GuiElementRenderState() {
 				@Override
-				public void setupVertices(VertexConsumer vc) {
+				public void buildVertices(VertexConsumer vc) {
 					for (var emit : emitsCopy) {
-						vc.vertex(emit.x1, emit.y1, 0).texture(emit.minU, emit.minV).color(emit.color);
-						vc.vertex(emit.x2, emit.y2, 0).texture(emit.minU, emit.maxV).color(emit.color);
-						vc.vertex(emit.x3, emit.y3, 0).texture(emit.maxU, emit.maxV).color(emit.color);
-						vc.vertex(emit.x4, emit.y4, 0).texture(emit.maxU, emit.minV).color(emit.color);
+						vc.addVertex(emit.x1, emit.y1, 0).setUv(emit.minU, emit.minV).setColor(emit.color);
+						vc.addVertex(emit.x2, emit.y2, 0).setUv(emit.minU, emit.maxV).setColor(emit.color);
+						vc.addVertex(emit.x3, emit.y3, 0).setUv(emit.maxU, emit.maxV).setColor(emit.color);
+						vc.addVertex(emit.x4, emit.y4, 0).setUv(emit.maxU, emit.minV).setColor(emit.color);
 					}
 				}
 
@@ -399,16 +399,16 @@ public class TextureBatchedRenderer {
 
 				@Override
 				public TextureSetup textureSetup() {
-					return TextureSetup.of(texture, RenderSystem.getSamplerCache().getRepeated(FilterMode.NEAREST));
+					return TextureSetup.singleTexture(texture, RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST));
 				}
 
 				@Override
-				public ScreenRect scissorArea() {
+				public ScreenRectangle scissorArea() {
 					return scissorArea;
 				}
 
 				@Override
-				public ScreenRect bounds() {
+				public ScreenRectangle bounds() {
 					return bounds;
 				}
 			});
@@ -417,7 +417,7 @@ public class TextureBatchedRenderer {
 		batch.clear();
 	}
 
-	private static @NotNull ScreenRect calcBounds(List<TextureEmit> emits) {
+	private static @NotNull ScreenRectangle calcBounds(List<TextureEmit> emits) {
 		var minX = Float.POSITIVE_INFINITY;
 		var minY = Float.POSITIVE_INFINITY;
 		var maxX = Float.NEGATIVE_INFINITY;
@@ -445,11 +445,11 @@ public class TextureBatchedRenderer {
 			maxY = Math.max(maxY, emit.y4);
 		}
 
-		return new ScreenRect(
-				MathHelper.floor(minX),
-				MathHelper.floor(minY),
-				MathHelper.ceil(maxX - minX),
-				MathHelper.ceil(maxY - minY)
+		return new ScreenRectangle(
+				Mth.floor(minX),
+				Mth.floor(minY),
+				Mth.ceil(maxX - minX),
+				Mth.ceil(maxY - minY)
 		);
 	}
 }

@@ -4,30 +4,30 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtEnd;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.EndTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.puffish.skillsmod.api.SkillsAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ServerData extends PersistentState {
+public class ServerData extends SavedData {
 	private final Map<UUID, PlayerData> players = new HashMap<>();
 
 	private ServerData() {
 
 	}
 
-	private static ServerData read(NbtCompound tag) {
+	private static ServerData read(CompoundTag tag) {
 		var playersData = new ServerData();
 
 		var playersNbt = tag.getCompoundOrEmpty("players");
-		playersNbt.getKeys().forEach(key -> playersData.players.put(
+		playersNbt.keySet().forEach(key -> playersData.players.put(
 				UUID.fromString(key),
 				PlayerData.read(playersNbt.getCompoundOrEmpty(key))
 		));
@@ -35,12 +35,12 @@ public class ServerData extends PersistentState {
 		return playersData;
 	}
 
-	private NbtCompound writeNbt(NbtCompound nbt) {
-		var playersNbt = new NbtCompound();
+	private CompoundTag writeNbt(CompoundTag nbt) {
+		var playersNbt = new CompoundTag();
 		for (var entry : players.entrySet()) {
 			playersNbt.put(
 					entry.getKey().toString(),
-					entry.getValue().writeNbt(new NbtCompound())
+					entry.getValue().writeNbt(new CompoundTag())
 			);
 		}
 		nbt.put("players", playersNbt);
@@ -48,23 +48,23 @@ public class ServerData extends PersistentState {
 		return nbt;
 	}
 
-	public static PersistentStateType<ServerData> getPersistentStateType() {
-		return new PersistentStateType<>(
+	public static SavedDataType<ServerData> getPersistentStateType() {
+		return new SavedDataType<>(
 				SkillsAPI.MOD_ID,
 				ServerData::new,
 				new Codec<>() {
 					@Override
 					public <T> DataResult<Pair<ServerData, T>> decode(DynamicOps<T> ops, T input) {
-						return DataResult.success(Pair.of(ServerData.read((NbtCompound) input), input));
+						return DataResult.success(Pair.of(ServerData.read((CompoundTag) input), input));
 					}
 
 					@Override
 					@SuppressWarnings("unchecked")
 					public <T> DataResult<T> encode(ServerData input, DynamicOps<T> ops, T prefix) {
-						if (!(prefix instanceof NbtEnd)) {
+						if (!(prefix instanceof EndTag)) {
 							throw new RuntimeException();
 						}
-						return DataResult.success((T) input.writeNbt(new NbtCompound()));
+						return DataResult.success((T) input.writeNbt(new CompoundTag()));
 					}
 				},
 				null
@@ -72,17 +72,17 @@ public class ServerData extends PersistentState {
 	}
 
 	public static ServerData getOrCreate(MinecraftServer server) {
-		var persistentStateManager = server.getOverworld().getPersistentStateManager();
+		var persistentStateManager = server.overworld().getDataStorage();
 
-		return persistentStateManager.getOrCreate(getPersistentStateType());
+		return persistentStateManager.computeIfAbsent(getPersistentStateType());
 	}
 
-	public PlayerData getPlayerData(ServerPlayerEntity player) {
-		return players.computeIfAbsent(player.getUuid(), uuid -> PlayerData.empty());
+	public PlayerData getPlayerData(ServerPlayer player) {
+		return players.computeIfAbsent(player.getUUID(), uuid -> PlayerData.empty());
 	}
 
-	public void putPlayerData(ServerPlayerEntity player, PlayerData data) {
-		players.put(player.getUuid(), data);
+	public void putPlayerData(ServerPlayer player, PlayerData data) {
+		players.put(player.getUUID(), data);
 	}
 
 	@Override

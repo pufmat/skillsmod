@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.impl.calculation;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.Variables;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
@@ -183,7 +183,7 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 		if (problems.isEmpty()) {
 			return buildOperation(
 					operation,
-					optType.orElseThrow().withPrefixedPath(prefix),
+					optType.orElseThrow().withPrefix(prefix),
 					rootObject.getPath().getObject("type"),
 					maybeDataElement,
 					context
@@ -201,7 +201,7 @@ public class VariablesImpl<T, R> implements Variables<T, R> {
 			ConfigContext context
 	) {
 		if (type.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
-			type = Identifier.of(operation.getReturnPrototype().getId().getNamespace(), type.getPath());
+			type = Identifier.fromNamespaceAndPath(operation.getReturnPrototype().getId().getNamespace(), type.getPath());
 		}
 		var factory = operation.andThen(type, new OperationConfigContextImpl(context, maybeDataElement));
 		if (factory.isEmpty()) {

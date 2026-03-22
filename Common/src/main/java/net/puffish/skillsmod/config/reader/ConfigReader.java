@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.config.reader;
 
-import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.config.CategoryConfig;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.util.Result;
@@ -25,7 +25,7 @@ public abstract class ConfigReader {
 
 		for (var id : ids) {
 			readCategory(namespace, id, context)
-					.ifSuccess(category -> map.put(Identifier.of(namespace, id), category))
+					.ifSuccess(category -> map.put(Identifier.fromNamespaceAndPath(namespace, id), category))
 					.ifFailure(problems::add);
 		}
 
@@ -65,7 +65,7 @@ public abstract class ConfigReader {
 
 		if (problems.isEmpty()) {
 			return CategoryConfig.parse(
-					Identifier.of(namespace, id),
+					Identifier.fromNamespaceAndPath(namespace, id),
 					optGeneralElement.orElseThrow(),
 					optDefinitionsElement.orElseThrow(),
 					optSkillsElement.orElseThrow(),

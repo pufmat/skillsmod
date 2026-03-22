@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.puffish.skillsmod.client.event.ClientEventListener;
@@ -28,10 +28,10 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Optional;
 
 public class SkillsClientMod {
-	private static final KeyBinding.Category SKILLS_CATEGORY = KeyBinding.Category.create(SkillsMod.createIdentifier("skills"));
-	public static final KeyBinding OPEN_KEY_BINDING = new KeyBinding(
+	private static final KeyMapping.Category SKILLS_CATEGORY = KeyMapping.Category.register(SkillsMod.createIdentifier("skills"));
+	public static final KeyMapping OPEN_KEY_BINDING = new KeyMapping(
 			"key.puffish_skills.open",
-			InputUtil.Type.KEYSYM,
+			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_K,
 			SKILLS_CATEGORY
 	);
@@ -114,8 +114,8 @@ public class SkillsClientMod {
 	}
 
 	private void onOpenKeyPress() {
-		if (MinecraftClient.getInstance().currentScreen instanceof SkillsScreen screen) {
-			screen.close();
+		if (Minecraft.getInstance().screen instanceof SkillsScreen screen) {
+			screen.onClose();
 		} else {
 			openScreen(Optional.empty());
 		}
@@ -160,11 +160,11 @@ public class SkillsClientMod {
 	private void onNewPointPacket(NewPointInPacket packet) {
 		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			if (category.hasAnySkillLeft()) {
-				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
+				Minecraft.getInstance().gui.getChat().addMessage(
 						SkillsMod.createTranslatable(
 								"chat",
 								"new_point",
-								OPEN_KEY_BINDING.getBoundKeyLocalizedText()
+								OPEN_KEY_BINDING.getTranslatedKeyMessage()
 						)
 				);
 			}
@@ -176,10 +176,10 @@ public class SkillsClientMod {
 	}
 
 	private void onShowToast(ShowToastInPacket packet) {
-		var client = MinecraftClient.getInstance();
-		client.getToastManager().add(SimpleToast.create(
+		var client = Minecraft.getInstance();
+		client.getToastManager().addToast(SimpleToast.create(
 				client,
-				Text.literal("Pufferfish's Skills"),
+				Component.literal("Pufferfish's Skills"),
 				SkillsMod.createTranslatable("toast", switch (packet.getToastType()) {
 					case INVALID_CONFIG -> "invalid_config";
 					case MISSING_CONFIG -> "missing_config";
@@ -188,7 +188,7 @@ public class SkillsClientMod {
 	}
 
 	public void openScreen(Optional<Identifier> categoryId) {
-		MinecraftClient.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
+		Minecraft.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
 	}
 
 	public ClientPacketSender getPacketSender() {

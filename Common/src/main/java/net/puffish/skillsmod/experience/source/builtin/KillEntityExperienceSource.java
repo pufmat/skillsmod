@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -125,7 +125,7 @@ public record KillEntityExperienceSource(
 	}
 
 	public record Data(
-			ServerPlayerEntity player,
+			ServerPlayer player,
 			LivingEntity entity,
 			ItemStack weapon,
 			DamageSource damageSource,
@@ -170,12 +170,12 @@ public record KillEntityExperienceSource(
 		legacy.registerBooleanFunction(
 				"damage_type",
 				DamageTypeCondition::parse,
-				data -> data.damageSource().getType()
+				data -> data.damageSource().type()
 		);
 		legacy.registerBooleanFunction(
 				"damage_type_tag",
 				LegacyDamageTypeTagCondition::parse,
-				data -> data.damageSource().getType()
+				data -> data.damageSource().type()
 		);
 		legacy.registerNumberFunction(
 				"player_effect",
@@ -185,7 +185,7 @@ public record KillEntityExperienceSource(
 		);
 		legacy.registerNumberFunction(
 				"player_attribute",
-				EntityAttributeInstance::getValue,
+				AttributeInstance::getValue,
 				AttributeOperation::parse,
 				Data::player
 		);

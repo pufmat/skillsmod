@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -20,10 +20,10 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class EffectOperation implements Operation<LivingEntity, StatusEffectInstance> {
-	private final RegistryEntry<StatusEffect> effect;
+public class EffectOperation implements Operation<LivingEntity, MobEffectInstance> {
+	private final Holder<MobEffect> effect;
 
-	private EffectOperation(RegistryEntry<StatusEffect> effect) {
+	private EffectOperation(Holder<MobEffect> effect) {
 		this.effect = effect;
 	}
 
@@ -54,7 +54,7 @@ public class EffectOperation implements Operation<LivingEntity, StatusEffectInst
 				.andThen(BuiltinJson::parseEffect)
 				.ifFailure(problems::add)
 				.getSuccess()
-				.map(Registries.STATUS_EFFECT::getEntry);
+				.map(BuiltInRegistries.MOB_EFFECT::wrapAsHolder);
 
 		if (problems.isEmpty()) {
 			return Result.success(new EffectOperation(
@@ -66,7 +66,7 @@ public class EffectOperation implements Operation<LivingEntity, StatusEffectInst
 	}
 
 	@Override
-	public Optional<StatusEffectInstance> apply(LivingEntity entity) {
-		return Optional.ofNullable(entity.getStatusEffect(effect));
+	public Optional<MobEffectInstance> apply(LivingEntity entity) {
+		return Optional.ofNullable(entity.getEffect(effect));
 	}
 }

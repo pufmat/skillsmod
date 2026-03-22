@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -83,7 +83,7 @@ public record HealExperienceSource(
 		}
 	}
 
-	public record Data(ServerPlayerEntity player, float damage) { }
+	public record Data(ServerPlayer player, float damage) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {

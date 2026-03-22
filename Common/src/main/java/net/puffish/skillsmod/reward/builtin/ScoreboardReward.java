@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.reward.builtin;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -61,10 +61,10 @@ public class ScoreboardReward implements Reward {
 	@Override
 	public void update(RewardUpdateContext context) {
 		var player = context.getPlayer();
-		var scoreboard = player.getEntityWorld().getScoreboard();
-		var objective = scoreboard.getNullableObjective(objectiveName);
+		var scoreboard = player.level().getScoreboard();
+		var objective = scoreboard.getObjective(objectiveName);
 		if (objective != null) {
-			scoreboard.getOrCreateScore(player, objective).setScore(context.getCount());
+			scoreboard.getOrCreatePlayerScore(player, objective).set(context.getCount());
 		}
 	}
 

@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -60,10 +60,10 @@ public final class ScoreboardOperation implements Operation<Entity, Double> {
 
 	@Override
 	public Optional<Double> apply(Entity entity) {
-		var scoreboard = entity.getEntityWorld().getScoreboard();
-		return Optional.ofNullable(scoreboard.getNullableObjective(objectiveName))
-				.map(objective -> Optional.ofNullable(scoreboard.getScore(entity, objective))
-						.map(score -> (double) score.getScore())
+		var scoreboard = entity.level().getScoreboard();
+		return Optional.ofNullable(scoreboard.getObjective(objectiveName))
+				.map(objective -> Optional.ofNullable(scoreboard.getPlayerScoreInfo(entity, objective))
+						.map(score -> (double) score.value())
 						.orElse(0.0));
 	}
 }

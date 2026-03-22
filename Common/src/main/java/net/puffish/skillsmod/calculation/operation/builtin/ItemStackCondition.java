@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.predicate.component.ComponentsPredicate;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.criterion.NbtPredicate;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
-	private final Optional<RegistryEntryList<Item>> optItemEntries;
+	private final Optional<HolderSet<Item>> optItemEntries;
 	private final Optional<NbtPredicate> optNbt;
-	private final Optional<ComponentsPredicate> optComponents;
+	private final Optional<DataComponentMatchers> optComponents;
 
-	private ItemStackCondition(Optional<RegistryEntryList<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<ComponentsPredicate> optComponents) {
+	private ItemStackCondition(Optional<HolderSet<Item>> optItemEntries, Optional<NbtPredicate> optNbt, Optional<DataComponentMatchers> optComponents) {
 		this.optItemEntries = optItemEntries;
 		this.optNbt = optNbt;
 		this.optComponents = optComponents;
@@ -65,7 +65,7 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 		rootObject.get("components");
 		rootObject.get("predicates");
 
-		var optComponents = BuiltinJson.parseComponentsPredicate(rootObject.getAsElement(), context.getServer().getRegistryManager())
+		var optComponents = BuiltinJson.parseComponentsPredicate(rootObject.getAsElement(), context.getServer().registryAccess())
 				.ifFailure(problems::add)
 				.getSuccess();
 
@@ -83,8 +83,8 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 	@Override
 	public Optional<Boolean> apply(ItemStack itemStack) {
 		return Optional.of(
-				optItemEntries.map(itemStack::isIn).orElse(true)
-						&& optNbt.map(nbt -> nbt.test(itemStack)).orElse(true)
+				optItemEntries.map(itemStack::is).orElse(true)
+						&& optNbt.map(nbt -> nbt.matches(itemStack)).orElse(true)
 						&& optComponents.map(components -> components.test(itemStack)).orElse(true)
 		);
 	}

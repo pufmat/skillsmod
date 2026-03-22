@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.config;
 
-import net.minecraft.advancement.AdvancementFrame;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.AdvancementType;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 public sealed interface FrameConfig permits FrameConfig.AdvancementFrameConfig, FrameConfig.TextureFrameConfig {
 
 	static FrameConfig createDefault() {
-		return new AdvancementFrameConfig(AdvancementFrame.TASK);
+		return new AdvancementFrameConfig(AdvancementType.TASK);
 	}
 
 	static Result<FrameConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
@@ -66,7 +66,7 @@ public sealed interface FrameConfig permits FrameConfig.AdvancementFrameConfig, 
 		};
 	}
 
-	record AdvancementFrameConfig(AdvancementFrame frame) implements FrameConfig {
+	record AdvancementFrameConfig(AdvancementType frame) implements FrameConfig {
 		public static Result<AdvancementFrameConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 			return rootElement.getAsObject().andThen(
 					LegacyUtils.wrapNoUnused(AdvancementFrameConfig::parse, context)

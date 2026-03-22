@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.advancement.criterion.ConsumeItemCriterion;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.advancements.criterion.ConsumeItemTrigger;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.EatFoodExperienceSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ConsumeItemCriterion.class)
+@Mixin(ConsumeItemTrigger.class)
 public class ConsumeItemCriterionMixin {
 
 	@Inject(method = "trigger", at = @At("HEAD"))
-	private void injectAtTrigger(ServerPlayerEntity serverPlayer, ItemStack stack, CallbackInfo ci) {
-		var fc = stack.getItem().getComponents().get(DataComponentTypes.FOOD);
+	private void injectAtTrigger(ServerPlayer serverPlayer, ItemStack stack, CallbackInfo ci) {
+		var fc = stack.getItem().components().get(DataComponents.FOOD);
 		if (fc != null) {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,

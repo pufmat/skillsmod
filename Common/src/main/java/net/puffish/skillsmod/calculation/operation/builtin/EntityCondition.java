@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.advancements.criterion.NbtPredicate;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class EntityCondition implements Operation<Entity, Boolean> {
-	private final Optional<RegistryEntryList<EntityType<?>>> optEntityTypeEntries;
+	private final Optional<HolderSet<EntityType<?>>> optEntityTypeEntries;
 	private final Optional<NbtPredicate> optNbt;
 
-	private EntityCondition(Optional<RegistryEntryList<EntityType<?>>> optEntityTypeEntries, Optional<NbtPredicate> optNbt) {
+	private EntityCondition(Optional<HolderSet<EntityType<?>>> optEntityTypeEntries, Optional<NbtPredicate> optNbt) {
 		this.optEntityTypeEntries = optEntityTypeEntries;
 		this.optNbt = optNbt;
 	}
@@ -70,8 +70,8 @@ public final class EntityCondition implements Operation<Entity, Boolean> {
 	@Override
 	public Optional<Boolean> apply(Entity entity) {
 		return Optional.of(
-				optEntityTypeEntries.map(entityTypeEntries -> entity.getType().isIn(entityTypeEntries)).orElse(true)
-						&& optNbt.map(nbt -> nbt.test(entity)).orElse(true)
+				optEntityTypeEntries.map(entityTypeEntries -> entity.getType().is(entityTypeEntries)).orElse(true)
+						&& optNbt.map(nbt -> nbt.matches(entity)).orElse(true)
 		);
 	}
 }

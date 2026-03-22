@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.config.reader;
 
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonPath;
@@ -22,7 +22,7 @@ public class PackConfigReader extends ConfigReader {
 	}
 
 	public Result<JsonElement, Problem> readResource(Identifier id, Resource resource) {
-		try (var reader = resource.getReader()) {
+		try (var reader = resource.openAsReader()) {
 			return JsonElement.parseReader(reader, JsonPath.create(id.toString()));
 		} catch (Exception e) {
 			return Result.failure(Problem.message("Failed to read resource `" + id + "`"));
@@ -31,7 +31,7 @@ public class PackConfigReader extends ConfigReader {
 
 	@Override
 	public Result<JsonElement, Problem> read(Path path) {
-		var id = Identifier.of(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
+		var id = Identifier.fromNamespaceAndPath(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
 
 		return resourceManager.getResource(id)
 				.map(resource -> readResource(id, resource))
@@ -40,7 +40,7 @@ public class PackConfigReader extends ConfigReader {
 
 	@Override
 	public boolean exists(Path path) {
-		var id = Identifier.of(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
+		var id = Identifier.fromNamespaceAndPath(namespace, PathUtils.pathToString(Path.of(SkillsAPI.MOD_ID).resolve(path)));
 
 		return resourceManager.getResource(id).isPresent();
 	}

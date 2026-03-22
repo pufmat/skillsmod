@@ -1,9 +1,9 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.calculation.Calculation;
@@ -89,7 +89,7 @@ public record BreakBlockExperienceSource(
 		}
 	}
 
-	public record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
+	public record Data(ServerPlayer player, BlockState blockState, ItemStack tool) { }
 
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {

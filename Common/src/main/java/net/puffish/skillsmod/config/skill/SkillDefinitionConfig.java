@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.config.skill;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
@@ -19,9 +19,9 @@ import java.util.Optional;
 
 public record SkillDefinitionConfig(
 		String id,
-		Text title,
-		Text description,
-		Text extraDescription,
+		Component title,
+		Component description,
+		Component extraDescription,
 		IconConfig icon,
 		FrameConfig frame,
 		float size,
@@ -43,25 +43,25 @@ public record SkillDefinitionConfig(
 		var problems = new ArrayList<Problem>();
 
 		var optTitle = rootObject.get("title")
-				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().getRegistryManager()))
+				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 
 		var description = rootObject.get("description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)
-				.orElseGet(Text::empty);
+				.orElseGet(Component::empty);
 
 		var extraDescription = rootObject.get("extra_description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().getRegistryManager())
+				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)
-				.orElseGet(Text::empty);
+				.orElseGet(Component::empty);
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))

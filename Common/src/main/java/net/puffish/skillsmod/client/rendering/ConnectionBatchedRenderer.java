@@ -1,14 +1,14 @@
 package net.puffish.skillsmod.client.rendering;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.TextureSetup;
-import net.minecraft.util.math.MathHelper;
-import net.puffish.skillsmod.access.DrawContextAccess;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.Mth;
+import net.puffish.skillsmod.access.GuiGraphicsAccess;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
@@ -29,7 +29,7 @@ public class ConnectionBatchedRenderer {
 	) { }
 
 	public void emitConnection(
-			DrawContext context,
+			GuiGraphics graphics,
 			float startX,
 			float startY,
 			float endX,
@@ -38,7 +38,7 @@ public class ConnectionBatchedRenderer {
 			int fillColor,
 			int strokeColor
 	) {
-		var matrix = context.getMatrices();
+		var matrix = graphics.pose();
 
 		emitLine(strokeBatch, matrix, strokeColor, startX, startY, endX, endY, 3);
 		if (!bidirectional) {
@@ -99,7 +99,7 @@ public class ConnectionBatchedRenderer {
 				.add(backward);
 		var side = new Vector2f(backward)
 				.perpendicular()
-				.mul(MathHelper.sqrt(3f));
+				.mul(Mth.sqrt(3f));
 
 		emitQuad(
 				batch, matrix, color,
@@ -133,12 +133,12 @@ public class ConnectionBatchedRenderer {
 		));
 	}
 
-	public void draw(DrawContext context, ScreenRect scissorArea) {
-		drawBatch(context, strokeBatch, scissorArea);
-		drawBatch(context, fillBatch, scissorArea);
+	public void draw(GuiGraphics graphics, ScreenRectangle scissorArea) {
+		drawBatch(graphics, strokeBatch, scissorArea);
+		drawBatch(graphics, fillBatch, scissorArea);
 	}
 
-	private void drawBatch(DrawContext context, List<QuadEmit> batch, ScreenRect scissorArea) {
+	private void drawBatch(GuiGraphics graphics, List<QuadEmit> batch, ScreenRectangle scissorArea) {
 		if (batch.isEmpty()) {
 			return;
 		}
@@ -147,15 +147,15 @@ public class ConnectionBatchedRenderer {
 		var batchCopy = List.copyOf(batch);
 		batch.clear();
 
-		var contextAccess = (DrawContextAccess) context;
-		contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
+		var graphicsAccess = (GuiGraphicsAccess) graphics;
+		graphicsAccess.getState().submitGuiElement(new GuiElementRenderState() {
 			@Override
-			public void setupVertices(VertexConsumer vc) {
+			public void buildVertices(VertexConsumer vc) {
 				for (var emit : batchCopy) {
-					vc.vertex(emit.x1, emit.y1, 0).color(emit.color());
-					vc.vertex(emit.x2, emit.y2, 0).color(emit.color());
-					vc.vertex(emit.x3, emit.y3, 0).color(emit.color());
-					vc.vertex(emit.x4, emit.y4, 0).color(emit.color());
+					vc.addVertex(emit.x1, emit.y1, 0).setColor(emit.color());
+					vc.addVertex(emit.x2, emit.y2, 0).setColor(emit.color());
+					vc.addVertex(emit.x3, emit.y3, 0).setColor(emit.color());
+					vc.addVertex(emit.x4, emit.y4, 0).setColor(emit.color());
 				}
 			}
 
@@ -166,22 +166,22 @@ public class ConnectionBatchedRenderer {
 
 			@Override
 			public TextureSetup textureSetup() {
-				return TextureSetup.empty();
+				return TextureSetup.noTexture();
 			}
 
 			@Override
-			public ScreenRect scissorArea() {
+			public ScreenRectangle scissorArea() {
 				return scissorArea;
 			}
 
 			@Override
-			public ScreenRect bounds() {
+			public ScreenRectangle bounds() {
 				return bounds;
 			}
 		});
 	}
 
-	private static @NotNull ScreenRect calcBounds(List<@NotNull QuadEmit> batchCopy) {
+	private static @NotNull ScreenRectangle calcBounds(List<@NotNull QuadEmit> batchCopy) {
 		var minX = Float.POSITIVE_INFINITY;
 		var minY = Float.POSITIVE_INFINITY;
 		var maxX = Float.NEGATIVE_INFINITY;
@@ -209,11 +209,11 @@ public class ConnectionBatchedRenderer {
 			maxY = Math.max(maxY, emit.y4);
 		}
 
-		return new ScreenRect(
-				MathHelper.floor(minX),
-				MathHelper.floor(minY),
-				MathHelper.ceil(maxX - minX),
-				MathHelper.ceil(maxY - minY)
+		return new ScreenRectangle(
+				Mth.floor(minX),
+				Mth.floor(minY),
+				Mth.ceil(maxX - minX),
+				Mth.ceil(maxY - minY)
 		);
 	}
 }

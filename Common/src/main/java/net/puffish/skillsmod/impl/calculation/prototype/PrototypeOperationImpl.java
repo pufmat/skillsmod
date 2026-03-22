@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.impl.calculation.prototype;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
 import net.puffish.skillsmod.api.calculation.prototype.PrototypeOperation;

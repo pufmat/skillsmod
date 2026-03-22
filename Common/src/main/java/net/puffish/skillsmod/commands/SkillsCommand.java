@@ -3,46 +3,46 @@ package net.puffish.skillsmod.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.commands.arguments.SkillArgumentType;
 import net.puffish.skillsmod.util.CommandUtils;
 
 public class SkillsCommand {
-	public static LiteralArgumentBuilder<ServerCommandSource> create() {
-		return CommandManager.literal("skills")
-				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
-				.then(CommandManager.literal("unlock")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
+	public static LiteralArgumentBuilder<CommandSourceStack> create() {
+		return Commands.literal("skills")
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.literal("unlock")
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("category", CategoryArgumentType.category())
+										.then(Commands.argument("skill", SkillArgumentType.skillFromCategory("category"))
 												.executes(SkillsCommand::unlock)
 										)
 								)
 						)
 				)
-				.then(CommandManager.literal("lock")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
+				.then(Commands.literal("lock")
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("category", CategoryArgumentType.category())
+										.then(Commands.argument("skill", SkillArgumentType.skillFromCategory("category"))
 												.executes(SkillsCommand::lock)
 										)
 								)
 						)
 				)
-				.then(CommandManager.literal("reset")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
+				.then(Commands.literal("reset")
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("category", CategoryArgumentType.category())
 										.executes(SkillsCommand::reset)
 								)
 						)
 				);
 	}
 
-	private static int unlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int unlock(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
@@ -59,8 +59,8 @@ public class SkillsCommand {
 		return players.size();
 	}
 
-	private static int lock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int lock(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 		var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
@@ -77,8 +77,8 @@ public class SkillsCommand {
 		return players.size();
 	}
 
-	private static int reset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
+	private static int reset(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		var players = EntityArgument.getPlayers(context, "players");
 		var category = CategoryArgumentType.getCategory(context, "category");
 
 		for (var player : players) {

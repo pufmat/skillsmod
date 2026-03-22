@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.api;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class Events {
 

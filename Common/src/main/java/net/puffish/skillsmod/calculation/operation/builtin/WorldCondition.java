@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -15,7 +15,7 @@ import net.puffish.skillsmod.api.util.Result;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public final class WorldCondition implements Operation<ServerWorld, Boolean> {
+public final class WorldCondition implements Operation<ServerLevel, Boolean> {
 	private final Identifier dimension;
 
 	private WorldCondition(Identifier dimension) {
@@ -54,7 +54,7 @@ public final class WorldCondition implements Operation<ServerWorld, Boolean> {
 	}
 
 	@Override
-	public Optional<Boolean> apply(ServerWorld world) {
-		return Optional.of(world.getRegistryKey().getValue().equals(dimension));
+	public Optional<Boolean> apply(ServerLevel world) {
+		return Optional.of(world.dimension().identifier().equals(dimension));
 	}
 }

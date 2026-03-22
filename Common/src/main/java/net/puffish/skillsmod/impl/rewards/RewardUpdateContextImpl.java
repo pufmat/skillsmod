@@ -1,12 +1,12 @@
 package net.puffish.skillsmod.impl.rewards;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 
-public record RewardUpdateContextImpl(ServerPlayerEntity player, int count, boolean isAction) implements RewardUpdateContext {
+public record RewardUpdateContextImpl(ServerPlayer player, int count, boolean isAction) implements RewardUpdateContext {
 
 	@Override
-	public ServerPlayerEntity getPlayer() {
+	public ServerPlayer getPlayer() {
 		return player;
 	}
 

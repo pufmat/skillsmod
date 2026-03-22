@@ -1,21 +1,21 @@
 package net.puffish.skillsmod.client.rendering;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.OversizedItemGuiElementRenderer;
-import net.minecraft.client.gui.render.state.ItemGuiElementRenderState;
-import net.minecraft.client.gui.render.state.special.OversizedItemGuiElementRenderState;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.KeyedItemRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.puffish.skillsmod.access.DrawContextAccess;
-import net.puffish.skillsmod.access.GameRendererAccess;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
+import net.minecraft.client.gui.render.state.GuiItemRenderState;
+import net.minecraft.client.gui.render.state.pip.OversizedItemRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.puffish.skillsmod.access.GuiGraphicsAccess;
 import net.puffish.skillsmod.access.GuiRendererAccess;
+import net.puffish.skillsmod.access.GameRendererAccess;
 import net.puffish.skillsmod.mixin.GuiRendererInvoker;
 import org.joml.Matrix3x2f;
 
@@ -30,48 +30,48 @@ public class ItemBatchedRenderer {
 
 	private static final Object KEY = new Object();
 
-	public void emitItem(DrawContext context, ItemStack item, int x, int y) {
+	public void emitItem(GuiGraphics graphics, ItemStack item, int x, int y) {
 		var emits = batch.computeIfAbsent(
 				new ComparableItemStack(item),
 				key -> new ArrayList<>()
 		);
 
-		emits.add(new Matrix3x2f(context.getMatrices()).translate(x - 8, y - 8));
+		emits.add(new Matrix3x2f(graphics.pose()).translate(x - 8, y - 8));
 	}
 
-	public void draw(DrawContext context, ScreenRect scissorArea) {
-		var client = MinecraftClient.getInstance();
+	public void draw(GuiGraphics graphics, ScreenRectangle scissorArea) {
+		var client = Minecraft.getInstance();
 		var gameRenderer = client.gameRenderer;
 		var gameRendererAccess = (GameRendererAccess) gameRenderer;
 		var guiRendererAccess = (GuiRendererAccess) gameRendererAccess.getGuiRenderer();
 		var guiRendererInvoker = (GuiRendererInvoker) gameRendererAccess.getGuiRenderer();
-		var contextAccess = (DrawContextAccess) context;
-		var guiRenderState = contextAccess.getState();
+		var graphicsAccess = (GuiGraphicsAccess) graphics;
+		var guiRenderState = graphicsAccess.getState();
 		var windowScaleFactor = guiRendererInvoker.invokeGetWindowScaleFactor();
 		var vertexConsumers = guiRendererAccess.getVertexConsumers();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
 
-			var itemRenderState = new KeyedItemRenderState();
-			client.getItemModelManager().clearAndUpdate(
+			var itemRenderState = new TrackingItemStackRenderState();
+			client.getItemModelResolver().updateForTopItem(
 					itemRenderState,
 					itemStack,
 					ItemDisplayContext.GUI,
-					client.world,
+					client.level,
 					client.player,
 					0
 			);
 
-			itemRenderState.addModelKey(KEY);
+			itemRenderState.appendModelIdentityElement(KEY);
 
 			var renderer = guiRendererAccess.getOversizedItems().computeIfAbsent(
-					itemRenderState.getModelKey(),
+					itemRenderState.getModelIdentity(),
 					object -> new ItemGuiElementRenderer(vertexConsumers)
 			);
 
 			for (var matrix : entry.getValue()) {
-				var renderState = new ItemGuiElementRenderState(
+				var renderState = new GuiItemRenderState(
 						itemStack.getItem().getName().toString(),
 						matrix,
 						itemRenderState,
@@ -79,7 +79,7 @@ public class ItemBatchedRenderer {
 						0,
 						scissorArea
 				);
-				renderer.render(new OversizedItemGuiElementRenderState(
+				renderer.prepare(new OversizedItemRenderState(
 						renderState,
 						0,
 						0,
@@ -101,7 +101,7 @@ public class ItemBatchedRenderer {
 				return false;
 			}
 
-			return ItemStack.areEqual(this.itemStack, ((ComparableItemStack) o).itemStack);
+			return ItemStack.matches(this.itemStack, ((ComparableItemStack) o).itemStack);
 		}
 
 		@Override
@@ -110,49 +110,49 @@ public class ItemBatchedRenderer {
 		}
 	}
 
-	private static class ItemGuiElementRenderer extends OversizedItemGuiElementRenderer {
-		private Object modelKey;
+	private static class ItemGuiElementRenderer extends OversizedItemRenderer {
+		private Object modelIdentity;
 
-		public ItemGuiElementRenderer(VertexConsumerProvider.Immediate immediate) {
+		public ItemGuiElementRenderer(MultiBufferSource.BufferSource immediate) {
 			super(immediate);
 		}
 
 		@Override
-		public void clearModel() {
-			this.modelKey = null;
+		public void invalidateTexture() {
+			this.modelIdentity = null;
 		}
 
 		@Override
-		protected void render(OversizedItemGuiElementRenderState renderState, MatrixStack matrixStack) {
+		protected void renderToTexture(OversizedItemRenderState renderState, PoseStack matrixStack) {
 			matrixStack.scale(1f, -1f, -1f);
 
 			var guiItemRenderState = renderState.guiItemRenderState();
-			var itemRenderState = guiItemRenderState.state();
-			var gameRenderer = MinecraftClient.getInstance().gameRenderer;
-			var renderDispatcher = gameRenderer.getEntityRenderDispatcher();
+			var itemRenderState = guiItemRenderState.itemStackRenderState();
+			var gameRenderer = Minecraft.getInstance().gameRenderer;
+			var renderDispatcher = gameRenderer.getFeatureRenderDispatcher();
 
-			gameRenderer.getDiffuseLighting().setShaderLights(
-					itemRenderState.isSideLit()
-							? DiffuseLighting.Type.ITEMS_3D
-							: DiffuseLighting.Type.ITEMS_FLAT
+			gameRenderer.getLighting().setupFor(
+					itemRenderState.usesBlockLight()
+							? Lighting.Entry.ITEMS_3D
+							: Lighting.Entry.ITEMS_FLAT
 			);
 
-			itemRenderState.render(
+			itemRenderState.submit(
 					matrixStack,
-					renderDispatcher.getQueue(),
+					renderDispatcher.getSubmitNodeStorage(),
 					0xF000F0,
-					OverlayTexture.DEFAULT_UV,
+					OverlayTexture.NO_OVERLAY,
 					0
 			);
-			renderDispatcher.render();
+			renderDispatcher.renderAllFeatures();
 
-			this.modelKey = itemRenderState.getModelKey();
+			this.modelIdentity = itemRenderState.getModelIdentity();
 		}
 
 		@Override
-		public boolean shouldBypassScaling(OversizedItemGuiElementRenderState renderState) {
-			var itemRenderState = renderState.guiItemRenderState().state();
-			return !itemRenderState.isAnimated() && itemRenderState.getModelKey().equals(this.modelKey);
+		public boolean textureIsReadyToBlit(OversizedItemRenderState renderState) {
+			var itemRenderState = renderState.guiItemRenderState().itemStackRenderState();
+			return !itemRenderState.isAnimated() && itemRenderState.getModelIdentity().equals(this.modelIdentity);
 		}
 	}
 

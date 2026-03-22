@@ -9,12 +9,12 @@ public class SkillsArgumentTypes {
 		registrar.registerArgumentType(
 				SkillsMod.createIdentifier("category"),
 				CategoryArgumentType.class,
-				new CategoryArgumentType.Serializer()
+				new CategoryArgumentType.Info()
 		);
 		registrar.registerArgumentType(
 				SkillsMod.createIdentifier("skill"),
 				SkillArgumentType.class,
-				new SkillArgumentType.Serializer()
+				new SkillArgumentType.Info()
 		);
 	}
 }

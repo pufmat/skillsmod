@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stat;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -16,7 +16,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class StatValueOperation implements Operation<ServerPlayerEntity, Double> {
+public class StatValueOperation implements Operation<ServerPlayer, Double> {
 	private final Stat<?> stat;
 
 	private StatValueOperation(Stat<?> stat) {
@@ -55,7 +55,7 @@ public class StatValueOperation implements Operation<ServerPlayerEntity, Double>
 	}
 
 	@Override
-	public Optional<Double> apply(ServerPlayerEntity player) {
-		return Optional.of((double) player.getStatHandler().getStat(stat));
+	public Optional<Double> apply(ServerPlayer player) {
+		return Optional.of((double) player.getStats().getValue(stat));
 	}
 }

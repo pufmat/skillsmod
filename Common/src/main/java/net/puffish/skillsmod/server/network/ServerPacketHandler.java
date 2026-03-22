@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.server.network;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface ServerPacketHandler<T> {
-	void handle(ServerPlayerEntity player, T packet);
+	void handle(ServerPlayer player, T packet);
 }

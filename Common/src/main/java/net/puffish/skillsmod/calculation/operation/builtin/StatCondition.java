@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.stat.Stat;
+import net.minecraft.stats.Stat;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;

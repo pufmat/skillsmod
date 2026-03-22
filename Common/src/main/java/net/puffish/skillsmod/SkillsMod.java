@@ -1,14 +1,14 @@
 package net.puffish.skillsmod;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.puffish.skillsmod.api.Events;
 import net.puffish.skillsmod.api.Skill;
@@ -166,7 +166,7 @@ public class SkillsMod {
 	}
 
 	public static Identifier createIdentifier(String path) {
-		return Identifier.of(SkillsAPI.MOD_ID, path);
+		return Identifier.fromNamespaceAndPath(SkillsAPI.MOD_ID, path);
 	}
 
 	public static Identifier convertIdentifier(Identifier id) {
@@ -176,8 +176,8 @@ public class SkillsMod {
 		return id;
 	}
 
-	public static MutableText createTranslatable(String type, String path, Object... args) {
-		return Text.stringifiedTranslatable(Util.createTranslationKey(type, createIdentifier(path)), args);
+	public static MutableComponent createTranslatable(String type, String path, Object... args) {
+		return Component.translatableEscape(Util.makeDescriptionId(type, createIdentifier(path)), args);
 	}
 
 	public PrefixedLogger getLogger() {
@@ -232,7 +232,7 @@ public class SkillsMod {
 	private boolean loadPackConfig(MinecraftServer server, Map<Identifier, CategoryConfig> cumulatedMap, boolean showWarning) {
 		var resourceManager = server.getResourceManager();
 
-		var resources = resourceManager.findResources(
+		var resources = resourceManager.listResources(
 				SkillsAPI.MOD_ID,
 				id -> id.getPath().endsWith("config.json")
 		);
@@ -296,18 +296,18 @@ public class SkillsMod {
 		);
 	}
 
-	private void onSkillClickPacket(ServerPlayerEntity player, SkillClickInPacket packet) {
+	private void onSkillClickPacket(ServerPlayer player, SkillClickInPacket packet) {
 		if (player.isSpectator()) {
 			return;
 		}
 		tryUnlockSkill(player, packet.getCategoryId(), packet.getSkillId(), false);
 	}
 
-	public void unlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+	public void unlockSkill(ServerPlayer player, Identifier categoryId, String skillId) {
 		tryUnlockSkill(player, categoryId, skillId, true);
 	}
 
-	public void tryUnlockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean force) {
+	public void tryUnlockSkill(ServerPlayer player, Identifier categoryId, String skillId, boolean force) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			category.skills().getById(skillId).ifPresent(skill -> {
@@ -324,7 +324,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void lockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+	public void lockSkill(ServerPlayer player, Identifier categoryId, String skillId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			category.skills().getById(skillId).ifPresent(skill -> {
@@ -339,7 +339,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
+	public void resetSkills(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			categoryData.resetSkills();
@@ -348,7 +348,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void eraseCategory(ServerPlayerEntity player, Identifier categoryId) {
+	public void eraseCategory(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var playerData = getPlayerData(player);
 			playerData.removeCategoryData(category);
@@ -357,7 +357,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void unlockCategory(ServerPlayerEntity player, Identifier categoryId) {
+	public void unlockCategory(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			categoryData.unlock();
@@ -365,7 +365,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void lockCategory(ServerPlayerEntity player, Identifier categoryId) {
+	public void lockCategory(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			categoryData.lock();
@@ -377,7 +377,7 @@ public class SkillsMod {
 		return getCategory(categoryId).map(category -> category.experience().isPresent());
 	}
 
-	public void addExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
+	public void addExperience(ServerPlayer player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			category.experience().ifPresent(experience -> {
 				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -386,11 +386,11 @@ public class SkillsMod {
 		});
 	}
 
-	public void addExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
+	public void addExperience(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
 		setExperience(player, category, experience, categoryData, categoryData.getExperience() + amount);
 	}
 
-	public void setExperience(ServerPlayerEntity player, Identifier categoryId, int amount) {
+	public void setExperience(ServerPlayer player, Identifier categoryId, int amount) {
 		getCategory(categoryId).ifPresent(category -> {
 			category.experience().ifPresent(experience -> {
 				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -399,7 +399,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void setExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
+	public void setExperience(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
 		var curve = experience.curve();
 		var level = curve.getProgress(amount).currentLevel();
 		var levelLimit = curve.getLevelLimit();
@@ -413,7 +413,7 @@ public class SkillsMod {
 		setPoints(player, category, categoryData, PointSources.EXPERIENCE, level, false);
 	}
 
-	public Optional<Integer> getExperience(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getExperience(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).flatMap(category -> {
 			if (category.experience().isEmpty()) {
 				return Optional.empty();
@@ -424,25 +424,25 @@ public class SkillsMod {
 		});
 	}
 
-	public void addPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
+	public void addPoints(ServerPlayer player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			addPoints(player, category, categoryData, source, count, isSilent);
 		});
 	}
 
-	public void addPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
+	public void addPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
 		setPoints(player, category, categoryData, source, categoryData.getPoints(source) + count, isSilent);
 	}
 
-	public void setPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
+	public void setPoints(ServerPlayer player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			setPoints(player, category, categoryData, source, count, isSilent);
 		});
 	}
 
-	public void setPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
+	public void setPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
 		watchNewPoints(player, category, categoryData, isSilent, () -> {
 			categoryData.setPoints(source, count);
 
@@ -450,42 +450,42 @@ public class SkillsMod {
 		});
 	}
 
-	public Optional<Integer> getPoints(ServerPlayerEntity player, Identifier categoryId, Identifier source) {
+	public Optional<Integer> getPoints(ServerPlayer player, Identifier categoryId, Identifier source) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getPoints(source);
 		});
 	}
 
-	public Optional<Integer> getPointsTotal(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getPointsTotal(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getPointsTotal();
 		});
 	}
 
-	public Optional<Stream<Identifier>> getPointsSources(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Stream<Identifier>> getPointsSources(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getPointsSources();
 		});
 	}
 
-	public Optional<Integer> getPointsLeft(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getPointsLeft(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getPointsLeft(category);
 		});
 	}
 
-	public Optional<Integer> getSpentPoints(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getSpentPoints(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getSpentPoints(category);
 		});
 	}
 
-	public Optional<Integer> getCurrentLevel(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getCurrentLevel(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -494,7 +494,7 @@ public class SkillsMod {
 				.orElse(0));
 	}
 
-	public Optional<Integer> getCurrentExperience(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Integer> getCurrentExperience(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -515,7 +515,7 @@ public class SkillsMod {
 				.orElse(0));
 	}
 
-	public Optional<Skill.State> getSkillState(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+	public Optional<Skill.State> getSkillState(ServerPlayer player, Identifier categoryId, String skillId) {
 		return getCategory(categoryId).flatMap(category -> category.skills()
 				.getById(skillId)
 				.flatMap(skill -> category.definitions()
@@ -528,7 +528,7 @@ public class SkillsMod {
 		);
 	}
 
-	public Collection<Identifier> getUnlockedCategories(ServerPlayerEntity player) {
+	public Collection<Identifier> getUnlockedCategories(ServerPlayer player) {
 		var playerData = getPlayerData(player);
 
 		return getAllCategories()
@@ -546,7 +546,7 @@ public class SkillsMod {
 				.toList();
 	}
 
-	public Optional<Collection<String>> getUnlockedSkills(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Collection<String>> getUnlockedSkills(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			return categoryData.getUnlockedSkillIds();
@@ -573,22 +573,22 @@ public class SkillsMod {
 				.orElse(false);
 	}
 
-	private void showCategory(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
+	private void showCategory(ServerPlayer player, CategoryConfig category, CategoryData categoryData) {
 		updatePoints(category, categoryData);
 		updateRewards(player, category, categoryData);
 		packetSender.send(player, new ShowCategoryOutPacket(category, categoryData));
 	}
 
-	private void hideCategory(ServerPlayerEntity player, CategoryConfig category) {
+	private void hideCategory(ServerPlayer player, CategoryConfig category) {
 		resetRewards(player, category);
 		packetSender.send(player, new HideCategoryOutPacket(category.id()));
 	}
 
-	public void exportPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+	public void exportPlayerData(ServerPlayer player, CompoundTag nbt) {
 		getPlayerData(player).writeNbt(nbt);
 	}
 
-	public void importPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+	public void importPlayerData(ServerPlayer player, CompoundTag nbt) {
 		for (var category : getAllCategories()) {
 			resetRewards(player, category);
 		}
@@ -596,21 +596,21 @@ public class SkillsMod {
 		updateAllCategories(player);
 	}
 
-	private void watchNewPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, boolean isSilent, Runnable runnable) {
+	private void watchNewPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, boolean isSilent, Runnable runnable) {
 		if (isSilent) {
 			runnable.run();
 		} else {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
-				if (player.getEntityWorld().getGameRules().getValue(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
+				if (player.level().getGameRules().get(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
 					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}
 			}
 		}
 	}
 
-	private void syncPoints(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
+	private void syncPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData) {
 		packetSender.send(player, new PointsUpdateOutPacket(
 				category.id(),
 				categoryData.getSpentPoints(category),
@@ -618,7 +618,7 @@ public class SkillsMod {
 		));
 	}
 
-	private void syncExperience(ServerPlayerEntity player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData) {
+	private void syncExperience(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData) {
 		var progress = experience.curve().getProgress(categoryData.getExperience());
 		packetSender.send(player, new ExperienceUpdateOutPacket(
 				category.id(),
@@ -628,7 +628,7 @@ public class SkillsMod {
 		));
 	}
 
-	public void visitExperienceSources(ServerPlayerEntity player, Function<ExperienceSource, Integer> function) {
+	public void visitExperienceSources(ServerPlayer player, Function<ExperienceSource, Integer> function) {
 		if (platform.isFakePlayer(player)) {
 			return;
 		}
@@ -645,9 +645,9 @@ public class SkillsMod {
 		}
 	}
 
-	private void visitExperienceSources(ServerPlayerEntity player, PlayerData playerData, CategoryConfig category, ExperienceConfig experience, Function<ExperienceSource, Integer> function) {
+	private void visitExperienceSources(ServerPlayer player, PlayerData playerData, CategoryConfig category, ExperienceConfig experience, Function<ExperienceSource, Integer> function) {
 		var amount = 0;
-		var teamAmounts = new HashMap<ServerPlayerEntity, Integer>();
+		var teamAmounts = new HashMap<ServerPlayer, Integer>();
 
 		for (var experienceSource : experience.experienceSources()) {
 			var result = function.apply(experienceSource.instance());
@@ -657,9 +657,9 @@ public class SkillsMod {
 			amount += result;
 
 			experienceSource.teamSharing().ifPresent(teamSharing -> {
-				var teamPlayers = player.getEntityWorld().getPlayers(
+				var teamPlayers = player.level().getPlayers(
 						otherPlayer -> player != otherPlayer
-								&& player.isTeammate(otherPlayer)
+								&& player.isAlliedTo(otherPlayer)
 								&& player.distanceTo(otherPlayer) <= teamSharing.distanceLimit()
 								&& getPlayerData(otherPlayer).isCategoryUnlocked(category)
 				);
@@ -679,7 +679,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void updateRewards(ServerPlayerEntity player, Predicate<SkillRewardConfig> predicate) {
+	public void updateRewards(ServerPlayer player, Predicate<SkillRewardConfig> predicate) {
 		if (platform.isFakePlayer(player)) {
 			return;
 		}
@@ -700,7 +700,7 @@ public class SkillsMod {
 		}
 	}
 
-	private void updateRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
+	private void updateRewards(ServerPlayer player, CategoryConfig category, CategoryData categoryData) {
 		for (var definition : category.definitions().getAll()) {
 			var count = categoryData.countUnlocked(category, definition.id());
 
@@ -710,7 +710,7 @@ public class SkillsMod {
 		}
 	}
 
-	private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
+	private void updateSkillRewards(ServerPlayer player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
 		category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
 			var count = categoryData.countUnlocked(category, definition.id());
 
@@ -720,7 +720,7 @@ public class SkillsMod {
 		});
 	}
 
-	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
+	private void resetRewards(ServerPlayer player, CategoryConfig category) {
 		for (var definition : category.definitions().getAll()) {
 			for (var reward : definition.rewards()) {
 				reward.instance().update(new RewardUpdateContextImpl(player, 0, false));
@@ -728,7 +728,7 @@ public class SkillsMod {
 		}
 	}
 
-	private Optional<CategoryData> getCategoryDataIfUnlocked(ServerPlayerEntity player, CategoryConfig category) {
+	private Optional<CategoryData> getCategoryDataIfUnlocked(ServerPlayer player, CategoryConfig category) {
 		return getCategoryDataIfUnlocked(getPlayerData(player), category);
 	}
 
@@ -739,7 +739,7 @@ public class SkillsMod {
 		return Optional.empty();
 	}
 
-	public Optional<Boolean> isCategoryUnlocked(ServerPlayerEntity player, Identifier categoryId) {
+	public Optional<Boolean> isCategoryUnlocked(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> getPlayerData(player).isCategoryUnlocked(category));
 	}
 
@@ -764,14 +764,14 @@ public class SkillsMod {
 		}
 	}
 
-	private void updateCategory(ServerPlayerEntity player, CategoryConfig category) {
+	private void updateCategory(ServerPlayer player, CategoryConfig category) {
 		getCategoryDataIfUnlocked(player, category).ifPresentOrElse(
 				categoryData -> showCategory(player, category, categoryData),
 				() -> hideCategory(player, category)
 		);
 	}
 
-	public void updateAllCategories(ServerPlayerEntity player) {
+	public void updateAllCategories(ServerPlayer player) {
 		if (isConfigValid()) {
 			var categories = getAllCategories();
 			if (categories.isEmpty()) {
@@ -786,13 +786,13 @@ public class SkillsMod {
 		}
 	}
 
-	private void showToast(ServerPlayerEntity player, ToastType type) {
+	private void showToast(ServerPlayer player, ToastType type) {
 		if (isOperatorOrHost(player)) {
 			packetSender.send(player, new ShowToastOutPacket(type));
 		}
 	}
 
-	public void openScreen(ServerPlayerEntity player, Optional<Identifier> categoryId) {
+	public void openScreen(ServerPlayer player, Optional<Identifier> categoryId) {
 		packetSender.send(player, new OpenScreenOutPacket(categoryId));
 	}
 
@@ -800,22 +800,22 @@ public class SkillsMod {
 		return categories.get().isPresent();
 	}
 
-	private PlayerData getPlayerData(ServerPlayerEntity player) {
+	private PlayerData getPlayerData(ServerPlayer player) {
 		return ServerData.getOrCreate(getPlayerServer(player)).getPlayerData(player);
 	}
 
-	private void putPlayerData(ServerPlayerEntity player, PlayerData playerData) {
+	private void putPlayerData(ServerPlayer player, PlayerData playerData) {
 		ServerData.getOrCreate(getPlayerServer(player)).putPlayerData(player, playerData);
 	}
 
-	public MinecraftServer getPlayerServer(ServerPlayerEntity player) {
+	public MinecraftServer getPlayerServer(ServerPlayer player) {
 		return ((ServerPlayerEntityAccessor) player).getServer();
 	}
 
-	private boolean isOperatorOrHost(ServerPlayerEntity player) {
+	private boolean isOperatorOrHost(ServerPlayer player) {
 		var server = getPlayerServer(player);
-		return server.isHost(player.getPlayerConfigEntry())
-				|| server.getPlayerManager().isOperator(player.getPlayerConfigEntry());
+		return server.isSingleplayerOwner(player.nameAndId())
+				|| server.getPlayerList().isOp(player.nameAndId());
 	}
 
 	private class EventListener implements ServerEventListener {
@@ -827,7 +827,7 @@ public class SkillsMod {
 
 		@Override
 		public void onServerReload(MinecraftServer server) {
-			for (var player : server.getPlayerManager().getPlayerList()) {
+			for (var player : server.getPlayerList().getPlayers()) {
 				for (var category : getAllCategories()) {
 					hideCategory(player, category);
 				}
@@ -835,27 +835,27 @@ public class SkillsMod {
 
 			loadModConfig(server);
 
-			for (var player : server.getPlayerManager().getPlayerList()) {
+			for (var player : server.getPlayerList().getPlayers()) {
 				updateAllCategories(player);
 			}
 		}
 
 		@Override
-		public void onPlayerJoin(ServerPlayerEntity player) {
+		public void onPlayerJoin(ServerPlayer player) {
 			PointsReward.cleanup(player);
 			updateAllCategories(player);
 		}
 
 		@Override
-		public void onPlayerLeave(ServerPlayerEntity player) {
+		public void onPlayerLeave(ServerPlayer player) {
 			for (var category : getAllCategories()) {
 				resetRewards(player, category);
 			}
 		}
 
 		@Override
-		public void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
-			dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
+		public void onCommandsRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
+			dispatcher.register(Commands.literal(SkillsAPI.MOD_ID)
 					.then(CategoryCommand.create())
 					.then(SkillsCommand.create())
 					.then(PointsCommand.create())

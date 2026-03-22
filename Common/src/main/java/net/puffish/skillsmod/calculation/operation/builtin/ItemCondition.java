@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class ItemCondition implements Operation<Item, Boolean> {
-	private final RegistryEntryList<Item> itemEntries;
+	private final HolderSet<Item> itemEntries;
 
-	private ItemCondition(RegistryEntryList<Item> itemEntries) {
+	private ItemCondition(HolderSet<Item> itemEntries) {
 		this.itemEntries = itemEntries;
 	}
 
@@ -57,6 +57,6 @@ public final class ItemCondition implements Operation<Item, Boolean> {
 
 	@Override
 	public Optional<Boolean> apply(Item item) {
-		return Optional.of(itemEntries.contains(Registries.ITEM.getEntry(item)));
+		return Optional.of(itemEntries.contains(BuiltInRegistries.ITEM.wrapAsHolder(item)));
 	}
 }

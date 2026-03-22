@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.entity.EntityType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class EntityTypeCondition implements Operation<EntityType<?>, Boolean> {
-	private final RegistryEntryList<EntityType<?>> entityTypeEntries;
+	private final HolderSet<EntityType<?>> entityTypeEntries;
 
-	private EntityTypeCondition(RegistryEntryList<EntityType<?>> entityTypeEntries) {
+	private EntityTypeCondition(HolderSet<EntityType<?>> entityTypeEntries) {
 		this.entityTypeEntries = entityTypeEntries;
 	}
 
@@ -61,6 +61,6 @@ public final class EntityTypeCondition implements Operation<EntityType<?>, Boole
 
 	@Override
 	public Optional<Boolean> apply(EntityType<?> entityType) {
-		return Optional.of(entityType.isIn(entityTypeEntries));
+		return Optional.of(entityType.is(entityTypeEntries));
 	}
 }

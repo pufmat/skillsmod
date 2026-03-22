@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.api;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.experience.source.ExperienceSource;
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceFactory;
@@ -38,11 +38,11 @@ public final class SkillsAPI {
 		ExperienceSourceRegistry.register(key, factory);
 	}
 
-	public static void updateExperienceSources(ServerPlayerEntity player, Function<ExperienceSource, Integer> function) {
+	public static void updateExperienceSources(ServerPlayer player, Function<ExperienceSource, Integer> function) {
 		SkillsMod.getInstance().visitExperienceSources(player, function);
 	}
 
-	public static <T extends ExperienceSource> void updateExperienceSources(ServerPlayerEntity player, Class<T> clazz, Function<T, Integer> function) {
+	public static <T extends ExperienceSource> void updateExperienceSources(ServerPlayer player, Class<T> clazz, Function<T, Integer> function) {
 		SkillsMod.getInstance().visitExperienceSources(player, experienceSource -> {
 			if (clazz.isInstance(experienceSource)) {
 				return function.apply(clazz.cast(experienceSource));
@@ -51,19 +51,19 @@ public final class SkillsAPI {
 		});
 	}
 
-	public static void updateRewards(ServerPlayerEntity player, Identifier id) {
+	public static void updateRewards(ServerPlayer player, Identifier id) {
 		SkillsMod.getInstance().updateRewards(player, reward -> reward.type().equals(id));
 	}
 
-	public static void updateRewards(ServerPlayerEntity player, Predicate<Reward> predicate) {
+	public static void updateRewards(ServerPlayer player, Predicate<Reward> predicate) {
 		SkillsMod.getInstance().updateRewards(player, reward -> predicate.test(reward.instance()));
 	}
 
-	public static <T extends Reward> void updateRewards(ServerPlayerEntity player, Class<T> clazz) {
+	public static <T extends Reward> void updateRewards(ServerPlayer player, Class<T> clazz) {
 		updateRewards(player, clazz::isInstance);
 	}
 
-	public static <T extends Reward> void updateRewards(ServerPlayerEntity player, Class<T> clazz, Predicate<T> predicate) {
+	public static <T extends Reward> void updateRewards(ServerPlayer player, Class<T> clazz, Predicate<T> predicate) {
 		updateRewards(player, reward -> {
 			if (clazz.isInstance(reward)) {
 				return predicate.test(clazz.cast(reward));
@@ -72,7 +72,7 @@ public final class SkillsAPI {
 		});
 	}
 
-	public static void openScreen(ServerPlayerEntity player) {
+	public static void openScreen(ServerPlayer player) {
 		SkillsMod.getInstance().openScreen(player, Optional.empty());
 	}
 
@@ -91,18 +91,18 @@ public final class SkillsAPI {
 				.map(CategoryImpl::new);
 	}
 
-	public static Stream<Category> streamUnlockedCategories(ServerPlayerEntity player) {
+	public static Stream<Category> streamUnlockedCategories(ServerPlayer player) {
 		return SkillsMod.getInstance()
 				.getUnlockedCategories(player)
 				.stream()
 				.map(CategoryImpl::new);
 	}
 
-	public static void exportPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+	public static void exportPlayerData(ServerPlayer player, CompoundTag nbt) {
 		SkillsMod.getInstance().exportPlayerData(player, nbt);
 	}
 
-	public static void importPlayerData(ServerPlayerEntity player, NbtCompound nbt) {
+	public static void importPlayerData(ServerPlayer player, CompoundTag nbt) {
 		SkillsMod.getInstance().importPlayerData(player, nbt);
 	}
 }

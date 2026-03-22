@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.impl;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
 import net.puffish.skillsmod.api.Skill;
@@ -25,17 +25,17 @@ public class SkillImpl implements Skill {
 	}
 
 	@Override
-	public State getState(ServerPlayerEntity player) {
+	public State getState(ServerPlayer player) {
 		return SkillsMod.getInstance().getSkillState(player, category.getId(), skillId).orElseThrow();
 	}
 
 	@Override
-	public void unlock(ServerPlayerEntity player) {
+	public void unlock(ServerPlayer player) {
 		SkillsMod.getInstance().unlockSkill(player, category.getId(), skillId);
 	}
 
 	@Override
-	public void lock(ServerPlayerEntity player) {
+	public void lock(ServerPlayer player) {
 		SkillsMod.getInstance().lockSkill(player, category.getId(), skillId);
 	}
 }

@@ -1,18 +1,18 @@
 package net.puffish.skillsmod.server.event;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface ServerEventListener {
 	void onServerStarting(MinecraftServer server);
 
 	void onServerReload(MinecraftServer server);
 
-	void onPlayerJoin(ServerPlayerEntity player);
+	void onPlayerJoin(ServerPlayer player);
 
-	void onPlayerLeave(ServerPlayerEntity player);
+	void onPlayerLeave(ServerPlayer player);
 
-	void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher);
+	void onCommandsRegister(CommandDispatcher<CommandSourceStack> dispatcher);
 }

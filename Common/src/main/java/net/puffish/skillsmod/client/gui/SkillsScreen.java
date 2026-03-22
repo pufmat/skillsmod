@@ -1,30 +1,30 @@
 package net.puffish.skillsmod.client.gui;
 
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.advancement.AdvancementObtainedStatus;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.resource.metadata.GuiResourceMetadata;
-import net.minecraft.client.texture.Scaling;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Atlases;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.advancements.AdvancementWidgetType;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.metadata.gui.GuiMetadataSection;
+import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.client.SkillsClientMod;
@@ -50,20 +50,20 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class SkillsScreen extends Screen {
-	private static final Identifier WINDOW_TEXTURE = Identifier.of("textures/gui/advancements/window.png");
-	private static final Identifier EXPERIENCE_BAR_BACKGROUND_TEXTURE = Identifier.of("hud/experience_bar_background");
-	private static final Identifier EXPERIENCE_BAR_PROGRESS_TEXTURE = Identifier.of("hud/experience_bar_progress");
-	private static final Identifier TAB_ABOVE_LEFT_SELECTED_TEXTURE = Identifier.of("advancements/tab_above_left_selected");
-	private static final Identifier TAB_ABOVE_MIDDLE_SELECTED_TEXTURE = Identifier.of("advancements/tab_above_middle_selected");
-	private static final Identifier TAB_ABOVE_LEFT_TEXTURE = Identifier.of("advancements/tab_above_left");
-	private static final Identifier TAB_ABOVE_MIDDLE_TEXTURE = Identifier.of("advancements/tab_above_middle");
-	private static final ButtonTextures PAGE_FORWARD_TEXTURES = new ButtonTextures(
-			Identifier.ofVanilla("recipe_book/page_forward"), Identifier.ofVanilla("recipe_book/page_forward_highlighted")
+	private static final Identifier WINDOW_TEXTURE = Identifier.parse("textures/gui/advancements/window.png");
+	private static final Identifier EXPERIENCE_BAR_BACKGROUND_TEXTURE = Identifier.parse("hud/experience_bar_background");
+	private static final Identifier EXPERIENCE_BAR_PROGRESS_TEXTURE = Identifier.parse("hud/experience_bar_progress");
+	private static final Identifier TAB_ABOVE_LEFT_SELECTED_TEXTURE = Identifier.parse("advancements/tab_above_left_selected");
+	private static final Identifier TAB_ABOVE_MIDDLE_SELECTED_TEXTURE = Identifier.parse("advancements/tab_above_middle_selected");
+	private static final Identifier TAB_ABOVE_LEFT_TEXTURE = Identifier.parse("advancements/tab_above_left");
+	private static final Identifier TAB_ABOVE_MIDDLE_TEXTURE = Identifier.parse("advancements/tab_above_middle");
+	private static final WidgetSprites PAGE_FORWARD_TEXTURES = new WidgetSprites(
+			Identifier.withDefaultNamespace("recipe_book/page_forward"), Identifier.withDefaultNamespace("recipe_book/page_forward_highlighted")
 	);
-	private static final ButtonTextures PAGE_BACKWARD_TEXTURES = new ButtonTextures(
-			Identifier.ofVanilla("recipe_book/page_backward"), Identifier.ofVanilla("recipe_book/page_backward_highlighted")
+	private static final WidgetSprites PAGE_BACKWARD_TEXTURES = new WidgetSprites(
+			Identifier.withDefaultNamespace("recipe_book/page_backward"), Identifier.withDefaultNamespace("recipe_book/page_backward_highlighted")
 	);
-	private static final Identifier TRIAL_AVAILABLE_TEXTURE = Identifier.of("icon/trial_available");
+	private static final Identifier TRIAL_AVAILABLE_TEXTURE = Identifier.parse("icon/trial_available");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -77,8 +77,8 @@ public class SkillsScreen extends Screen {
 	private static final int HALF_FRAME_WIDTH = FRAME_WIDTH / 2;
 	private static final int HALF_FRAME_HEIGHT = FRAME_HEIGHT / 2;
 
-	private static final int COLOR_WHITE = ColorHelper.fromFloats(1f, 1f, 1f, 1f);
-	private static final int COLOR_GRAY = ColorHelper.fromFloats(1f, 0.25f, 0.25f, 0.25f);
+	private static final int COLOR_WHITE = ARGB.colorFromFloat(1f, 1f, 1f, 1f);
+	private static final int COLOR_GRAY = ARGB.colorFromFloat(1f, 0.25f, 0.25f, 0.25f);
 
 	private final ClientSkillScreenData data;
 
@@ -86,8 +86,8 @@ public class SkillsScreen extends Screen {
 
 	private Optional<Identifier> optActiveCategoryId;
 
-	private ButtonWidget nextButton;
-	private ButtonWidget prevButton;
+	private Button nextButton;
+	private Button prevButton;
 
 	private float minScale = 1f;
 	private float maxScale = 1f;
@@ -106,7 +106,7 @@ public class SkillsScreen extends Screen {
 	private int contentPaddingBottom = 0;
 
 	public SkillsScreen(ClientSkillScreenData data, Optional<Identifier> optCategoryId) {
-		super(ScreenTexts.EMPTY);
+		super(CommonComponents.EMPTY);
 		this.data = data;
 		optActiveCategoryId = optCategoryId;
 	}
@@ -154,11 +154,11 @@ public class SkillsScreen extends Screen {
 		var contentHeight = this.height - contentPaddingTop - contentPaddingBottom;
 
 		if (bounds.width() * contentHeight > contentWidth * bounds.height()) {
-			var halfSize = MathHelper.ceilDiv(this.bounds.width() * contentHeight, contentWidth * 2);
+			var halfSize = Mth.positiveCeilDiv(this.bounds.width() * contentHeight, contentWidth * 2);
 			bounds.extendY(-halfSize);
 			bounds.extendY(halfSize);
 		} else {
-			var halfSize = MathHelper.ceilDiv(this.bounds.height() * contentWidth, contentHeight * 2);
+			var halfSize = Mth.positiveCeilDiv(this.bounds.height() * contentWidth, contentHeight * 2);
 			bounds.extendX(-halfSize);
 			bounds.extendX(halfSize);
 		}
@@ -178,7 +178,7 @@ public class SkillsScreen extends Screen {
 				)
 		);
 
-		this.nextButton = new TexturedButtonWidget(
+		this.nextButton = new ImageButton(
 				width - FRAME_PADDING - 12,
 				FRAME_PADDING + 8,
 				12,
@@ -186,7 +186,7 @@ public class SkillsScreen extends Screen {
 				PAGE_FORWARD_TEXTURES,
 				button -> data.incrementOffset()
 		);
-		this.prevButton = new TexturedButtonWidget(
+		this.prevButton = new ImageButton(
 				FRAME_PADDING,
 				FRAME_PADDING + 8,
 				12,
@@ -272,18 +272,18 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(Click click, boolean doubled) {
-		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
 			optActiveCategoryData.ifPresent(activeCategoryData ->
-					mouseClickedWithCategory(click.x(), click.y(), activeCategoryData)
+					mouseClickedWithCategory(event.x(), event.y(), activeCategoryData)
 			);
 		}
 
 		if (hasNextButton()) {
-			nextButton.mouseClicked(click, doubled);
+			nextButton.mouseClicked(event, doubled);
 		}
 		if (hasPrevButton()) {
-			prevButton.mouseClicked(click, doubled);
+			prevButton.mouseClicked(event, doubled);
 		}
 
 		return true;
@@ -310,14 +310,14 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseReleased(Click click) {
-		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+	public boolean mouseReleased(MouseButtonEvent event) {
+		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
 			if (dragTotal > 2) {
 				return true;
 			}
 
 			optActiveCategoryData.ifPresent(activeCategoryData ->
-					mouseReleasedWithCategory(click.x(), click.y(), activeCategoryData)
+					mouseReleasedWithCategory(event.x(), event.y(), activeCategoryData)
 			);
 		}
 
@@ -346,37 +346,37 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(KeyInput input) {
-		if (SkillsClientMod.OPEN_KEY_BINDING.matchesKey(input)) {
-			this.close();
+	public boolean keyPressed(KeyEvent input) {
+		if (SkillsClientMod.OPEN_KEY_BINDING.matches(input)) {
+			this.onClose();
 			return true;
 		}
 		return super.keyPressed(input);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		this.syncCategory();
 
-		this.drawContent(context, mouseX, mouseY);
-		this.drawWindow(context, mouseX, mouseY);
-		this.drawTabs(context, mouseX, mouseY, delta);
+		this.drawContent(graphics, mouseX, mouseY);
+		this.drawWindow(graphics, mouseX, mouseY);
+		this.drawTabs(graphics, mouseX, mouseY, delta);
 	}
 
 	@Override
-	public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+	public boolean mouseDragged(MouseButtonEvent event, double offsetX, double offsetY) {
 		if (!canDrag) {
 			return true;
 		}
 
-		if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
 			dragTotal += Math.abs(offsetX);
 			dragTotal += Math.abs(offsetY);
 			if (dragTotal > 2) {
 				optActiveCategoryData.ifPresent(activeCategoryData -> {
 					applyChangesWithLimits(
-							(int) Math.round(click.x() - dragStartX),
-							(int) Math.round(click.y() - dragStartY),
+							(int) Math.round(event.x() - dragStartX),
+							(int) Math.round(event.y() - dragStartY),
 							activeCategoryData.getScale(),
 							activeCategoryData
 					);
@@ -422,18 +422,18 @@ public class SkillsScreen extends Screen {
 		var halfWidth = this.width / 2;
 		var halfHeight = this.height / 2;
 
-		scale = MathHelper.clamp(
+		scale = Mth.clamp(
 				scale,
 				minScale,
 				maxScale
 		);
 
-		activeCategoryData.setX(MathHelper.clamp(
+		activeCategoryData.setX(Mth.clamp(
 				x,
 				(int) Math.ceil(halfWidth - contentPaddingRight - bounds.max().x() * scale),
 				(int) Math.floor(contentPaddingLeft - halfWidth - bounds.min().x() * scale)
 		));
-		activeCategoryData.setY(MathHelper.clamp(
+		activeCategoryData.setY(Mth.clamp(
 				y,
 				(int) Math.ceil(halfHeight - contentPaddingBottom - bounds.max().y() * scale),
 				(int) Math.floor(contentPaddingTop - halfHeight - bounds.min().y() * scale)
@@ -441,30 +441,30 @@ public class SkillsScreen extends Screen {
 		activeCategoryData.setScale(scale);
 	}
 
-	private void drawIcon(DrawContext context, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
-		if (client == null) {
+	private void drawIcon(GuiGraphics graphics, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
+		if (minecraft == null) {
 			return;
 		}
 
-		var matrices = context.getMatrices();
+		var matrices = graphics.pose();
 		matrices.pushMatrix();
 
 		if (icon instanceof ClientIconConfig.ItemIconConfig itemIcon) {
 			matrices.translate(x * (1f - sizeScale), y * (1f - sizeScale));
 			matrices.scale(sizeScale, sizeScale);
 			itemRenderer.emitItem(
-					context,
+					graphics,
 					itemIcon.item(),
 					x, y
 			);
 		} else if (icon instanceof ClientIconConfig.EffectIconConfig effectIcon) {
-			var guiAtlasManager = client.getAtlasManager().getAtlasTexture(Atlases.GUI);
-			var texture = InGameHud.getEffectTexture(Registries.STATUS_EFFECT.getEntry(effectIcon.effect()));
+			var guiAtlasManager = minecraft.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
+			var texture = Gui.getMobEffectSprite(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effectIcon.effect()));
 			var sprite = guiAtlasManager.getSprite(texture);
 			var halfSize = Math.round(9f * sizeScale);
 			var size = halfSize * 2;
 			textureRenderer.emitSprite(
-					context, sprite, Scaling.STRETCH,
+					graphics, sprite, GuiSpriteScaling.DEFAULT,
 					x - halfSize, y - halfSize, size, size,
 					COLOR_WHITE
 			);
@@ -472,7 +472,7 @@ public class SkillsScreen extends Screen {
 			var halfSize = Math.round(8f * sizeScale);
 			var size = halfSize * 2;
 			textureRenderer.emitTexture(
-					context, textureIcon.texture(),
+					graphics, textureIcon.texture(),
 					x - halfSize, y - halfSize, size, size,
 					COLOR_WHITE
 			);
@@ -481,8 +481,8 @@ public class SkillsScreen extends Screen {
 		matrices.popMatrix();
 	}
 
-	private void drawFrame(DrawContext context, TextureBatchedRenderer textureRenderer, ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
-		if (client == null) {
+	private void drawFrame(GuiGraphics graphics, TextureBatchedRenderer textureRenderer, ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
+		if (minecraft == null) {
 			return;
 		}
 
@@ -490,23 +490,23 @@ public class SkillsScreen extends Screen {
 		var size = halfSize * 2;
 
 		if (frame instanceof ClientFrameConfig.AdvancementFrameConfig advancementFrame) {
-			var guiAtlasManager = client.getAtlasManager().getAtlasTexture(Atlases.GUI);
+			var guiAtlasManager = minecraft.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
 			var status = switch (state) {
-				case LOCKED, EXCLUDED, AVAILABLE, AFFORDABLE -> AdvancementObtainedStatus.UNOBTAINED;
-				case UNLOCKED -> AdvancementObtainedStatus.OBTAINED;
+				case LOCKED, EXCLUDED, AVAILABLE, AFFORDABLE -> AdvancementWidgetType.UNOBTAINED;
+				case UNLOCKED -> AdvancementWidgetType.OBTAINED;
 			};
-			var texture = status.getFrameTexture(advancementFrame.frame());
+			var texture = status.frameSprite(advancementFrame.frame());
 			var sprite = guiAtlasManager.getSprite(texture);
-			var scaling = sprite.getContents()
-					.getAdditionalMetadataValue(GuiResourceMetadata.SERIALIZER)
-					.orElse(GuiResourceMetadata.DEFAULT)
+			var scaling = sprite.contents()
+					.getAdditionalMetadata(GuiMetadataSection.TYPE)
+					.orElse(GuiMetadataSection.DEFAULT)
 					.scaling();
 			var color = switch (state) {
 				case LOCKED, EXCLUDED -> COLOR_GRAY;
 				case AVAILABLE, AFFORDABLE, UNLOCKED -> COLOR_WHITE;
 			};
 			textureRenderer.emitSprite(
-					context, sprite, scaling,
+					graphics, sprite, scaling,
 					x - halfSize, y - halfSize, size, size,
 					color
 			);
@@ -514,45 +514,45 @@ public class SkillsScreen extends Screen {
 			switch (state) {
 				case LOCKED -> textureFrame.lockedTexture().ifPresentOrElse(
 						lockedTexture -> textureRenderer.emitTexture(
-								context, lockedTexture,
+								graphics, lockedTexture,
 								x - halfSize, y - halfSize, size, size,
 								COLOR_WHITE
 						),
 						() -> textureRenderer.emitTexture(
-								context, textureFrame.availableTexture(),
+								graphics, textureFrame.availableTexture(),
 								x - halfSize, y - halfSize, size, size,
 								COLOR_GRAY
 						)
 				);
 				case AVAILABLE -> textureRenderer.emitTexture(
-						context, textureFrame.availableTexture(),
+						graphics, textureFrame.availableTexture(),
 						x - halfSize, y - halfSize, size, size,
 						COLOR_WHITE
 				);
 				case AFFORDABLE -> textureFrame.affordableTexture().ifPresentOrElse(
 						affordableTexture -> textureRenderer.emitTexture(
-								context, affordableTexture,
+								graphics, affordableTexture,
 								x - halfSize, y - halfSize, size, size,
 								COLOR_WHITE
 						),
 						() -> textureRenderer.emitTexture(
-								context, textureFrame.availableTexture(),
+								graphics, textureFrame.availableTexture(),
 								x - halfSize, y - halfSize, size, size,
 								COLOR_WHITE
 						)
 				);
 				case UNLOCKED -> textureRenderer.emitTexture(
-						context, textureFrame.unlockedTexture(),
+						graphics, textureFrame.unlockedTexture(),
 						x - halfSize, y - halfSize, size, size,
 						COLOR_WHITE
 				);
 				case EXCLUDED -> textureFrame.excludedTexture().ifPresentOrElse(
 						excludedTexture -> textureRenderer.emitTexture(
-								context, excludedTexture,
+								graphics, excludedTexture,
 								x - halfSize, y - halfSize, size, size,
 								COLOR_WHITE
 						), () -> textureRenderer.emitTexture(
-								context, textureFrame.availableTexture(),
+								graphics, textureFrame.availableTexture(),
 								x - halfSize, y - halfSize, size, size,
 								COLOR_GRAY
 						)
@@ -562,12 +562,12 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void drawBackground(DrawContext context, ClientBackgroundConfig background) {
+	private void drawBackground(GuiGraphics graphics, ClientBackgroundConfig background) {
 		var position = background.position();
 
 		switch (position) {
 			case TILE -> {
-				context.drawTexture(
+				graphics.blit(
 						RenderPipelines.GUI_TEXTURED,
 						background.texture(),
 						bounds.min().x(),
@@ -606,19 +606,19 @@ public class SkillsScreen extends Screen {
 			case FILL_WIDTH -> {
 				x = bounds.min().x();
 				width = bounds.width();
-				y = bounds.min().y() + bounds.height() / 2 - MathHelper.ceilDiv(background.height() * width, 2 * background.width());
-				height = MathHelper.ceilDiv(background.height() * width, background.width());
+				y = bounds.min().y() + bounds.height() / 2 - Mth.positiveCeilDiv(background.height() * width, 2 * background.width());
+				height = Mth.positiveCeilDiv(background.height() * width, background.width());
 			}
 			case FILL_HEIGHT -> {
 				y = bounds.min().y();
 				height = bounds.height();
-				x = bounds.min().x() + bounds.width() / 2 - MathHelper.ceilDiv(background.width() * height, 2 * background.height());
-				width = MathHelper.ceilDiv(background.width() * height, background.height());
+				x = bounds.min().x() + bounds.width() / 2 - Mth.positiveCeilDiv(background.width() * height, 2 * background.height());
+				width = Mth.positiveCeilDiv(background.width() * height, background.height());
 			}
 			default -> throw new IllegalStateException();
 		}
 
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				background.texture(),
 				x,
@@ -632,29 +632,29 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawContent(DrawContext context, int mouseX, int mouseY) {
+	private void drawContent(GuiGraphics graphics, int mouseX, int mouseY) {
 		var minX = contentPaddingLeft - 4;
 		var minY = contentPaddingTop - 4;
 		var maxX = this.width - contentPaddingRight + 4;
 		var maxY = this.height - contentPaddingBottom + 4;
 
-		var scissorArea = new ScreenRect(minX, minY, maxX - minX, maxY - minY)
-				.transform(context.getMatrices());
+		var scissorArea = new ScreenRectangle(minX, minY, maxX - minX, maxY - minY)
+				.transformAxisAligned(graphics.pose());
 
-		context.enableScissor(minX, minY, maxX, maxY);
+		graphics.enableScissor(minX, minY, maxX, maxY);
 
-		context.fill(0, 0, width, height, 0xff000000);
+		graphics.fill(0, 0, width, height, 0xff000000);
 
 		optActiveCategoryData.ifPresentOrElse(
-				activeCategoryData -> drawContentWithCategory(context, mouseX, mouseY, scissorArea, activeCategoryData),
-				() -> drawContentWithoutCategory(context)
+				activeCategoryData -> drawContentWithCategory(graphics, mouseX, mouseY, scissorArea, activeCategoryData),
+				() -> drawContentWithoutCategory(graphics)
 		);
 
-		context.disableScissor();
+		graphics.disableScissor();
 	}
 
-	private void drawContentWithCategory(DrawContext context, int mouseX, int mouseY, ScreenRect scissorArea, ClientCategoryData activeCategoryData) {
-		if (client == null) {
+	private void drawContentWithCategory(GuiGraphics graphics, int mouseX, int mouseY, ScreenRectangle scissorArea, ClientCategoryData activeCategoryData) {
+		if (minecraft == null) {
 			return;
 		}
 
@@ -662,20 +662,20 @@ public class SkillsScreen extends Screen {
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY, activeCategoryData);
 		var activeCategory = activeCategoryData.getConfig();
 
-		var matrices = context.getMatrices();
+		var matrices = graphics.pose();
 		matrices.pushMatrix();
 
 		matrices.translate(activeCategoryData.getX() + this.width / 2f, activeCategoryData.getY() + this.height / 2f);
 		matrices.scale(activeCategoryData.getScale(), activeCategoryData.getScale());
 
-		drawBackground(context, activeCategory.background());
+		drawBackground(graphics, activeCategory.background());
 
 		var connectionRenderer = new ConnectionBatchedRenderer();
 
 		for (var connection : activeCategory.normalConnections()) {
 			activeCategoryData.getConnection(connection)
 					.ifPresent(relation -> connectionRenderer.emitConnection(
-							context,
+							graphics,
 							relation.getSkillA().x(),
 							relation.getSkillA().y(),
 							relation.getSkillB().x(),
@@ -704,29 +704,29 @@ public class SkillsScreen extends Screen {
 					return;
 				}
 
-				var lines = new ArrayList<OrderedText>();
-				lines.add(definition.title().asOrderedText());
-				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+				var lines = new ArrayList<FormattedCharSequence>();
+				lines.add(definition.title().getVisualOrderText());
+				lines.addAll(Tooltip.splitTooltip(minecraft, ComponentUtils.mergeStyles(
 						definition.description().copy(),
-						Style.EMPTY.withFormatting(Formatting.GRAY)
+						Style.EMPTY.applyFormat(ChatFormatting.GRAY)
 				)));
-				if (client.isShiftPressed()) {
-					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+				if (minecraft.hasShiftDown()) {
+					lines.addAll(Tooltip.splitTooltip(minecraft, ComponentUtils.mergeStyles(
 							definition.extraDescription().copy(),
-							Style.EMPTY.withFormatting(Formatting.GRAY)
+							Style.EMPTY.applyFormat(ChatFormatting.GRAY)
 					)));
 				}
-				if (client.options.advancedItemTooltips) {
-					lines.add(Text.literal(hoveredSkill.id()).formatted(Formatting.DARK_GRAY).asOrderedText());
+				if (minecraft.options.advancedItemTooltips) {
+					lines.add(Component.literal(hoveredSkill.id()).withStyle(ChatFormatting.DARK_GRAY).getVisualOrderText());
 				}
-				context.drawTooltip(lines, mouseX, mouseY);
+				graphics.setTooltipForNextFrame(lines, mouseX, mouseY);
 
 				var connections = activeCategory.skillExclusiveConnections().get(hoveredSkill.id());
 				if (connections != null) {
 					for (var connection : connections) {
 						activeCategoryData.getConnection(connection)
 								.ifPresent(relation -> connectionRenderer.emitConnection(
-										context,
+										graphics,
 										relation.getSkillA().x(),
 										relation.getSkillA().y(),
 										relation.getSkillB().x(),
@@ -740,7 +740,7 @@ public class SkillsScreen extends Screen {
 			});
 		}
 
-		connectionRenderer.draw(context, scissorArea);
+		connectionRenderer.draw(graphics, scissorArea);
 
 		var textureRenderer = new TextureBatchedRenderer();
 
@@ -748,7 +748,7 @@ public class SkillsScreen extends Screen {
 			activeCategory
 					.getDefinitionById(skill.definitionId())
 					.ifPresent(definition -> drawFrame(
-							context,
+							graphics,
 							textureRenderer,
 							definition.frame(),
 							definition.size(),
@@ -758,14 +758,14 @@ public class SkillsScreen extends Screen {
 					));
 		}
 
-		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
+		textureRenderer.draw(graphics, minecraft.getTextureManager(), scissorArea);
 		var itemRenderer = new ItemBatchedRenderer();
 
 		for (var skill : activeCategory.skills().values()) {
 			activeCategory
 					.getDefinitionById(skill.definitionId())
 					.ifPresent(definition -> drawIcon(
-							context,
+							graphics,
 							textureRenderer,
 							itemRenderer,
 							definition.icon(),
@@ -775,44 +775,44 @@ public class SkillsScreen extends Screen {
 					));
 		}
 
-		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
-		itemRenderer.draw(context, scissorArea);
+		textureRenderer.draw(graphics, minecraft.getTextureManager(), scissorArea);
+		itemRenderer.draw(graphics, scissorArea);
 
 		matrices.popMatrix();
 	}
 
-	private void drawContentWithoutCategory(DrawContext context) {
+	private void drawContentWithoutCategory(GuiGraphics graphics) {
 		var tmpX = contentPaddingLeft + (width - contentPaddingLeft - contentPaddingRight) / 2;
 
-		context.drawCenteredTextWithShadow(
-				this.textRenderer,
-				Text.translatable("advancements.sad_label"),
+		graphics.drawCenteredString(
+				this.font,
+				Component.translatable("advancements.sad_label"),
 				tmpX,
-				height - contentPaddingBottom - this.textRenderer.fontHeight,
+				height - contentPaddingBottom - this.font.lineHeight,
 				0xffffffff
 		);
-		context.drawCenteredTextWithShadow(
-				this.textRenderer,
-				Text.translatable("advancements.empty"),
+		graphics.drawCenteredString(
+				this.font,
+				Component.translatable("advancements.empty"),
 				tmpX,
-				contentPaddingTop + (height - contentPaddingTop - contentPaddingBottom - this.textRenderer.fontHeight) / 2,
+				contentPaddingTop + (height - contentPaddingTop - contentPaddingBottom - this.font.lineHeight) / 2,
 				0xffffffff
 		);
 	}
 
-	private void drawTabs(DrawContext context, int mouseX, int mouseY, float delta) {
-		if (client == null) {
+	private void drawTabs(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		if (minecraft == null) {
 			return;
 		}
 
 		if (hasNextButton()) {
-			nextButton.render(context, mouseX, mouseY, delta);
+			nextButton.render(graphics, mouseX, mouseY, delta);
 		}
 		if (hasPrevButton()) {
-			prevButton.render(context, mouseX, mouseY, delta);
+			prevButton.render(graphics, mouseX, mouseY, delta);
 		}
 
-		forEachVisibleTab((x, category) -> context.drawGuiTexture(
+		forEachVisibleTab((x, category) -> graphics.blitSprite(
 				RenderPipelines.GUI_TEXTURED,
 				optActiveCategoryData.orElse(null) == category
 						? x == FRAME_PADDING
@@ -827,7 +827,7 @@ public class SkillsScreen extends Screen {
 				32
 		));
 
-		context.createNewRootLayer();
+		graphics.nextStratum();
 
 		var mouse = getMousePos(mouseX, mouseY);
 
@@ -838,7 +838,7 @@ public class SkillsScreen extends Screen {
 			var categoryConfig = category.getConfig();
 
 			drawIcon(
-					context,
+					graphics,
 					textureRenderer,
 					itemRenderer,
 					categoryConfig.icon(),
@@ -848,32 +848,32 @@ public class SkillsScreen extends Screen {
 			);
 
 			if (isInsideTab(mouse, x)) {
-				var lines = new ArrayList<OrderedText>();
-				lines.add(categoryConfig.title().asOrderedText());
-				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+				var lines = new ArrayList<FormattedCharSequence>();
+				lines.add(categoryConfig.title().getVisualOrderText());
+				lines.addAll(Tooltip.splitTooltip(minecraft, ComponentUtils.mergeStyles(
 						categoryConfig.description().copy(),
-						Style.EMPTY.withFormatting(Formatting.GRAY)
+						Style.EMPTY.applyFormat(ChatFormatting.GRAY)
 				)));
-				if (client.isShiftPressed()) {
-					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+				if (minecraft.hasShiftDown()) {
+					lines.addAll(Tooltip.splitTooltip(minecraft, ComponentUtils.mergeStyles(
 							categoryConfig.extraDescription().copy(),
-							Style.EMPTY.withFormatting(Formatting.GRAY)
+							Style.EMPTY.applyFormat(ChatFormatting.GRAY)
 					)));
 				}
-				if (client.options.advancedItemTooltips) {
-					lines.add(Text.literal(categoryConfig.id().toString()).formatted(Formatting.DARK_GRAY).asOrderedText());
+				if (minecraft.options.advancedItemTooltips) {
+					lines.add(Component.literal(categoryConfig.id().toString()).withStyle(ChatFormatting.DARK_GRAY).getVisualOrderText());
 				}
-				context.drawTooltip(lines, mouseX, mouseY);
+				graphics.setTooltipForNextFrame(lines, mouseX, mouseY);
 			}
 		});
 
-		var scissorArea = new ScreenRect(0, 0, width, height);
-		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
-		itemRenderer.draw(context, scissorArea);
+		var scissorArea = new ScreenRectangle(0, 0, width, height);
+		textureRenderer.draw(graphics, minecraft.getTextureManager(), scissorArea);
+		itemRenderer.draw(graphics, scissorArea);
 
 		forEachVisibleTab((x, category) -> {
 			if (category.hasUnseenPoints()) {
-				context.drawGuiTexture(
+				graphics.blitSprite(
 						RenderPipelines.GUI_TEXTURED,
 						TRIAL_AVAILABLE_TEXTURE,
 						x + 10,
@@ -885,13 +885,13 @@ public class SkillsScreen extends Screen {
 		});
 	}
 
-	private void drawWindow(DrawContext context, int mouseX, int mouseY) {
-		if (client == null) {
+	private void drawWindow(GuiGraphics graphics, int mouseX, int mouseY) {
+		if (minecraft == null) {
 			return;
 		}
 
 		// bottom left
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING,
@@ -905,7 +905,7 @@ public class SkillsScreen extends Screen {
 		);
 
 		// bottom right
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
@@ -919,7 +919,7 @@ public class SkillsScreen extends Screen {
 		);
 
 		// left
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING,
@@ -935,7 +935,7 @@ public class SkillsScreen extends Screen {
 		);
 
 		// bottom
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				FRAME_PADDING + HALF_FRAME_WIDTH,
@@ -951,7 +951,7 @@ public class SkillsScreen extends Screen {
 		);
 
 		// right
-		context.drawTexture(
+		graphics.blit(
 				RenderPipelines.GUI_TEXTURED,
 				WINDOW_TEXTURE,
 				this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
@@ -968,7 +968,7 @@ public class SkillsScreen extends Screen {
 
 		if (small) {
 			// top left
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
@@ -980,7 +980,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_WIDTH,
 					TEXTURE_HEIGHT
 			);
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
@@ -994,7 +994,7 @@ public class SkillsScreen extends Screen {
 			);
 
 			// top right
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
@@ -1006,7 +1006,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_WIDTH,
 					TEXTURE_HEIGHT
 			);
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
@@ -1020,7 +1020,7 @@ public class SkillsScreen extends Screen {
 			);
 
 			// top
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
@@ -1034,7 +1034,7 @@ public class SkillsScreen extends Screen {
 					TEXTURE_WIDTH,
 					TEXTURE_HEIGHT
 			);
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
@@ -1050,7 +1050,7 @@ public class SkillsScreen extends Screen {
 			);
 		} else {
 			// top left
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING,
@@ -1064,7 +1064,7 @@ public class SkillsScreen extends Screen {
 			);
 
 			// top right
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					this.width - FRAME_PADDING - HALF_FRAME_WIDTH,
@@ -1078,7 +1078,7 @@ public class SkillsScreen extends Screen {
 			);
 
 			// top
-			context.drawTexture(
+			graphics.blit(
 					RenderPipelines.GUI_TEXTURED,
 					WINDOW_TEXTURE,
 					FRAME_PADDING + HALF_FRAME_WIDTH,
@@ -1098,8 +1098,8 @@ public class SkillsScreen extends Screen {
 		var tmpX = FRAME_PADDING + 8;
 		var tmpY = FRAME_PADDING + TABS_HEIGHT + 6;
 
-		context.drawText(
-				this.textRenderer,
+		graphics.drawString(
+				this.font,
 				tmpText,
 				tmpX,
 				tmpY,
@@ -1108,11 +1108,11 @@ public class SkillsScreen extends Screen {
 		);
 
 		optActiveCategoryData.ifPresent(activeCategoryData ->
-				drawWindowWithCategory(context, mouseX, mouseY, activeCategoryData)
+				drawWindowWithCategory(graphics, mouseX, mouseY, activeCategoryData)
 		);
 	}
 
-	private void drawWindowWithCategory(DrawContext context, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
+	private void drawWindowWithCategory(GuiGraphics graphics, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1121,27 +1121,27 @@ public class SkillsScreen extends Screen {
 
 		var startX = tmpX;
 
-		var tmpText = Text.literal(activeCategoryData.getPointsLeft()
+		var tmpText = Component.literal(activeCategoryData.getPointsLeft()
 				+ (activeCategory.spentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategoryData.getSpentPointsLeft())
 		);
 
-		tmpX -= this.textRenderer.getWidth(tmpText);
+		tmpX -= this.font.width(tmpText);
 		tmpX -= 1;
 
 		var pointsColor = activeCategory.colors().points();
 		var pointsStrokeColor = pointsColor.stroke().argb();
 		var pointsFillColor = pointsColor.fill().argb();
-		context.drawText(this.textRenderer, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
-		context.drawText(this.textRenderer, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
-		context.drawText(this.textRenderer, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
-		context.drawText(this.textRenderer, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
-		context.drawText(this.textRenderer, tmpText, tmpX, tmpY, pointsFillColor, false);
+		graphics.drawString(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
+		graphics.drawString(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
+		graphics.drawString(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
+		graphics.drawString(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
+		graphics.drawString(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
 		tmpX -= 1;
 
 		tmpText = SkillsMod.createTranslatable("text", "points_left");
-		tmpX -= this.textRenderer.getWidth(tmpText);
-		context.drawText(
-				this.textRenderer,
+		tmpX -= this.font.width(tmpText);
+		graphics.drawString(
+				this.font,
 				tmpText,
 				tmpX,
 				tmpY,
@@ -1149,20 +1149,20 @@ public class SkillsScreen extends Screen {
 				false
 		);
 
-		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.textRenderer.fontHeight)) {
-			var lines = new ArrayList<OrderedText>();
+		if (isInsideArea(mouse, tmpX, tmpY, startX, tmpY + this.font.lineHeight)) {
+			var lines = new ArrayList<FormattedCharSequence>();
 			lines.add(SkillsMod.createTranslatable(
 					"tooltip",
 					"earned_points",
 					activeCategoryData.getEarnedPoints()
-			).asOrderedText());
+			).getVisualOrderText());
 			lines.add(SkillsMod.createTranslatable(
 					"tooltip",
 					"spent_points",
 					activeCategoryData.getSpentPoints()
 							+ (activeCategory.spentPointsLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.spentPointsLimit())
-			).asOrderedText());
-			context.drawTooltip(lines, mouseX, mouseY);
+			).getVisualOrderText());
+			graphics.setTooltipForNextFrame(lines, mouseX, mouseY);
 		}
 
 		if (activeCategoryData.hasExperience()) {
@@ -1174,7 +1174,7 @@ public class SkillsScreen extends Screen {
 				tmpY = TABS_HEIGHT + 15;
 			}
 
-			context.drawGuiTexture(
+			graphics.blitSprite(
 					RenderPipelines.GUI_TEXTURED,
 					EXPERIENCE_BAR_BACKGROUND_TEXTURE,
 					tmpX,
@@ -1184,7 +1184,7 @@ public class SkillsScreen extends Screen {
 			);
 			var width = Math.min(182, (int) (activeCategoryData.getExperienceProgress() * 183f));
 			if (width > 0) {
-				context.drawGuiTexture(
+				graphics.blitSprite(
 						RenderPipelines.GUI_TEXTURED,
 						EXPERIENCE_BAR_PROGRESS_TEXTURE,
 						182,
@@ -1199,37 +1199,37 @@ public class SkillsScreen extends Screen {
 			}
 
 			if (isInsideExperience(mouse, tmpX, tmpY)) {
-				var lines = new ArrayList<OrderedText>();
+				var lines = new ArrayList<FormattedCharSequence>();
 				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"current_level",
 						activeCategoryData.getCurrentLevel()
 								+ (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
-				).asOrderedText());
+				).getVisualOrderText());
 				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"experience_progress",
 						activeCategoryData.getCurrentExperience(),
 						activeCategoryData.getRequiredExperience(),
-						MathHelper.floor(activeCategoryData.getExperienceProgress() * 100f)
-				).asOrderedText());
+						Mth.floor(activeCategoryData.getExperienceProgress() * 100f)
+				).getVisualOrderText());
 				lines.add(SkillsMod.createTranslatable(
 						"tooltip",
 						"to_next_level",
 						activeCategoryData.getExperienceToNextLevel()
-				).asOrderedText());
-				context.drawTooltip(lines, mouseX, mouseY);
+				).getVisualOrderText());
+				graphics.setTooltipForNextFrame(lines, mouseX, mouseY);
 			}
 
 			if (activeCategoryData.getCurrentLevel() > 0) {
-				tmpText = Text.literal("" + activeCategoryData.getCurrentLevel());
-				tmpX += (182 - this.textRenderer.getWidth(tmpText)) / 2;
+				tmpText = Component.literal("" + activeCategoryData.getCurrentLevel());
+				tmpX += (182 - this.font.width(tmpText)) / 2;
 				tmpY -= 1;
-				context.drawText(this.textRenderer, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
-				context.drawText(this.textRenderer, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
-				context.drawText(this.textRenderer, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
-				context.drawText(this.textRenderer, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
-				context.drawText(this.textRenderer, tmpText, tmpX, tmpY, pointsFillColor, false);
+				graphics.drawString(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
+				graphics.drawString(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
+				graphics.drawString(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
+				graphics.drawString(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
+				graphics.drawString(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
 			}
 		}
 	}

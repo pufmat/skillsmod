@@ -1,7 +1,7 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 import java.util.Optional;
@@ -13,8 +13,8 @@ public class OpenScreenInPacket implements InPacket {
 		this.categoryId = categoryId;
 	}
 
-	public static OpenScreenInPacket read(PacketByteBuf buf) {
-		return new OpenScreenInPacket(buf.readOptional(PacketByteBuf::readIdentifier));
+	public static OpenScreenInPacket read(FriendlyByteBuf buf) {
+		return new OpenScreenInPacket(buf.readOptional(FriendlyByteBuf::readIdentifier));
 	}
 
 	public Optional<Identifier> getCategoryId() {
