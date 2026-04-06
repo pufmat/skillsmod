@@ -8,12 +8,12 @@ import net.puffish.skillsmod.impl.calculation.prototype.PrototypeImpl;
 public final class LegacyBuiltinPrototypes {
 	public static void register() {
 		registerAlias(
-				BuiltinPrototypes.WORLD,
+				BuiltinPrototypes.LEVEL,
 				Identifier.parse("server"),
 				Identifier.parse("get_server")
 		);
 		registerAlias(
-				BuiltinPrototypes.WORLD,
+				BuiltinPrototypes.LEVEL,
 				Identifier.parse("time_of_day"),
 				Identifier.parse("get_time_of_day")
 		);
@@ -123,22 +123,22 @@ public final class LegacyBuiltinPrototypes {
 				Identifier.parse("get_type")
 		);
 		registerAlias(
-				BuiltinPrototypes.STATUS_EFFECT_INSTANCE,
+				BuiltinPrototypes.EFFECT_INSTANCE,
 				Identifier.parse("level"),
 				Identifier.parse("get_level")
 		);
 		registerAlias(
-				BuiltinPrototypes.STATUS_EFFECT_INSTANCE,
+				BuiltinPrototypes.EFFECT_INSTANCE,
 				Identifier.parse("duration"),
 				Identifier.parse("get_duration")
 		);
 		registerAlias(
-				BuiltinPrototypes.ENTITY_ATTRIBUTE_INSTANCE,
+				BuiltinPrototypes.ATTRIBUTE_INSTANCE,
 				Identifier.parse("value"),
 				Identifier.parse("get_value")
 		);
 		registerAlias(
-				BuiltinPrototypes.ENTITY_ATTRIBUTE_INSTANCE,
+				BuiltinPrototypes.ATTRIBUTE_INSTANCE,
 				Identifier.parse("base_value"),
 				Identifier.parse("get_base_value")
 		);

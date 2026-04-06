@@ -7,5 +7,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GuiRenderer.class)
 public interface GuiRendererInvoker {
 	@Invoker("getGuiScaleInvalidatingItemAtlasIfChanged")
-	int invokeGetWindowScaleFactor();
+	int invokeGetGuiScaleInvalidatingItemAtlasIfChanged();
 }

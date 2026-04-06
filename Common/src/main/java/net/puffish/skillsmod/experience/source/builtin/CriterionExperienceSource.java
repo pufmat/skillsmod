@@ -56,7 +56,7 @@ public record CriterionExperienceSource(
 		var problems = new ArrayList<Problem>();
 
 		var criterion = rootObject.get("criterion")
-				.andThen(element -> BuiltinJson.parseAdvancementCriterion(element, context.getServer().registryAccess()))
+				.andThen(element -> BuiltinJson.parseCriterion(element, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 

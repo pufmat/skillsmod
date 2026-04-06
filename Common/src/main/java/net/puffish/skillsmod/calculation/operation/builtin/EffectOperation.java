@@ -30,7 +30,7 @@ public class EffectOperation implements Operation<LivingEntity, MobEffectInstanc
 	public static void register() {
 		BuiltinPrototypes.LIVING_ENTITY.registerOperation(
 				SkillsMod.createIdentifier("get_effect"),
-				BuiltinPrototypes.STATUS_EFFECT_INSTANCE,
+				BuiltinPrototypes.EFFECT_INSTANCE,
 				EffectOperation::parse
 		);
 

@@ -2,14 +2,14 @@ pluginManagement {
     repositories {
         maven(url = "https://maven.fabricmc.net/")
         maven(url = "https://maven.neoforged.net/releases/")
-        maven(url = "https://maven.architectury.dev/")
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
 plugins {
-    id("dev.architectury.loom") version "1.13.467" apply false
+    id("net.fabricmc.fabric-loom") version "1.15.5" apply false
+    id("net.neoforged.moddev") version "2.0.140" apply false
 }
 
 rootProject.name = "Pufferfish's Skills"

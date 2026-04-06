@@ -160,7 +160,7 @@ public class SkillsClientMod {
 	private void onNewPointPacket(NewPointInPacket packet) {
 		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			if (category.hasAnySkillLeft()) {
-				Minecraft.getInstance().gui.getChat().addMessage(
+				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
 						SkillsMod.createTranslatable(
 								"chat",
 								"new_point",

@@ -7,7 +7,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.puffish.skillsmod.access.DamageSourceAccess;
-import net.puffish.skillsmod.access.WorldChunkAccess;
+import net.puffish.skillsmod.access.LevelChunkAccess;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.DealDamageExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.HealExperienceSource;
@@ -53,13 +53,13 @@ public abstract class LivingEntityMixin {
 	}
 
 	@Inject(method = "actuallyHurt", at = @At("TAIL"))
-	private void injectAtApplyDamage(ServerLevel world, DamageSource source, float damage, CallbackInfo ci) {
+	private void injectAtActuallyHurt(ServerLevel world, DamageSource source, float damage, CallbackInfo ci) {
 		AttackerInfo.detect(source.getEntity(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
-			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.level()
+			var antiFarmingPerChunkState = ((LevelChunkAccess) entity.level()
 					.getChunkAt(entity.blockPosition()))
 					.getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
@@ -107,13 +107,13 @@ public abstract class LivingEntityMixin {
 	}
 
 	@Inject(method = "dropAllDeathLoot", at = @At("TAIL"))
-	private void injectAtDrop(ServerLevel world, DamageSource source, CallbackInfo ci) {
+	private void injectAtDropAllDeathLoot(ServerLevel world, DamageSource source, CallbackInfo ci) {
 		AttackerInfo.detect(source.getEntity(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
 			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
-			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.level()
+			var antiFarmingPerChunkState = ((LevelChunkAccess) entity.level()
 					.getChunkAt(entity.blockPosition()))
 					.getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
@@ -182,7 +182,7 @@ public abstract class LivingEntityMixin {
 			),
 			index = 2
 	)
-	private int injectAtDropExperience(int droppedXp) {
+	private int modifyArgAtAward(int droppedXp) {
 		entityDroppedXp = droppedXp;
 		return droppedXp;
 	}

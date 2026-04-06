@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemStackMixin {
 
 	@Inject(method = "mineBlock", at = @At("HEAD"))
-	private void injectAtPostMine(Level world, BlockState state, BlockPos pos, Player player, CallbackInfo ci) {
+	private void injectAtMineBlock(Level world, BlockState state, BlockPos pos, Player player, CallbackInfo ci) {
 		if (player instanceof ServerPlayer serverPlayer) {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,

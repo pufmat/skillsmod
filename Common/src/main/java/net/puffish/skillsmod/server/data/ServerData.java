@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.SkillsMod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class ServerData extends SavedData {
 
 	public static SavedDataType<ServerData> getPersistentStateType() {
 		return new SavedDataType<>(
-				SkillsAPI.MOD_ID,
+				SkillsMod.createIdentifier("data"),
 				ServerData::new,
 				new Codec<>() {
 					@Override

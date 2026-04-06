@@ -59,7 +59,7 @@ public class FabricMain implements ModInitializer {
 		@Override
 		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ServerPacketHandler<T> handler) {
 			var pId = new CustomPacketPayload.Type<InOutPayload<T>>(id);
-			PayloadTypeRegistry.playC2S().register(pId, CustomPacketPayload.codec(
+			PayloadTypeRegistry.serverboundPlay().register(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket.write(buf),
 					buf -> new InOutPayload<>(pId, reader.apply(buf), null)
 			));
@@ -74,7 +74,7 @@ public class FabricMain implements ModInitializer {
 			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 			if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
 				var pId = new CustomPacketPayload.Type<InOutPayload<?>>(id);
-				PayloadTypeRegistry.playS2C().register(pId, CustomPacketPayload.codec(
+				PayloadTypeRegistry.serverboundPlay().register(pId, CustomPacketPayload.codec(
 						(value, buf) -> value.outPacket.write(buf),
 						buf -> null
 				));

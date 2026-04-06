@@ -53,7 +53,7 @@ public final class BlockStateCondition implements Operation<BlockState, Boolean>
 
 		var optState = rootObject.get("state")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(stateElement -> BuiltinJson.parseStatePredicate(stateElement)
+				.flatMap(stateElement -> BuiltinJson.parseStatePropertiesPredicate(stateElement)
 						.ifFailure(problems::add)
 						.getSuccess()
 				);

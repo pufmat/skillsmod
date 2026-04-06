@@ -60,6 +60,6 @@ public final class TagCondition implements Operation<Entity, Boolean> {
 
 	@Override
 	public Optional<Boolean> apply(Entity entity) {
-		return Optional.of(entity.getTags().contains(tag));
+		return Optional.of(entity.entityTags().contains(tag));
 	}
 }

@@ -1,10 +1,6 @@
 plugins {
-	id("dev.architectury.loom")
+	id("net.neoforged.moddev")
 	id("checkstyle")
-}
-
-repositories {
-	maven(url = "https://maven.neoforged.net/releases/")
 }
 
 base.archivesName.set("${project.properties["archives_base_name"]}")
@@ -14,21 +10,33 @@ group = "${project.properties["maven_group"]}"
 evaluationDependsOn(":Common")
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+neoForge {
+	version = "${project.properties["neoforge_version"]}"
+
+	validateAccessTransformers = true
+
+	runs {
+		register("client") {
+			client()
+		}
+		register("server") {
+			server()
+		}
+	}
+
+	mods {
+		register("${project.properties["archives_base_name"]}") {
+			sourceSet(sourceSets.main.get())
+		}
+	}
 }
 
 dependencies {
-	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-	mappings(loom.officialMojangMappings())
-
-	neoForge("net.neoforged:neoforge:${project.properties["neoforge_version"]}")
-
-	implementation(project(path = ":Common", configuration = "namedElements"))
-}
-
-loom {
-	mixin.useLegacyMixinAp = false
+	implementation(project(path = ":Common"))
 }
 
 tasks.test {

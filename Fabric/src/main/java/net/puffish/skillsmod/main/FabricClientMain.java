@@ -2,7 +2,7 @@ package net.puffish.skillsmod.main;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -42,7 +42,7 @@ public class FabricClientMain implements ClientModInitializer {
 		@Override
 		public <T extends InPacket> void registerInPacket(Identifier id, Function<RegistryFriendlyByteBuf, T> reader, ClientPacketHandler<T> handler) {
 			var pId = new CustomPacketPayload.Type<FabricMain.InOutPayload<T>>(id);
-			PayloadTypeRegistry.playS2C().register(pId, CustomPacketPayload.codec(
+			PayloadTypeRegistry.clientboundPlay().register(pId, CustomPacketPayload.codec(
 					(value, buf) -> value.outPacket().write(buf),
 					buf -> new FabricMain.InOutPayload<>(pId, reader.apply(buf), null)
 			));
@@ -77,7 +77,7 @@ public class FabricClientMain implements ClientModInitializer {
 						}
 					}
 			);
-			KeyBindingHelper.registerKeyBinding(keyBinding);
+			KeyMappingHelper.registerKeyMapping(keyBinding);
 		}
 	}
 

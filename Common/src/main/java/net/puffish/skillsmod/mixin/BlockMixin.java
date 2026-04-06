@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class BlockMixin {
 
 	@Inject(method = "playerDestroy", at = @At("HEAD"))
-	private void injectAtAfterBreak(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack stack, CallbackInfo ci) {
+	private void injectAtPlayerDestroy(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack stack, CallbackInfo ci) {
 		if (player instanceof ServerPlayer serverPlayer) {
 			SkillsAPI.updateExperienceSources(
 					serverPlayer,

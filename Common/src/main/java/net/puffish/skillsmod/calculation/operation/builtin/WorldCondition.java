@@ -23,7 +23,7 @@ public final class WorldCondition implements Operation<ServerLevel, Boolean> {
 	}
 
 	public static void register() {
-		BuiltinPrototypes.WORLD.registerOperation(
+		BuiltinPrototypes.LEVEL.registerOperation(
 				SkillsMod.createIdentifier("test"),
 				BuiltinPrototypes.BOOLEAN,
 				WorldCondition::parse

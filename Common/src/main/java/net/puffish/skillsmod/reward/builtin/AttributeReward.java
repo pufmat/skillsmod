@@ -75,7 +75,7 @@ public class AttributeReward implements Reward {
 				.getSuccess();
 
 		var optOperation = rootObject.get("operation")
-				.andThen(BuiltinJson::parseAttributeOperation)
+				.andThen(BuiltinJson::parseAttributeModifierOperation)
 				.ifFailure(problems::add)
 				.getSuccess();
 

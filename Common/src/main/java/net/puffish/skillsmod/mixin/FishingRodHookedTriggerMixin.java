@@ -14,10 +14,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collection;
 
 @Mixin(FishingRodHookedTrigger.class)
-public class FishingRodHookedCriterionMixin {
+public class FishingRodHookedTriggerMixin {
 
 	@Inject(method = "trigger", at = @At("HEAD"))
-	private void injectAtInit(ServerPlayer player, ItemStack rod, FishingHook bobber, Collection<ItemStack> fishingLoots, CallbackInfo ci) {
+	private void injectAtTrigger(ServerPlayer player, ItemStack rod, FishingHook bobber, Collection<ItemStack> fishingLoots, CallbackInfo ci) {
 		for (var fishedItem : fishingLoots) {
 			SkillsAPI.updateExperienceSources(
 					player,

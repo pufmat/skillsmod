@@ -11,14 +11,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerEntityMixin {
+public abstract class ServerPlayerMixin {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void injectAtInit(CallbackInfo ci) {
 		SkillsAPI.updateRewards((ServerPlayer) (Object) this, AttributeReward.class);
 	}
 
 	@Inject(method = "awardStat", at = @At("HEAD"))
-	private void injectAtIncreaseStat(Stat<?> stat, int amount, CallbackInfo ci) {
+	private void injectAtAwardStat(Stat<?> stat, int amount, CallbackInfo ci) {
 		var player = (ServerPlayer) (Object) this;
 		SkillsAPI.updateExperienceSources(
 				player,

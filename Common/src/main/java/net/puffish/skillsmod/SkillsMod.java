@@ -37,7 +37,7 @@ import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.experience.source.BuiltinExperienceSources;
 import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
-import net.puffish.skillsmod.mixin.ServerPlayerEntityAccessor;
+import net.puffish.skillsmod.mixin.ServerPlayerAccessor;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
@@ -809,7 +809,7 @@ public class SkillsMod {
 	}
 
 	public MinecraftServer getPlayerServer(ServerPlayer player) {
-		return ((ServerPlayerEntityAccessor) player).getServer();
+		return ((ServerPlayerAccessor) player).getServer();
 	}
 
 	private boolean isOperatorOrHost(ServerPlayer player) {

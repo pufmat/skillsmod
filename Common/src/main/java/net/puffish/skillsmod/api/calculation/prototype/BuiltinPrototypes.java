@@ -29,7 +29,7 @@ public final class BuiltinPrototypes {
 	public static final Prototype<Double> NUMBER = Prototype.create(SkillsMod.createIdentifier("number"));
 	public static final Prototype<Boolean> BOOLEAN = Prototype.create(SkillsMod.createIdentifier("boolean"));
 	public static final Prototype<MinecraftServer> SERVER = Prototype.create(Identifier.parse("server"));
-	public static final Prototype<ServerLevel> WORLD = Prototype.create(Identifier.parse("world"));
+	public static final Prototype<ServerLevel> LEVEL = Prototype.create(Identifier.parse("level"));
 	public static final Prototype<EntityType<?>> ENTITY_TYPE = Prototype.create(Identifier.parse("entity_type"));
 	public static final Prototype<Entity> ENTITY = Prototype.create(Identifier.parse("entity"));
 	public static final Prototype<LivingEntity> LIVING_ENTITY = Prototype.create(Identifier.parse("living_entity"));
@@ -42,19 +42,19 @@ public final class BuiltinPrototypes {
 	public static final Prototype<DamageSource> DAMAGE_SOURCE = Prototype.create(Identifier.parse("damage_source"));
 	public static final Prototype<StatType<?>> STAT_TYPE = Prototype.create(Identifier.parse("stat_type"));
 	public static final Prototype<Stat<?>> STAT = Prototype.create(Identifier.parse("stat"));
-	public static final Prototype<MobEffectInstance> STATUS_EFFECT_INSTANCE = Prototype.create(Identifier.parse("status_effect_instance"));
-	public static final Prototype<AttributeInstance> ENTITY_ATTRIBUTE_INSTANCE = Prototype.create(Identifier.parse("entity_attribute_instance"));
+	public static final Prototype<MobEffectInstance> EFFECT_INSTANCE = Prototype.create(Identifier.parse("effect_instance"));
+	public static final Prototype<AttributeInstance> ATTRIBUTE_INSTANCE = Prototype.create(Identifier.parse("attribute_instance"));
 
 	static {
-		WORLD.registerOperation(
+		LEVEL.registerOperation(
 				Identifier.parse("get_server"),
 				SERVER,
 				OperationFactory.create(ServerLevel::getServer)
 		);
-		WORLD.registerOperation(
+		LEVEL.registerOperation(
 				Identifier.parse("get_time_of_day"),
 				NUMBER,
-				OperationFactory.create(world -> (double) world.getDayTime())
+				OperationFactory.create(world -> (double) world.getGameTime())
 		);
 
 		ENTITY.registerOperation(
@@ -64,7 +64,7 @@ public final class BuiltinPrototypes {
 		);
 		ENTITY.registerOperation(
 				Identifier.parse("get_world"),
-				WORLD,
+				LEVEL,
 				OperationFactory.create(entity -> (ServerLevel) entity.level())
 		);
 
@@ -75,7 +75,7 @@ public final class BuiltinPrototypes {
 		);
 		LIVING_ENTITY.registerOperation(
 				Identifier.parse("get_world"),
-				WORLD,
+				LEVEL,
 				OperationFactory.create(livingEntity -> (ServerLevel) livingEntity.level())
 		);
 		LIVING_ENTITY.registerOperation(
@@ -106,7 +106,7 @@ public final class BuiltinPrototypes {
 		);
 		PLAYER.registerOperation(
 				Identifier.parse("get_world"),
-				WORLD,
+				LEVEL,
 				OperationFactory.create(ServerPlayer::level)
 		);
 
@@ -177,23 +177,23 @@ public final class BuiltinPrototypes {
 				OperationFactory.create(Stat::getType)
 		);
 
-		STATUS_EFFECT_INSTANCE.registerOperation(
+		EFFECT_INSTANCE.registerOperation(
 				Identifier.parse("get_level"),
 				NUMBER,
 				OperationFactory.create(effect -> (double) (effect.getAmplifier() + 1))
 		);
-		STATUS_EFFECT_INSTANCE.registerOperation(
+		EFFECT_INSTANCE.registerOperation(
 				Identifier.parse("get_duration"),
 				NUMBER,
 				OperationFactory.create(effect -> (double) effect.getDuration())
 		);
 
-		ENTITY_ATTRIBUTE_INSTANCE.registerOperation(
+		ATTRIBUTE_INSTANCE.registerOperation(
 				Identifier.parse("get_value"),
 				NUMBER,
 				OperationFactory.create(AttributeInstance::getValue)
 		);
-		ENTITY_ATTRIBUTE_INSTANCE.registerOperation(
+		ATTRIBUTE_INSTANCE.registerOperation(
 				Identifier.parse("get_base_value"),
 				NUMBER,
 				OperationFactory.create(AttributeInstance::getBaseValue)

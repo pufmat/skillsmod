@@ -65,7 +65,7 @@ public final class ItemStackCondition implements Operation<ItemStack, Boolean> {
 		rootObject.get("components");
 		rootObject.get("predicates");
 
-		var optComponents = BuiltinJson.parseComponentsPredicate(rootObject.getAsElement(), context.getServer().registryAccess())
+		var optComponents = BuiltinJson.parseDataComponentMatchers(rootObject.getAsElement(), context.getServer().registryAccess())
 				.ifFailure(problems::add)
 				.getSuccess();
 

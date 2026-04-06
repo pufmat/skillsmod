@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EnchantedItemTrigger.class)
-public class EnchantedItemCriterionMixin {
+public class EnchantedItemTriggerMixin {
 
 	@Inject(method = "trigger", at = @At("HEAD"))
 	private void injectAtTrigger(ServerPlayer serverPlayer, ItemStack stack, int levels, CallbackInfo ci) {

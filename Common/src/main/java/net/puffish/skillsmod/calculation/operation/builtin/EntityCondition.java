@@ -70,7 +70,7 @@ public final class EntityCondition implements Operation<Entity, Boolean> {
 	@Override
 	public Optional<Boolean> apply(Entity entity) {
 		return Optional.of(
-				optEntityTypeEntries.map(entityTypeEntries -> entity.getType().is(entityTypeEntries)).orElse(true)
+				optEntityTypeEntries.map(entity::is).orElse(true)
 						&& optNbt.map(nbt -> nbt.matches(entity)).orElse(true)
 		);
 	}

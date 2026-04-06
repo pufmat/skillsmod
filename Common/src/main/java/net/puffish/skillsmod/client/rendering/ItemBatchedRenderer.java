@@ -3,17 +3,17 @@ package net.puffish.skillsmod.client.rendering;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
-import net.minecraft.client.gui.render.state.GuiItemRenderState;
-import net.minecraft.client.gui.render.state.pip.OversizedItemRenderState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
+import net.minecraft.client.renderer.state.gui.pip.OversizedItemRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.puffish.skillsmod.access.GuiGraphicsAccess;
+import net.puffish.skillsmod.access.GuiGraphicsExtractorAccess;
 import net.puffish.skillsmod.access.GuiRendererAccess;
 import net.puffish.skillsmod.access.GameRendererAccess;
 import net.puffish.skillsmod.mixin.GuiRendererInvoker;
@@ -30,7 +30,7 @@ public class ItemBatchedRenderer {
 
 	private static final Object KEY = new Object();
 
-	public void emitItem(GuiGraphics graphics, ItemStack item, int x, int y) {
+	public void emitItem(GuiGraphicsExtractor graphics, ItemStack item, int x, int y) {
 		var emits = batch.computeIfAbsent(
 				new ComparableItemStack(item),
 				key -> new ArrayList<>()
@@ -39,16 +39,16 @@ public class ItemBatchedRenderer {
 		emits.add(new Matrix3x2f(graphics.pose()).translate(x - 8, y - 8));
 	}
 
-	public void draw(GuiGraphics graphics, ScreenRectangle scissorArea) {
+	public void draw(GuiGraphicsExtractor graphics, ScreenRectangle scissorArea) {
 		var client = Minecraft.getInstance();
 		var gameRenderer = client.gameRenderer;
 		var gameRendererAccess = (GameRendererAccess) gameRenderer;
 		var guiRendererAccess = (GuiRendererAccess) gameRendererAccess.getGuiRenderer();
 		var guiRendererInvoker = (GuiRendererInvoker) gameRendererAccess.getGuiRenderer();
-		var graphicsAccess = (GuiGraphicsAccess) graphics;
-		var guiRenderState = graphicsAccess.getState();
-		var windowScaleFactor = guiRendererInvoker.invokeGetWindowScaleFactor();
-		var vertexConsumers = guiRendererAccess.getVertexConsumers();
+		var graphicsAccess = (GuiGraphicsExtractorAccess) graphics;
+		var guiRenderState = graphicsAccess.getGuiRenderState();
+		var windowScaleFactor = guiRendererInvoker.invokeGetGuiScaleInvalidatingItemAtlasIfChanged();
+		var vertexConsumers = guiRendererAccess.getBufferSource();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
@@ -65,14 +65,13 @@ public class ItemBatchedRenderer {
 
 			itemRenderState.appendModelIdentityElement(KEY);
 
-			var renderer = guiRendererAccess.getOversizedItems().computeIfAbsent(
+			var renderer = guiRendererAccess.getOversizedItemRenderers().computeIfAbsent(
 					itemRenderState.getModelIdentity(),
 					object -> new ItemGuiElementRenderer(vertexConsumers)
 			);
 
 			for (var matrix : entry.getValue()) {
 				var renderState = new GuiItemRenderState(
-						itemStack.getItem().getName().toString(),
 						matrix,
 						itemRenderState,
 						0,

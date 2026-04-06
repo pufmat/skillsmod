@@ -21,9 +21,9 @@
 		"puffish_skills.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.18.2",
+		"fabricloader": ">=0.18.4",
 		"fabric-api": "*",
-		"minecraft": "~1.21.11",
+		"minecraft": "~26.1",
 		"java": ">=17"
 	}
 }

@@ -2,7 +2,7 @@ package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
@@ -30,8 +30,8 @@ public class SimpleToast implements Toast {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, Font font, long startTime) {
-		toast.render(graphics, font, startTime);
+	public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long startTime) {
+		toast.extractRenderState(graphics, font, startTime);
 	}
 
 	@Override

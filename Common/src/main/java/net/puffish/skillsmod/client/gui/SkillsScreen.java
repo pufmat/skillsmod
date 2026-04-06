@@ -2,7 +2,7 @@ package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -355,7 +355,7 @@ public class SkillsScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		this.syncCategory();
 
 		this.drawContent(graphics, mouseX, mouseY);
@@ -441,7 +441,7 @@ public class SkillsScreen extends Screen {
 		activeCategoryData.setScale(scale);
 	}
 
-	private void drawIcon(GuiGraphics graphics, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
+	private void drawIcon(GuiGraphicsExtractor graphics, TextureBatchedRenderer textureRenderer, ItemBatchedRenderer itemRenderer, ClientIconConfig icon, float sizeScale, int x, int y) {
 		if (minecraft == null) {
 			return;
 		}
@@ -481,7 +481,7 @@ public class SkillsScreen extends Screen {
 		matrices.popMatrix();
 	}
 
-	private void drawFrame(GuiGraphics graphics, TextureBatchedRenderer textureRenderer, ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
+	private void drawFrame(GuiGraphicsExtractor graphics, TextureBatchedRenderer textureRenderer, ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
 		if (minecraft == null) {
 			return;
 		}
@@ -562,7 +562,7 @@ public class SkillsScreen extends Screen {
 		}
 	}
 
-	private void drawBackground(GuiGraphics graphics, ClientBackgroundConfig background) {
+	private void drawBackground(GuiGraphicsExtractor graphics, ClientBackgroundConfig background) {
 		var position = background.position();
 
 		switch (position) {
@@ -632,7 +632,7 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawContent(GuiGraphics graphics, int mouseX, int mouseY) {
+	private void drawContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		var minX = contentPaddingLeft - 4;
 		var minY = contentPaddingTop - 4;
 		var maxX = this.width - contentPaddingRight + 4;
@@ -653,7 +653,7 @@ public class SkillsScreen extends Screen {
 		graphics.disableScissor();
 	}
 
-	private void drawContentWithCategory(GuiGraphics graphics, int mouseX, int mouseY, ScreenRectangle scissorArea, ClientCategoryData activeCategoryData) {
+	private void drawContentWithCategory(GuiGraphicsExtractor graphics, int mouseX, int mouseY, ScreenRectangle scissorArea, ClientCategoryData activeCategoryData) {
 		if (minecraft == null) {
 			return;
 		}
@@ -781,17 +781,17 @@ public class SkillsScreen extends Screen {
 		matrices.popMatrix();
 	}
 
-	private void drawContentWithoutCategory(GuiGraphics graphics) {
+	private void drawContentWithoutCategory(GuiGraphicsExtractor graphics) {
 		var tmpX = contentPaddingLeft + (width - contentPaddingLeft - contentPaddingRight) / 2;
 
-		graphics.drawCenteredString(
+		graphics.centeredText(
 				this.font,
 				Component.translatable("advancements.sad_label"),
 				tmpX,
 				height - contentPaddingBottom - this.font.lineHeight,
 				0xffffffff
 		);
-		graphics.drawCenteredString(
+		graphics.centeredText(
 				this.font,
 				Component.translatable("advancements.empty"),
 				tmpX,
@@ -800,16 +800,16 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawTabs(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+	private void drawTabs(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		if (minecraft == null) {
 			return;
 		}
 
 		if (hasNextButton()) {
-			nextButton.render(graphics, mouseX, mouseY, delta);
+			nextButton.extractRenderState(graphics, mouseX, mouseY, delta);
 		}
 		if (hasPrevButton()) {
-			prevButton.render(graphics, mouseX, mouseY, delta);
+			prevButton.extractRenderState(graphics, mouseX, mouseY, delta);
 		}
 
 		forEachVisibleTab((x, category) -> graphics.blitSprite(
@@ -885,7 +885,7 @@ public class SkillsScreen extends Screen {
 		});
 	}
 
-	private void drawWindow(GuiGraphics graphics, int mouseX, int mouseY) {
+	private void drawWindow(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		if (minecraft == null) {
 			return;
 		}
@@ -1098,7 +1098,7 @@ public class SkillsScreen extends Screen {
 		var tmpX = FRAME_PADDING + 8;
 		var tmpY = FRAME_PADDING + TABS_HEIGHT + 6;
 
-		graphics.drawString(
+		graphics.text(
 				this.font,
 				tmpText,
 				tmpX,
@@ -1112,7 +1112,7 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawWindowWithCategory(GuiGraphics graphics, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
+	private void drawWindowWithCategory(GuiGraphicsExtractor graphics, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1131,16 +1131,16 @@ public class SkillsScreen extends Screen {
 		var pointsColor = activeCategory.colors().points();
 		var pointsStrokeColor = pointsColor.stroke().argb();
 		var pointsFillColor = pointsColor.fill().argb();
-		graphics.drawString(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
-		graphics.drawString(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
-		graphics.drawString(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
-		graphics.drawString(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
-		graphics.drawString(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
+		graphics.text(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
+		graphics.text(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
+		graphics.text(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
+		graphics.text(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
+		graphics.text(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
 		tmpX -= 1;
 
 		tmpText = SkillsMod.createTranslatable("text", "points_left");
 		tmpX -= this.font.width(tmpText);
-		graphics.drawString(
+		graphics.text(
 				this.font,
 				tmpText,
 				tmpX,
@@ -1225,11 +1225,11 @@ public class SkillsScreen extends Screen {
 				tmpText = Component.literal("" + activeCategoryData.getCurrentLevel());
 				tmpX += (182 - this.font.width(tmpText)) / 2;
 				tmpY -= 1;
-				graphics.drawString(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
-				graphics.drawString(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
-				graphics.drawString(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
-				graphics.drawString(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
-				graphics.drawString(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
+				graphics.text(this.font, tmpText, tmpX - 1, tmpY, pointsStrokeColor, false);
+				graphics.text(this.font, tmpText, tmpX, tmpY - 1, pointsStrokeColor, false);
+				graphics.text(this.font, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
+				graphics.text(this.font, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
+				graphics.text(this.font, tmpText, tmpX, tmpY, pointsFillColor, false);
 			}
 		}
 	}

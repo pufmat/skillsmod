@@ -5,7 +5,7 @@ import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 public interface GuiRendererAccess {
-	Map<Object, OversizedItemRenderer> getOversizedItems();
+	Map<Object, OversizedItemRenderer> getOversizedItemRenderers();
 
-	MultiBufferSource.BufferSource getVertexConsumers();
+	MultiBufferSource.BufferSource getBufferSource();
 }

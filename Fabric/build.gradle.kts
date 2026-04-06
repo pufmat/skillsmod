@@ -1,5 +1,5 @@
 plugins {
-    id("dev.architectury.loom")
+    id("net.fabricmc.fabric-loom")
     id("checkstyle")
 }
 
@@ -16,16 +16,11 @@ java {
 
 dependencies {
     minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-    mappings(loom.officialMojangMappings())
 
-    modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
+    implementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
 
-    implementation(project(path = ":Common", configuration = "namedElements"))
-}
-
-loom {
-    mixin.useLegacyMixinAp = false
+    implementation(project(path = ":Common"))
 }
 
 tasks.test {

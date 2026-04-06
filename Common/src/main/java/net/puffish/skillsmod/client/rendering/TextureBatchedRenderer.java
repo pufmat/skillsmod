@@ -4,17 +4,17 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.puffish.skillsmod.access.GuiGraphicsAccess;
+import net.puffish.skillsmod.access.GuiGraphicsExtractorAccess;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2f;
 
@@ -37,7 +37,7 @@ public class TextureBatchedRenderer {
 	) { }
 
 	public void emitTexture(
-			GuiGraphics graphics, Identifier texture,
+			GuiGraphicsExtractor graphics, Identifier texture,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -51,7 +51,7 @@ public class TextureBatchedRenderer {
 	}
 
 	public void emitSprite(
-			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling scaling,
+			GuiGraphicsExtractor graphics, TextureAtlasSprite sprite, GuiSpriteScaling scaling,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -77,7 +77,7 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteTile(
-			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling.Tile tile,
+			GuiGraphicsExtractor graphics, TextureAtlasSprite sprite, GuiSpriteScaling.Tile tile,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -98,7 +98,7 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteNineSlice(
-			GuiGraphics graphics, TextureAtlasSprite sprite, GuiSpriteScaling.NineSlice nineSlice,
+			GuiGraphicsExtractor graphics, TextureAtlasSprite sprite, GuiSpriteScaling.NineSlice nineSlice,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -331,7 +331,7 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitSpriteStretch(
-			GuiGraphics graphics, TextureAtlasSprite sprite,
+			GuiGraphicsExtractor graphics, TextureAtlasSprite sprite,
 			int x, int y, int width, int height,
 			int color
 	) {
@@ -345,7 +345,7 @@ public class TextureBatchedRenderer {
 	}
 
 	private void emitTextureBatched(
-			GuiGraphics graphics, Identifier texture,
+			GuiGraphicsExtractor graphics, Identifier texture,
 			float minX, float minY, float maxX, float maxY,
 			float minU, float minV, float maxU, float maxV,
 			int color
@@ -369,7 +369,7 @@ public class TextureBatchedRenderer {
 		));
 	}
 
-	public void draw(GuiGraphics graphics, TextureManager textureManager, ScreenRectangle scissorArea) {
+	public void draw(GuiGraphicsExtractor graphics, TextureManager textureManager, ScreenRectangle scissorArea) {
 		if (batch.isEmpty()) {
 			return;
 		}
@@ -380,8 +380,8 @@ public class TextureBatchedRenderer {
 			var bounds = calcBounds(emits);
 			var emitsCopy = List.copyOf(emits);
 
-			var graphicsAccess = (GuiGraphicsAccess) graphics;
-			graphicsAccess.getState().submitGuiElement(new GuiElementRenderState() {
+			var graphicsAccess = (GuiGraphicsExtractorAccess) graphics;
+			graphicsAccess.getGuiRenderState().addGuiElement(new GuiElementRenderState() {
 				@Override
 				public void buildVertices(VertexConsumer vc) {
 					for (var emit : emitsCopy) {

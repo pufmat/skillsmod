@@ -23,13 +23,13 @@ public final class GuiRendererMixin implements GuiRendererAccess {
 
 	@Override
 	@Unique
-	public Map<Object, OversizedItemRenderer> getOversizedItems() {
+	public Map<Object, OversizedItemRenderer> getOversizedItemRenderers() {
 		return oversizedItemRenderers;
 	}
 
 	@Override
 	@Unique
-	public MultiBufferSource.BufferSource getVertexConsumers() {
+	public MultiBufferSource.BufferSource getBufferSource() {
 		return bufferSource;
 	}
 }

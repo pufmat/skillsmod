@@ -34,13 +34,13 @@ public record GeneralConfig(
 		var problems = new ArrayList<Problem>();
 
 		var optTitle = rootObject.get("title")
-				.andThen(titleElement -> BuiltinJson.parseText(titleElement, context.getServer().registryAccess()))
+				.andThen(titleElement -> BuiltinJson.parseComponent(titleElement, context.getServer().registryAccess()))
 				.ifFailure(problems::add)
 				.getSuccess();
 
 		var description = rootObject.get("description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
+				.flatMap(descriptionElement -> BuiltinJson.parseComponent(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)
@@ -48,7 +48,7 @@ public record GeneralConfig(
 
 		var extraDescription = rootObject.get("extra_description")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement, context.getServer().registryAccess())
+				.flatMap(descriptionElement -> BuiltinJson.parseComponent(descriptionElement, context.getServer().registryAccess())
 						.ifFailure(problems::add)
 						.getSuccess()
 				)

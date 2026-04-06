@@ -2,13 +2,13 @@ package net.puffish.skillsmod.client.rendering;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.util.Mth;
-import net.puffish.skillsmod.access.GuiGraphicsAccess;
+import net.puffish.skillsmod.access.GuiGraphicsExtractorAccess;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
@@ -29,7 +29,7 @@ public class ConnectionBatchedRenderer {
 	) { }
 
 	public void emitConnection(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			float startX,
 			float startY,
 			float endX,
@@ -133,12 +133,12 @@ public class ConnectionBatchedRenderer {
 		));
 	}
 
-	public void draw(GuiGraphics graphics, ScreenRectangle scissorArea) {
+	public void draw(GuiGraphicsExtractor graphics, ScreenRectangle scissorArea) {
 		drawBatch(graphics, strokeBatch, scissorArea);
 		drawBatch(graphics, fillBatch, scissorArea);
 	}
 
-	private void drawBatch(GuiGraphics graphics, List<QuadEmit> batch, ScreenRectangle scissorArea) {
+	private void drawBatch(GuiGraphicsExtractor graphics, List<QuadEmit> batch, ScreenRectangle scissorArea) {
 		if (batch.isEmpty()) {
 			return;
 		}
@@ -147,8 +147,8 @@ public class ConnectionBatchedRenderer {
 		var batchCopy = List.copyOf(batch);
 		batch.clear();
 
-		var graphicsAccess = (GuiGraphicsAccess) graphics;
-		graphicsAccess.getState().submitGuiElement(new GuiElementRenderState() {
+		var graphicsAccess = (GuiGraphicsExtractorAccess) graphics;
+		graphicsAccess.getGuiRenderState().addGuiElement(new GuiElementRenderState() {
 			@Override
 			public void buildVertices(VertexConsumer vc) {
 				for (var emit : batchCopy) {

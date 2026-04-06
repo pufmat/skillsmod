@@ -1,5 +1,5 @@
 plugins {
-    id("dev.architectury.loom")
+    id("net.fabricmc.fabric-loom")
     id("checkstyle")
 }
 
@@ -16,19 +16,13 @@ java {
 
 dependencies {
     minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-    mappings(loom.officialMojangMappings())
 
     compileOnly("net.fabricmc:sponge-mixin:${project.properties["mixin_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:${project.properties["junit_version"]}")
 }
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.jar {
-    manifest {
-        attributes["Fabric-Loom-Remap"] = "true"
-    }
 }

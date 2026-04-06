@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Predicate;
 
 @Mixin(SimpleCriterionTrigger.class)
-public class AbstractCriterionMixin {
+public class SimpleCriterionTriggerMixin {
 
 	@Inject(method = "trigger", at = @At("HEAD"))
 	private void injectAtTrigger(ServerPlayer player, Predicate<Object> predicate, CallbackInfo ci) {

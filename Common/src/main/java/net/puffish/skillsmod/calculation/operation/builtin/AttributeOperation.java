@@ -30,7 +30,7 @@ public class AttributeOperation implements Operation<LivingEntity, AttributeInst
 	public static void register() {
 		BuiltinPrototypes.LIVING_ENTITY.registerOperation(
 				SkillsMod.createIdentifier("get_attribute"),
-				BuiltinPrototypes.ENTITY_ATTRIBUTE_INSTANCE,
+				BuiltinPrototypes.ATTRIBUTE_INSTANCE,
 				AttributeOperation::parse
 		);
 

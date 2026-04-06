@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.calculation.operation.builtin;
 
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.calculation.operation.Operation;
@@ -61,6 +62,6 @@ public final class EntityTypeCondition implements Operation<EntityType<?>, Boole
 
 	@Override
 	public Optional<Boolean> apply(EntityType<?> entityType) {
-		return Optional.of(entityType.is(entityTypeEntries));
+		return Optional.of(entityTypeEntries.contains(BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entityType)));
 	}
 }

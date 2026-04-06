@@ -198,11 +198,11 @@ public final class BuiltinJson {
 		);
 	}
 
-	public static Result<StatePropertiesPredicate, Problem> parseStatePredicate(JsonElement element) {
+	public static Result<StatePropertiesPredicate, Problem> parseStatePropertiesPredicate(JsonElement element) {
 		try {
 			return Result.success(StatePropertiesPredicate.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected state predicate"));
+			return Result.failure(element.getPath().createProblem("Expected state properties predicate"));
 		}
 	}
 
@@ -220,11 +220,11 @@ public final class BuiltinJson {
 		);
 	}
 
-	public static Result<DataComponentMatchers, Problem> parseComponentsPredicate(JsonElement element, RegistryAccess manager) {
+	public static Result<DataComponentMatchers, Problem> parseDataComponentMatchers(JsonElement element, RegistryAccess manager) {
 		try {
 			return Result.success(DataComponentMatchers.CODEC.codec().parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected component predicate"));
+			return Result.failure(element.getPath().createProblem("Expected data component matchers"));
 		}
 	}
 
@@ -245,7 +245,7 @@ public final class BuiltinJson {
 		return statType.get(statType.getRegistry().getOptional(id).orElseThrow());
 	}
 
-	public static Result<Criterion<?>, Problem> parseAdvancementCriterion(JsonElement element, RegistryAccess manager) {
+	public static Result<Criterion<?>, Problem> parseCriterion(JsonElement element, RegistryAccess manager) {
 		try {
 			return Result.success(Criterion.CODEC.parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
@@ -253,7 +253,7 @@ public final class BuiltinJson {
 		}
 	}
 
-	public static Result<CompoundTag, Problem> parseNbt(JsonElement element) {
+	public static Result<CompoundTag, Problem> parseCompoundTag(JsonElement element) {
 		return parseFromString(
 				element,
 				s -> {
@@ -263,21 +263,16 @@ public final class BuiltinJson {
 						throw new RuntimeException(e);
 					}
 				},
-				"nbt"
+				"nbt compound tag"
 		);
 	}
 
-	@Deprecated
-	public static Result<DataComponentPatch, Problem> parseComponentChanges(JsonElement element) {
-		return parseComponentChanges(element, null);
-	}
-
-	public static Result<DataComponentPatch, Problem> parseComponentChanges(JsonElement element, RegistryAccess manager) {
+	public static Result<DataComponentPatch, Problem> parseDataComponentPatch(JsonElement element, RegistryAccess manager) {
 		try {
 			var ops = manager == null ? JsonOps.INSTANCE : manager.createSerializationContext(JsonOps.INSTANCE);
 			return Result.success(DataComponentPatch.CODEC.parse(ops, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected components"));
+			return Result.failure(element.getPath().createProblem("Expected data component patch"));
 		}
 	}
 
@@ -298,7 +293,7 @@ public final class BuiltinJson {
 
 				var components = rootObject.get("components")
 						.getSuccess()
-						.flatMap(nbtElement -> BuiltinJson.parseComponentChanges(nbtElement, manager)
+						.flatMap(nbtElement -> BuiltinJson.parseDataComponentPatch(nbtElement, manager)
 								.ifFailure(problems::add)
 								.getSuccess()
 						);
@@ -316,19 +311,19 @@ public final class BuiltinJson {
 		}
 	}
 
-	public static Result<AdvancementType, Problem> parseFrame(JsonElement element) {
+	public static Result<AdvancementType, Problem> parseAdvancementType(JsonElement element) {
 		try {
 			return Result.success(AdvancementType.CODEC.parse(JsonOps.INSTANCE, element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected frame"));
+			return Result.failure(element.getPath().createProblem("Expected advancement frame type"));
 		}
 	}
 
-	public static Result<Component, Problem> parseText(JsonElement element, RegistryAccess manager) {
+	public static Result<Component, Problem> parseComponent(JsonElement element, RegistryAccess manager) {
 		try {
 			return Result.success(ComponentSerialization.CODEC.parse(manager.createSerializationContext(JsonOps.INSTANCE), element.getJson()).result().orElseThrow());
 		} catch (Exception e) {
-			return Result.failure(element.getPath().createProblem("Expected text"));
+			return Result.failure(element.getPath().createProblem("Expected text component"));
 		}
 	}
 
@@ -345,7 +340,7 @@ public final class BuiltinJson {
 		);
 	}
 
-	public static Result<AttributeModifier.Operation, Problem> parseAttributeOperation(JsonElement element) {
+	public static Result<AttributeModifier.Operation, Problem> parseAttributeModifierOperation(JsonElement element) {
 		return parseFromString(
 				element,
 				s -> switch (s) {
@@ -354,7 +349,7 @@ public final class BuiltinJson {
 					case "multiply_total", "add_multiplied_total" -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
 					default -> throw new RuntimeException();
 				},
-				"attribute operation"
+				"attribute modifier operation"
 		);
 	}
 

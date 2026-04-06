@@ -24,7 +24,7 @@ public sealed interface FrameConfig permits FrameConfig.AdvancementFrameConfig, 
 	static Result<FrameConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().flatMap(
 				LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context),
-				failure -> BuiltinJson.parseFrame(rootElement)
+				failure -> BuiltinJson.parseAdvancementType(rootElement)
 						.mapSuccess(AdvancementFrameConfig::new)
 		);
 	}
@@ -77,7 +77,7 @@ public sealed interface FrameConfig permits FrameConfig.AdvancementFrameConfig, 
 			var problems = new ArrayList<Problem>();
 
 			var optEffect = rootObject.get("frame")
-					.andThen(BuiltinJson::parseFrame)
+					.andThen(BuiltinJson::parseAdvancementType)
 					.ifFailure(problems::add)
 					.getSuccess();
 

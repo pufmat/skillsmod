@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ConsumeItemTrigger.class)
-public class ConsumeItemCriterionMixin {
+public class ConsumeItemTriggerMixin {
 
 	@Inject(method = "trigger", at = @At("HEAD"))
 	private void injectAtTrigger(ServerPlayer serverPlayer, ItemStack stack, CallbackInfo ci) {
