@@ -74,7 +74,7 @@ public class FabricMain implements ModInitializer {
 			outPackets.put(id, new CustomPacketPayload.Type<>(id));
 			if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
 				var pId = new CustomPacketPayload.Type<InOutPayload<?>>(id);
-				PayloadTypeRegistry.serverboundPlay().register(pId, CustomPacketPayload.codec(
+				PayloadTypeRegistry.clientboundPlay().register(pId, CustomPacketPayload.codec(
 						(value, buf) -> value.outPacket.write(buf),
 						buf -> null
 				));
