@@ -93,9 +93,6 @@ public class SkillsMod {
 	public static final Event<Events.SkillLock> SKILL_LOCK = Event.create(
 			c -> (player, categoryId, skillId) -> c.forEach(e -> e.onSkillLock(player, categoryId, skillId))
 	);
-	public static final Event<Events.SkillsReset> SKILLS_RESET = Event.create(
-			c -> (player, categoryId) -> c.forEach(e -> e.onSkillsReset(player, categoryId))
-	);
 
 	private static SkillsMod instance;
 
@@ -347,10 +344,15 @@ public class SkillsMod {
 	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			var unlockedSkillIds = new ArrayList<>(categoryData.getUnlockedSkillIds());
+
 			categoryData.resetSkills();
 			updateRewards(player, category, categoryData);
 			showCategory(player, category, categoryData);
-			SKILLS_RESET.invoker().onSkillsReset(player, categoryId);
+
+			for (var skillId : unlockedSkillIds) {
+				SKILL_LOCK.invoker().onSkillLock(player, categoryId, skillId);
+			}
 		});
 	}
 

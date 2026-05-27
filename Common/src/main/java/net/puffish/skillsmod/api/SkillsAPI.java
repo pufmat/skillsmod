@@ -30,10 +30,6 @@ public final class SkillsAPI {
 		SkillsMod.SKILL_LOCK.register(event);
 	}
 
-	public static void registerSkillsResetEvent(Events.SkillsReset event) {
-		SkillsMod.SKILLS_RESET.register(event);
-	}
-
 	public static void registerReward(Identifier key, RewardFactory factory) {
 		RewardRegistry.register(key, factory);
 	}

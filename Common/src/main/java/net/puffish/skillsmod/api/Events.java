@@ -13,8 +13,4 @@ public class Events {
 		void onSkillLock(ServerPlayerEntity player, Identifier categoryId, String skillId);
 	}
 
-	public interface SkillsReset {
-		void onSkillsReset(ServerPlayerEntity player, Identifier categoryId);
-	}
-
 }
