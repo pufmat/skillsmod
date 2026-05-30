@@ -18,15 +18,16 @@ public abstract class ConfigReader {
 	public abstract Result<JsonElement, Problem> read(Path path);
 	public abstract boolean exists(Path path);
 
-	public Result<Map<Identifier, CategoryConfig>, Problem> readCategories(String namespace, List<String> ids, ConfigContext context) {
+	public Result<Map<Identifier, CategoryConfig>, Problem> readCategories(String namespace, List<String> ids, int position, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var map = new LinkedHashMap<Identifier, CategoryConfig>();
 
 		for (var id : ids) {
-			readCategory(namespace, id, context)
+			readCategory(namespace, id, position, context)
 					.ifSuccess(category -> map.put(Identifier.fromNamespaceAndPath(namespace, id), category))
 					.ifFailure(problems::add);
+			position++;
 		}
 
 		if (problems.isEmpty()) {
@@ -36,7 +37,7 @@ public abstract class ConfigReader {
 		}
 	}
 
-	public Result<CategoryConfig, Problem> readCategory(String namespace, String id, ConfigContext context) {
+	public Result<CategoryConfig, Problem> readCategory(String namespace, String id, int position, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var optGeneralElement = read(Path.of("categories", id, "category.json"))
@@ -66,6 +67,7 @@ public abstract class ConfigReader {
 		if (problems.isEmpty()) {
 			return CategoryConfig.parse(
 					Identifier.fromNamespaceAndPath(namespace, id),
+					position,
 					optGeneralElement.orElseThrow(),
 					optDefinitionsElement.orElseThrow(),
 					optSkillsElement.orElseThrow(),

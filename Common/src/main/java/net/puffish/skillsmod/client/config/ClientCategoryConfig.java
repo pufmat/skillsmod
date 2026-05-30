@@ -17,6 +17,7 @@ import java.util.Optional;
 
 public record ClientCategoryConfig(
 		Identifier id,
+		int position,
 		Component title,
 		Component description,
 		Component extraDescription,
@@ -39,6 +40,7 @@ public record ClientCategoryConfig(
 ) {
 	public ClientCategoryConfig(
 			Identifier id,
+			int position,
 			Component title,
 			Component description,
 			Component extraDescription,
@@ -55,6 +57,7 @@ public record ClientCategoryConfig(
 	) {
 		this(
 				id,
+				position,
 				title,
 				description,
 				extraDescription,

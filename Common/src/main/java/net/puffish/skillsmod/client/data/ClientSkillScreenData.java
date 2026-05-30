@@ -1,9 +1,10 @@
 package net.puffish.skillsmod.client.data;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.resources.Identifier;
 
 public class ClientSkillScreenData {
@@ -27,8 +28,12 @@ public class ClientSkillScreenData {
 		return Optional.ofNullable(categories.get(categoryId));
 	}
 
-	public Collection<ClientCategoryData> getCategories() {
-		return categories.values();
+	public Stream<ClientCategoryData> streamCategories() {
+		return categories.values().stream().sorted(Comparator.comparing(data -> data.getConfig().position()));
+	}
+
+	public int getCategoriesCount() {
+		return categories.size();
 	}
 
 	public int getOffset() {

@@ -41,6 +41,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 	public static ClientCategoryData readCategory(RegistryFriendlyByteBuf buf) {
 		var id = buf.readIdentifier();
+		var position = buf.readInt();
 
 		var title = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf);
 		var description = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf);
@@ -83,6 +84,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 		var category = new ClientCategoryConfig(
 				id,
+				position,
 				title,
 				description,
 				extraDescription,
