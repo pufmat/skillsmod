@@ -41,6 +41,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 	public static ClientCategoryData readCategory(RegistryByteBuf buf) {
 		var id = buf.readIdentifier();
+		var position = buf.readInt();
 
 		var title = TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.decode(buf);
 		var description = TextCodecs.UNLIMITED_REGISTRY_PACKET_CODEC.decode(buf);
@@ -83,6 +84,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 		var category = new ClientCategoryConfig(
 				id,
+				position,
 				title,
 				description,
 				extraDescription,
