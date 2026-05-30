@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 public record CategoryConfig(
 		Identifier id,
+		int position,
 		GeneralConfig general,
 		SkillDefinitionsConfig definitions,
 		SkillsConfig skills,
@@ -26,6 +27,7 @@ public record CategoryConfig(
 
 	public static Result<CategoryConfig, Problem> parse(
 			Identifier id,
+			int position,
 			JsonElement generalElement,
 			JsonElement definitionsElement,
 			JsonElement skillsElement,
@@ -65,6 +67,7 @@ public record CategoryConfig(
 		if (problems.isEmpty()) {
 			return Result.success(new CategoryConfig(
 					id,
+					position,
 					optGeneral.orElseThrow(),
 					optDefinitions.orElseThrow(),
 					optSkills.orElseThrow(),
