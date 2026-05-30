@@ -32,6 +32,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	@Override
 	public void write(RegistryByteBuf buf) {
 		buf.writeIdentifier(category.id());
+		buf.writeInt(category.position());
 		write(buf, category.general());
 		write(buf, category.definitions());
 		write(buf, category.skills());
