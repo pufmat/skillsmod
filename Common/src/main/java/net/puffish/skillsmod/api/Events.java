@@ -1,15 +1,16 @@
 package net.puffish.skillsmod.api;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
 
 public class Events {
 
 	public interface SkillUnlock {
-		void onSkillUnlock(Identifier categoryId, String skillId);
+		void onSkillUnlock(ServerPlayer player, Identifier categoryId, String skillId);
 	}
 
 	public interface SkillLock {
-		void onSkillLock(Identifier categoryId, String skillId);
+		void onSkillLock(ServerPlayer player, Identifier categoryId, String skillId);
 	}
 
 }
