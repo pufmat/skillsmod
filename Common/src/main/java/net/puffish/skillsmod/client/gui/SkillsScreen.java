@@ -233,8 +233,7 @@ public class SkillsScreen extends Screen {
 		var opt = optActiveCategoryId.flatMap(data::getCategory);
 		opt.ifPresent(ClientCategoryData::updateLastOpen);
 		if (optActiveCategoryData.isEmpty() || optActiveCategoryData.orElseThrow() != opt.orElse(null)) {
-			optActiveCategoryData = data.getCategories()
-					.stream()
+			optActiveCategoryData = data.streamCategories()
 					.max(Comparator.comparing(ClientCategoryData::getLastOpen));
 			optActiveCategoryId = optActiveCategoryData
 					.map(data -> data.getConfig().id());
@@ -248,10 +247,8 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void forEachVisibleTab(BiConsumer<Integer, ClientCategoryData> consumer) {
-		var it = data.getCategories().iterator();
 		var i = 0;
-		while (it.hasNext()) {
-			var category = it.next();
+		for (var category : (Iterable<ClientCategoryData>) data.streamCategories()::iterator) {
 			var x = getTabX(i);
 			if (x >= FRAME_PADDING && x + 28 <= this.width - FRAME_PADDING - 12 - 3) {
 				consumer.accept(x, category);
@@ -261,7 +258,7 @@ public class SkillsScreen extends Screen {
 	}
 
 	private boolean hasNextButton() {
-		var x = getTabX(data.getCategories().size() - 1);
+		var x = getTabX(data.getCategoriesCount() - 1);
 		return x + 28 > this.width - FRAME_PADDING - 12 - 3;
 	}
 
