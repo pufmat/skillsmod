@@ -204,7 +204,7 @@ public class SkillsMod {
 
 		reader.read(Path.of("config.json"))
 				.andThen(rootElement -> ModConfig.parse(rootElement, context))
-				.andThen(modConfig -> loadCategories(reader, modConfig, SkillsAPI.MOD_ID, context)
+				.andThen(modConfig -> loadCategories(reader, modConfig, SkillsAPI.MOD_ID, 0, context)
 						.ifSuccess(map -> {
 							var cumulatedMap = new LinkedHashMap<>(map);
 							showSuccess("Mod configuration", modConfig.showWarnings(), context);
@@ -226,10 +226,10 @@ public class SkillsMod {
 				});
 	}
 
-	private Result<Map<Identifier, CategoryConfig>, Problem> loadCategories(ConfigReader reader, Config config, String namespace,  ConfigContext context) {
+	private Result<Map<Identifier, CategoryConfig>, Problem> loadCategories(ConfigReader reader, Config config, String namespace, int position, ConfigContext context) {
 		var versionedContext = new VersionedConfigContext(context, config.version());
 
-		return reader.readCategories(namespace, config.categories(), versionedContext);
+		return reader.readCategories(namespace, config.categories(), position, versionedContext);
 	}
 
 	private boolean loadPackConfig(MinecraftServer server, Map<Identifier, CategoryConfig> cumulatedMap, boolean showWarning) {
@@ -246,12 +246,13 @@ public class SkillsMod {
 			var resource = entry.getValue();
 			var id = entry.getKey();
 			var namespace = id.getNamespace();
+			var position = cumulatedMap.size();
 			var reader = new PackConfigReader(resourceManager, namespace);
 			var context = new ConfigContextImpl(server);
 
 			if (reader.readResource(id, resource)
 					.andThen(rootElement -> PackConfig.parse(namespace, rootElement, context))
-					.andThen(packConfig -> loadCategories(reader, packConfig, namespace, context))
+					.andThen(packConfig -> loadCategories(reader, packConfig, namespace, position, context))
 					.andThen(map -> {
 						var problems = new ArrayList<Problem>();
 
