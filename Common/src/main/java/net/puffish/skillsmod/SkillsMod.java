@@ -89,10 +89,10 @@ public class SkillsMod {
 	public static final int MAX_CONFIG_VERSION = 3;
 
 	public static final Event<Events.SkillUnlock> SKILL_UNLOCK = Event.create(
-			c -> (categoryId, skillId) -> c.forEach(e -> e.onSkillUnlock(categoryId, skillId))
+			c -> (player, categoryId, skillId) -> c.forEach(e -> e.onSkillUnlock(player, categoryId, skillId))
 	);
 	public static final Event<Events.SkillLock> SKILL_LOCK = Event.create(
-			c -> (categoryId, skillId) -> c.forEach(e -> e.onSkillLock(categoryId, skillId))
+			c -> (player, categoryId, skillId) -> c.forEach(e -> e.onSkillLock(player, categoryId, skillId))
 	);
 
 	private static SkillsMod instance;
@@ -320,7 +320,7 @@ public class SkillsMod {
 						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
 						syncPoints(player, category, categoryData);
 					});
-					SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
+					SKILL_UNLOCK.invoker().onSkillUnlock(player, categoryId, skillId);
 					updateSkillRewards(player, category, categoryData, skill, true);
 				}
 			});
@@ -336,7 +336,7 @@ public class SkillsMod {
 					packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
 					syncPoints(player, category, categoryData);
 				});
-				SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
+				SKILL_LOCK.invoker().onSkillLock(player, categoryId, skillId);
 				updateSkillRewards(player, category, categoryData, skill, false);
 			});
 		});
@@ -345,9 +345,15 @@ public class SkillsMod {
 	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			var unlockedSkillIds = new ArrayList<>(categoryData.getUnlockedSkillIds());
+
 			categoryData.resetSkills();
 			updateRewards(player, category, categoryData);
 			showCategory(player, category, categoryData);
+
+			for (var skillId : unlockedSkillIds) {
+				SKILL_LOCK.invoker().onSkillLock(player, categoryId, skillId);
+			}
 		});
 	}
 
