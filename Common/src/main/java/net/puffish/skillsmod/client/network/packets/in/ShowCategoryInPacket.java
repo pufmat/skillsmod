@@ -38,6 +38,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 	public static ClientCategoryData readCategory(PacketByteBuf buf) {
 		var id = buf.readIdentifier();
+		var position = buf.readInt();
 
 		var title = buf.readText();
 		var description = buf.readText();
@@ -80,6 +81,7 @@ public class ShowCategoryInPacket implements InPacket {
 
 		var category = new ClientCategoryConfig(
 				id,
+				position,
 				title,
 				description,
 				extraDescription,
