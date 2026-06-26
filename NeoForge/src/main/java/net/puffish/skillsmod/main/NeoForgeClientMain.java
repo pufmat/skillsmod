@@ -103,8 +103,10 @@ public class NeoForgeClientMain {
 		@Override
 		public void registerKeyBinding(KeyBinding keyBinding, KeyBindingHandler handler) {
 			keyBindings.add(new KeyBindingWithHandler(keyBinding, handler));
-			var options = MinecraftClient.getInstance().options;
-			options.allKeys = ArrayUtils.add(options.allKeys, keyBinding);
+			var client = MinecraftClient.getInstance();
+			if (client != null) {
+				client.options.allKeys = ArrayUtils.add(client.options.allKeys, keyBinding);
+			}
 		}
 	}
 
