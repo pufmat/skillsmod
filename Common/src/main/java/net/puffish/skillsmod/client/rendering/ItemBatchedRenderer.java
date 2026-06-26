@@ -6,16 +6,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
 import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
 import net.minecraft.client.renderer.state.gui.pip.OversizedItemRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.puffish.skillsmod.access.GameRendererAccess;
 import net.puffish.skillsmod.access.GuiGraphicsExtractorAccess;
 import net.puffish.skillsmod.access.GuiRendererAccess;
-import net.puffish.skillsmod.access.GameRendererAccess;
 import net.puffish.skillsmod.mixin.GuiRendererInvoker;
 import org.joml.Matrix3x2f;
 
@@ -48,7 +48,7 @@ public class ItemBatchedRenderer {
 		var graphicsAccess = (GuiGraphicsExtractorAccess) graphics;
 		var guiRenderState = graphicsAccess.getGuiRenderState();
 		var windowScaleFactor = guiRendererInvoker.invokeGetGuiScaleInvalidatingItemAtlasIfChanged();
-		var vertexConsumers = guiRendererAccess.getBufferSource();
+		var featureRenderDispatcher = guiRendererAccess.getFeatureRenderDispatcher();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
@@ -67,7 +67,7 @@ public class ItemBatchedRenderer {
 
 			var renderer = guiRendererAccess.getOversizedItemRenderers().computeIfAbsent(
 					itemRenderState.getModelIdentity(),
-					object -> new ItemGuiElementRenderer(vertexConsumers)
+					object -> new ItemGuiElementRenderer()
 			);
 
 			for (var matrix : entry.getValue()) {
@@ -84,7 +84,7 @@ public class ItemBatchedRenderer {
 						0,
 						16,
 						16
-				), guiRenderState, windowScaleFactor);
+				), guiRenderState, featureRenderDispatcher, windowScaleFactor);
 			}
 		}
 		batch.clear();
@@ -112,38 +112,32 @@ public class ItemBatchedRenderer {
 	private static class ItemGuiElementRenderer extends OversizedItemRenderer {
 		private Object modelIdentity;
 
-		public ItemGuiElementRenderer(MultiBufferSource.BufferSource immediate) {
-			super(immediate);
-		}
-
 		@Override
 		public void invalidateTexture() {
 			this.modelIdentity = null;
 		}
 
 		@Override
-		protected void renderToTexture(OversizedItemRenderState renderState, PoseStack matrixStack) {
-			matrixStack.scale(1f, -1f, -1f);
+		protected void renderToTexture(OversizedItemRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
+			poseStack.scale(1f, -1f, -1f);
 
 			var guiItemRenderState = renderState.guiItemRenderState();
 			var itemRenderState = guiItemRenderState.itemStackRenderState();
 			var gameRenderer = Minecraft.getInstance().gameRenderer;
-			var renderDispatcher = gameRenderer.getFeatureRenderDispatcher();
 
-			gameRenderer.getLighting().setupFor(
+			gameRenderer.lighting().setupFor(
 					itemRenderState.usesBlockLight()
 							? Lighting.Entry.ITEMS_3D
 							: Lighting.Entry.ITEMS_FLAT
 			);
 
 			itemRenderState.submit(
-					matrixStack,
-					renderDispatcher.getSubmitNodeStorage(),
+					poseStack,
+					submitNodeCollector,
 					0xF000F0,
 					OverlayTexture.NO_OVERLAY,
 					0
 			);
-			renderDispatcher.renderAllFeatures();
 
 			this.modelIdentity = itemRenderState.getModelIdentity();
 		}

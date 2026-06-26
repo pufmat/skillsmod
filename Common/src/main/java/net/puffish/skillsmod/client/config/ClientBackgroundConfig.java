@@ -1,10 +1,10 @@
 package net.puffish.skillsmod.client.config;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -21,7 +21,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 
 public record ClientBackgroundConfig(
@@ -71,7 +70,7 @@ public record ClientBackgroundConfig(
 					))
 					.orElseGet(MissingTextureAtlasSprite::create);
 
-			var size = Mth.roundToward(SpriteContents.UBO_SIZE, RenderSystem.getDevice().getUniformOffsetAlignment());
+			var size = Mth.roundToward(SpriteContents.UBO_SIZE, RenderSystem.getDevice().getDeviceInfo().limits().minUniformOffsetAlignment());
 			var byteBuffer = MemoryUtil.memAlloc(size);
 
 			var sprite = new ClientBackgroundSprite(id, contents);
@@ -83,7 +82,7 @@ public record ClientBackgroundConfig(
 			texture = RenderSystem.getDevice().createTexture(
 					id.toString(),
 					GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT,
-					TextureFormat.RGBA8,
+					GpuFormat.RGBA8_UNORM,
 					contents.width(),
 					contents.height(),
 					1,
@@ -91,20 +90,31 @@ public record ClientBackgroundConfig(
 			);
 			textureView = RenderSystem.getDevice().createTextureView(texture);
 
-			contents.uploadFirstFrame(texture, 0);
+			if (!contents.isAnimated()) {
+				contents.uploadFirstFrame(texture, 0);
+			}
+			if (animationState != null) {
+				uploadAnimationFrames();
+			}
+		}
+
+		private void uploadAnimationFrames() {
+			try (var renderPass = RenderSystem.getDevice()
+					.createCommandEncoder()
+					.createRenderPass(() -> "Animate " + contents.name(), textureView, Optional.empty())) {
+				RenderSystem.bindDefaultUniforms(renderPass);
+
+				if (animationState.needsToDraw()) {
+					animationState.drawToAtlas(renderPass, animationState.getDrawUbo(0));
+				}
+			}
 		}
 
 		@Override
 		public void tick() {
 			if (animationState != null) {
 				animationState.tick();
-				try (var renderPass = RenderSystem.getDevice()
-						.createCommandEncoder()
-						.createRenderPass(() -> "Animate " + contents.name(), textureView, OptionalInt.empty())) {
-					if (animationState.needsToDraw()) {
-						animationState.drawToAtlas(renderPass, animationState.getDrawUbo(0));
-					}
-				}
+				uploadAnimationFrames();
 			}
 		}
 

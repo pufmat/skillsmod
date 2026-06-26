@@ -1,8 +1,8 @@
 package net.puffish.skillsmod.client.gui;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -456,7 +456,7 @@ public class SkillsScreen extends Screen {
 			);
 		} else if (icon instanceof ClientIconConfig.EffectIconConfig effectIcon) {
 			var guiAtlasManager = minecraft.getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
-			var texture = Gui.getMobEffectSprite(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effectIcon.effect()));
+			var texture = Hud.getMobEffectSprite(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effectIcon.effect()));
 			var sprite = guiAtlasManager.getSprite(texture);
 			var halfSize = Math.round(9f * sizeScale);
 			var size = halfSize * 2;

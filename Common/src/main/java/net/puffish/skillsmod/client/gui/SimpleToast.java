@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.client.gui;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -15,8 +14,8 @@ public class SimpleToast implements Toast {
 		this.toast = toast;
 	}
 
-	public static SimpleToast create(Minecraft client, Component title, Component description) {
-		return new SimpleToast(SystemToast.multiline(client, SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, description));
+	public static SimpleToast create(Component title, Component description) {
+		return new SimpleToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, description));
 	}
 
 	@Override

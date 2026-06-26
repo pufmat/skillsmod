@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.advancements.criterion.FishingRodHookedTrigger;
+import net.minecraft.advancements.triggers.FishingRodHookedTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;

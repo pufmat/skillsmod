@@ -3,7 +3,7 @@ package net.puffish.skillsmod.reward.builtin;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
@@ -60,7 +60,7 @@ public class AttributeReward implements Reward {
 				.andThen(attributeElement -> BuiltinJson.parseAttribute(attributeElement)
 						.andThen(attribute -> {
 							var attributeEntry = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute);
-							if (DefaultAttributes.getSupplier(EntityType.PLAYER).hasAttribute(attributeEntry)) {
+							if (DefaultAttributes.getSupplier(EntityTypes.PLAYER).hasAttribute(attributeEntry)) {
 								return Result.success(attributeEntry);
 							} else {
 								return Result.failure(attributeElement.getPath().createProblem("Expected a valid player attribute"));

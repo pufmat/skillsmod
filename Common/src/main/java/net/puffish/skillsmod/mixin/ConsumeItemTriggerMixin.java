@@ -1,6 +1,6 @@
 package net.puffish.skillsmod.mixin;
 
-import net.minecraft.advancements.criterion.ConsumeItemTrigger;
+import net.minecraft.advancements.triggers.ConsumeItemTrigger;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;

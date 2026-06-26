@@ -114,7 +114,7 @@ public class SkillsClientMod {
 	}
 
 	private void onOpenKeyPress() {
-		if (Minecraft.getInstance().screen instanceof SkillsScreen screen) {
+		if (Minecraft.getInstance().gui.screen() instanceof SkillsScreen screen) {
 			screen.onClose();
 		} else {
 			openScreen(Optional.empty());
@@ -160,7 +160,7 @@ public class SkillsClientMod {
 	private void onNewPointPacket(NewPointInPacket packet) {
 		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
 			if (category.hasAnySkillLeft()) {
-				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
+				Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
 						SkillsMod.createTranslatable(
 								"chat",
 								"new_point",
@@ -176,9 +176,7 @@ public class SkillsClientMod {
 	}
 
 	private void onShowToast(ShowToastInPacket packet) {
-		var client = Minecraft.getInstance();
-		client.getToastManager().addToast(SimpleToast.create(
-				client,
+		Minecraft.getInstance().gui.toastManager().addToast(SimpleToast.create(
 				Component.literal("Pufferfish's Skills"),
 				SkillsMod.createTranslatable("toast", switch (packet.getToastType()) {
 					case INVALID_CONFIG -> "invalid_config";
@@ -188,7 +186,7 @@ public class SkillsClientMod {
 	}
 
 	public void openScreen(Optional<Identifier> categoryId) {
-		Minecraft.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
+		Minecraft.getInstance().gui.setScreen(new SkillsScreen(screenData, categoryId));
 	}
 
 	public ClientPacketSender getPacketSender() {

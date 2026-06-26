@@ -1,11 +1,12 @@
 package net.puffish.skillsmod.access;
 
-import java.util.Map;
 import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+
+import java.util.Map;
 
 public interface GuiRendererAccess {
 	Map<Object, OversizedItemRenderer> getOversizedItemRenderers();
 
-	MultiBufferSource.BufferSource getBufferSource();
+	FeatureRenderDispatcher getFeatureRenderDispatcher();
 }

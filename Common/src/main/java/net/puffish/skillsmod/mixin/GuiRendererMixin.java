@@ -2,7 +2,7 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.OversizedItemRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.puffish.skillsmod.access.GuiRendererAccess;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +19,7 @@ public final class GuiRendererMixin implements GuiRendererAccess {
 
 	@Shadow
 	@Final
-	private MultiBufferSource.BufferSource bufferSource;
+	private FeatureRenderDispatcher featureRenderDispatcher;
 
 	@Override
 	@Unique
@@ -29,7 +29,7 @@ public final class GuiRendererMixin implements GuiRendererAccess {
 
 	@Override
 	@Unique
-	public MultiBufferSource.BufferSource getBufferSource() {
-		return bufferSource;
+	public FeatureRenderDispatcher getFeatureRenderDispatcher() {
+		return featureRenderDispatcher;
 	}
 }
