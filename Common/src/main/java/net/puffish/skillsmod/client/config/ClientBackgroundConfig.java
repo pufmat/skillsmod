@@ -119,4 +119,10 @@ public record ClientBackgroundConfig(
 			super.close();
 		}
 	}
+
+	public void dispose() {
+		var client = Minecraft.getInstance();
+		client.execute(() -> client.getTextureManager()
+				.release(this.texture));
+	}
 }
