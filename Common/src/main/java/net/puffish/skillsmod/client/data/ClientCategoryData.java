@@ -353,6 +353,10 @@ public class ClientCategoryData {
 		return Optional.ofNullable(connectionStates.get(connection));
 	}
 
+	public void dispose() {
+		config.dispose();
+	}
+
 	public ClientCategoryConfig getConfig() {
 		return config;
 	}
