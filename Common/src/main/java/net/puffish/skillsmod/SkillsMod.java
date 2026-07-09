@@ -407,6 +407,9 @@ public class SkillsMod {
 	}
 
 	public void setExperience(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int amount) {
+		if (amount < 0) {
+			amount = 0;
+		}
 		var curve = experience.curve();
 		var level = curve.getProgress(amount).currentLevel();
 		var levelLimit = curve.getLevelLimit();
