@@ -18,9 +18,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -28,6 +30,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.Environment;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.mixin.GameRulesInvoker;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
@@ -67,11 +71,35 @@ public class NeoForgeMain {
 		modEventBus.addListener(this::onRegisterPayloadHandler);
 
 		var neoForgeEventBus = NeoForge.EVENT_BUS;
+		neoForgeEventBus.addListener(this::onBlockBreak);
 		neoForgeEventBus.addListener(this::onPlayerLoggedIn);
 		neoForgeEventBus.addListener(this::onPlayerLoggedOut);
 		neoForgeEventBus.addListener(this::onServerStarting);
 		neoForgeEventBus.addListener(this::onOnDatapackSyncEvent);
 		neoForgeEventBus.addListener(this::onRegisterCommands);
+	}
+
+	private void onBlockBreak(BlockEvent.BreakEvent event) {
+		if (event.getPlayer() instanceof ServerPlayerEntity serverPlayer) {
+			var state = event.getState();
+			var stack = serverPlayer.getMainHandStack();
+			SkillsAPI.updateExperienceSources(
+					serverPlayer,
+					BreakBlockExperienceSource.class,
+					experienceSource -> (int) Math.round(experienceSource.calculation().evaluate(
+							new BreakBlockExperienceSource.Data(serverPlayer, state, stack)
+					))
+			);
+			if (EventHooks.doPlayerHarvestCheck(serverPlayer, state, event.getLevel(), event.getPos())) {
+				SkillsAPI.updateExperienceSources(
+						serverPlayer,
+						MineBlockExperienceSource.class,
+						es -> (int) Math.round(es.calculation().evaluate(
+								new MineBlockExperienceSource.Data(serverPlayer, state, stack)
+						))
+				);
+			}
+		}
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
