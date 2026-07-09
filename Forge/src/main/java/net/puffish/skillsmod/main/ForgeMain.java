@@ -16,6 +16,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -28,6 +29,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.mixin.GameRulesInvoker;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
@@ -50,6 +53,7 @@ public class ForgeMain {
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ForgeClientMain::new);
 
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
+		forgeEventBus.addListener(this::onBlockBreak);
 		forgeEventBus.addListener(this::onPlayerLoggedIn);
 		forgeEventBus.addListener(this::onPlayerLoggedOut);
 		forgeEventBus.addListener(this::onServerStarting);
@@ -63,6 +67,29 @@ public class ForgeMain {
 				new ServerPacketSenderImpl(),
 				new ServerPlatformImpl()
 		);
+	}
+
+	private void onBlockBreak(BlockEvent.BreakEvent event) {
+		if (event.getPlayer() instanceof ServerPlayerEntity serverPlayer) {
+			var state = event.getState();
+			var stack = serverPlayer.getMainHandStack();
+			SkillsAPI.updateExperienceSources(
+					serverPlayer,
+					BreakBlockExperienceSource.class,
+					experienceSource -> (int) Math.round(experienceSource.calculation().evaluate(
+							new BreakBlockExperienceSource.Data(serverPlayer, state, stack)
+					))
+			);
+			if (serverPlayer.canHarvest(state)) {
+				SkillsAPI.updateExperienceSources(
+						serverPlayer,
+						MineBlockExperienceSource.class,
+						es -> (int) Math.round(es.calculation().evaluate(
+								new MineBlockExperienceSource.Data(serverPlayer, state, stack)
+						))
+				);
+			}
+		}
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
