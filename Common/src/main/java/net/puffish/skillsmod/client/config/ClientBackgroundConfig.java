@@ -87,4 +87,12 @@ public record ClientBackgroundConfig(
 			super.close();
 		}
 	}
+
+	public void dispose() {
+		MinecraftClient.getInstance().execute(() -> {
+			MinecraftClient.getInstance()
+					.getTextureManager()
+					.destroyTexture(this.texture);
+		});
+	}
 }
