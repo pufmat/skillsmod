@@ -13,14 +13,23 @@ public class ClientSkillScreenData {
 	private int offset = 0;
 
 	public void putCategory(Identifier categoryId, ClientCategoryData categoryData) {
-		categories.put(categoryId, categoryData);
+		var oldCategoryData = categories.put(categoryId, categoryData);
+		if (oldCategoryData != null) {
+			oldCategoryData.dispose();
+		}
 	}
 
 	public void removeCategory(Identifier categoryId) {
-		categories.remove(categoryId);
+		var oldCategoryData = categories.remove(categoryId);
+		if (oldCategoryData != null) {
+			oldCategoryData.dispose();
+		}
 	}
 
 	public void clearCategories() {
+		for (var oldCategoryData : categories.values()) {
+			oldCategoryData.dispose();
+		}
 		categories.clear();
 	}
 

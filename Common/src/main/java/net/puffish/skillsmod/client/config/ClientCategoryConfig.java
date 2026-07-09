@@ -122,4 +122,8 @@ public record ClientCategoryConfig(
 		return Optional.ofNullable(definitions.get(id));
 	}
 
+	public void dispose() {
+		background.dispose();
+	}
+
 }
