@@ -101,4 +101,12 @@ public record ClientBackgroundConfig(
 			super(null, info, 0, width, height, 0, 0, image);
 		}
 	}
+
+	public void dispose() {
+		MinecraftClient.getInstance().execute(() -> {
+			MinecraftClient.getInstance()
+					.getTextureManager()
+					.destroyTexture(this.texture);
+		});
+	}
 }
