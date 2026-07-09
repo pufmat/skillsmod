@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -18,6 +19,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSource;
+import net.puffish.skillsmod.experience.source.builtin.MineBlockExperienceSource;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
@@ -43,6 +47,28 @@ public class FabricMain implements ModInitializer {
 				new ServerPacketSenderImpl(),
 				new ServerPlatformImpl()
 		);
+
+		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
+			if (player instanceof ServerPlayer serverPlayer) {
+				var stack = serverPlayer.getMainHandItem();
+				SkillsAPI.updateExperienceSources(
+						serverPlayer,
+						BreakBlockExperienceSource.class,
+						experienceSource -> (int) Math.round(experienceSource.calculation().evaluate(
+								new BreakBlockExperienceSource.Data(serverPlayer, state, stack)
+						))
+				);
+				if (serverPlayer.hasCorrectToolForDrops(state)) {
+					SkillsAPI.updateExperienceSources(
+							serverPlayer,
+							MineBlockExperienceSource.class,
+							es -> (int) Math.round(es.calculation().evaluate(
+									new MineBlockExperienceSource.Data(serverPlayer, state, stack)
+							))
+					);
+				}
+			}
+		});
 	}
 
 	private class ServerRegistrarImpl implements ServerRegistrar {

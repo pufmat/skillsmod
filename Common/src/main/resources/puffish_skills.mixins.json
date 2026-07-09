@@ -4,13 +4,11 @@
 	"package": "net.puffish.skillsmod.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"BlockMixin",
 		"ConsumeItemTriggerMixin",
 		"DamageSourceMixin",
 		"EnchantedItemTriggerMixin",
 		"FishingRodHookedTriggerMixin",
 		"FurnaceResultSlotMixin",
-		"ItemStackMixin",
 		"LevelChunkMixin",
 		"LivingEntityMixin",
 		"PlayerMixin",
