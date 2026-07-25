@@ -59,6 +59,7 @@ import net.puffish.skillsmod.server.network.packets.out.SkillUpdateOutPacket;
 import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.setup.SkillsArgumentTypes;
+import net.puffish.skillsmod.server.setup.SkillsCriteria;
 import net.puffish.skillsmod.server.setup.SkillsGameRules;
 import net.puffish.skillsmod.util.ChangeListener;
 import net.puffish.skillsmod.util.DisposeContext;
@@ -160,6 +161,7 @@ public class SkillsMod {
 		eventReceiver.registerListener(instance.new EventListener());
 
 		SkillsArgumentTypes.register(registrar);
+		SkillsCriteria.register(registrar);
 
 		BuiltinRewards.register();
 		BuiltinOperations.register();
