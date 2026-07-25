@@ -92,8 +92,14 @@ public class CommandReward implements Reward {
 
 		var server = SkillsMod.getInstance().getPlayerServer(player);
 
+		// use server command source instead of player command source to make
+		// permission mods consider this command as executed by the server
 		server.getCommands().performPrefixedCommand(
-				player.createCommandSourceStack()
+				server.createCommandSourceStack()
+						.withPosition(player.position())
+						.withRotation(player.getRotationVector())
+						.withLevel(player.level())
+						.withEntity(player)
 						.withSuppressedOutput()
 						.withPermission(server.getFunctionCompilationPermissions()),
 				command
