@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.reward.builtin;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
@@ -92,8 +93,14 @@ public class CommandReward implements Reward {
 
 		var server = SkillsMod.getInstance().getPlayerServer(player);
 
+		// use server command source instead of player command source to make
+		// permission mods consider this command as executed by the server
 		server.getCommandManager().executeWithPrefix(
-				player.getCommandSource()
+				server.getCommandSource()
+						.withPosition(player.getPos())
+						.withRotation(player.getRotationClient())
+						.withWorld(player.getWorld() instanceof ServerWorld world ? world : null)
+						.withEntity(player)
 						.withSilent()
 						.withLevel(server.getFunctionPermissionLevel()),
 				command
