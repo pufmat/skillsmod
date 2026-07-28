@@ -72,11 +72,16 @@ public record ClientBackgroundConfig(
 					})
 					.orElseGet(() -> MissingSprite.getMissingSprite(null, 0, 16, 16, 0, 0));
 
-			RenderSystem.recordRenderCall(() -> {
+			RenderSystem.recordRenderCall(this::setup);
+		}
+
+		private void setup() {
+			// close may be called before setup is queued
+			if (sprite != null) {
 				bindTexture();
 				TextureUtil.prepareImage(this.getGlId(), 0, sprite.getWidth(), sprite.getHeight());
 				sprite.upload();
-			});
+			}
 		}
 
 		@Override
@@ -91,6 +96,7 @@ public record ClientBackgroundConfig(
 		@Override
 		public void close() {
 			sprite.close();
+			sprite = null;
 
 			super.close();
 		}
