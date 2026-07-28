@@ -62,11 +62,16 @@ public record ClientBackgroundConfig(
 					.orElseGet(MissingSprite::createSpriteContents);
 			animator = sprite.createAnimator();
 
-			RenderSystem.recordRenderCall(() -> {
+			RenderSystem.recordRenderCall(this::setup);
+		}
+
+		private void setup() {
+			// close may be called before setup is queued
+			if (sprite != null) {
 				bindTexture();
 				TextureUtil.prepareImage(this.getGlId(), 0, sprite.getWidth(), sprite.getHeight());
 				sprite.upload(0, 0);
-			});
+			}
 		}
 
 		@Override
@@ -80,8 +85,10 @@ public record ClientBackgroundConfig(
 		@Override
 		public void close() {
 			sprite.close();
+			sprite = null;
 			if (animator != null) {
 				animator.close();
+				animator = null;
 			}
 
 			super.close();
