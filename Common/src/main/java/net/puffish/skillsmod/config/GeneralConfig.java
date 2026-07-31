@@ -22,7 +22,8 @@ public record GeneralConfig(
 		boolean unlockedByDefault,
 		int startingPoints,
 		boolean exclusiveRoot,
-		int spentPointsLimit
+		int spentPointsLimit,
+		boolean eraseOnDeath
 ) {
 
 	public static Result<GeneralConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
@@ -104,6 +105,14 @@ public record GeneralConfig(
 				)
 				.orElse(Integer.MAX_VALUE);
 
+		var eraseOnDeath = rootObject.get("erase_on_death")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsBoolean()
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(false);
+
 		if (problems.isEmpty()) {
 			return Result.success(new GeneralConfig(
 					optTitle.orElseThrow(),
@@ -115,7 +124,8 @@ public record GeneralConfig(
 					unlockedByDefault,
 					startingPoints,
 					exclusiveRoot,
-					spentPointsLimit
+					spentPointsLimit,
+					eraseOnDeath
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
