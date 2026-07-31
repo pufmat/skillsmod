@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Criteria.class)
 public interface CriteriaInvoker {
 	@Invoker("register")
-	static <T extends Criterion<?>> T register(T object) {
+	static <T extends Criterion<?>> T register(String id, T object) {
 		throw new AssertionError();
 	}
 }

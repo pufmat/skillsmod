@@ -22,7 +22,7 @@ public class SkillsCriteria {
 		SkillsAPI.registerSkillUnlockEvent((player, categoryId, skillId) -> {
 			SKILL_UNLOCKED.trigger(player, categoryId, skillId);
 		});
-		CriteriaInvoker.register(SKILL_UNLOCKED);
+		CriteriaInvoker.register(SKILL_UNLOCKED.getId().toString(), SKILL_UNLOCKED);
 	}
 
 	public static class SkillUnlockedCriterion extends AbstractCriterion<SkillUnlockedCriterion.Conditions> {
