@@ -2,6 +2,8 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
+import net.minecraft.world.damagesource.DamageSource;
+import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.IncreaseStatExperienceSource;
 import net.puffish.skillsmod.reward.builtin.AttributeReward;
@@ -27,5 +29,11 @@ public abstract class ServerPlayerMixin {
 						new IncreaseStatExperienceSource.Data(player, stat, amount)
 				))
 		);
+	}
+
+	@Inject(method = "die", at = @At("TAIL"))
+	private void injectAtDie(DamageSource damageSource, CallbackInfo ci) {
+		var player = (ServerPlayer) (Object) this;
+		SkillsMod.getInstance().onPlayerDeath(player);
 	}
 }
