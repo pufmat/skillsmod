@@ -15,7 +15,8 @@ import java.util.Optional;
 
 public record ExperienceConfig(
 		ExperienceCurve curve,
-		List<ExperienceSourceConfig> experienceSources
+		List<ExperienceSourceConfig> experienceSources,
+		boolean resetOnDeath
 ) {
 
 	public static Result<Optional<ExperienceConfig>, Problem> parse(JsonElement rootElement, ConfigContext context) {
@@ -51,11 +52,20 @@ public record ExperienceConfig(
 				.getSuccess()
 				.orElseGet(List::of);
 
+		var resetOnDeath = rootObject.get("reset_on_death")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsBoolean()
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElse(false);
+
 		if (problems.isEmpty()) {
 			if (enabled) {
 				return Result.success(Optional.of(new ExperienceConfig(
 						ExperienceCurve.create(optExperiencePerLevel.orElseThrow().function(), levelLimit),
-						experienceSources
+						experienceSources,
+						resetOnDeath
 				)));
 			} else {
 				return Result.success(Optional.empty());
