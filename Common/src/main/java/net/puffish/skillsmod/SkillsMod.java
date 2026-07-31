@@ -307,8 +307,19 @@ public class SkillsMod {
 	}
 
 	public void onPlayerDeath(ServerPlayer player) {
+		if (platform.isFakePlayer(player)) {
+			return;
+		}
 		var playerData = getPlayerData(player);
 		for (var category : getAllCategories()) {
+			var categoryData = playerData.getOrCreateCategoryData(category);
+			category.experience().ifPresent(experience -> {
+				if (experience.resetOnDeath()) {
+					var amount = categoryData.getExperience();
+					amount -= experience.curve().getProgress(amount).currentExperience();
+					setExperience(player, category, experience, categoryData, amount);
+				}
+			});
 			if (category.general().eraseOnDeath()) {
 				eraseCategory(player, playerData, category);
 			}
