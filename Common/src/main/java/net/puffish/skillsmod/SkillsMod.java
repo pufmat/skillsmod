@@ -306,6 +306,15 @@ public class SkillsMod {
 		tryUnlockSkill(player, packet.getCategoryId(), packet.getSkillId(), false);
 	}
 
+	public void onPlayerDeath(ServerPlayer player) {
+		var playerData = getPlayerData(player);
+		for (var category : getAllCategories()) {
+			if (category.general().eraseOnDeath()) {
+				eraseCategory(player, playerData, category);
+			}
+		}
+	}
+
 	public void unlockSkill(ServerPlayer player, Identifier categoryId, String skillId) {
 		tryUnlockSkill(player, categoryId, skillId, true);
 	}
@@ -344,26 +353,33 @@ public class SkillsMod {
 
 	public void resetSkills(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
-			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-			var unlockedSkillIds = new ArrayList<>(categoryData.getUnlockedSkillIds());
-
-			categoryData.resetSkills();
-			updateRewards(player, category, categoryData);
-			showCategory(player, category, categoryData);
-
-			for (var skillId : unlockedSkillIds) {
-				SKILL_LOCK.invoker().onSkillLock(player, categoryId, skillId);
-			}
+			resetSkills(player, category, getPlayerData(player).getOrCreateCategoryData(category));
 		});
+	}
+
+	private void resetSkills(ServerPlayer player, CategoryConfig category, CategoryData categoryData) {
+		var unlockedSkillIds = new ArrayList<>(categoryData.getUnlockedSkillIds());
+
+		categoryData.resetSkills();
+		updateRewards(player, category, categoryData);
+		showCategory(player, category, categoryData);
+
+		for (var skillId : unlockedSkillIds) {
+			SKILL_LOCK.invoker().onSkillLock(player, category.id(), skillId);
+		}
 	}
 
 	public void eraseCategory(ServerPlayer player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var playerData = getPlayerData(player);
-			playerData.removeCategoryData(category);
-
-			updateCategory(player, category);
+			eraseCategory(player, playerData, category);
 		});
+	}
+
+	private void eraseCategory(ServerPlayer player, PlayerData playerData, CategoryConfig category) {
+		playerData.removeCategoryData(category);
+
+		updateCategory(player, category);
 	}
 
 	public void unlockCategory(ServerPlayer player, Identifier categoryId) {
