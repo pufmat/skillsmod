@@ -22,7 +22,8 @@ public record CategoryConfig(
 		SkillDefinitionsConfig definitions,
 		SkillsConfig skills,
 		SkillConnectionsConfig connections,
-		Optional<ExperienceConfig> experience
+		Optional<ExperienceConfig> experience,
+		Optional<ExchangeConfig> exchange
 ) {
 
 	public static Result<CategoryConfig, Problem> parse(
@@ -33,6 +34,7 @@ public record CategoryConfig(
 			JsonElement skillsElement,
 			JsonElement connectionsElement,
 			Optional<JsonElement> optExperienceElement,
+			Optional<JsonElement> optExchangeElement,
 			ConfigContext context
 	) {
 		var problems = new ArrayList<Problem>();
@@ -46,6 +48,12 @@ public record CategoryConfig(
 						.ifFailure(problems::add)
 						.getSuccess()
 						.flatMap(Function.identity())
+				);
+
+		var optExchange = optExchangeElement
+				.flatMap(exchange -> ExchangeConfig.parse(exchange, context)
+						.ifFailure(problems::add)
+						.getSuccess()
 				);
 
 		var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement, context)
@@ -64,6 +72,10 @@ public record CategoryConfig(
 						.getSuccess()
 		);
 
+		if (optExchange.isPresent() && optExperience.isPresent()) {
+			problems.add(Problem.message("Experience and exchange cannot be enabled together"));
+		}
+
 		if (problems.isEmpty()) {
 			return Result.success(new CategoryConfig(
 					id,
@@ -72,7 +84,8 @@ public record CategoryConfig(
 					optDefinitions.orElseThrow(),
 					optSkills.orElseThrow(),
 					optConnections.orElseThrow(),
-					optExperience
+					optExperience,
+					optExchange
 			));
 		} else {
 			return Result.failure(Problem.combine(problems));
