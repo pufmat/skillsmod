@@ -21,6 +21,7 @@ public class ClientCategoryData {
 	private int earnedPoints;
 
 	private int currentLevel;
+	private int currentCost;
 	private int currentExperience;
 	private int requiredExperience;
 
@@ -39,6 +40,7 @@ public class ClientCategoryData {
 			int spentPoints,
 			int earnedPoints,
 			int currentLevel,
+			int currentCost,
 			int currentExperience,
 			int requiredExperience
 	) {
@@ -47,6 +49,7 @@ public class ClientCategoryData {
 		this.spentPoints = spentPoints;
 		this.earnedPoints = earnedPoints;
 		this.currentLevel = currentLevel;
+		this.currentCost = currentCost;
 		this.currentExperience = currentExperience;
 		this.requiredExperience = requiredExperience;
 		this.connectionStates = new HashMap<>();
@@ -382,7 +385,11 @@ public class ClientCategoryData {
 	}
 
 	public boolean hasExperience() {
-		return currentLevel >= 0;
+		return currentExperience != Integer.MIN_VALUE;
+	}
+
+	public boolean hasExchange() {
+		return currentCost != Integer.MIN_VALUE;
 	}
 
 	public void setCurrentLevel(int currentLevel) {
@@ -403,6 +410,14 @@ public class ClientCategoryData {
 
 	public void setRequiredExperience(int requiredExperience) {
 		this.requiredExperience = requiredExperience;
+	}
+
+	public int getCurrentCost() {
+		return currentCost;
+	}
+
+	public void setCurrentCost(int currentCost) {
+		this.currentCost = currentCost;
 	}
 
 	public float getExperienceProgress() {

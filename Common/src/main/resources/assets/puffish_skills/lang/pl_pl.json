@@ -1,12 +1,14 @@
 {
 	"text.puffish_skills.skills": "Umiejętności",
 	"text.puffish_skills.points_left": "Pozostałe punkty: ",
+	"text.puffish_skills.buy_point": "Kup punkt",
 
 	"tooltip.puffish_skills.current_level": "Obecny poziom: %s",
 	"tooltip.puffish_skills.experience_progress": "Doświadczenie: %s/%s (%s%%)",
 	"tooltip.puffish_skills.to_next_level": "Do następnego poziomu: %s",
 	"tooltip.puffish_skills.earned_points": "Zdobyte punkty: %s",
 	"tooltip.puffish_skills.spent_points": "Wydane punkty: %s",
+	"tooltip.puffish_skills.cost": "Koszt: %s",
 
 	"category.puffish_skills.skills": "Umiejętności",
 	"key.puffish_skills.open": "Otwórz drzewko umiejętności",

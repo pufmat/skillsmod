@@ -8,4 +8,5 @@ public class PointSources {
 	public static final Identifier STARTING = SkillsMod.createIdentifier("starting");
 	public static final Identifier COMMANDS = SkillsMod.createIdentifier("commands");
 	public static final Identifier EXPERIENCE = SkillsMod.createIdentifier("experience");
+	public static final Identifier EXCHANGE = SkillsMod.createIdentifier("exchange");
 }

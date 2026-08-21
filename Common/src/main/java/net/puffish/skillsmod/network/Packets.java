@@ -10,7 +10,9 @@ public class Packets {
 	public static final Identifier SKILL_UPDATE = SkillsMod.createIdentifier("skill_update");
 	public static final Identifier POINTS_UPDATE = SkillsMod.createIdentifier("points_update");
 	public static final Identifier EXPERIENCE_UPDATE = SkillsMod.createIdentifier("experience_update");
+	public static final Identifier EXCHANGE_UPDATE = SkillsMod.createIdentifier("exchange_update");
 	public static final Identifier SKILL_CLICK = SkillsMod.createIdentifier("skill_click");
+	public static final Identifier BUY_POINT = SkillsMod.createIdentifier("buy_point");
 	public static final Identifier SHOW_TOAST = SkillsMod.createIdentifier("show_toast");
 	public static final Identifier OPEN_SCREEN = SkillsMod.createIdentifier("open_screen");
 }

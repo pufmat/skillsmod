@@ -6,6 +6,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,6 +27,7 @@ import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.Config;
+import net.puffish.skillsmod.config.ExchangeConfig;
 import net.puffish.skillsmod.config.ModConfig;
 import net.puffish.skillsmod.config.PackConfig;
 import net.puffish.skillsmod.config.experience.ExperienceConfig;
@@ -47,7 +49,9 @@ import net.puffish.skillsmod.server.data.ServerData;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
+import net.puffish.skillsmod.server.network.packets.in.BuyPointInPacket;
 import net.puffish.skillsmod.server.network.packets.in.SkillClickInPacket;
+import net.puffish.skillsmod.server.network.packets.out.ExchangeUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.ExperienceUpdateOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.HideCategoryOutPacket;
 import net.puffish.skillsmod.server.network.packets.out.NewPointOutPacket;
@@ -145,11 +149,18 @@ public class SkillsMod {
 				instance::onSkillClickPacket
 		);
 
+		registrar.registerInPacket(
+				Packets.BUY_POINT,
+				BuyPointInPacket::read,
+				instance::onBuyPointPacket
+		);
+
 		registrar.registerOutPacket(Packets.SHOW_CATEGORY);
 		registrar.registerOutPacket(Packets.HIDE_CATEGORY);
 		registrar.registerOutPacket(Packets.SKILL_UPDATE);
 		registrar.registerOutPacket(Packets.POINTS_UPDATE);
 		registrar.registerOutPacket(Packets.EXPERIENCE_UPDATE);
+		registrar.registerOutPacket(Packets.EXCHANGE_UPDATE);
 		registrar.registerOutPacket(Packets.SHOW_TOAST);
 		registrar.registerOutPacket(Packets.OPEN_SCREEN);
 		registrar.registerOutPacket(Packets.NEW_POINT);
@@ -299,6 +310,39 @@ public class SkillsMod {
 		);
 	}
 
+	private void onBuyPointPacket(ServerPlayer player, BuyPointInPacket packet) {
+		if (player.isSpectator()) {
+			return;
+		}
+		tryBuyPoint(player, packet.getCategoryId());
+	}
+
+	private void tryBuyPoint(ServerPlayer player, Identifier categoryId) {
+		getCategory(categoryId).ifPresent(category -> {
+			category.exchange().ifPresent(exchange -> {
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				var level = categoryData.getExchangeLevel();
+				if (level < exchange.levelLimit()) {
+					var cost = exchange.function().apply(level);
+					if (player.experienceLevel >= cost) {
+						player.giveExperienceLevels(-cost);
+						// vanilla does not send this immediately, so it is sent manually here
+						player.connection.send(new ClientboundSetExperiencePacket(
+								player.experienceProgress,
+								player.totalExperience,
+								player.experienceLevel
+						));
+
+						level += 1;
+						categoryData.setExchangeLevel(level);
+						setPoints(player, category, categoryData, PointSources.EXCHANGE, level, true);
+						syncExchange(player, category, exchange, categoryData);
+					}
+				}
+			});
+		});
+	}
+
 	private void onSkillClickPacket(ServerPlayer player, SkillClickInPacket packet) {
 		if (player.isSpectator()) {
 			return;
@@ -409,6 +453,10 @@ public class SkillsMod {
 		});
 	}
 
+	public Optional<Boolean> hasExchange(Identifier categoryId) {
+		return getCategory(categoryId).map(category -> category.exchange().isPresent());
+	}
+
 	public Optional<Boolean> hasExperience(Identifier categoryId) {
 		return getCategory(categoryId).map(category -> category.experience().isPresent());
 	}
@@ -463,6 +511,39 @@ public class SkillsMod {
 		});
 	}
 
+	public Optional<Integer> getExchangeLevel(ServerPlayer player, Identifier categoryId) {
+		return getCategory(categoryId).flatMap(category -> {
+			if (category.exchange().isEmpty()) {
+				return Optional.empty();
+			}
+
+			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+			return Optional.of(categoryData.getExchangeLevel());
+		});
+	}
+
+	public void setExchangeLevel(ServerPlayer player, Identifier categoryId, int level) {
+		getCategory(categoryId).ifPresent(category -> {
+			category.exchange().ifPresent(exchange -> {
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				setExchangeLevel(player, category, exchange, categoryData, level);
+			});
+		});
+	}
+
+	private void setExchangeLevel(ServerPlayer player, CategoryConfig category, ExchangeConfig exchange, CategoryData categoryData, int level) {
+		if (level < 0) {
+			level = 0;
+		}
+
+		var levelLimit = exchange.levelLimit();
+		if (level >= levelLimit) {
+			level = levelLimit;
+		}
+		categoryData.setExchangeLevel(level);
+		syncExchange(player, category, exchange, categoryData);
+	}
+
 	public void addPoints(ServerPlayer player, Identifier categoryId, Identifier source, int count, boolean isSilent) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -470,7 +551,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void addPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
+	private void addPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
 		setPoints(player, category, categoryData, source, categoryData.getPoints(source) + count, isSilent);
 	}
 
@@ -481,7 +562,7 @@ public class SkillsMod {
 		});
 	}
 
-	public void setPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
+	private void setPoints(ServerPlayer player, CategoryConfig category, CategoryData categoryData, Identifier source, int count, boolean isSilent) {
 		watchNewPoints(player, category, categoryData, isSilent, () -> {
 			categoryData.setPoints(source, count);
 
@@ -524,7 +605,13 @@ public class SkillsMod {
 		});
 	}
 
-	public Optional<Integer> getCurrentLevel(ServerPlayer player, Identifier categoryId) {
+	public Optional<Integer> getCost(Identifier categoryId, int level) {
+		return getCategory(categoryId).map(category -> category.exchange()
+				.map(exchange -> exchange.function().apply(level))
+				.orElse(0));
+	}
+
+	public Optional<Integer> getExperienceLevel(ServerPlayer player, Identifier categoryId) {
 		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
@@ -664,6 +751,15 @@ public class SkillsMod {
 				progress.currentLevel(),
 				progress.currentExperience(),
 				progress.requiredExperience()
+		));
+	}
+
+	private void syncExchange(ServerPlayer player, CategoryConfig category, ExchangeConfig exchange, CategoryData categoryData) {
+		var level = categoryData.getExchangeLevel();
+		packetSender.send(player, new ExchangeUpdateOutPacket(
+				category.id(),
+				level,
+				exchange.function().apply(level)
 		));
 	}
 

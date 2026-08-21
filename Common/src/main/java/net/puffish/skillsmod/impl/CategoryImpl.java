@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
 import net.puffish.skillsmod.api.Experience;
+import net.puffish.skillsmod.api.Exchange;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.util.PointSources;
 
@@ -27,6 +28,15 @@ public class CategoryImpl implements Category {
 	public Optional<Experience> getExperience() {
 		if (SkillsMod.getInstance().hasExperience(categoryId).orElseThrow()) {
 			return Optional.of(new ExperienceImpl(categoryId));
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public Optional<Exchange> getExchange() {
+		if (SkillsMod.getInstance().hasExchange(categoryId).orElseThrow()) {
+			return Optional.of(new ExchangeImpl(categoryId));
 		} else {
 			return Optional.empty();
 		}

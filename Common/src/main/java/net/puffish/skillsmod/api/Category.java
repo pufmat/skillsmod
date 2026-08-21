@@ -10,6 +10,8 @@ public interface Category {
 
 	Optional<Experience> getExperience();
 
+	Optional<Exchange> getExchange();
+
 	Optional<Skill> getSkill(String skillId);
 
 	Stream<Skill> streamSkills();
