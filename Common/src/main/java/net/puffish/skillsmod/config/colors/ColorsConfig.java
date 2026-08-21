@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public record ColorsConfig(
 		ConnectionsColorsConfig connections,
+		ExchangeColorsConfig exchange,
 		FillStrokeColorsConfig points
 ) {
 	private static final FillStrokeColorsConfig DEFAULT_POINTS = new FillStrokeColorsConfig(
@@ -21,6 +22,7 @@ public record ColorsConfig(
 	public static ColorsConfig createDefault() {
 		return new ColorsConfig(
 				ConnectionsColorsConfig.createDefault(),
+				ExchangeColorsConfig.createDefault(),
 				DEFAULT_POINTS
 		);
 	}
@@ -42,6 +44,14 @@ public record ColorsConfig(
 				)
 				.orElseGet(ConnectionsColorsConfig::createDefault);
 
+		var exchange = rootObject.get("exchange")
+				.getSuccess()
+				.flatMap(element -> ExchangeColorsConfig.parse(element, context)
+						.ifFailure(problems::add)
+						.getSuccess()
+				)
+				.orElseGet(ExchangeColorsConfig::createDefault);
+
 		var points = rootObject.get("points")
 				.getSuccess()
 				.flatMap(element -> FillStrokeColorsConfig.parse(element, DEFAULT_POINTS, context)
@@ -53,6 +63,7 @@ public record ColorsConfig(
 		if (problems.isEmpty()) {
 			return Result.success(new ColorsConfig(
 					connections,
+					exchange,
 					points
 			));
 		} else {

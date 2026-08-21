@@ -14,6 +14,7 @@ import net.puffish.skillsmod.client.gui.SimpleToast;
 import net.puffish.skillsmod.client.gui.SkillsScreen;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
+import net.puffish.skillsmod.client.network.packets.in.ExchangeUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
 import net.puffish.skillsmod.client.network.packets.in.NewPointInPacket;
@@ -91,6 +92,12 @@ public class SkillsClientMod {
 		);
 
 		registrar.registerInPacket(
+				Packets.EXCHANGE_UPDATE,
+				ExchangeUpdateInPacket::read,
+				instance::onExchangeUpdatePacket
+		);
+
+		registrar.registerInPacket(
 				Packets.SHOW_TOAST,
 				ShowToastInPacket::read,
 				instance::onShowToast
@@ -109,6 +116,7 @@ public class SkillsClientMod {
 		);
 
 		registrar.registerOutPacket(Packets.SKILL_CLICK);
+		registrar.registerOutPacket(Packets.BUY_POINT);
 
 		eventReceiver.registerListener(instance.new EventListener());
 	}
@@ -145,6 +153,13 @@ public class SkillsClientMod {
 			category.setCurrentLevel(packet.getCurrentLevel());
 			category.setCurrentExperience(packet.getCurrentExperience());
 			category.setRequiredExperience(packet.getRequiredExperience());
+		});
+	}
+
+	private void onExchangeUpdatePacket(ExchangeUpdateInPacket packet) {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+			category.setCurrentLevel(packet.getCurrentLevel());
+			category.setCurrentCost(packet.getCurrentCost());
 		});
 	}
 

@@ -64,6 +64,14 @@ public abstract class ConfigReader {
 					.getSuccess();
 		}
 
+		var optExchangeElement = Optional.<JsonElement>empty();
+		var exchangePath = Path.of("categories", id, "exchange.json");
+		if (exists(exchangePath)) {
+			optExchangeElement = read(exchangePath)
+					.ifFailure(problems::add)
+					.getSuccess();
+		}
+
 		if (problems.isEmpty()) {
 			return CategoryConfig.parse(
 					new Identifier(namespace, id),
@@ -73,6 +81,7 @@ public abstract class ConfigReader {
 					optSkillsElement.orElseThrow(),
 					optConnectionsElement.orElseThrow(),
 					optExperienceElement,
+					optExchangeElement,
 					context
 			);
 		} else {
