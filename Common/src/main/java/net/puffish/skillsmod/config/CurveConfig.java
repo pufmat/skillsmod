@@ -1,4 +1,4 @@
-package net.puffish.skillsmod.config.experience;
+package net.puffish.skillsmod.config;
 
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.config.ConfigContext;
@@ -15,17 +15,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public record ExperiencePerLevelConfig(
+public record CurveConfig(
 		Function<Integer, Integer> function
 ) {
 
-	public static Result<ExperiencePerLevelConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
+	public static Result<CurveConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
 				LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context)
 		);
 	}
 
-	public static Result<ExperiencePerLevelConfig, Problem> parse(JsonObject rootObject, ConfigContext context) {
+	public static Result<CurveConfig, Problem> parse(JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var optTypeElement = rootObject.get("type")
@@ -54,7 +54,7 @@ public record ExperiencePerLevelConfig(
 		}
 	}
 
-	private static Result<ExperiencePerLevelConfig, Problem> build(String type, JsonElement dataElement, JsonPath typeElementPath, ConfigContext context) {
+	private static Result<CurveConfig, Problem> build(String type, JsonElement dataElement, JsonPath typeElementPath, ConfigContext context) {
 		return switch (type) {
 			case "expression" -> parseExpression(dataElement, context);
 			case "values" -> parseValues(dataElement, context);
@@ -62,13 +62,13 @@ public record ExperiencePerLevelConfig(
 		};
 	}
 
-	private static Result<ExperiencePerLevelConfig, Problem> parseExpression(JsonElement rootElement, ConfigContext context) {
+	private static Result<CurveConfig, Problem> parseExpression(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
 				LegacyUtils.wrapNoUnused(rootObject -> parseExpression(rootObject, context), context)
 		);
 	}
 
-	private static Result<ExperiencePerLevelConfig, Problem> parseExpression(JsonObject rootObject, ConfigContext context) {
+	private static Result<CurveConfig, Problem> parseExpression(JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var optExpressionElement = rootObject.get("expression")
@@ -86,7 +86,7 @@ public record ExperiencePerLevelConfig(
 			var expressionElement = optExpressionElement.orElseThrow();
 			var expression = optExpression.orElseThrow();
 
-			return Result.success(new ExperiencePerLevelConfig(
+			return Result.success(new CurveConfig(
 					level -> {
 						var value = expression.eval(Map.ofEntries(Map.entry("level", (double) level)));
 						if (Double.isFinite(value)) {
@@ -106,13 +106,13 @@ public record ExperiencePerLevelConfig(
 		}
 	}
 
-	private static Result<ExperiencePerLevelConfig, Problem> parseValues(JsonElement rootElement, ConfigContext context) {
+	private static Result<CurveConfig, Problem> parseValues(JsonElement rootElement, ConfigContext context) {
 		return rootElement.getAsObject().andThen(
 				LegacyUtils.wrapNoUnused(rootObject -> parseValues(rootObject, context), context)
 		);
 	}
 
-	private static Result<ExperiencePerLevelConfig, Problem> parseValues(JsonObject rootObject, ConfigContext context) {
+	private static Result<CurveConfig, Problem> parseValues(JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
 		var optValues = rootObject.getArray("values")
@@ -125,7 +125,7 @@ public record ExperiencePerLevelConfig(
 		if (problems.isEmpty()) {
 			var values = optValues.orElseThrow();
 
-			return Result.success(new ExperiencePerLevelConfig(
+			return Result.success(new CurveConfig(
 					level -> values.get(Math.min(level, values.size() - 1))
 			));
 		} else {

@@ -5,6 +5,7 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skillsmod.config.CurveConfig;
 import net.puffish.skillsmod.experience.ExperienceCurve;
 import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
@@ -42,7 +43,7 @@ public record ExperienceConfig(
 				.orElse(Integer.MAX_VALUE);
 
 		var optExperiencePerLevel = rootObject.get("experience_per_level")
-				.andThen(element -> ExperiencePerLevelConfig.parse(element, context))
+				.andThen(element -> CurveConfig.parse(element, context))
 				.ifFailure(problems::add)
 				.getSuccess();
 

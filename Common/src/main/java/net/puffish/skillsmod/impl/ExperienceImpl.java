@@ -29,7 +29,7 @@ public class ExperienceImpl implements Experience {
 
 	@Override
 	public int getLevel(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getCurrentLevel(player, categoryId).orElseThrow();
+		return SkillsMod.getInstance().getExperienceLevel(player, categoryId).orElseThrow();
 	}
 
 	@Override
