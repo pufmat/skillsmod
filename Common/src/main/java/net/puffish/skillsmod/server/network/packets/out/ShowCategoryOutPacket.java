@@ -5,6 +5,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.puffish.skillsmod.common.FrameType;
 import net.puffish.skillsmod.common.IconType;
+import net.puffish.skillsmod.common.PointsProvider;
 import net.puffish.skillsmod.common.SkillConnection;
 import net.puffish.skillsmod.config.BackgroundConfig;
 import net.puffish.skillsmod.config.CategoryConfig;
@@ -14,6 +15,8 @@ import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.config.colors.ColorConfig;
 import net.puffish.skillsmod.config.colors.ColorsConfig;
 import net.puffish.skillsmod.config.colors.ConnectionsColorsConfig;
+import net.puffish.skillsmod.config.colors.ExchangeColorsConfig;
+import net.puffish.skillsmod.config.colors.ExchangeCostColorsConfig;
 import net.puffish.skillsmod.config.colors.FillStrokeColorsConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
@@ -48,14 +51,20 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getPointsTotal());
 		category.experience().ifPresentOrElse(experience -> {
-			buf.writeBoolean(true);
+			buf.writeEnumConstant(PointsProvider.EXPERIENCE);
 			var curve = experience.curve();
 			buf.writeInt(curve.getLevelLimit());
 			var progress = curve.getProgress(categoryData.getExperience());
 			buf.writeInt(progress.currentLevel());
 			buf.writeInt(progress.currentExperience());
 			buf.writeInt(progress.requiredExperience());
-		}, () -> buf.writeBoolean(false));
+		}, () -> category.exchange().ifPresentOrElse(exchange -> {
+			buf.writeEnumConstant(PointsProvider.EXCHANGE);
+			buf.writeInt(exchange.levelLimit());
+			var level = categoryData.getExchangeLevel();
+			buf.writeInt(level);
+			buf.writeInt(exchange.function().apply(level));
+		}, () -> buf.writeEnumConstant(PointsProvider.NONE)));
 	}
 
 	public void write(PacketByteBuf buf, SkillDefinitionsConfig definitions) {
@@ -147,6 +156,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	public static void write(PacketByteBuf buf, ColorsConfig colors) {
 		write(buf, colors.connections());
+		write(buf, colors.exchange());
 		write(buf, colors.points());
 	}
 
@@ -156,6 +166,16 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		write(buf, connectionsColors.affordable());
 		write(buf, connectionsColors.unlocked());
 		write(buf, connectionsColors.excluded());
+	}
+
+	public static void write(PacketByteBuf buf, ExchangeColorsConfig exchangeColors) {
+		write(buf, exchangeColors.cost());
+	}
+
+	public static void write(PacketByteBuf buf, ExchangeCostColorsConfig exchangeCostColors) {
+		write(buf, exchangeCostColors.available());
+		write(buf, exchangeCostColors.affordable());
+		write(buf, exchangeCostColors.hovered());
 	}
 
 	public static void write(PacketByteBuf buf, FillStrokeColorsConfig fillStrokeColors) {

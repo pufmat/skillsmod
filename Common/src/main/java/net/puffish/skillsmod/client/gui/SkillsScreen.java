@@ -30,6 +30,7 @@ import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
 import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
+import net.puffish.skillsmod.client.network.packets.out.BuyPointOutPacket;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.ItemBatchedRenderer;
@@ -48,6 +49,7 @@ import java.util.function.BiConsumer;
 public class SkillsScreen extends Screen {
 	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
 	private static final Identifier WINDOW_TEXTURE = new Identifier("textures/gui/advancements/window.png");
+	private static final Identifier ENCHANTING_TEXTURE = new Identifier("textures/gui/container/enchanting_table.png");
 	private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
 	private static final Identifier RECIPE_BOOK_TEXTURE = new Identifier("textures/gui/recipe_book.png");
 	private static final Identifier TRIAL_ICON_TEXTURE = new Identifier("realms", "textures/gui/realms/trial_icon.png");
@@ -217,6 +219,10 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= x && mouse.y >= y && mouse.x < x + 182 && mouse.y < y + 5;
 	}
 
+	private boolean isInsideBuyPoint(Vec2i mouse, int x, int y) {
+		return mouse.x >= x && mouse.y >= y && mouse.x < x + 108 && mouse.y < y + 12;
+	}
+
 	private boolean isInsideArea(Vec2i mouse, int x1, int y1, int x2, int y2) {
 		return mouse.x >= x1 && mouse.y >= y1 && mouse.x < x2 && mouse.y < y2;
 	}
@@ -312,6 +318,16 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void mouseReleasedWithCategory(double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+		if (client == null) {
+			return;
+		}
+		if (client.player == null) {
+			return;
+		}
+		if (client.player.isSpectator()) {
+			return;
+		}
+
 		var mouse = getMousePos(mouseX, mouseY);
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY, activeCategoryData);
 		var activeCategory = activeCategoryData.getConfig();
@@ -328,6 +344,15 @@ public class SkillsScreen extends Screen {
 							.getPacketSender()
 							.send(new SkillClickOutPacket(activeCategory.id(), skill.id()));
 				}
+			}
+		} else {
+			var tmpX = (this.width - 108) / 2;
+			var tmpY = TABS_HEIGHT + 12;
+
+			if (isInsideBuyPoint(mouse, tmpX, tmpY)) {
+				SkillsClientMod.getInstance()
+						.getPacketSender()
+						.send(new BuyPointOutPacket(activeCategory.id()));
 			}
 		}
 	}
@@ -629,7 +654,7 @@ public class SkillsScreen extends Screen {
 
 		DrawableHelper.enableScissor(
 				contentPaddingLeft - 4,
-				contentPaddingTop - 4,
+				contentPaddingTop - 1,
 				this.width - contentPaddingRight + 4,
 				this.height - contentPaddingBottom + 4
 		);
@@ -1101,6 +1126,12 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void drawWindowWithCategory(MatrixStack matrices, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+		if (client == null) {
+			return;
+		}
+		if (client.player == null) {
+			return;
+		}
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1204,6 +1235,91 @@ public class SkillsScreen extends Screen {
 				this.textRenderer.draw(matrices, tmpText, tmpX + 1, tmpY, pointsStrokeColor);
 				this.textRenderer.draw(matrices, tmpText, tmpX, tmpY + 1, pointsStrokeColor);
 				this.textRenderer.draw(matrices, tmpText, tmpX, tmpY, pointsFillColor);
+			}
+		}
+
+		if (activeCategoryData.hasExchange()) {
+			tmpX = (this.width - 108) / 2;
+			tmpY = TABS_HEIGHT + 12;
+
+			var levelsColors = activeCategory.colors().exchange();
+
+			var insideBuyButton = isInsideBuyPoint(mouse, tmpX, tmpY);
+			var belowLimit = activeCategoryData.getCurrentLevel() < activeCategory.levelLimit();
+			var canAfford = client.player.experienceLevel >= activeCategoryData.getCurrentCost();
+
+			if (insideBuyButton) {
+				var lines = new ArrayList<OrderedText>();
+				lines.add(SkillsMod.createTranslatable(
+						"tooltip",
+						"current_level",
+						activeCategoryData.getCurrentLevel()
+								+ (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
+				).asOrderedText());
+				if (belowLimit) {
+					lines.add(SkillsMod.createTranslatable(
+							"tooltip",
+							"cost",
+							client.player.experienceLevel + "/" + activeCategoryData.getCurrentCost()
+					).asOrderedText());
+				}
+				tooltip = lines;
+			}
+
+			var tmpV = 185;
+			var tmpColor1 = 0x342f25;
+			var tmpColor2 = levelsColors.cost().available().argb();
+
+			if (belowLimit && canAfford) {
+				if (insideBuyButton) {
+					tmpV = 204;
+					tmpColor1 = 0xffff80;
+					tmpColor2 = levelsColors.cost().hovered().argb();
+				} else {
+					tmpV = 166;
+					tmpColor1 = 0x685e4a;
+					tmpColor2 = levelsColors.cost().affordable().argb();
+				}
+			}
+
+			RenderSystem.setShaderTexture(0, ENCHANTING_TEXTURE);
+			drawTexture(
+					matrices,
+					tmpX, tmpY,
+					0, tmpV,
+					108, 6
+			);
+			drawTexture(
+					matrices,
+					tmpX, tmpY + 6,
+					0, tmpV + 13,
+					108, 6
+			);
+
+			tmpX += 3;
+			tmpY = FRAME_PADDING + TABS_HEIGHT + 6;
+			tmpText = SkillsMod.createTranslatable("text", "buy_point");
+
+			this.textRenderer.draw(
+					matrices,
+					tmpText,
+					tmpX,
+					tmpY,
+					tmpColor1
+			);
+
+			if (belowLimit) {
+				tmpText = Text.literal(String.valueOf(activeCategoryData.getCurrentCost()));
+				tmpX += 103;
+				tmpX -= this.textRenderer.getWidth(tmpText);
+
+				this.textRenderer.drawWithShadow(
+						matrices,
+						tmpText,
+						tmpX,
+						tmpY,
+						tmpColor2
+				);
 			}
 		}
 	}
