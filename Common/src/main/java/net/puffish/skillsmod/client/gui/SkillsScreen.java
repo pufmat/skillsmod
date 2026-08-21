@@ -35,6 +35,7 @@ import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
 import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
+import net.puffish.skillsmod.client.network.packets.out.BuyPointOutPacket;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.ItemBatchedRenderer;
@@ -51,6 +52,9 @@ import java.util.function.BiConsumer;
 
 public class SkillsScreen extends Screen {
 	private static final Identifier WINDOW_TEXTURE = Identifier.of("textures/gui/advancements/window.png");
+	private static final Identifier ENCHANTMENT_SLOT_DISABLED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_disabled");
+	private static final Identifier ENCHANTMENT_SLOT_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_highlighted");
+	private static final Identifier ENCHANTMENT_SLOT_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot");
 	private static final Identifier EXPERIENCE_BAR_BACKGROUND_TEXTURE = Identifier.of("hud/experience_bar_background");
 	private static final Identifier EXPERIENCE_BAR_PROGRESS_TEXTURE = Identifier.of("hud/experience_bar_progress");
 	private static final Identifier TAB_ABOVE_LEFT_SELECTED_TEXTURE = Identifier.of("advancements/tab_above_left_selected");
@@ -227,6 +231,10 @@ public class SkillsScreen extends Screen {
 		return mouse.x >= x && mouse.y >= y && mouse.x < x + 182 && mouse.y < y + 5;
 	}
 
+	private boolean isInsideBuyPoint(Vector2i mouse, int x, int y) {
+		return mouse.x >= x && mouse.y >= y && mouse.x < x + 108 && mouse.y < y + 12;
+	}
+
 	private boolean isInsideArea(Vector2i mouse, int x1, int y1, int x2, int y2) {
 		return mouse.x >= x1 && mouse.y >= y1 && mouse.x < x2 && mouse.y < y2;
 	}
@@ -322,6 +330,16 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void mouseReleasedWithCategory(double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+		if (client == null) {
+			return;
+		}
+		if (client.player == null) {
+			return;
+		}
+		if (client.player.isSpectator()) {
+			return;
+		}
+
 		var mouse = getMousePos(mouseX, mouseY);
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY, activeCategoryData);
 		var activeCategory = activeCategoryData.getConfig();
@@ -338,6 +356,15 @@ public class SkillsScreen extends Screen {
 							.getPacketSender()
 							.send(new SkillClickOutPacket(activeCategory.id(), skill.id()));
 				}
+			}
+		} else {
+			var tmpX = (this.width - 108) / 2;
+			var tmpY = TABS_HEIGHT + 12;
+
+			if (isInsideBuyPoint(mouse, tmpX, tmpY)) {
+				SkillsClientMod.getInstance()
+						.getPacketSender()
+						.send(new BuyPointOutPacket(activeCategory.id()));
 			}
 		}
 	}
@@ -631,7 +658,7 @@ public class SkillsScreen extends Screen {
 
 	private void drawContent(DrawContext context, int mouseX, int mouseY) {
 		var minX = contentPaddingLeft - 4;
-		var minY = contentPaddingTop - 4;
+		var minY = contentPaddingTop - 1;
 		var maxX = this.width - contentPaddingRight + 4;
 		var maxY = this.height - contentPaddingBottom + 4;
 
@@ -1110,6 +1137,12 @@ public class SkillsScreen extends Screen {
 	}
 
 	private void drawWindowWithCategory(DrawContext context, int mouseX, int mouseY, ClientCategoryData activeCategoryData) {
+		if (client == null) {
+			return;
+		}
+		if (client.player == null) {
+			return;
+		}
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1227,6 +1260,96 @@ public class SkillsScreen extends Screen {
 				context.drawText(this.textRenderer, tmpText, tmpX + 1, tmpY, pointsStrokeColor, false);
 				context.drawText(this.textRenderer, tmpText, tmpX, tmpY + 1, pointsStrokeColor, false);
 				context.drawText(this.textRenderer, tmpText, tmpX, tmpY, pointsFillColor, false);
+			}
+		}
+
+		if (activeCategoryData.hasExchange()) {
+			tmpX = (this.width - 108) / 2;
+			tmpY = TABS_HEIGHT + 12;
+
+			var levelsColors = activeCategory.colors().exchange();
+
+			var insideBuyButton = isInsideBuyPoint(mouse, tmpX, tmpY);
+			var belowLimit = activeCategoryData.getCurrentLevel() < activeCategory.levelLimit();
+			var canAfford = client.player.experienceLevel >= activeCategoryData.getCurrentCost();
+
+			if (insideBuyButton) {
+				var lines = new ArrayList<OrderedText>();
+				lines.add(SkillsMod.createTranslatable(
+						"tooltip",
+						"current_level",
+						activeCategoryData.getCurrentLevel()
+								+ (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
+				).asOrderedText());
+				if (belowLimit) {
+					lines.add(SkillsMod.createTranslatable(
+							"tooltip",
+							"cost",
+							client.player.experienceLevel + "/" + activeCategoryData.getCurrentCost()
+					).asOrderedText());
+				}
+				context.drawTooltip(lines, mouseX, mouseY);
+			}
+
+			var slotTexture = ENCHANTMENT_SLOT_DISABLED_TEXTURE;
+			var tmpColor1 = 0xff342f25;
+			var tmpColor2 = levelsColors.cost().available().argb();
+
+			if (belowLimit && canAfford) {
+				if (insideBuyButton) {
+					slotTexture = ENCHANTMENT_SLOT_HIGHLIGHTED_TEXTURE;
+					tmpColor1 = 0xffffff80;
+					tmpColor2 = levelsColors.cost().hovered().argb();
+				} else {
+					slotTexture = ENCHANTMENT_SLOT_TEXTURE;
+					tmpColor1 = 0xff685e4a;
+					tmpColor2 = levelsColors.cost().affordable().argb();
+				}
+			}
+
+			context.drawGuiTexture(
+					RenderPipelines.GUI_TEXTURED,
+					slotTexture,
+					108, 19,
+					0, 0,
+					tmpX, tmpY,
+					108, 6
+			);
+			context.drawGuiTexture(
+					RenderPipelines.GUI_TEXTURED,
+					slotTexture,
+					108, 19,
+					0, 13,
+					tmpX, tmpY + 6,
+					108, 6
+			);
+
+			tmpX += 3;
+			tmpY = FRAME_PADDING + TABS_HEIGHT + 6;
+			tmpText = SkillsMod.createTranslatable("text", "buy_point");
+
+			context.drawText(
+					this.textRenderer,
+					tmpText,
+					tmpX,
+					tmpY,
+					tmpColor1,
+					false
+			);
+
+			if (belowLimit) {
+				tmpText = Text.literal(String.valueOf(activeCategoryData.getCurrentCost()));
+				tmpX += 103;
+				tmpX -= this.textRenderer.getWidth(tmpText);
+
+				context.drawText(
+						this.textRenderer,
+						tmpText,
+						tmpX,
+						tmpY,
+						tmpColor2,
+						true
+				);
 			}
 		}
 	}

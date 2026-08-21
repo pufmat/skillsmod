@@ -14,7 +14,9 @@ import net.puffish.skillsmod.client.config.ClientIconConfig;
 import net.puffish.skillsmod.client.config.colors.ClientColorConfig;
 import net.puffish.skillsmod.client.config.colors.ClientColorsConfig;
 import net.puffish.skillsmod.client.config.colors.ClientConnectionsColorsConfig;
+import net.puffish.skillsmod.client.config.colors.ClientExchangeCostColorsConfig;
 import net.puffish.skillsmod.client.config.colors.ClientFillStrokeColorsConfig;
+import net.puffish.skillsmod.client.config.colors.ClientExchangeColorsConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
@@ -22,6 +24,7 @@ import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.common.BackgroundPosition;
 import net.puffish.skillsmod.common.FrameType;
 import net.puffish.skillsmod.common.IconType;
+import net.puffish.skillsmod.common.PointsProvider;
 import net.puffish.skillsmod.network.InPacket;
 
 import java.util.stream.Collectors;
@@ -73,13 +76,22 @@ public class ShowCategoryInPacket implements InPacket {
 
 		var levelLimit = Integer.MAX_VALUE;
 		var currentLevel = Integer.MIN_VALUE;
+		var currentCost = Integer.MIN_VALUE;
 		var currentExperience = Integer.MIN_VALUE;
 		var requiredExperience = Integer.MIN_VALUE;
-		if (buf.readBoolean()) {
-			levelLimit = buf.readInt();
-			currentLevel = buf.readInt();
-			currentExperience = buf.readInt();
-			requiredExperience = buf.readInt();
+		switch (buf.readEnumConstant(PointsProvider.class)) {
+			case EXPERIENCE -> {
+				levelLimit = buf.readInt();
+				currentLevel = buf.readInt();
+				currentExperience = buf.readInt();
+				requiredExperience = buf.readInt();
+			}
+			case EXCHANGE -> {
+				levelLimit = buf.readInt();
+				currentLevel = buf.readInt();
+				currentCost = buf.readInt();
+			}
+			default -> { }
 		}
 
 		var category = new ClientCategoryConfig(
@@ -106,6 +118,7 @@ public class ShowCategoryInPacket implements InPacket {
 				spentPoints,
 				earnedPoints,
 				currentLevel,
+				currentCost,
 				currentExperience,
 				requiredExperience
 		);
@@ -194,9 +207,10 @@ public class ShowCategoryInPacket implements InPacket {
 
 	public static ClientColorsConfig readColors(PacketByteBuf buf) {
 		var connections = readConnectionsColors(buf);
+		var exchange = readExchangeColors(buf);
 		var points = readFillStrokeColors(buf);
 
-		return new ClientColorsConfig(connections, points);
+		return new ClientColorsConfig(connections, exchange, points);
 	}
 
 	public static ClientConnectionsColorsConfig readConnectionsColors(PacketByteBuf buf) {
@@ -207,6 +221,20 @@ public class ShowCategoryInPacket implements InPacket {
 		var excluded = readFillStrokeColors(buf);
 
 		return new ClientConnectionsColorsConfig(locked, available, affordable, unlocked, excluded);
+	}
+
+	public static ClientExchangeColorsConfig readExchangeColors(PacketByteBuf buf) {
+		var cost = readExchangeCostColors(buf);
+
+		return new ClientExchangeColorsConfig(cost);
+	}
+
+	public static ClientExchangeCostColorsConfig readExchangeCostColors(PacketByteBuf buf) {
+		var available = readColor(buf);
+		var affordable = readColor(buf);
+		var hovered = readColor(buf);
+
+		return new ClientExchangeCostColorsConfig(available, affordable, hovered);
 	}
 
 	public static ClientFillStrokeColorsConfig readFillStrokeColors(PacketByteBuf buf) {
