@@ -23,12 +23,14 @@ public class CategoryData {
 	private final Map<Identifier, Integer> points;
 	private boolean unlocked;
 	private int experience;
+	private int exchangeLevel;
 
-	private CategoryData(Set<String> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience) {
+	private CategoryData(Set<String> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience, int exchangeLevel) {
 		this.unlockedSkills = unlockedSkills;
 		this.points = points;
 		this.unlocked = unlocked;
 		this.experience = experience;
+		this.exchangeLevel = exchangeLevel;
 	}
 
 	public static CategoryData create(GeneralConfig general) {
@@ -39,6 +41,7 @@ public class CategoryData {
 				new HashSet<>(),
 				points,
 				general.unlockedByDefault(),
+				0,
 				0
 		);
 	}
@@ -46,6 +49,7 @@ public class CategoryData {
 	public static CategoryData read(CompoundTag nbt) {
 		var unlocked = nbt.getBooleanOr("unlocked", false);
 		var experience = nbt.getIntOr("experience", 0);
+		var exchangeLevel = nbt.getIntOr("level", 0);
 
 		var unlockedSkills = new HashSet<String>();
 		var unlockedNbt = nbt.getListOrEmpty("unlocked_skills");
@@ -65,12 +69,13 @@ public class CategoryData {
 			}
 		}
 
-		return new CategoryData(unlockedSkills, points, unlocked, experience);
+		return new CategoryData(unlockedSkills, points, unlocked, experience, exchangeLevel);
 	}
 
 	public CompoundTag writeNbt(CompoundTag nbt) {
 		nbt.putBoolean("unlocked", unlocked);
 		nbt.putInt("experience", experience);
+		nbt.putInt("level", exchangeLevel);
 
 		var unlockedNbt = new ListTag();
 		for (var skill : unlockedSkills) {
@@ -176,6 +181,14 @@ public class CategoryData {
 
 	public void setExperience(int earnedExperience) {
 		this.experience = earnedExperience;
+	}
+
+	public int getExchangeLevel() {
+		return exchangeLevel;
+	}
+
+	public void setExchangeLevel(int exchangeLevel) {
+		this.exchangeLevel = exchangeLevel;
 	}
 
 	public int getSpentPoints(CategoryConfig category) {

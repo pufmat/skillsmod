@@ -1,0 +1,18 @@
+package net.puffish.skillsmod.client.network.packets.out;
+
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
+import net.puffish.skillsmod.network.OutPacket;
+import net.puffish.skillsmod.network.Packets;
+
+public record BuyPointOutPacket(Identifier categoryId) implements OutPacket {
+	@Override
+	public void write(RegistryFriendlyByteBuf buf) {
+		buf.writeIdentifier(categoryId);
+	}
+
+	@Override
+	public Identifier getId() {
+		return Packets.BUY_POINT;
+	}
+}
