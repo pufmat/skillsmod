@@ -101,6 +101,9 @@ public class SkillsMod {
 	public static final Event<Events.SkillLock> SKILL_LOCK = Event.create(
 			c -> (player, categoryId, skillId) -> c.forEach(e -> e.onSkillLock(player, categoryId, skillId))
 	);
+	public static final Event<Events.NewPoint> NEW_POINT = Event.create(
+			c -> (player, categoryId) -> c.forEach(e -> e.onNewPoint(player, categoryId))
+	);
 
 	private static SkillsMod instance;
 
@@ -784,6 +787,7 @@ public class SkillsMod {
 			var pointsLeft = categoryData.getPointsLeft(category);
 			runnable.run();
 			if (categoryData.getPointsLeft(category) > pointsLeft) {
+				NEW_POINT.invoker().onNewPoint(player, category.id());
 				if (player.level().getGameRules().get(SkillsGameRules.ANNOUNCE_NEW_POINTS)) {
 					packetSender.send(player, new NewPointOutPacket(category.id()));
 				}

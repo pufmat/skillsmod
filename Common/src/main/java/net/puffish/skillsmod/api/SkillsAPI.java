@@ -31,6 +31,10 @@ public final class SkillsAPI {
 		SkillsMod.SKILL_LOCK.register(event);
 	}
 
+	public static void registerNewPointEvent(Events.NewPoint event) {
+		SkillsMod.NEW_POINT.register(event);
+	}
+
 	public static void registerReward(Identifier key, RewardFactory factory) {
 		RewardRegistry.register(key, factory);
 	}
