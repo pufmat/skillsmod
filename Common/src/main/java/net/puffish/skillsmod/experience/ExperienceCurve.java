@@ -23,7 +23,7 @@ public class ExperienceCurve {
 
 	// Returns the experience required at the specified level.
 	public int getRequired(int level) {
-		if (level >= levelLimit) {
+		if (level < 0 || level >= levelLimit) {
 			return 0;
 		}
 		while (level >= requiredCache.size()) {
@@ -34,6 +34,9 @@ public class ExperienceCurve {
 
 	// Returns the total experience required at the specified level.
 	public int getRequiredTotal(int level) {
+		if (level < 0) {
+			return 0;
+		}
 		level = Math.min(level, levelLimit - 1);
 		while (level >= requiredTotalCache.size()) {
 			requiredTotalCache.add(
