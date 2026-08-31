@@ -11,6 +11,7 @@ import net.puffish.skillsmod.api.reward.RewardFactory;
 import net.puffish.skillsmod.experience.source.ExperienceSourceRegistry;
 import net.puffish.skillsmod.impl.CategoryImpl;
 import net.puffish.skillsmod.reward.RewardRegistry;
+import net.puffish.skillsmod.util.CategoryFilter;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -86,7 +87,7 @@ public final class SkillsAPI {
 
 	public static Stream<Category> streamCategories() {
 		return SkillsMod.getInstance()
-				.getCategories(false)
+				.getCategories(CategoryFilter.ALL)
 				.stream()
 				.map(CategoryImpl::new);
 	}

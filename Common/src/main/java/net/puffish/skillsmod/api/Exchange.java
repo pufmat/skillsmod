@@ -10,6 +10,9 @@ public interface Exchange {
 	/// Sets level.
 	void setLevel(ServerPlayer player, int level);
 
+	/// Adds level.
+	void addLevel(ServerPlayer player, int level);
+
 	/// Returns the cost at the specified level.
 	int getCost(int level);
 
