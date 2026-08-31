@@ -20,9 +20,10 @@
 
 	"gamerule.puffish_skills:announceNewPoints": "Ogłaszaj nowe punkty umiejętności",
 
-	"command.puffish_skills.no_such_category": "Nie istnieje kategoria z ID \"%s\"",
-	"command.puffish_skills.no_such_skill": "Nie istnieje umiejętność z ID \"%s\"",
-	"command.puffish_skills.no_experience": "Doświadczenie nie jest włączone dla tej kategorii",
+	"command.puffish_skills.no_such_category": "Nie istnieje kategoria o ID \"%s\"",
+	"command.puffish_skills.no_such_skill": "Nie istnieje umiejętność o ID \"%s\"",
+	"command.puffish_skills.no_experience": "Doświadczenie nie jest włączone w kategoria o ID \"%s\"",
+	"command.puffish_skills.no_level": "Poziom nie jest włączony w kategoria o ID \"%s\"",
 
 	"command.puffish_skills.category.lock.success.single": "Zablokowano kategorię %s dla %s",
 	"command.puffish_skills.category.lock.success.multiple": "Zablokowano kategorię %s dla %s graczy",
@@ -40,6 +41,14 @@
 	"command.puffish_skills.experience.set.success.multiple": "Ustawiono %s doświadczenia w kategorii %s dla %s graczy",
 
 	"command.puffish_skills.experience.get.success": "%3$s ma %1$s doświadczenia w kategorii %2$s",
+
+	"command.puffish_skills.level.add.success.single": "Dodano %s poziomów do kategorii %s dla %s",
+	"command.puffish_skills.level.add.success.multiple": "Dodano %s poziomów do kategorii %s dla %s graczy",
+
+	"command.puffish_skills.level.set.success.single": "Ustawiono %s poziom w kategorii %s dla %s",
+	"command.puffish_skills.level.set.success.multiple": "Ustawiono %s poziom w kategorii %s dla %s graczy",
+
+	"command.puffish_skills.level.get.success": "%3$s ma %1$s poziom w kategorii %2$s",
 
 	"command.puffish_skills.points.add.success.single": "Dodano %s punktów w kategorii %s dla %s",
 	"command.puffish_skills.points.add.success.multiple": "Dodano %s punktów w kategorii %s dla %s graczy",

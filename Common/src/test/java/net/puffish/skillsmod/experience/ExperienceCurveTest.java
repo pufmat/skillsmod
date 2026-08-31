@@ -15,6 +15,7 @@ public class ExperienceCurveTest {
 		Assertions.assertEquals(1, curve.getRequired(0));
 		Assertions.assertEquals(37, curve.getRequired(6));
 		Assertions.assertEquals(5, curve.getRequired(2));
+		Assertions.assertEquals(0, curve.getRequired(-1));
 	}
 
 	@Test
@@ -33,6 +34,9 @@ public class ExperienceCurveTest {
 		Assertions.assertEquals(
 				1 + 2 + 5,
 				curve.getRequiredTotal(2));
+		Assertions.assertEquals(
+				0,
+				curve.getRequiredTotal(-1));
 	}
 
 	@Test
