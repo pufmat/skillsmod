@@ -22,6 +22,7 @@ import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.operation.BuiltinOperations;
 import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
+import net.puffish.skillsmod.commands.LevelCommand;
 import net.puffish.skillsmod.commands.OpenCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
@@ -65,6 +66,7 @@ import net.puffish.skillsmod.server.setup.ServerRegistrar;
 import net.puffish.skillsmod.server.setup.SkillsArgumentTypes;
 import net.puffish.skillsmod.server.setup.SkillsTriggers;
 import net.puffish.skillsmod.server.setup.SkillsGameRules;
+import net.puffish.skillsmod.util.CategoryFilter;
 import net.puffish.skillsmod.util.ChangeListener;
 import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.Event;
@@ -522,6 +524,19 @@ public class SkillsMod {
 		});
 	}
 
+	public void addExchangeLevel(ServerPlayer player, Identifier categoryId, int count) {
+		getCategory(categoryId).ifPresent(category -> {
+			category.exchange().ifPresent(exchange -> {
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				addExchangeLevel(player, category, exchange, categoryData, count);
+			});
+		});
+	}
+
+	private void addExchangeLevel(ServerPlayer player, CategoryConfig category, ExchangeConfig exchange, CategoryData categoryData, int count) {
+		setExchangeLevel(player, category, exchange, categoryData, categoryData.getExchangeLevel() + count);
+	}
+
 	public void setExchangeLevel(ServerPlayer player, Identifier categoryId, int level) {
 		getCategory(categoryId).ifPresent(category -> {
 			category.exchange().ifPresent(exchange -> {
@@ -615,9 +630,45 @@ public class SkillsMod {
 		return getCategory(categoryId).map(category -> category.experience()
 				.map(experience -> {
 					var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-					return experience.curve().getProgress(categoryData.getExperience()).currentLevel();
+					return getExperienceLevel(experience, categoryData);
 				})
 				.orElse(0));
+	}
+
+	private int getExperienceLevel(ExperienceConfig experience, CategoryData categoryData) {
+		return experience.curve().getProgress(categoryData.getExperience()).currentLevel();
+	}
+
+	public void setExperienceLevel(ServerPlayer player, Identifier categoryId, int level) {
+		getCategory(categoryId).ifPresent(category -> {
+			category.experience().ifPresent(experience -> {
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				setExperienceLevel(player, category, experience, categoryData, level);
+			});
+		});
+	}
+
+	private void setExperienceLevel(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int level) {
+		var curve = experience.curve();
+		var progress = curve.getProgress(categoryData.getExperience());
+		var amount = curve.getRequiredTotal(level - 1);
+		if (progress.requiredExperience() > 0) {
+			amount += curve.getRequired(level) * progress.currentExperience() / progress.requiredExperience();
+		}
+		setExperience(player, category, experience, categoryData, amount);
+	}
+
+	public void addExperienceLevel(ServerPlayer player, Identifier categoryId, int count) {
+		getCategory(categoryId).ifPresent(category -> {
+			category.experience().ifPresent(experience -> {
+				var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+				addExperienceLevel(player, category, experience, categoryData, count);
+			});
+		});
+	}
+
+	private void addExperienceLevel(ServerPlayer player, CategoryConfig category, ExperienceConfig experience, CategoryData categoryData, int count) {
+		setExperienceLevel(player, category, experience, categoryData, getExperienceLevel(experience, categoryData) + count);
 	}
 
 	public Optional<Integer> getCurrentExperience(ServerPlayer player, Identifier categoryId) {
@@ -664,10 +715,14 @@ public class SkillsMod {
 				.toList();
 	}
 
-	public Collection<Identifier> getCategories(boolean onlyWithExperience) {
+	public Collection<Identifier> getCategories(CategoryFilter filter) {
 		return getAllCategories()
 				.stream()
-				.filter(category -> !onlyWithExperience || category.experience().isPresent())
+				.filter(category -> switch (filter) {
+					case ALL -> true;
+					case WITH_EXPERIENCE -> category.experience().isPresent();
+					case WITH_LEVEL -> category.experience().isPresent() || category.exchange().isPresent();
+				})
 				.map(CategoryConfig::id)
 				.toList();
 	}
@@ -995,6 +1050,7 @@ public class SkillsMod {
 					.then(SkillsCommand.create())
 					.then(PointsCommand.create())
 					.then(ExperienceCommand.create())
+					.then(LevelCommand.create())
 					.then(OpenCommand.create())
 			);
 		}

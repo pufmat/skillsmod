@@ -33,6 +33,16 @@ public class ExperienceImpl implements Experience {
 	}
 
 	@Override
+	public void setLevel(ServerPlayer player, int level) {
+		SkillsMod.getInstance().setExperienceLevel(player, categoryId, level);
+	}
+
+	@Override
+	public void addLevel(ServerPlayer player, int count) {
+		SkillsMod.getInstance().addExperienceLevel(player, categoryId, count);
+	}
+
+	@Override
 	public int getCurrent(ServerPlayer player) {
 		return SkillsMod.getInstance().getCurrentExperience(player, categoryId).orElseThrow();
 	}

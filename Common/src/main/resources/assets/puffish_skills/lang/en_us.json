@@ -22,7 +22,8 @@
 
 	"command.puffish_skills.no_such_category": "There is no category with ID %s",
 	"command.puffish_skills.no_such_skill": "There is no skill with ID %s",
-	"command.puffish_skills.no_experience": "Experience is not enabled for this category",
+	"command.puffish_skills.no_experience": "Experience is not enabled for category with ID %s",
+	"command.puffish_skills.no_level": "Level is not enabled for category with ID %s",
 
 	"command.puffish_skills.category.lock.success.single": "Locked category %s for %s",
 	"command.puffish_skills.category.lock.success.multiple": "Locked category %s for %s players",
@@ -40,6 +41,14 @@
 	"command.puffish_skills.experience.set.success.multiple": "Set %s experience in category %s for %s players",
 
 	"command.puffish_skills.experience.get.success": "%3$s has %1$s experience in category %2$s",
+
+	"command.puffish_skills.level.add.success.single": "Added %s levels to category %s for %s",
+	"command.puffish_skills.level.add.success.multiple": "Added %s levels to category %s for %s players",
+
+	"command.puffish_skills.level.set.success.single": "Set %s level in category %s for %s",
+	"command.puffish_skills.level.set.success.multiple": "Set %s level in category %s for %s players",
+
+	"command.puffish_skills.level.get.success": "%3$s has %1$s level in category %2$s",
 
 	"command.puffish_skills.points.add.success.single": "Added %s points to category %s for %s",
 	"command.puffish_skills.points.add.success.multiple": "Added %s points to category %s for %s players",

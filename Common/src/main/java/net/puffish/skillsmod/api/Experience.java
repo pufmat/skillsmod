@@ -12,6 +12,12 @@ public interface Experience {
 	/// Returns the current level based on the total experience.
 	int getLevel(ServerPlayer player);
 
+	/// Modifies total experience to set given level. Current experience is scaled.
+	void setLevel(ServerPlayer player, int level);
+
+	/// Modifies total experience to add given count of levels. Current experience is scaled.
+	void addLevel(ServerPlayer player, int count);
+
 	/// Returns the current experience based on the total experience.
 	int getCurrent(ServerPlayer player);
 

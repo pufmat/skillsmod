@@ -23,6 +23,11 @@ public class ExchangeImpl implements Exchange {
 	}
 
 	@Override
+	public void addLevel(ServerPlayer player, int level) {
+		SkillsMod.getInstance().addExchangeLevel(player, categoryId, level);
+	}
+
+	@Override
 	public int getCost(int level) {
 		return SkillsMod.getInstance().getCost(categoryId, level).orElseThrow();
 	}
