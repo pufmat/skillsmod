@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.mixin;
 
 import net.minecraft.advancement.criterion.AbstractCriterion;
+import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.CriterionExperienceSource;
@@ -21,7 +22,12 @@ public class AbstractCriterionMixin {
 				CriterionExperienceSource.class,
 				es -> {
 					if (es.criterion().trigger().equals(this)) {
-						if (predicate.test(es.criterion().conditions())) {
+						var conditions = es.criterion().conditions();
+						// That cast is valid since conditions in `AbstractCriterion` are instances of `AbstractCriterion.Conditions`.
+						if (predicate.test(conditions) && ((AbstractCriterion.Conditions) conditions).player().map(lootContextPredicate -> {
+							var lootContext = EntityPredicate.createAdvancementEntityLootContext(player, player);
+							return lootContextPredicate.test(lootContext);
+						}).orElse(true)) {
 							return (int) Math.round(es.calculation().evaluate(
 									new CriterionExperienceSource.Data(player)
 							));
