@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.mixin;
 
+import net.minecraft.advancements.predicates.entity.EntityPredicate;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import net.puffish.skillsmod.api.SkillsAPI;
@@ -21,7 +22,12 @@ public class SimpleCriterionTriggerMixin {
 				CriterionExperienceSource.class,
 				es -> {
 					if (es.criterion().trigger().equals(this)) {
-						if (predicate.test(es.criterion().triggerInstance())) {
+						var conditions = es.criterion().triggerInstance();
+						// That cast is valid since conditions in `SimpleCriterionTrigger` are instances of `SimpleCriterionTrigger.SimpleInstance`.
+						if (predicate.test(conditions) && ((SimpleCriterionTrigger.SimpleInstance) conditions).player().map(lootContextPredicate -> {
+							var lootContext = EntityPredicate.createContext(player, player);
+							return lootContextPredicate.value().test(lootContext);
+						}).orElse(true)) {
 							return (int) Math.round(es.calculation().evaluate(
 									new CriterionExperienceSource.Data(player)
 							));
