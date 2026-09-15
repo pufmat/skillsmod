@@ -8,6 +8,7 @@
 		"ConsumeItemCriterionMixin",
 		"CraftingResultSlotMixin",
 		"DamageSourceMixin",
+		"DamageTrackerMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
 		"FurnaceOutputSlotMixin",
