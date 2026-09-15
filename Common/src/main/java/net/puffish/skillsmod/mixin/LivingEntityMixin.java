@@ -4,12 +4,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.server.world.ServerWorld;
 import net.puffish.skillsmod.access.DamageSourceAccess;
+import net.puffish.skillsmod.access.LivingEntityAccess;
 import net.puffish.skillsmod.access.WorldChunkAccess;
 import net.puffish.skillsmod.api.SkillsAPI;
-import net.puffish.skillsmod.experience.source.builtin.DealDamageExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.HealExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.KillEntityExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.SharedKillEntityExperienceSource;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin {
+public abstract class LivingEntityMixin implements LivingEntityAccess {
 
 	@Unique
 	private int entityDroppedXp = 0;
@@ -50,60 +49,6 @@ public abstract class LivingEntityMixin {
 				);
 			}
 		}
-	}
-
-	@Inject(method = "applyDamage", at = @At("TAIL"))
-	private void injectAtApplyDamage(DamageSource source, float damage, CallbackInfo ci) {
-		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
-			var entity = ((LivingEntity) (Object) this);
-			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
-			var player = attackerInfo.player();
-
-			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getWorld()
-					.getWorldChunk(entity.getBlockPos()))
-					.getAntiFarmingPerChunkState();
-			antiFarmingPerChunkState.removeOutdated();
-
-			damageShare.compute(player, (key, value) -> {
-				if (value == null) {
-					return damage;
-				} else {
-					return value + damage;
-				}
-			});
-
-			antiFarmingPerEntityState.removeOutdated();
-			SkillsAPI.updateExperienceSources(
-					player,
-					DealDamageExperienceSource.class,
-					es -> {
-						if (attackerInfo.matchesTamedActivity(es.tamedActivity())
-								&& es.antiFarmingPerChunk()
-								.map(antiFarmingPerChunkState::tryIncrement)
-								.orElse(true)
-						) {
-							float limitedDamage = es.antiFarmingPerEntity()
-									.map(antiFarming -> antiFarmingPerEntityState.addAndLimit(
-											antiFarming,
-											damage
-									))
-									.orElse(damage);
-							if (limitedDamage > MathHelper.EPSILON) {
-								return (int) Math.round(es.calculation().evaluate(
-										new DealDamageExperienceSource.Data(
-												player,
-												entity,
-												weapon,
-												limitedDamage,
-												source
-										)
-								));
-							}
-						}
-						return 0;
-					}
-			);
-		});
 	}
 
 	@Inject(method = "drop", at = @At("TAIL"))
@@ -185,5 +130,15 @@ public abstract class LivingEntityMixin {
 	private int injectAtDropXp(int droppedXp) {
 		entityDroppedXp = droppedXp;
 		return droppedXp;
+	}
+
+	@Override
+	public Map<ServerPlayerEntity, Float> getDamageShare() {
+		return damageShare;
+	}
+
+	@Override
+	public AntiFarmingPerEntity.State getAntiFarmingPerEntityState() {
+		return antiFarmingPerEntityState;
 	}
 }
