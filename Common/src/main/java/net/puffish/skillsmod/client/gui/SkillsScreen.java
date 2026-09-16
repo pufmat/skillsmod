@@ -1,5 +1,6 @@
 package net.puffish.skillsmod.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
@@ -43,7 +44,6 @@ import net.puffish.skillsmod.client.rendering.TextureBatchedRenderer;
 import net.puffish.skillsmod.common.BackgroundPosition;
 import net.puffish.skillsmod.util.Bounds2i;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -278,7 +278,7 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			optActiveCategoryData.ifPresent(activeCategoryData ->
 					mouseClickedWithCategory(event.x(), event.y(), activeCategoryData)
 			);
@@ -316,7 +316,7 @@ public class SkillsScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
-		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			if (dragTotal > 2) {
 				return true;
 			}
@@ -393,7 +393,7 @@ public class SkillsScreen extends Screen {
 			return true;
 		}
 
-		if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			dragTotal += Math.abs(offsetX);
 			dragTotal += Math.abs(offsetY);
 			if (dragTotal > 2) {

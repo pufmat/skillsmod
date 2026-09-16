@@ -3,12 +3,12 @@ package net.puffish.skillsmod.server.setup;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
-import net.minecraft.advancements.predicates.entity.EntityPredicate;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 
@@ -35,12 +35,12 @@ public class SkillsTriggers {
 		}
 
 		public record Conditions(
-				Optional<ContextAwarePredicate> player,
+				Optional<Holder<LootItemCondition>> player,
 				Identifier categoryId,
 				String skillId
 		) implements SimpleCriterionTrigger.SimpleInstance {
 			public static final Codec<Conditions> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-					EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
+					LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Conditions::player),
 					Identifier.CODEC.fieldOf("category").forGetter(Conditions::categoryId),
 					PrimitiveCodec.STRING.fieldOf("skill").forGetter(Conditions::skillId)
 			).apply(instance, Conditions::new));

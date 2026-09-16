@@ -26,6 +26,7 @@ import net.puffish.skillsmod.common.FrameType;
 import net.puffish.skillsmod.common.IconType;
 import net.puffish.skillsmod.common.PointsProvider;
 import net.puffish.skillsmod.network.InPacket;
+import net.puffish.skillsmod.util.PacketUtils;
 
 import java.util.stream.Collectors;
 
@@ -55,20 +56,21 @@ public class ShowCategoryInPacket implements InPacket {
 		var exclusiveRoot = buf.readBoolean();
 		var spentPointsLimit = buf.readInt();
 
-		var definitions = buf.readList(buf1 -> ShowCategoryInPacket.readDefinition(buf))
+		var definitions = PacketUtils.readList(buf, buf1 -> ShowCategoryInPacket.readDefinition(buf))
 				.stream()
 				.collect(Collectors.toMap(ClientSkillDefinitionConfig::id, definition -> definition));
 
-		var skills = buf.readList(ShowCategoryInPacket::readSkill)
+		var skills = PacketUtils.readList(buf, ShowCategoryInPacket::readSkill)
 				.stream()
 				.collect(Collectors.toMap(ClientSkillConfig::id, skill -> skill));
 
-		var normalConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
-		var exclusiveConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
+		var normalConnections = PacketUtils.readList(buf, ShowCategoryInPacket::readSkillConnection);
+		var exclusiveConnections = PacketUtils.readList(buf, ShowCategoryInPacket::readSkillConnection);
 
-		var skillsStates = buf.readMap(
+		var skillsStates = PacketUtils.readMap(
+				buf,
 				FriendlyByteBuf::readUtf,
-				buf1 -> buf1.readEnum(Skill.State.class)
+				buf1 -> PacketUtils.readEnum(buf1, Skill.State.class)
 		);
 
 		var spentPoints = buf.readInt();
@@ -79,7 +81,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var currentCost = Integer.MIN_VALUE;
 		var currentExperience = Integer.MIN_VALUE;
 		var requiredExperience = Integer.MIN_VALUE;
-		switch (buf.readEnum(PointsProvider.class)) {
+		switch (PacketUtils.readEnum(buf, PointsProvider.class)) {
 			case EXPERIENCE -> {
 				levelLimit = buf.readInt();
 				currentLevel = buf.readInt();
@@ -155,7 +157,7 @@ public class ShowCategoryInPacket implements InPacket {
 	}
 
 	public static ClientIconConfig readSkillIcon(RegistryFriendlyByteBuf buf) {
-		var type = buf.readEnum(IconType.class);
+		var type = PacketUtils.readEnum(buf, IconType.class);
 		return switch (type) {
 			case EFFECT -> {
 				var effect = buf.readIdentifier();
@@ -173,10 +175,10 @@ public class ShowCategoryInPacket implements InPacket {
 	}
 
 	public static ClientFrameConfig readFrameIcon(FriendlyByteBuf buf) {
-		var type = buf.readEnum(FrameType.class);
+		var type = PacketUtils.readEnum(buf, FrameType.class);
 		return switch (type) {
 			case ADVANCEMENT -> {
-				var advancementFrame = buf.readEnum(AdvancementType.class);
+				var advancementFrame = PacketUtils.readEnum(buf, AdvancementType.class);
 				yield new ClientFrameConfig.AdvancementFrameConfig(advancementFrame);
 			}
 			case TEXTURE -> {
@@ -200,7 +202,7 @@ public class ShowCategoryInPacket implements InPacket {
 		var texture = buf.readIdentifier();
 		var width = buf.readInt();
 		var height = buf.readInt();
-		var position = buf.readEnum(BackgroundPosition.class);
+		var position = PacketUtils.readEnum(buf, BackgroundPosition.class);
 
 		return ClientBackgroundConfig.create(texture, width, height, position);
 	}

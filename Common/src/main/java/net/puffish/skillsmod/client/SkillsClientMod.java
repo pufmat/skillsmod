@@ -24,7 +24,6 @@ import net.puffish.skillsmod.client.network.packets.in.ShowToastInPacket;
 import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.Packets;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 
@@ -32,8 +31,8 @@ public class SkillsClientMod {
 	private static final KeyMapping.Category SKILLS_CATEGORY = KeyMapping.Category.register(SkillsMod.createIdentifier("skills"));
 	public static final KeyMapping OPEN_KEY_BINDING = new KeyMapping(
 			"key.puffish_skills.open",
-			InputConstants.Type.KEYSYM,
-			GLFW.GLFW_KEY_K,
+			InputConstants.Type.KEYBOARD,
+			InputConstants.KEY_K,
 			SKILLS_CATEGORY
 	);
 

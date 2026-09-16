@@ -29,6 +29,7 @@ import net.puffish.skillsmod.config.skill.SkillsConfig;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.server.data.CategoryData;
+import net.puffish.skillsmod.util.PacketUtils;
 
 public record ShowCategoryOutPacket(CategoryConfig category, CategoryData categoryData) implements OutPacket {
 
@@ -40,10 +41,12 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		write(buf, category.definitions());
 		write(buf, category.skills());
 		write(buf, category.connections());
-		buf.writeMap(
+		PacketUtils.writeMap(
+				buf,
 				category.skills().getMap(),
 				FriendlyByteBuf::writeUtf,
-				(buf1, skill) -> buf1.writeEnum(
+				(buf1, skill) -> PacketUtils.writeEnum(
+						buf1,
 						categoryData.getSkillState(
 								category,
 								skill,
@@ -54,7 +57,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getPointsTotal());
 		category.experience().ifPresentOrElse(experience -> {
-			buf.writeEnum(PointsProvider.EXPERIENCE);
+			PacketUtils.writeEnum(buf, PointsProvider.EXPERIENCE);
 			var curve = experience.curve();
 			buf.writeInt(curve.getLevelLimit());
 			var progress = curve.getProgress(categoryData.getExperience());
@@ -62,16 +65,16 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 			buf.writeInt(progress.currentExperience());
 			buf.writeInt(progress.requiredExperience());
 		}, () -> category.exchange().ifPresentOrElse(exchange -> {
-			buf.writeEnum(PointsProvider.EXCHANGE);
+			PacketUtils.writeEnum(buf, PointsProvider.EXCHANGE);
 			buf.writeInt(exchange.levelLimit());
 			var level = categoryData.getExchangeLevel();
 			buf.writeInt(level);
 			buf.writeInt(exchange.function().apply(level));
-		}, () -> buf.writeEnum(PointsProvider.NONE)));
+		}, () -> PacketUtils.writeEnum(buf, PointsProvider.NONE)));
 	}
 
 	public void write(RegistryFriendlyByteBuf buf, SkillDefinitionsConfig definitions) {
-		buf.writeCollection(definitions.getAll(), (buf1, definition) -> write(buf, definition));
+		PacketUtils.writeCollection(buf, definitions.getAll(), (buf1, definition) -> write(buf, definition));
 	}
 
 	public void write(RegistryFriendlyByteBuf buf, GeneralConfig general) {
@@ -101,12 +104,12 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 	}
 
 	public void write(FriendlyByteBuf buf, SkillsConfig skills) {
-		buf.writeCollection(skills.getAll(), ShowCategoryOutPacket::write);
+		PacketUtils.writeCollection(buf, skills.getAll(), ShowCategoryOutPacket::write);
 	}
 
 	public void write(FriendlyByteBuf buf, SkillConnectionsConfig connections) {
-		buf.writeCollection(connections.normal().getAll(), ShowCategoryOutPacket::write);
-		buf.writeCollection(connections.exclusive().getAll(), ShowCategoryOutPacket::write);
+		PacketUtils.writeCollection(buf, connections.normal().getAll(), ShowCategoryOutPacket::write);
+		PacketUtils.writeCollection(buf, connections.exclusive().getAll(), ShowCategoryOutPacket::write);
 	}
 
 	public static void write(FriendlyByteBuf buf, SkillConfig skill) {
@@ -125,23 +128,23 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	public static void write(RegistryFriendlyByteBuf buf, IconConfig icon) {
 		if (icon instanceof IconConfig.EffectIconConfig effectIcon) {
-			buf.writeEnum(IconType.EFFECT);
+			PacketUtils.writeEnum(buf, IconType.EFFECT);
 			buf.writeIdentifier(BuiltInRegistries.MOB_EFFECT.getKey(effectIcon.effect()));
 		} else if (icon instanceof IconConfig.ItemIconConfig itemIcon) {
-			buf.writeEnum(IconType.ITEM);
+			PacketUtils.writeEnum(buf, IconType.ITEM);
 			ItemStack.STREAM_CODEC.encode(buf, itemIcon.item());
 		} else if (icon instanceof IconConfig.TextureIconConfig textureIcon) {
-			buf.writeEnum(IconType.TEXTURE);
+			PacketUtils.writeEnum(buf, IconType.TEXTURE);
 			buf.writeIdentifier(textureIcon.texture());
 		}
 	}
 
 	public static void write(FriendlyByteBuf buf, FrameConfig frame) {
 		if (frame instanceof FrameConfig.AdvancementFrameConfig advancementFrame) {
-			buf.writeEnum(FrameType.ADVANCEMENT);
-			buf.writeEnum(advancementFrame.frame());
+			PacketUtils.writeEnum(buf, FrameType.ADVANCEMENT);
+			PacketUtils.writeEnum(buf, advancementFrame.frame());
 		} else if (frame instanceof FrameConfig.TextureFrameConfig textureFrame) {
-			buf.writeEnum(FrameType.TEXTURE);
+			PacketUtils.writeEnum(buf, FrameType.TEXTURE);
 			buf.writeOptional(textureFrame.lockedTexture(), FriendlyByteBuf::writeIdentifier);
 			buf.writeIdentifier(textureFrame.availableTexture());
 			buf.writeOptional(textureFrame.affordableTexture(), FriendlyByteBuf::writeIdentifier);
@@ -154,7 +157,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeIdentifier(background.texture());
 		buf.writeInt(background.width());
 		buf.writeInt(background.height());
-		buf.writeEnum(background.position());
+		PacketUtils.writeEnum(buf, background.position());
 	}
 
 	public static void write(FriendlyByteBuf buf, ColorsConfig colors) {
