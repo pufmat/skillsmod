@@ -3,21 +3,21 @@ package net.puffish.skillsmod.impl.calculation.prototype;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.calculation.operation.OperationConfigContext;
 import net.puffish.skillsmod.api.calculation.operation.OperationFactory;
-import net.puffish.skillsmod.api.calculation.prototype.PrototypeOperation;
 import net.puffish.skillsmod.api.calculation.prototype.Prototype;
+import net.puffish.skillsmod.api.calculation.prototype.PrototypeOperation;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.LegacyUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class PrototypeImpl<T> implements Prototype<T> {
 
-	private final Map<Identifier, Function<OperationConfigContext, Result<PrototypeOperation<T, ?>, Problem>>> factories = new HashMap<>();
+	private final Map<Identifier, Function<OperationConfigContext, Result<PrototypeOperation<T, ?>, Problem>>> factories = new ConcurrentHashMap<>();
 
 	private final Identifier id;
 
