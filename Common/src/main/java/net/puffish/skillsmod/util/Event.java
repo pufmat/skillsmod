@@ -1,8 +1,7 @@
 package net.puffish.skillsmod.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 public class Event<T> {
@@ -14,8 +13,8 @@ public class Event<T> {
 		this.invoker = invoker;
 	}
 
-	public static <T> Event<T> create(Function<Collection<T>, T> invoker) {
-		var listeners = new ArrayList<T>();
+	public static <T> Event<T> create(Function<Iterable<T>, T> invoker) {
+		var listeners = new CopyOnWriteArrayList<T>();
 		return new Event<>(listeners, invoker.apply(listeners));
 	}
 
