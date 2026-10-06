@@ -800,6 +800,7 @@ public class SkillsScreen extends Screen {
 		}
 
 		textureRenderer.draw(graphics, minecraft.getTextureManager(), scissorArea);
+		graphics.nextStratum();
 		itemRenderer.draw(graphics, scissorArea);
 
 		matrices.popMatrix();
@@ -893,6 +894,7 @@ public class SkillsScreen extends Screen {
 
 		var scissorArea = new ScreenRectangle(0, 0, width, height);
 		textureRenderer.draw(graphics, minecraft.getTextureManager(), scissorArea);
+		graphics.nextStratum();
 		itemRenderer.draw(graphics, scissorArea);
 
 		forEachVisibleTab((x, category) -> {
