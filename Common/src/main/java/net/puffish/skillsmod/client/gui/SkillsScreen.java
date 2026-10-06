@@ -800,6 +800,7 @@ public class SkillsScreen extends Screen {
 		}
 
 		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
+		context.createNewRootLayer();
 		itemRenderer.draw(context, scissorArea);
 
 		matrices.popMatrix();
@@ -893,6 +894,7 @@ public class SkillsScreen extends Screen {
 
 		var scissorArea = new ScreenRect(0, 0, width, height);
 		textureRenderer.draw(context, client.getTextureManager(), scissorArea);
+		context.createNewRootLayer();
 		itemRenderer.draw(context, scissorArea);
 
 		forEachVisibleTab((x, category) -> {
