@@ -80,7 +80,7 @@ public class FabricMain implements ModInitializer {
 
 		@Override
 		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String name, GameRules.Category category, GameRules.Type<T> type) {
-			return GameRulesAccessor.invokeRegister(name, category, type);
+			return GameRulesAccessor.puffish_skills$register(name, category, type);
 		}
 
 		@Override

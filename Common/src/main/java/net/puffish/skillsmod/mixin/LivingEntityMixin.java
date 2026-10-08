@@ -55,12 +55,12 @@ public abstract class LivingEntityMixin implements LivingEntityAccess {
 	private void injectAtDrop(ServerWorld world, DamageSource source, CallbackInfo ci) {
 		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
 			var entity = ((LivingEntity) (Object) this);
-			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+			var weapon = ((DamageSourceAccess) source).puffish_skills$getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
 			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getWorld()
 					.getWorldChunk(entity.getBlockPos()))
-					.getAntiFarmingPerChunkState();
+					.puffish_skills$getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
 
 			SkillsAPI.updateExperienceSources(
@@ -133,12 +133,12 @@ public abstract class LivingEntityMixin implements LivingEntityAccess {
 	}
 
 	@Override
-	public Map<ServerPlayerEntity, Float> getDamageShare() {
+	public Map<ServerPlayerEntity, Float> puffish_skills$getDamageShare() {
 		return damageShare;
 	}
 
 	@Override
-	public AntiFarmingPerEntity.State getAntiFarmingPerEntityState() {
+	public AntiFarmingPerEntity.State puffish_skills$getAntiFarmingPerEntityState() {
 		return antiFarmingPerEntityState;
 	}
 }

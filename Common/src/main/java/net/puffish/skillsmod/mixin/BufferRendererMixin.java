@@ -24,7 +24,7 @@ public final class BufferRendererMixin {
 			cancellable = true
 	)
 	private static void injectBeforeDraw(BuiltBuffer builtBuffer, CallbackInfo ci, VertexBuffer vertexBuffer) {
-		var emits = ((BuiltBufferAccess) builtBuffer).getEmits();
+		var emits = ((BuiltBufferAccess) builtBuffer).puffish_skills$getEmits();
 		if (emits != null) {
 			for (var emit : emits) {
 				vertexBuffer.draw(
