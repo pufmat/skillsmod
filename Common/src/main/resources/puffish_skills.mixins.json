@@ -4,18 +4,18 @@
 	"package": "net.puffish.skillsmod.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"AbstractCriterionConditionsMixin",
+		"AbstractCriterionConditionsAccessor",
 		"AbstractCriterionMixin",
-		"BooleanRuleInvoker",
+		"BooleanRuleAccessor",
 		"ConsumeItemCriterionMixin",
 		"CraftingResultSlotMixin",
-		"CriteriaInvoker",
+		"CriteriaAccessor",
 		"DamageSourceMixin",
 		"DamageTrackerMixin",
 		"EnchantedItemCriterionMixin",
 		"FishingRodHookedCriterionMixin",
 		"FurnaceOutputSlotMixin",
-		"GameRulesInvoker",
+		"GameRulesAccessor",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
 		"ServerPlayerEntityMixin",
@@ -24,7 +24,7 @@
 	"client": [
 		"BufferRendererMixin",
 		"BuiltBufferMixin",
-		"MinecraftClientMixin",
+		"MinecraftClientAccessor",
 		"RenderLayerMixin"
 	],
 	"injectors": {
