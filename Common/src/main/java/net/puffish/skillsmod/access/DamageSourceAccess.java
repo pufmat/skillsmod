@@ -1,8 +1,9 @@
 package net.puffish.skillsmod.access;
 
-import java.util.Optional;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Optional;
+
 public interface DamageSourceAccess {
-	Optional<ItemStack> getWeapon();
+	Optional<ItemStack> puffish_skills$getWeapon();
 }

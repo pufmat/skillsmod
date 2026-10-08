@@ -12,7 +12,7 @@ public abstract class LevelChunkMixin implements LevelChunkAccess {
 	private final AntiFarmingPerChunk.State antiFarmingState = new AntiFarmingPerChunk.State();
 
 	@Override
-	public AntiFarmingPerChunk.State getAntiFarmingPerChunkState() {
+	public AntiFarmingPerChunk.State puffish_skills$getAntiFarmingPerChunkState() {
 		return antiFarmingState;
 	}
 }

@@ -42,11 +42,11 @@ public class ItemBatchedRenderer {
 		var client = Minecraft.getInstance();
 		var gameRenderer = client.gameRenderer;
 		var gameRendererAccessor = (GameRendererAccessor) gameRenderer;
-		var guiRendererAccessor = (GuiRendererAccessor) gameRendererAccessor.getGuiRenderer();
+		var guiRendererAccessor = (GuiRendererAccessor) gameRendererAccessor.puffish_skills$getGuiRenderer();
 		var graphicsAccess = (GuiGraphicsExtractorAccessor) graphics;
-		var guiRenderState = graphicsAccess.getGuiRenderState();
-		var windowScaleFactor = guiRendererAccessor.invokeGetGuiScaleInvalidatingItemAtlasIfChanged();
-		var vertexConsumers = guiRendererAccessor.getBufferSource();
+		var guiRenderState = graphicsAccess.puffish_skills$getGuiRenderState();
+		var windowScaleFactor = guiRendererAccessor.puffish_skills$getGuiScaleInvalidatingItemAtlasIfChanged();
+		var vertexConsumers = guiRendererAccessor.puffish_skills$getBufferSource();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
@@ -63,7 +63,7 @@ public class ItemBatchedRenderer {
 
 			itemRenderState.appendModelIdentityElement(KEY);
 
-			var renderer = guiRendererAccessor.getOversizedItemRenderers().computeIfAbsent(
+			var renderer = guiRendererAccessor.puffish_skills$getOversizedItemRenderers().computeIfAbsent(
 					itemRenderState.getModelIdentity(),
 					object -> new ItemGuiElementRenderer(vertexConsumers)
 			);
