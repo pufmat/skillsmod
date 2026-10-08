@@ -21,7 +21,7 @@ public class SkillsCriteria {
 		SkillsAPI.registerSkillUnlockEvent((player, categoryId, skillId) -> {
 			SKILL_UNLOCKED.trigger(player, categoryId, skillId);
 		});
-		CriteriaAccessor.register(SKILL_UNLOCKED);
+		CriteriaAccessor.puffish_skills$register(SKILL_UNLOCKED);
 	}
 
 	public static class SkillUnlockedCriterion extends AbstractCriterion<SkillUnlockedCriterion.Conditions> {

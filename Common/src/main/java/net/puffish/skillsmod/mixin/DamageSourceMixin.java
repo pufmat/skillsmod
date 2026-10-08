@@ -19,7 +19,7 @@ public abstract class DamageSourceMixin implements DamageSourceAccess {
 
 	@Override
 	@Unique
-	public Optional<ItemStack> getWeapon() {
+	public Optional<ItemStack> puffish_skills$getWeapon() {
 		if (getAttacker() instanceof LivingEntity livingEntity) {
 			return Optional.of(livingEntity.getMainHandStack()); // not really correct
 		}

@@ -56,7 +56,7 @@ public class ItemBatchedRenderer {
 			}
 
 			var clientAccessor = (MinecraftClientAccessor) client;
-			var immediate = clientAccessor.getBufferBuilders().getEntityVertexConsumers();
+			var immediate = clientAccessor.puffish_skills$getBufferBuilders().getEntityVertexConsumers();
 
 			var layers = new HashSet<RenderLayerAccess>();
 
@@ -67,7 +67,7 @@ public class ItemBatchedRenderer {
 					matrices,
 					layer -> {
 						var layerAccess = (RenderLayerAccess) layer;
-						layerAccess.setEmits(entry.getValue());
+						layerAccess.puffish_skills$setEmits(entry.getValue());
 						layers.add(layerAccess);
 						return immediate.getBuffer(layer);
 					},
@@ -79,7 +79,7 @@ public class ItemBatchedRenderer {
 			immediate.draw();
 
 			for (var layer : layers) {
-				layer.setEmits(null);
+				layer.puffish_skills$setEmits(null);
 			}
 		}
 		batch.clear();

@@ -5,5 +5,5 @@ import net.minecraft.util.math.Matrix4f;
 import java.util.List;
 
 public interface RenderLayerAccess {
-	void setEmits(List<Matrix4f> emits);
+	void puffish_skills$setEmits(List<Matrix4f> emits);
 }
