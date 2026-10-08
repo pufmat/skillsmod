@@ -21,7 +21,7 @@ public class BufferBuilderMixin implements BufferBuilderAccess {
 
 	@Override
 	@Unique
-	public void setEmits(List<Matrix4f> emits) {
+	public void puffish_skills$setEmits(List<Matrix4f> emits) {
 		this.emits = emits;
 	}
 
@@ -30,6 +30,6 @@ public class BufferBuilderMixin implements BufferBuilderAccess {
 			at = @At("RETURN")
 	)
 	private void popData(CallbackInfoReturnable<Pair<BufferBuilder.DrawArrayParameters, ByteBuffer>> cir) {
-		((DrawArrayParametersAccess) (Object) cir.getReturnValue().getFirst()).setEmits(emits);
+		((DrawArrayParametersAccess) (Object) cir.getReturnValue().getFirst()).puffish_skills$setEmits(emits);
 	}
 }

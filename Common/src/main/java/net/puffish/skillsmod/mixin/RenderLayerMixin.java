@@ -19,7 +19,7 @@ public final class RenderLayerMixin implements RenderLayerAccess {
 
 	@Override
 	@Unique
-	public void setEmits(List<Matrix4f> emits) {
+	public void puffish_skills$setEmits(List<Matrix4f> emits) {
 		this.emits = emits;
 	}
 
@@ -32,7 +32,7 @@ public final class RenderLayerMixin implements RenderLayerAccess {
 			)
 	)
 	private BufferBuilder modifyArgAtDrawWithShader(BufferBuilder bufferBuilder) {
-		((BufferBuilderAccess) bufferBuilder).setEmits(emits);
+		((BufferBuilderAccess) bufferBuilder).puffish_skills$setEmits(emits);
 		return bufferBuilder;
 	}
 }

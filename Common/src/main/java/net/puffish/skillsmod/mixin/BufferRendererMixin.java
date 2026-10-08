@@ -24,9 +24,9 @@ public final class BufferRendererMixin {
 	)
 	private static void injectAtDraw(ByteBuffer buffer, VertexFormat.DrawMode drawMode, VertexFormat vertexFormat, int count, VertexFormat.IntType elementFormat, int vertexCount, boolean textured, CallbackInfo ci) {
 		var access = ((VertexFormatAccess) vertexFormat);
-		var emits = access.getEmits();
+		var emits = access.puffish_skills$getEmits();
 		if (emits != null) {
-			access.setEmits(null);
+			access.puffish_skills$setEmits(null);
 			var original = new Matrix4f(RenderSystem.getModelViewMatrix());
 			for (var emit : emits) {
 				var matrix = new Matrix4f(original);
@@ -34,7 +34,7 @@ public final class BufferRendererMixin {
 				RenderSystem.getModelViewMatrix().load(matrix);
 				draw(buffer, drawMode, vertexFormat, count, elementFormat, vertexCount, textured);
 			}
-			access.setEmits(emits);
+			access.puffish_skills$setEmits(emits);
 			RenderSystem.getModelViewMatrix().load(original);
 			ci.cancel();
 		}

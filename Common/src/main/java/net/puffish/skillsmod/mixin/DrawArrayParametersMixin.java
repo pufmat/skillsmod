@@ -20,7 +20,7 @@ public class DrawArrayParametersMixin implements DrawArrayParametersAccess {
 
 	@Override
 	@Unique
-	public void setEmits(List<Matrix4f> emits) {
+	public void puffish_skills$setEmits(List<Matrix4f> emits) {
 		this.emits = emits;
 	}
 
@@ -29,6 +29,6 @@ public class DrawArrayParametersMixin implements DrawArrayParametersAccess {
 			at = @At("RETURN")
 	)
 	private void getVertexFormat(CallbackInfoReturnable<VertexFormat> cir) {
-		((VertexFormatAccess) cir.getReturnValue()).setEmits(emits);
+		((VertexFormatAccess) cir.getReturnValue()).puffish_skills$setEmits(emits);
 	}
 }

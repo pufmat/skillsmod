@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
 	@Invoker("shouldDropXp")
-	boolean invokeShouldDropXp();
+	boolean puffish_skills$shouldDropXp();
 
 	@Invoker("getXpToDrop")
-	int invokeGetXpToDrop(PlayerEntity player);
+	int puffish_skills$getXpToDrop(PlayerEntity player);
 }

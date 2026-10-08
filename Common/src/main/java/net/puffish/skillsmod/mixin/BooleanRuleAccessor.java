@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GameRules.BooleanRule.class)
 public interface BooleanRuleAccessor {
 	@Invoker("create")
-	static GameRules.Type<GameRules.BooleanRule> invokeCreate(boolean initialValue) {
+	static GameRules.Type<GameRules.BooleanRule> puffish_skills$create(boolean initialValue) {
 		throw new AssertionError();
 	}
 }

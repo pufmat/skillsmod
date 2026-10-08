@@ -15,12 +15,12 @@ public class VertexFormatMixin implements VertexFormatAccess {
 
 	@Override
 	@Unique
-	public void setEmits(List<Matrix4f> emits) {
+	public void puffish_skills$setEmits(List<Matrix4f> emits) {
 		this.emits = emits;
 	}
 
 	@Override
-	public List<Matrix4f> getEmits() {
+	public List<Matrix4f> puffish_skills$getEmits() {
 		return emits;
 	}
 }
