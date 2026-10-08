@@ -6,7 +6,7 @@ import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerEntity
 import java.util.Map;
 
 public interface LivingEntityAccess {
-	Map<ServerPlayerEntity, Float> getDamageShare();
+	Map<ServerPlayerEntity, Float> puffish_skills$getDamageShare();
 
-	AntiFarmingPerEntity.State getAntiFarmingPerEntityState();
+	AntiFarmingPerEntity.State puffish_skills$getAntiFarmingPerEntityState();
 }

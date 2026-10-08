@@ -12,7 +12,7 @@ public record SkillsGameRules(
 				registrar.registerGameRule(
 						SkillsAPI.MOD_ID + ":" + "announceNewPoints",
 						GameRules.Category.CHAT,
-						BooleanRuleAccessor.invokeCreate(true)
+						BooleanRuleAccessor.puffish_skills$create(true)
 				)
 		);
 	}
