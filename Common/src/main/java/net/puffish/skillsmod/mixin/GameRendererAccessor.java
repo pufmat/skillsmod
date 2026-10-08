@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(GameRenderer.class)
 public interface GameRendererAccessor {
 	@Accessor("guiRenderer")
-	GuiRenderer getGuiRenderer();
+	GuiRenderer puffish_skills$getGuiRenderer();
 }

@@ -12,11 +12,11 @@ import java.util.Map;
 @Mixin(GuiRenderer.class)
 public interface GuiRendererAccessor {
 	@Accessor("oversizedItemRenderers")
-	Map<Object, OversizedItemRenderer> getOversizedItemRenderers();
+	Map<Object, OversizedItemRenderer> puffish_skills$getOversizedItemRenderers();
 
 	@Accessor("featureRenderDispatcher")
-	FeatureRenderDispatcher getFeatureRenderDispatcher();
+	FeatureRenderDispatcher puffish_skills$getFeatureRenderDispatcher();
 
 	@Invoker("getGuiScaleInvalidatingItemAtlasIfChanged")
-	int invokeGetGuiScaleInvalidatingItemAtlasIfChanged();
+	int puffish_skills$getGuiScaleInvalidatingItemAtlasIfChanged();
 }

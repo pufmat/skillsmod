@@ -30,7 +30,7 @@ public class DamageSourceMixin implements DamageSourceAccess {
 
 	@Override
 	@Unique
-	public Optional<ItemStack> getWeapon() {
+	public Optional<ItemStack> puffish_skills$getWeapon() {
 		return Optional.ofNullable(weapon);
 	}
 }

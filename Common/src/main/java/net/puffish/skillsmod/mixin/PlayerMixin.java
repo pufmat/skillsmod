@@ -25,7 +25,7 @@ public abstract class PlayerMixin {
 	)
 	private void injectAtSetHealth(ServerLevel world, DamageSource source, float damage, CallbackInfo ci) {
 		if (((Player) (Object) this) instanceof ServerPlayer player) {
-			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+			var weapon = ((DamageSourceAccess) source).puffish_skills$getWeapon().orElse(ItemStack.EMPTY);
 			var takenDamage = Math.min(damage, player.getHealth());
 
 			SkillsAPI.updateExperienceSources(
