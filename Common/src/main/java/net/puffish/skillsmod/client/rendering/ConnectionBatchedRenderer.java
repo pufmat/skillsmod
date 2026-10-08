@@ -8,7 +8,7 @@ import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.util.math.MathHelper;
-import net.puffish.skillsmod.access.DrawContextAccess;
+import net.puffish.skillsmod.mixin.DrawContextAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
@@ -147,7 +147,7 @@ public class ConnectionBatchedRenderer {
 		var batchCopy = List.copyOf(batch);
 		batch.clear();
 
-		var contextAccess = (DrawContextAccess) context;
+		var contextAccess = (DrawContextAccessor) context;
 		contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
 			@Override
 			public void setupVertices(VertexConsumer vc) {

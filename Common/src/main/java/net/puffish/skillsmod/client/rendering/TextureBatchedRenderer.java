@@ -14,7 +14,7 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.puffish.skillsmod.access.DrawContextAccess;
+import net.puffish.skillsmod.mixin.DrawContextAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2f;
 
@@ -380,7 +380,7 @@ public class TextureBatchedRenderer {
 			var bounds = calcBounds(emits);
 			var emitsCopy = List.copyOf(emits);
 
-			var contextAccess = (DrawContextAccess) context;
+			var contextAccess = (DrawContextAccessor) context;
 			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
 				@Override
 				public void setupVertices(VertexConsumer vc) {

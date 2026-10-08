@@ -13,10 +13,9 @@ import net.minecraft.client.render.item.KeyedItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.puffish.skillsmod.access.DrawContextAccess;
-import net.puffish.skillsmod.access.GameRendererAccess;
-import net.puffish.skillsmod.access.GuiRendererAccess;
-import net.puffish.skillsmod.mixin.GuiRendererInvoker;
+import net.puffish.skillsmod.mixin.DrawContextAccessor;
+import net.puffish.skillsmod.mixin.GameRendererAccessor;
+import net.puffish.skillsmod.mixin.GuiRendererAccessor;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
@@ -42,13 +41,12 @@ public class ItemBatchedRenderer {
 	public void draw(DrawContext context, ScreenRect scissorArea) {
 		var client = MinecraftClient.getInstance();
 		var gameRenderer = client.gameRenderer;
-		var gameRendererAccess = (GameRendererAccess) gameRenderer;
-		var guiRendererAccess = (GuiRendererAccess) gameRendererAccess.getGuiRenderer();
-		var guiRendererInvoker = (GuiRendererInvoker) gameRendererAccess.getGuiRenderer();
-		var contextAccess = (DrawContextAccess) context;
-		var guiRenderState = contextAccess.getState();
-		var windowScaleFactor = guiRendererInvoker.invokeGetWindowScaleFactor();
-		var vertexConsumers = guiRendererAccess.getVertexConsumers();
+		var gameRendererAccessor = (GameRendererAccessor) gameRenderer;
+		var guiRendererAccessor = (GuiRendererAccessor) gameRendererAccessor.getGuiRenderer();
+		var contextAccessor = (DrawContextAccessor) context;
+		var guiRenderState = contextAccessor.getState();
+		var windowScaleFactor = guiRendererAccessor.invokeGetWindowScaleFactor();
+		var vertexConsumers = guiRendererAccessor.getVertexConsumers();
 
 		for (var entry : batch.entrySet()) {
 			var itemStack = entry.getKey().itemStack;
@@ -65,7 +63,7 @@ public class ItemBatchedRenderer {
 
 			itemRenderState.addModelKey(KEY);
 
-			var renderer = guiRendererAccess.getOversizedItems().computeIfAbsent(
+			var renderer = guiRendererAccessor.getOversizedItems().computeIfAbsent(
 					itemRenderState.getModelKey(),
 					object -> new ItemGuiElementRenderer(vertexConsumers)
 			);

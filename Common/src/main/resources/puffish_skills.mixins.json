@@ -19,10 +19,9 @@
 		"WorldChunkMixin"
 	],
 	"client": [
-		"DrawContextMixin",
-		"GameRendererMixin",
-		"GuiRendererInvoker",
-		"GuiRendererMixin"
+		"DrawContextAccessor",
+		"GameRendererAccessor",
+		"GuiRendererAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
