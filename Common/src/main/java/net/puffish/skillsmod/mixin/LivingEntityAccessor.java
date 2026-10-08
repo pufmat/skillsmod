@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(LivingEntity.class)
-public interface LivingEntityInvoker {
+public interface LivingEntityAccessor {
 	@Invoker("shouldDropXp")
 	boolean invokeShouldDropXp();
 
