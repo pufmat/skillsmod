@@ -7,8 +7,8 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.puffish.skillsmod.access.MinecraftClientAccess;
 import net.puffish.skillsmod.access.RenderLayerAccess;
+import net.puffish.skillsmod.mixin.MinecraftClientAccessor;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -56,8 +56,8 @@ public class ItemBatchedRenderer {
 				DiffuseLighting.disableGuiDepthLighting();
 			}
 
-			var clientAccess = (MinecraftClientAccess) client;
-			var immediate = clientAccess.getBufferBuilders().getEntityVertexConsumers();
+			var clientAccessor = (MinecraftClientAccessor) client;
+			var immediate = clientAccessor.getBufferBuilders().getEntityVertexConsumers();
 
 			var layers = new HashSet<RenderLayerAccess>();
 
