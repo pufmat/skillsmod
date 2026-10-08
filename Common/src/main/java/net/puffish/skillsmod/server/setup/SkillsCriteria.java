@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
-import net.puffish.skillsmod.mixin.CriteriaInvoker;
+import net.puffish.skillsmod.mixin.CriteriaAccessor;
 
 public class SkillsCriteria {
 
@@ -21,7 +21,7 @@ public class SkillsCriteria {
 		SkillsAPI.registerSkillUnlockEvent((player, categoryId, skillId) -> {
 			SKILL_UNLOCKED.trigger(player, categoryId, skillId);
 		});
-		CriteriaInvoker.register(SKILL_UNLOCKED);
+		CriteriaAccessor.register(SKILL_UNLOCKED);
 	}
 
 	public static class SkillUnlockedCriterion extends AbstractCriterion<SkillUnlockedCriterion.Conditions> {

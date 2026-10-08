@@ -32,7 +32,7 @@ import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.experience.source.builtin.BreakBlockExperienceSource;
 import net.puffish.skillsmod.experience.source.builtin.MineBlockExperienceSource;
-import net.puffish.skillsmod.mixin.GameRulesInvoker;
+import net.puffish.skillsmod.mixin.GameRulesAccessor;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
@@ -146,7 +146,7 @@ public class ForgeMain {
 
 		@Override
 		public <T extends GameRules.Rule<T>> GameRules.Key<T> registerGameRule(String name, GameRules.Category category, GameRules.Type<T> type) {
-			return GameRulesInvoker.invokeRegister(name, category, type);
+			return GameRulesAccessor.invokeRegister(name, category, type);
 		}
 
 		@Override
