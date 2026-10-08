@@ -381,7 +381,7 @@ public class TextureBatchedRenderer {
 			var emitsCopy = List.copyOf(emits);
 
 			var graphicsAccess = (GuiGraphicsExtractorAccessor) graphics;
-			graphicsAccess.getGuiRenderState().addGuiElement(new GuiElementRenderState() {
+			graphicsAccess.puffish_skills$getGuiRenderState().addGuiElement(new GuiElementRenderState() {
 				@Override
 				public void buildVertices(VertexConsumer vc) {
 					for (var emit : emitsCopy) {

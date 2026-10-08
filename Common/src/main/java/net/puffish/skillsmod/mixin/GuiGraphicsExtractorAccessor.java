@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(GuiGraphicsExtractor.class)
 public interface GuiGraphicsExtractorAccessor {
 	@Accessor("guiRenderState")
-	GuiRenderState getGuiRenderState();
+	GuiRenderState puffish_skills$getGuiRenderState();
 }

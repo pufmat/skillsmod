@@ -1003,7 +1003,7 @@ public class SkillsMod {
 	}
 
 	public MinecraftServer getPlayerServer(ServerPlayer player) {
-		return ((ServerPlayerAccessor) player).getServer();
+		return ((ServerPlayerAccessor) player).puffish_skills$getServer();
 	}
 
 	private boolean isOperatorOrHost(ServerPlayer player) {

@@ -148,7 +148,7 @@ public class ConnectionBatchedRenderer {
 		batch.clear();
 
 		var graphicsAccess = (GuiGraphicsExtractorAccessor) graphics;
-		graphicsAccess.getGuiRenderState().addGuiElement(new GuiElementRenderState() {
+		graphicsAccess.puffish_skills$getGuiRenderState().addGuiElement(new GuiElementRenderState() {
 			@Override
 			public void buildVertices(VertexConsumer vc) {
 				for (var emit : batchCopy) {
