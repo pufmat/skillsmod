@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.puffish.skillsmod.access.GuiGraphicsExtractorAccess;
+import net.puffish.skillsmod.mixin.GuiGraphicsExtractorAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2f;
 
@@ -380,7 +380,7 @@ public class TextureBatchedRenderer {
 			var bounds = calcBounds(emits);
 			var emitsCopy = List.copyOf(emits);
 
-			var graphicsAccess = (GuiGraphicsExtractorAccess) graphics;
+			var graphicsAccess = (GuiGraphicsExtractorAccessor) graphics;
 			graphicsAccess.getGuiRenderState().addGuiElement(new GuiElementRenderState() {
 				@Override
 				public void buildVertices(VertexConsumer vc) {

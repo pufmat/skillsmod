@@ -19,10 +19,9 @@
 		"SimpleCriterionTriggerMixin"
 	],
 	"client": [
-		"GameRendererMixin",
-		"GuiGraphicsExtractorMixin",
-		"GuiRendererInvoker",
-		"GuiRendererMixin"
+		"GameRendererAccessor",
+		"GuiGraphicsExtractorAccessor",
+		"GuiRendererAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
