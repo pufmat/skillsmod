@@ -26,7 +26,7 @@ public class AbstractCriterionMixin {
 					if (conditions != null && this.equals(Criteria.getById(conditions.getId()))) {
 						var lootContext = EntityPredicate.createAdvancementEntityLootContext(player, player);
 						// That cast is valid since conditions in `AbstractCriterion` are instances of `AbstractCriterionConditions`.
-						if (predicate.test(conditions) && ((AbstractCriterionConditionsAccessor) conditions).getPlayerPredicate().test(lootContext)) {
+						if (predicate.test(conditions) && ((AbstractCriterionConditionsAccessor) conditions).puffish_skills$getPlayerPredicate().test(lootContext)) {
 							return (int) Math.round(es.calculation().evaluate(
 									new CriterionExperienceSource.Data(player)
 							));

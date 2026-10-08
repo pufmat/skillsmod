@@ -12,7 +12,7 @@ public abstract class WorldChunkMixin implements WorldChunkAccess {
 	private final AntiFarmingPerChunk.State antiFarmingState = new AntiFarmingPerChunk.State();
 
 	@Override
-	public AntiFarmingPerChunk.State getAntiFarmingPerChunkState() {
+	public AntiFarmingPerChunk.State puffish_skills$getAntiFarmingPerChunkState() {
 		return antiFarmingState;
 	}
 }

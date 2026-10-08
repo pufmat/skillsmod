@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractCriterionConditions.class)
 public interface AbstractCriterionConditionsAccessor {
 	@Accessor("playerPredicate")
-	LootContextPredicate getPlayerPredicate();
+	LootContextPredicate puffish_skills$getPlayerPredicate();
 }
