@@ -148,7 +148,7 @@ public class ConnectionBatchedRenderer {
 		batch.clear();
 
 		var contextAccess = (DrawContextAccessor) context;
-		contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
+		contextAccess.puffish_skills$getState().addSimpleElement(new SimpleGuiElementRenderState() {
 			@Override
 			public void setupVertices(VertexConsumer vc) {
 				for (var emit : batchCopy) {

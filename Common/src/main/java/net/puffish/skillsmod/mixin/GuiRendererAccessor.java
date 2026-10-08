@@ -12,11 +12,11 @@ import java.util.Map;
 @Mixin(GuiRenderer.class)
 public interface GuiRendererAccessor {
 	@Accessor("oversizedItems")
-	Map<Object, OversizedItemGuiElementRenderer> getOversizedItems();
+	Map<Object, OversizedItemGuiElementRenderer> puffish_skills$getOversizedItems();
 
 	@Accessor("vertexConsumers")
-	VertexConsumerProvider.Immediate getVertexConsumers();
+	VertexConsumerProvider.Immediate puffish_skills$getVertexConsumers();
 
 	@Invoker("getWindowScaleFactor")
-	int invokeGetWindowScaleFactor();
+	int puffish_skills$invokeGetWindowScaleFactor();
 }

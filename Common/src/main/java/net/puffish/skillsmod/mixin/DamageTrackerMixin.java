@@ -29,15 +29,15 @@ public class DamageTrackerMixin {
 	private void injectAtOnDamage(DamageSource source, float damage, CallbackInfo ci) {
 		AttackerInfo.detect(source.getAttacker(), attackerInfo -> {
 			var entityAccess = (LivingEntityAccess) entity;
-			var damageShare = entityAccess.getDamageShare();
-			var antiFarmingPerEntityState = entityAccess.getAntiFarmingPerEntityState();
+			var damageShare = entityAccess.puffish_skills$getDamageShare();
+			var antiFarmingPerEntityState = entityAccess.puffish_skills$getAntiFarmingPerEntityState();
 
-			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+			var weapon = ((DamageSourceAccess) source).puffish_skills$getWeapon().orElse(ItemStack.EMPTY);
 			var player = attackerInfo.player();
 
 			var antiFarmingPerChunkState = ((WorldChunkAccess) entity.getEntityWorld()
 					.getWorldChunk(entity.getBlockPos()))
-					.getAntiFarmingPerChunkState();
+					.puffish_skills$getAntiFarmingPerChunkState();
 			antiFarmingPerChunkState.removeOutdated();
 
 			damageShare.compute(player, (key, value) -> {

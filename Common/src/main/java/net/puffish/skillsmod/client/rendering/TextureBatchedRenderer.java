@@ -381,7 +381,7 @@ public class TextureBatchedRenderer {
 			var emitsCopy = List.copyOf(emits);
 
 			var contextAccess = (DrawContextAccessor) context;
-			contextAccess.getState().addSimpleElement(new SimpleGuiElementRenderState() {
+			contextAccess.puffish_skills$getState().addSimpleElement(new SimpleGuiElementRenderState() {
 				@Override
 				public void setupVertices(VertexConsumer vc) {
 					for (var emit : emitsCopy) {

@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerPlayerEntity.class)
 public interface ServerPlayerEntityAccessor {
 	@Accessor("server")
-	MinecraftServer getServer();
+	MinecraftServer puffish_skills$getServer();
 }
